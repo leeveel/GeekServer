@@ -28,4 +28,6 @@ Actor模型本身是存在死锁的情况，且不容易被发现，GeekServer�
 ### 10.高效的通信协议  
 通信协议，以扁平数据结构的xbuffer为基础（flatbuffer的简化版），序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。
 ### 11.一键导表工具  
-GeekServer包含一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用    
+GeekServer包含一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用   
+# 推荐项目  
+[xbuffer](https://github.com/CodeZeg/xbuffer) 一种简化版本的 flatbuffer 序列化库  
