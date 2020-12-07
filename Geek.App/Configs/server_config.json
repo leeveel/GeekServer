@@ -22,5 +22,5 @@
 	"useLibuv": true,
 
 	"mongoDB": "game_geek",
-	"mongoUrl": "mongodb://192.168.0.83:6666?maxPoolSize=50&waitQueueMultiple=100&compressors=zlib"
+	"mongoUrl": "mongodb://127.0.0.1:27017?maxPoolSize=50&waitQueueMultiple=100&compressors=zlib"
 }
