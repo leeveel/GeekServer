@@ -30,9 +30,7 @@ using System.Threading.Tasks;
 using Geek.Core.Net.Handler;
 using Geek.Core.Actor;
 using Geek.App.Server;
-using Geek.Core.Component;
 using Geek.App.Session;
-using Geek.App.Role;
 
 namespace Geek.Hotfix.Logic
 {

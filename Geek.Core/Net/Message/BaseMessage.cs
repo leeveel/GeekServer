@@ -27,12 +27,12 @@ using System;
 
 namespace Geek.Core.Net.Message
 {
-    //�����������ݿ���
-    [BsonIgnoreExtraElements(true, Inherited = true)]//���Դ���ɾ�����ֶ�[���ݿ������ֶ�]
+    //可能用于数据库结果
+    [BsonIgnoreExtraElements(true, Inherited = true)]//忽略代码删除的字段[数据库多余的字段]
     public abstract class BaseMessage : IMessage
     {
         /// <summary>
-        /// ��ϢΨһid
+        /// 消息唯一id
         /// </summary>
         [BsonIgnore]
         public int UniId { get; set; }
