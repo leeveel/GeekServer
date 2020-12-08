@@ -23,11 +23,10 @@ THE SOFTWARE.
 ****************************************************************************/
 using Geek.Core.Actor;
 using Geek.Core.Net.Handler;
-using Geek.App.Login;
-using Message.Login;
 using System.Threading;
 using System.Threading.Tasks;
 using Geek.App.Logic.Login;
+using Geek.Message.Login;
 
 namespace Geek.Hotfix.Logic.Login
 {

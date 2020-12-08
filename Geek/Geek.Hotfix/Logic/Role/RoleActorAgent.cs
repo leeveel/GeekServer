@@ -29,13 +29,13 @@ using Geek.Core.Actor;
 using Geek.App.Server;
 using Geek.Core.Net.Message;
 using Geek.App.Session;
-using Message.Login;
 using Geek.App.Login;
 using Geek.Hotfix.Logic.Server;
 using Geek.Hotfix.Logic.Login;
 using Geek.Core.Component;
 using DotNetty.Transport.Channels;
 using Geek.App.Logic.Login;
+using Geek.Message.Login;
 
 namespace Geek.Hotfix.Logic.Role
 {

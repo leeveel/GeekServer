@@ -15,6 +15,10 @@
     <OutputPath>..\package_debug</OutputPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\package</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Geek.App\Geek.App.csproj" />
   </ItemGroup>

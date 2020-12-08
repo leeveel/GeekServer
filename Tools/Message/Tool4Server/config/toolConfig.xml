@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<configure>
+	<java path="temp" />
+	<lua path="temp" />
+	<csharp path="..\..\..\Geek\Geek.Generate\Protocols" />
+	<message path="..\Protocols" />
+</configure>

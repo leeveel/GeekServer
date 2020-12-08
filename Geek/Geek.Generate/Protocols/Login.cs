@@ -1,26 +1,3 @@
-/****************************************************************************
-Copyright (c) Geek
-
-https://github.com/leeveel/GeekServer
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-****************************************************************************/
 //for xbuffer
 //Auto generated, do not modify it
 //限制：命名不能以下划线开头，不能跨命名空间继承
@@ -32,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using Geek.Core.Net.Message;
 
-namespace Message.Login
+namespace Geek.Message.Login
 {
 	public class LoginMsgCreator
 	{
@@ -40,17 +17,13 @@ namespace Message.Login
 		{
 			switch(msgId)
 			{
-				case 101201:
+				case 103201:
 					return new ReqLogin();
-				case 101101:
+				case 103101:
 					return new ResLogin();
-				case 101102:
-					return new ResPrompt();
-				case 101103:
-					return new ResHeartBeat();
-				case 101205:
+				case 103205:
 					return new ReqReLogin();
-				case 101105:
+				case 103105:
 					return new ResReLogin();
 				default:
 					return null;
@@ -74,24 +47,8 @@ namespace Message.Login
 		public string roleName;
 		///<summary>角色等级</summary>
 		public int level;
-		///<summary>vip等级</summary>
-		public int vipLevel;
-		///<summary>战斗力</summary>
-		public long fightPower;
-		///<summary>公会id</summary>
-		public long guildId;
-		///<summary>公会名字</summary>
-		public string guildName;
-		///<summary>开服天数</summary>
-		public int openServerDay;
-		///<summary>世界等级</summary>
-		public int serverLevel;
-		///<summary>登陆时服务器时间</summary>
-		public long loginTick;
-		///<summary>注册时间</summary>
-		public long startTime;
-		///<summary>是不是gm玩家</summary>
-		public bool isGMRole;
+		///<summary>设置性别0隐藏 1男 2女 </summary>
+		public int gender;
 
         //构造函数
         public RoleInfo() : base()
@@ -105,15 +62,7 @@ namespace Message.Login
 			roleId = 0L;
 			roleName = null;
 			level = 0;
-			vipLevel = 0;
-			fightPower = 0L;
-			guildId = 0L;
-			guildName = null;
-			openServerDay = 0;
-			serverLevel = 0;
-			loginTick = 0L;
-			startTime = 0L;
-			isGMRole = false;
+			gender = 0;
 		}
 		
         ///<summary>反序列化，读取数据</summary>
@@ -161,47 +110,7 @@ namespace Message.Login
 					
 					if(_fieldNum_ > 3)
 					{
-								vipLevel = XBuffer.ReadInt(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 4)
-					{
-								fightPower = XBuffer.ReadLong(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 5)
-					{
-								guildId = XBuffer.ReadLong(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 6)
-					{
-								guildName = XBuffer.ReadString(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 7)
-					{
-								openServerDay = XBuffer.ReadInt(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 8)
-					{
-								serverLevel = XBuffer.ReadInt(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 9)
-					{
-								loginTick = XBuffer.ReadLong(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 10)
-					{
-								startTime = XBuffer.ReadLong(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 11)
-					{
-								isGMRole = XBuffer.ReadBool(_buffer_, ref _offset_);
+								gender = XBuffer.ReadInt(_buffer_, ref _offset_);
 					} else { break; }
 					
 					break;
@@ -235,21 +144,12 @@ namespace Message.Login
 				int _toWriteLenOffset_ = _offset_;
 				XBuffer.WriteInt(0, _buffer_, ref _offset_);
 				
-				XBuffer.WriteByte(255, _buffer_, ref _offset_);
-				XBuffer.WriteByte(31, _buffer_, ref _offset_);
+				XBuffer.WriteByte(15, _buffer_, ref _offset_);
 				
 						XBuffer.WriteLong(roleId, _buffer_, ref _offset_);
 						XBuffer.WriteString(roleName, _buffer_, ref _offset_);
 						XBuffer.WriteInt(level, _buffer_, ref _offset_);
-						XBuffer.WriteInt(vipLevel, _buffer_, ref _offset_);
-						XBuffer.WriteLong(fightPower, _buffer_, ref _offset_);
-						XBuffer.WriteLong(guildId, _buffer_, ref _offset_);
-						XBuffer.WriteString(guildName, _buffer_, ref _offset_);
-						XBuffer.WriteInt(openServerDay, _buffer_, ref _offset_);
-						XBuffer.WriteInt(serverLevel, _buffer_, ref _offset_);
-						XBuffer.WriteLong(loginTick, _buffer_, ref _offset_);
-						XBuffer.WriteLong(startTime, _buffer_, ref _offset_);
-						XBuffer.WriteBool(isGMRole, _buffer_, ref _offset_);
+						XBuffer.WriteInt(gender, _buffer_, ref _offset_);
 				
 				XBuffer.WriteInt(_offset_ - _toWriteLenOffset_, _buffer_, ref _toWriteLenOffset_);
             }
@@ -265,30 +165,42 @@ namespace Message.Login
     {
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public override int GetMsgId() { return MsgId; }
-        public const int MsgId = 101201;
+        public const int MsgId = 103201;
 		
 		///<summary>登陆用户名</summary>
 		public string userName;
 		///<summary>游戏服务器Id</summary>
 		public int serverId;
-		///<summary>登陆标识</summary>
-		public string sdkToken;
-		///<summary>0无SDK</summary>
-		public int sdkType;
+		///<summary>登陆时间</summary>
+		public long loginTime;
 		///<summary>渠道id</summary>
 		public string channelId;
+		///<summary>0无SDK</summary>
+		public int sdkType;
+		protected byte _osVersion = 0;
+		protected string __osVersion;
+		public bool hasOsVersion() { return this._osVersion == 1; }
+		///<summary>手机系统版本</summary>
+		public string osVersion { set { _osVersion = 1; __osVersion = value; } get { return __osVersion; } }
+		protected byte _mobileRand = 0;
+		protected string __mobileRand;
+		public bool hasMobileRand() { return this._mobileRand == 1; }
+		///<summary>手机品牌(在IOS中为：ipad iPhone ipod)</summary>
+		public string mobileRand { set { _mobileRand = 1; __mobileRand = value; } get { return __mobileRand; } }
+		protected byte _mobileModel = 0;
+		protected string __mobileModel;
+		public bool hasMobileModel() { return this._mobileModel == 1; }
+		///<summary>手机型号</summary>
+		public string mobileModel { set { _mobileModel = 1; __mobileModel = value; } get { return __mobileModel; } }
+		protected byte _mobileIOS = 0;
+		protected string __mobileIOS;
+		public bool hasMobileIOS() { return this._mobileIOS == 1; }
+		///<summary>手机系统 android ios</summary>
+		public string mobileIOS { set { _mobileIOS = 1; __mobileIOS = value; } get { return __mobileIOS; } }
 		///<summary>是否为后台重连</summary>
 		public bool isRelogin;
-		///<summary>登陆token,客户端启动游戏生成一次[相同代表是同一重连/不同则顶号]</summary>
+		///<summary>登陆token,启动游戏生成一次</summary>
 		public long handToken;
-		///<summary>0编辑器，1android, 2ios, 3ios越狱</summary>
-		public int deviceType;
-		///<summary>手机系统 android ios</summary>
-		public string deviceOS;
-		///<summary>设备型号</summary>
-		public string deviceModel;
-		///<summary>设备名字</summary>
-		public string deviceName;
 
         //构造函数
         public ReqLogin() : base()
@@ -301,15 +213,19 @@ namespace Message.Login
 			base.Reset();
 			userName = null;
 			serverId = 0;
-			sdkToken = null;
-			sdkType = 0;
+			loginTime = 0L;
 			channelId = null;
+			sdkType = 0;
+			_osVersion = 0;
+			__osVersion = null;
+			_mobileRand = 0;
+			__mobileRand = null;
+			_mobileModel = 0;
+			__mobileModel = null;
+			_mobileIOS = 0;
+			__mobileIOS = null;
 			isRelogin = false;
 			handToken = 0L;
-			deviceType = 0;
-			deviceOS = null;
-			deviceModel = null;
-			deviceName = null;
 		}
 		
         ///<summary>反序列化，读取数据</summary>
@@ -353,47 +269,63 @@ namespace Message.Login
 					
 					if(_fieldNum_ > 2)
 					{
-								sdkToken = XBuffer.ReadString(_buffer_, ref _offset_);
+								loginTime = XBuffer.ReadLong(_buffer_, ref _offset_);
 					} else { break; }
 					
 					if(_fieldNum_ > 3)
 					{
-								sdkType = XBuffer.ReadInt(_buffer_, ref _offset_);
+								channelId = XBuffer.ReadString(_buffer_, ref _offset_);
 					} else { break; }
 					
 					if(_fieldNum_ > 4)
 					{
-								channelId = XBuffer.ReadString(_buffer_, ref _offset_);
+								sdkType = XBuffer.ReadInt(_buffer_, ref _offset_);
 					} else { break; }
 					
 					if(_fieldNum_ > 5)
 					{
-								isRelogin = XBuffer.ReadBool(_buffer_, ref _offset_);
+							_osVersion = XBuffer.ReadByte(_buffer_, ref _offset_);
+							if(_osVersion == 1)
+							{
+								osVersion = XBuffer.ReadString(_buffer_, ref _offset_);
+							}
 					} else { break; }
 					
 					if(_fieldNum_ > 6)
 					{
-								handToken = XBuffer.ReadLong(_buffer_, ref _offset_);
+							_mobileRand = XBuffer.ReadByte(_buffer_, ref _offset_);
+							if(_mobileRand == 1)
+							{
+								mobileRand = XBuffer.ReadString(_buffer_, ref _offset_);
+							}
 					} else { break; }
 					
 					if(_fieldNum_ > 7)
 					{
-								deviceType = XBuffer.ReadInt(_buffer_, ref _offset_);
+							_mobileModel = XBuffer.ReadByte(_buffer_, ref _offset_);
+							if(_mobileModel == 1)
+							{
+								mobileModel = XBuffer.ReadString(_buffer_, ref _offset_);
+							}
 					} else { break; }
 					
 					if(_fieldNum_ > 8)
 					{
-								deviceOS = XBuffer.ReadString(_buffer_, ref _offset_);
+							_mobileIOS = XBuffer.ReadByte(_buffer_, ref _offset_);
+							if(_mobileIOS == 1)
+							{
+								mobileIOS = XBuffer.ReadString(_buffer_, ref _offset_);
+							}
 					} else { break; }
 					
 					if(_fieldNum_ > 9)
 					{
-								deviceModel = XBuffer.ReadString(_buffer_, ref _offset_);
+								isRelogin = XBuffer.ReadBool(_buffer_, ref _offset_);
 					} else { break; }
 					
 					if(_fieldNum_ > 10)
 					{
-								deviceName = XBuffer.ReadString(_buffer_, ref _offset_);
+								handToken = XBuffer.ReadLong(_buffer_, ref _offset_);
 					} else { break; }
 					
 					break;
@@ -424,15 +356,31 @@ namespace Message.Login
 				
 						XBuffer.WriteString(userName, _buffer_, ref _offset_);
 						XBuffer.WriteInt(serverId, _buffer_, ref _offset_);
-						XBuffer.WriteString(sdkToken, _buffer_, ref _offset_);
-						XBuffer.WriteInt(sdkType, _buffer_, ref _offset_);
+						XBuffer.WriteLong(loginTime, _buffer_, ref _offset_);
 						XBuffer.WriteString(channelId, _buffer_, ref _offset_);
+						XBuffer.WriteInt(sdkType, _buffer_, ref _offset_);
+					XBuffer.WriteByte(_osVersion, _buffer_, ref _offset_);
+					if(_osVersion == 1)
+					{
+						XBuffer.WriteString(osVersion, _buffer_, ref _offset_);
+					}
+					XBuffer.WriteByte(_mobileRand, _buffer_, ref _offset_);
+					if(_mobileRand == 1)
+					{
+						XBuffer.WriteString(mobileRand, _buffer_, ref _offset_);
+					}
+					XBuffer.WriteByte(_mobileModel, _buffer_, ref _offset_);
+					if(_mobileModel == 1)
+					{
+						XBuffer.WriteString(mobileModel, _buffer_, ref _offset_);
+					}
+					XBuffer.WriteByte(_mobileIOS, _buffer_, ref _offset_);
+					if(_mobileIOS == 1)
+					{
+						XBuffer.WriteString(mobileIOS, _buffer_, ref _offset_);
+					}
 						XBuffer.WriteBool(isRelogin, _buffer_, ref _offset_);
 						XBuffer.WriteLong(handToken, _buffer_, ref _offset_);
-						XBuffer.WriteInt(deviceType, _buffer_, ref _offset_);
-						XBuffer.WriteString(deviceOS, _buffer_, ref _offset_);
-						XBuffer.WriteString(deviceModel, _buffer_, ref _offset_);
-						XBuffer.WriteString(deviceName, _buffer_, ref _offset_);
 				
             }
             catch(Exception ex)
@@ -447,18 +395,18 @@ namespace Message.Login
     {
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public override int GetMsgId() { return MsgId; }
-        public const int MsgId = 101101;
+        public const int MsgId = 103101;
 		
 		///<summary>登陆结果（1 = 成功，other = 失败）</summary>
 		public int result;
 		///<summary>登陆失败的原因</summary>
 		public int reason;
+		///<summary>登陆用户名</summary>
+		public string username;
 		///<summary>角色信息</summary>
 		public RoleInfo role;
-		///<summary>登陆用户名</summary>
-		public string userName;
 		///<summary>是否为新角色</summary>
-		public bool isNewCreate;
+		public bool isNewCreat;
 
         //构造函数
         public ResLogin() : base()
@@ -471,9 +419,9 @@ namespace Message.Login
 			base.Reset();
 			result = 0;
 			reason = 0;
+			username = null;
 			role = null;
-			userName = null;
-			isNewCreate = false;
+			isNewCreat = false;
 		}
 		
         ///<summary>反序列化，读取数据</summary>
@@ -517,20 +465,20 @@ namespace Message.Login
 					
 					if(_fieldNum_ > 2)
 					{
+								username = XBuffer.ReadString(_buffer_, ref _offset_);
+					} else { break; }
+					
+					if(_fieldNum_ > 3)
+					{
 								var _real_type_ = XBuffer.ReadByte(_buffer_, ref _offset_);
 								RoleInfo _value_ = new RoleInfo();
 								_offset_ = _value_.Read(_buffer_, _offset_);
 								role = _value_;
 					} else { break; }
 					
-					if(_fieldNum_ > 3)
-					{
-								userName = XBuffer.ReadString(_buffer_, ref _offset_);
-					} else { break; }
-					
 					if(_fieldNum_ > 4)
 					{
-								isNewCreate = XBuffer.ReadBool(_buffer_, ref _offset_);
+								isNewCreat = XBuffer.ReadBool(_buffer_, ref _offset_);
 					} else { break; }
 					
 					break;
@@ -560,212 +508,12 @@ namespace Message.Login
 				
 						XBuffer.WriteInt(result, _buffer_, ref _offset_);
 						XBuffer.WriteInt(reason, _buffer_, ref _offset_);
+						XBuffer.WriteString(username, _buffer_, ref _offset_);
 							if(role == null)
 								LOGGER.Error("role is null");
 							else
 								_offset_ = role.WriteWithType(_buffer_, _offset_);
-						XBuffer.WriteString(userName, _buffer_, ref _offset_);
-						XBuffer.WriteBool(isNewCreate, _buffer_, ref _offset_);
-				
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
-			return _offset_;
-        }
-    }
-	///<summary>服务器通知</summary>
-    public class ResPrompt : BaseMessage
-    {
-		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public override int GetMsgId() { return MsgId; }
-        public const int MsgId = 101102;
-		
-		///<summary>通知内容</summary>
-		public string msg;
-		///<summary>通知内容语言包id</summary>
-		public int msgLanId;
-		///<summary>1tip, 2弹窗提示 3弹窗回到登陆，4弹窗退出游戏</summary>
-		public short type;
-
-        //构造函数
-        public ResPrompt() : base()
-        {
-        }
-		
-		//不缓存可以不调用
-		public override void Reset()
-		{
-			base.Reset();
-			msg = null;
-			msgLanId = 0;
-			type = 0;
-		}
-		
-        ///<summary>反序列化，读取数据</summary>
-        public override int Read(byte[] _buffer_, int _offset_)
-        {
-            try
-            {
-				UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
-				//ErrCode = XBuffer.ReadInt(_buffer_, ref _offset_);
-				//ErrDesc = XBuffer.ReadString(_buffer_, ref _offset_);
-                _offset_ = base.Read(_buffer_, _offset_);
-			
-				
-				int _fieldNum_ = 0;
-				while(true)
-				{
-					var _fieldMark_ = XBuffer.ReadByte(_buffer_, ref _offset_);
-					for(int i = 0; i < 7; ++i)
-					{
-						var _h_ = 1 << i;
-						bool _mark_ = (_fieldMark_ & _h_) == _h_;
-						if(_mark_) _fieldNum_++;
-						else break;
-					}
-					var _e_ = 1 << 7;
-					if((_fieldMark_ & _e_) == 0)
-						break;
-				}
-				
-				while(true)
-				{
-					if(_fieldNum_ > 0)
-					{
-								msg = XBuffer.ReadString(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 1)
-					{
-								msgLanId = XBuffer.ReadInt(_buffer_, ref _offset_);
-					} else { break; }
-					
-					if(_fieldNum_ > 2)
-					{
-								type = XBuffer.ReadShort(_buffer_, ref _offset_);
-					} else { break; }
-					
-					break;
-				}
-				
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
-			return _offset_;
-        }
-
-
-        ///<summary>序列化，写入数据</summary>
-        public override int Write(byte[] _buffer_, int _offset_)
-        {
-            try
-            {
-				XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
-				//XBuffer.WriteInt(ErrCode, _buffer_, ref _offset_);
-				//XBuffer.WriteString(ErrDesc, _buffer_, ref _offset_);
-                _offset_ = base.Write(_buffer_, _offset_);
-				
-				
-				XBuffer.WriteByte(7, _buffer_, ref _offset_);
-				
-						XBuffer.WriteString(msg, _buffer_, ref _offset_);
-						XBuffer.WriteInt(msgLanId, _buffer_, ref _offset_);
-						XBuffer.WriteShort(type, _buffer_, ref _offset_);
-				
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
-			return _offset_;
-        }
-    }
-	///<summary>服务器通知</summary>
-    public class ResHeartBeat : BaseMessage
-    {
-		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public override int GetMsgId() { return MsgId; }
-        public const int MsgId = 101103;
-		
-		///<summary>服务器时间</summary>
-		public long serverTime;
-
-        //构造函数
-        public ResHeartBeat() : base()
-        {
-        }
-		
-		//不缓存可以不调用
-		public override void Reset()
-		{
-			base.Reset();
-			serverTime = 0L;
-		}
-		
-        ///<summary>反序列化，读取数据</summary>
-        public override int Read(byte[] _buffer_, int _offset_)
-        {
-            try
-            {
-				UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
-				//ErrCode = XBuffer.ReadInt(_buffer_, ref _offset_);
-				//ErrDesc = XBuffer.ReadString(_buffer_, ref _offset_);
-                _offset_ = base.Read(_buffer_, _offset_);
-			
-				
-				int _fieldNum_ = 0;
-				while(true)
-				{
-					var _fieldMark_ = XBuffer.ReadByte(_buffer_, ref _offset_);
-					for(int i = 0; i < 7; ++i)
-					{
-						var _h_ = 1 << i;
-						bool _mark_ = (_fieldMark_ & _h_) == _h_;
-						if(_mark_) _fieldNum_++;
-						else break;
-					}
-					var _e_ = 1 << 7;
-					if((_fieldMark_ & _e_) == 0)
-						break;
-				}
-				
-				while(true)
-				{
-					if(_fieldNum_ > 0)
-					{
-								serverTime = XBuffer.ReadLong(_buffer_, ref _offset_);
-					} else { break; }
-					
-					break;
-				}
-				
-            }
-            catch(Exception ex)
-            {
-                throw ex;
-            }
-			return _offset_;
-        }
-
-
-        ///<summary>序列化，写入数据</summary>
-        public override int Write(byte[] _buffer_, int _offset_)
-        {
-            try
-            {
-				XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
-				//XBuffer.WriteInt(ErrCode, _buffer_, ref _offset_);
-				//XBuffer.WriteString(ErrDesc, _buffer_, ref _offset_);
-                _offset_ = base.Write(_buffer_, _offset_);
-				
-				
-				XBuffer.WriteByte(1, _buffer_, ref _offset_);
-				
-						XBuffer.WriteLong(serverTime, _buffer_, ref _offset_);
+						XBuffer.WriteBool(isNewCreat, _buffer_, ref _offset_);
 				
             }
             catch(Exception ex)
@@ -780,7 +528,7 @@ namespace Message.Login
     {
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public override int GetMsgId() { return MsgId; }
-        public const int MsgId = 101205;
+        public const int MsgId = 103205;
 		
 		///<summary>token</summary>
 		public string token;
@@ -871,7 +619,7 @@ namespace Message.Login
     {
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public override int GetMsgId() { return MsgId; }
-        public const int MsgId = 101105;
+        public const int MsgId = 103105;
 		
 		///<summary>登陆结果</summary>
 		public bool success;

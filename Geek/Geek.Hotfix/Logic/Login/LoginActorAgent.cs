@@ -30,9 +30,9 @@ using Geek.App.Login;
 using Geek.App.Role;
 using Geek.App.Server;
 using Geek.App.Session;
-using Message.Login;
 using System.Threading.Tasks;
 using Geek.App.Logic.Login;
+using Geek.Message.Login;
 
 namespace Geek.Hotfix.Logic.Login
 {

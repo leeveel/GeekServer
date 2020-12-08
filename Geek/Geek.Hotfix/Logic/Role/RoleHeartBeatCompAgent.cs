@@ -28,7 +28,7 @@ using Geek.Core.Hotfix;
 using System.Threading.Tasks;
 using Geek.Core.Timer;
 using Geek.App.Session;
-using Message.Login;
+using Geek.Message.Role;
 
 namespace Geek.Hotfix.Logic.Role
 {
