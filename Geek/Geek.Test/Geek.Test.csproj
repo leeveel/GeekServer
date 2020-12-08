@@ -16,4 +16,8 @@
     <OutputPath>..\package</OutputPath>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="MultiLogin\" />
+  </ItemGroup>
+
 </Project>
