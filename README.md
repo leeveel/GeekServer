@@ -20,7 +20,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现，GeekServer�
 ### 6.网络模块  
 网络模块采用了DotNetty，DotNetty是微软Azure团队，使用C#实现的Netty的版本，性能强劲，功能强大。
 ### 7.持久化透明  
-采用Mongodb作为数据存储，状态的持久化全透明，框架会自动序列化/反序列，让开发人员更加专注于业务逻辑，无需操心数据库。 
+采用Mongodb作为数据存储，状态的持久化全透明，框架会自动序列化/反序列（并在编译期间动态注入INotifyPropertyChanged，高效过滤非变化的状态）让开发人员更加专注于业务逻辑，无需操心数据库。 
 ### 8.Timer/Scheduler/Event  
 内置线程安全的Timer，Scheduler，Event系统，轻松应对游戏服务器常见的定时，任务计划，事件触发等业务需求。
 ### 9.定期释放不活跃内存数据  
@@ -29,5 +29,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现，GeekServer�
 通信协议，以扁平数据结构的xbuffer为基础（flatbuffer的简化版），序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。
 ### 11.一键导表工具  
 GeekServer包含一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用   
+# ROADMAP  
+1.文档以及Samples完善 2.网络层支持UDP   
 # 推荐项目  
 [xbuffer](https://github.com/CodeZeg/xbuffer) 一种简化版本的 flatbuffer 序列化库  
