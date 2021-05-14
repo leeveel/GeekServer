@@ -1,0 +1,65 @@
+/**
+ * Auto generated, do not edit it server
+ *
+ * {{SheetNameDesc}}
+ */
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using NLog;
+
+namespace Geek.Server.ConfigBean
+{
+	public class {{ContainerClassName}} : BaseContainer
+	{
+	    private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
+
+		private List<{{BeanClassName}}> list = new List<{{BeanClassName}}>();
+		private Dictionary<{{PrimaryKeyType}}, {{BeanClassName}}> map = new Dictionary<{{PrimaryKeyType}}, {{BeanClassName}}>();
+
+		//public override List<{{BeanClassName}}> getList()
+		public override IList getList()
+		{
+			return list;
+		}
+
+		//public override Dictionary<{{PrimaryKeyType}}, {{BeanClassName}}> getMap()
+		public override IDictionary getMap()
+		{
+			return map;
+		}
+		
+		public Type BinType = typeof({{BeanClassName}});
+
+		public override void loadDataFromBin()
+		{    
+			map.Clear();
+			list.Clear();
+			Loaded = true;
+			
+			string binPath = System.Environment.CurrentDirectory + "/Bytes/{{BeanClassName}}.bytes";
+            byte[] data;
+            if (File.Exists(binPath))
+                data = File.ReadAllBytes(binPath);
+            else
+            	throw new Exception("can not find " + binPath);
+			// FieldCount:int + FieldType:byte(0:int 1:long 2:string 3:float)
+			int offset = {{ContentStartOffset}};  
+			while (data.Length > offset)
+			{
+				{{BeanClassName}} bean = new {{BeanClassName}}();
+				bean.LoadData(data, ref offset);
+				list.Add(bean);
+				if(!map.ContainsKey(bean.t_id))
+					map.Add(bean.t_id, bean);
+				else
+					throw new Exception("Exist duplicate Key: " + bean.t_id + " {{BeanClassName}}");
+			}
+		}
+		
+	}
+}
+
+

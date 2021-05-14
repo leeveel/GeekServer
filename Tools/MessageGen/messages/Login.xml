@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messages namespace="Login" explain="玩家快照">
+	<message name="RoleInfo" super="" explain="玩家信息">
+		<var type="field" class="long"  name="roleId" explain="id" />
+		<var type="field" class="string" name="roleName" explain="名字" />
+		<var type="field" class="int" name="level" explain="角色等级"/>
+		<var type="field" class="int" name="vipLevel" explain="vip等级"/>
+		<var type="field" class="long" name="fightPower" explain="战斗力"/>
+		<var type="field" class="long" name="guildId" explain="公会id"/>
+		<var type="field" class="string" name="guildName" explain="公会名"/>
+		<var type="field" class="int" name="openServerDays" explain="开服天数"/>
+		<var type="field" class="int" name="serverLevel" explain="世界等级"/>
+		<var type="field" class="long" name="loginTick" explain="登陆时间"/>
+		<var type="field" class="long" name="createTick" explain="创角时间"/>
+		<var type="field" class="bool" name="isGMRole" explain="知否是gm玩家"/>
+	</message>
+	
+	<message name="ReqLogin" msgId="101201" super="" explain="登陆">
+		<var type="field" class="string"  name="userName" explain="登陆用户名" />
+		<var type="field" class="int" name="serverId" explain="游戏服务器Id" />
+		<var type="field" class="string" name="sdkToken" explain="sdk登陆标识"/>
+		<var type="field" class="int" name="sdkType" explain="sdk类型 0无sdk"/>
+		<var type="field" class="string" name="channelId" explain="渠道id"/>
+		<var type="field" class="bool" name="isRelogin" explain="是否为后台重连"/>
+		<var type="field" class="long" name="handToken" explain="登陆token,客户端启动游戏生成一次[相同代表是同一重连/不同则顶号]"/>
+		<var type="field" class="int" name="deviceType" explain="0编辑器，1android, 2ios, 3ios越狱"/>
+		<var type="field" class="string" name="deviceOS" explain="手机系统 android ios"/>
+		<var type="field" class="string" name="deviceModel" explain="设备型号"/>
+		<var type="field" class="string" name="deviceName" explain="设备名字"/>
+		<var type="field" class="string" name="deviceId" explain="设备id"/>
+	</message>
+	
+	<message name="ReqReLogin" msgId="101202" super="" explain="请求重连">
+		<var type="field" class="string"  name="sdkToken" explain="" />
+		<var type="field" class="long"  name="handToken" explain="" />
+	</message>
+	
+	<message name="ResLogin" msgId="101101" super="" explain="登陆结果">
+		<var type="field" class="int"  name="result" explain="登陆结果1成功，其他失败" />
+		<var type="field" class="int" name="reason" explain="登陆失败的原因" />
+		<var type="field" class="RoleInfo" name="role" optional="true" explain="角色信息"/>
+		<var type="field" class="string" name="userName" explain="登陆用户名"/>
+		<var type="field" class="bool" name="isNewCreate" explain="是否为新角色"/>
+	</message>
+	
+	<message name="ResReLogin" msgId="101102" super="" explain="断线重连">
+		<var type="field" class="bool" name="success" explain="重连结果" />
+	</message>
+	
+	<message name="HearBeat" msgId="101303" super="" explain="双向心跳/收到恢复同样的消息">
+		<var type="field" class="long" name="timeTick" explain="当前时间" />
+	</message>
+	
+	<message name="ResPrompt" msgId="101103" super="" explain="服务器通知">
+		<var type="field" class="string"  name="msg" explain="通知内容" />
+		<var type="field" class="int" name="msgLanId" explain="通知内容语言包id"/>
+		<var type="field" class="short" name="type" explain="1tip, 2弹窗提示 3弹窗回到登陆，4弹窗退出游戏"/>
+	</message>
+	
+	<message name="ResUnlockScreen" msgId="101104" super="" explain="解屏消息">
+	</message>
+	
+</messages>

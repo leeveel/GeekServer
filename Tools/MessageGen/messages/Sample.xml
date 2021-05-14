@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<messages namespace="Sample" explain="举例各种结构写法">
+	<message name="Test1" super="" explain="测试类型1">
+		<var type="field" class="long"  name="id" explain="id" />
+		<var type="field" class="string" name="s1" explain="" />
+		<var type="field" class="int" name="i1" explain=""/>
+		<var type="field" class="bool" name="b1" explain=""/>
+		<var type="field" class="float" name="f1" explain=""/>
+		<var type="field" class="short" name="s2" explain=""/>
+		<var type="field" class="double" name="d1" explain=""/>
+		<var type="field" class="byte[]" name="b2" explain=""/>
+		<optional type="field" class="string" name="o1" explain="测试option" />
+	</message>
+	
+	<message name="Test2" super="Test1" explain="测试继承类型">
+		<var type="field" class="long"  name="l1" explain="" />
+		<var type="list" class="string"  name="l2" explain="" />
+		<var type="list" class="float" name="l3" explain="" />
+		<var type="list" class="Test1" name="l4" explain="" />
+		<var type="map" class="long,string" name="m1" explain="" />
+		<var type="map" class="int,Test1" name="m2" explain="" />
+		<optional type="field" class="long" name="l5" explain="测试option" />
+		<optional type="field" class="Test1" name="t1" explain="测试option" />
+	</message>
+	
+	<message name="ReqTest" msgId="111101" super="" explain="登陆">
+		<var type="field" class="string"  name="userId" explain="登陆用户id" />
+		<var type="field" class="string" name="platform" explain="平台" />
+		<var type="field" class="Test2" name="t" explain="数据结构" />
+	</message>
+</messages>

@@ -1,0 +1,23 @@
+{
+	"IsDebug": true,
+	"ServerId": 10001,
+
+	"DataFlushTimeMax": 360,
+	"DataFlushTimeMin": 300,
+
+	"CompRecycleTime": 15,
+	"ActorRecycleTime": 30,
+
+	"HttpInnerCode": "jkserver_http_inner_code",
+	"HttpCode": "jkserver_http_code",
+	"HttpUrl": "/jkserver/logic",
+	"HttpPort": 20000,
+
+	"TcpPort": 10000,
+	"UseLibuv": true,
+
+	"MongoDB": "geek_game",
+	"MongoUrl": "mongodb://localhost:27017?maxPoolSize=50&waitQueueMultiple=100&compressors=zlib",
+
+	"Language": "chinese"
+}
