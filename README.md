@@ -31,8 +31,8 @@ Actor模型本身是存在死锁的情况，且不容易被发现，GeekServer�
 GeekServer包含一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用   
 
 
-### 运行
-1. 安装 netCore3.1
+# 运行
+1. 安装[.NetCore3.1](https://dotnet.microsoft.com/download/dotnet/3.1)
 2. 在本机安装[mongodb](https://www.mongodb.com/try/download/community)
 3. 打开git clone本项目https://github.com/leeveel/GeekServer.git
 4. 运行Tools/ExcelGen/ExcelConverter.exe 点击[服务器-ALL]导出配置表
