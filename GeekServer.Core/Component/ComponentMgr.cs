@@ -75,6 +75,21 @@ namespace Geek.Server
             return default;
         }
 
+        public bool IsCompRegisted(ComponentActor actor, Type compType)
+        {
+            var actorType = actor.GetType();
+            if (compMap.ContainsKey(actorType))
+            {
+                var list = compMap[actorType];
+                foreach (var info in list)
+                {
+                    if (info.CompType == compType)
+                        return true;
+                }
+            }
+            return false;
+        }
+
         public List<Type> GetAllComps(ComponentActor actor)
         {
             var actorType = actor.GetType();

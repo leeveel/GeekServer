@@ -10,9 +10,10 @@ namespace Geek.Server.Message
 			switch(msgId)
 			{
 				{{~ for file in filelist ~}}
+				//{{file.explain}}
 				{{~ for state in file.states ~}}
 				{{~ if state.msgid != "" ~}}
-				case {{state.msgid}}: return new JKServer.Message.{{file.space}}.{{state.name}}();
+				case {{state.msgid}}: return new Geek.Server.Message.{{file.space}}.{{state.name}}();
 				{{~ end ~}}
 				{{~ end ~}}
 				

@@ -17,6 +17,9 @@ namespace Geek.Server
                 LOGGER.Fatal($"不能添加hotfix工程的类型作为Schedule参数 1  {typeof(TH)} {param.GetType()}");
                 return -1;
             }
+            if (Settings.Ins.IsDebug && !isListenerLegal<TH>(agent))
+                return -1;
+
             getAgentInfo(agent, out var actorId, out var actorAgentType);
             long id = QuartzTimer.AddWeeklySchedule(days, hour, minute, actorId, actorAgentType, typeof(TH).FullName, param);
             return id;
@@ -32,6 +35,9 @@ namespace Geek.Server
                 LOGGER.Fatal($"不能添加hotfix工程的类型作为Schedule参数 2  {typeof(TH)} {param.GetType()}");
                 return -1;
             }
+            if (Settings.Ins.IsDebug && !isListenerLegal<TH>(agent))
+                return -1;
+
             getAgentInfo(agent, out var actorId, out var actorAgentType);
             long id = QuartzTimer.AddMonthlySchedule(date, hour, minute, actorId, actorAgentType, typeof(TH).FullName, param);
             return id;
@@ -47,6 +53,9 @@ namespace Geek.Server
                 LOGGER.Fatal($"不能添加hotfix工程的类型作为Schedule参数 3  {typeof(TH)} {param.GetType()}");
                 return -1;
             }
+            if (Settings.Ins.IsDebug && !isListenerLegal<TH>(agent))
+                return -1;
+
             getAgentInfo(agent, out var actorId, out var actorAgentType);
             long id = QuartzTimer.AddOnceSchedule(dateTime, actorId, actorAgentType, typeof(TH).FullName, param);
             return id;
@@ -68,6 +77,9 @@ namespace Geek.Server
                 LOGGER.Fatal($"不能添加hotfix工程的类型作为Schedule参数 4 {typeof(TH)} {param.GetType()}");
                 return -1;
             }
+            if (Settings.Ins.IsDebug && !isListenerLegal<TH>(agent))
+                return -1;
+
             getAgentInfo(agent, out var actorId, out var actorAgentType);
             long id = QuartzTimer.AddDailySchedule(hour, minute, actorId, actorAgentType, typeof(TH).FullName, param);
             return id;
@@ -105,6 +117,42 @@ namespace Geek.Server
                 actorId = actor.ActorId;
                 actorAgentType = actor.AgentTypeName;
             }
+        }
+
+        static bool isListenerLegal<TH>(IAgent agent) where TH : ITimerHandler
+        {
+            ComponentActor actor = default;
+            if (agent is IComponentAgent)
+            {
+                var comp = (BaseComponent)agent.Owner;
+                actor = comp.Actor;
+            }
+            else if (agent is IComponentActorAgent)
+            {
+                actor = (ComponentActor)agent.Owner;
+            }
+
+            var listenerType = typeof(TH);
+            var agentType = listenerType.BaseType.GetGenericArguments()[0];
+            if (agentType.GetInterface(typeof(IComponentAgent).FullName) != null)
+            {
+                //comp
+                var compType = agentType.BaseType.GenericTypeArguments[0];
+                var legal = ComponentMgr.Singleton.IsCompRegisted(actor, compType);
+                if (!legal)
+                    LOGGER.Error($"TimerHandler类型错误，注册Timer的Actor未注册TimerHandler泛型参数类型Component，{actor.GetType()}未注册Comp:{compType}");
+                return legal;
+            }
+            else if (agentType.GetInterface(typeof(IComponentActorAgent).FullName) != null)
+            {
+                //actor
+                var legal = agentType == agent.GetType();
+                if (!legal)
+                    LOGGER.Error($"TimerHandler类型错误，注册Timer的Actor与回调类型不一致{agent.GetType()} != {agentType}");
+                return legal;
+            }
+            LOGGER.Error("TimerHandler类型错误");
+            return false;
         }
     }
 }

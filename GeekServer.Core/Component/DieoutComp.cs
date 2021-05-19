@@ -12,17 +12,21 @@ namespace Geek.Server
         {
             foreach (var t in compTypeList)
             {
+                if (t.GetInterface(typeof(IState).FullName) == null)
+                    continue;
+
+                //删除数据库中所有StateComponent的document
                 var key = "";
-                var p = t.GetProperty("_State");
-                if (p != null)
+                var f = t.GetField("_State");
+                if (f != null)
                 {
-                    key = p.PropertyType.FullName;
+                    key = f.FieldType.FullName;
                 }
                 else
                 {
-                    var f = t.GetField("_State");
-                    if (f != null)
-                        key = f.FieldType.FullName;
+                    var p = t.GetProperty("_State");
+                    if (p != null)
+                        key = p.PropertyType.FullName;
                 }
                 if (string.IsNullOrEmpty(key))
                     continue;

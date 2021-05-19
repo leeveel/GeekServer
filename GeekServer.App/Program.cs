@@ -57,7 +57,10 @@ namespace Geek.Server
         {
             await HotfixMgr.ReloadModule("");//启动游戏[hotfix工程实现一个IHotfix接口]
             Settings.Ins.StartServerTime = DateTime.Now;
-            Console.WriteLine("enter game loop");
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+            Console.WriteLine("enter game loop 使用[ctrl+C]退出程序，不要强退，否则无法回存State");
+            Console.WriteLine("压力测试请将server_config.json中IsDebug改为false");
+            Console.ForegroundColor = ConsoleColor.Gray;
             LOGGER.Info("enter game loop");
 
             int gcTime = 0;

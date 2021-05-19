@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Threading;
+using System.ComponentModel;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Geek.Server
@@ -12,10 +13,14 @@ namespace Geek.Server
     //https://github.com/Fody/PropertyChanged/wiki/EventInvokerSelectionInjection
     public abstract class InnerDBState : BaseState, INotifyPropertyChanged
     {
+        /// <summary>PropertyChanged需要，勿动，保持为null即可</summary>
         public event PropertyChangedEventHandler PropertyChanged;
         public virtual void OnPropertyChanged(string propertyName)
         {
             _stateChanged = true;
+            var evt = PropertyChanged;
+            if (evt != null)
+                evt.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
@@ -39,20 +44,20 @@ namespace Geek.Server
         public void UpdateChangeVersion()
         {
             if (IsChanged)
-                changeVersion++;
+                Interlocked.Increment(ref changeVersion);
             ClearChanges();
         }
 
         ///<summary>存数据库前先await入队保存要存数据库的change版本</summary>
         public void ReadyToSaveToDB()
         {
-            tosaveVersion = changeVersion;
+            Interlocked.Exchange(ref tosaveVersion, changeVersion);
         }
 
         ///<summary>保存完后修改已保存版本号</summary>
         public void SavedToDB()
         {
-            savedVersion = tosaveVersion;
+            Interlocked.Exchange(ref savedVersion, tosaveVersion);
         }
 
         ///<summary>相对数据库是否有改变</summary>

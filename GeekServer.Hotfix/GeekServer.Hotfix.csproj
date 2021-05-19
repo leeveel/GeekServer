@@ -20,7 +20,10 @@
   <ItemGroup>
     <ProjectReference Include="..\GeekServer.App\GeekServer.App.csproj" />
     <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
-    <ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Generate\" />
   </ItemGroup>
 
 </Project>

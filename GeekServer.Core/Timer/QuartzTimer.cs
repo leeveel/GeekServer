@@ -26,11 +26,11 @@ namespace Geek.Server
                 var handlerType = context.JobDetail.JobDataMap.GetString(HandlerTypeKey);
 
                 var param = context.JobDetail.JobDataMap.Get(ParamKey) as Param;
-                await TriggerTimer(actorId, actorType, handlerType, param);
+                await triggerTimer(actorId, actorType, handlerType, param);
             }
         }
 
-        internal static async Task TriggerTimer(long actorId, string actorType, string handlerType, Param param)
+        static async Task triggerTimer(long actorId, string actorType, string handlerType, Param param)
         {
             try
             {

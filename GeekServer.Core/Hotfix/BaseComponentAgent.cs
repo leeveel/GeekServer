@@ -2,7 +2,7 @@
 
 namespace Geek.Server
 {
-    public abstract class NoStateComponentAgent<TComp> : BaseComponentAgent<TComp> where TComp : FuncComponent
+    public abstract class FuncComponentAgent<TComp> : BaseComponentAgent<TComp> where TComp : FuncComponent
     {
         public TComp Comp => _Comp;
     }
