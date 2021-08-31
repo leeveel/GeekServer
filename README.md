@@ -43,6 +43,19 @@ GeekServer包含一个一键导表工具，将策划配置表，转化为二进�
 # 文档&例子&Demo
 [文档](https://github.com/leeveel/GeekServer/tree/master/Docs)  
 
+# 代码片段
+```c#
+//注册Actor组件
+RegistAutoActiveActor(ActorType.Server); //server
+RegistComp<ServerComp>(ActorType.Server);  
+RegistComp<RoleComp>(ActorType.Role); //role
+RegistComp<RoleLoginComp>(ActorType.Role);
+
+//调用Actor组件函数(就像调用普通函数一样,无需关心多线程或入队)
+var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
+_ = serverComp.CheckCrossDay();
+```
+
 # 推荐项目  
 [xbuffer](https://github.com/CodeZeg/xbuffer) 一种简化版本的 flatbuffer 序列化库  
 [ExcelToCode](https://github.com/leeveel/ExcelToCode) 一键从Excel中导出模板代码和二进制数据  
