@@ -38,7 +38,7 @@ GeekServer包含一个一键导表工具，将策划配置表，转化为二进�
 3. 打开git clone本项目https://github.com/leeveel/GeekServer.git
 4. 运行Tools/ExcelGen/ExcelConverter.exe 点击[服务器-ALL]导出配置表
 5. 用VisualStudio2019打开GeekServer.sln 启动GeekServer.App
-6. 用VisualStudio2019打开GeekServer.sln 启动GeekServer.Test (一个1000人登录的demo)
+6. 启动GeekServer.Test (一个1000人登录的demo)
 
 # 文档&例子&Demo
 [文档](https://github.com/leeveel/GeekServer/tree/master/Docs)  
