@@ -15,6 +15,22 @@ __设计理念:大道至简，以简化繁__
 GeekServer的Actor模型构建于强大的TPL DataFlow之上，让Actor模型如虎添翼。（不了解Actor模型，可以搜一下相关资料，Akka，Orleans都是采用的Actor模型）
 ### 4.Actor入队透明化  
 GeekServer内部会自动处理线程上下文,编译期间会自动注入入队代码,开发人员无需关心多线程以及入队逻辑
+```c#
+//编译期间会注入一个继承自xxxCompAgent的wrapper类,来实现自动入队
+//同时SendAsync内部自动处理了线程上下文,开发者只需要像调用普通函数一样书写逻辑
+public class ServerCompAgentWrapper : ServerCompAgent
+{
+	public override Task CheckCrossDay()
+	{
+		return base.Actor.SendAsync((Func<Task>)base.CheckCrossDay, isAwait: false, 10000);
+	}
+
+	public override Task<int> GetDaysFromOpenServer()
+	{
+		return base.Actor.SendAsync((Func<Task<int>>)base.GetDaysFromOpenServer, isAwait: true, 10000);
+	}
+}
+```
 ### 5.Actor死锁检测 
 Actor模型本身是存在死锁的情况，且不容易被发现，~~GeekServer在debug模式下提供了检测机制，让死锁问题暴露在开发过程中~~。GeekServer内部可检测单路死锁和多路死锁，并采用调用链重入机制消除单路死锁，多路死锁时也可由开发人员判断是否可添加[InterleaveWhenDeadlock]属性以消除死锁。
 ### 6.支持不停服更新 
