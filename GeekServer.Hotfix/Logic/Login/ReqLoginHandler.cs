@@ -1,10 +1,8 @@
-﻿using Geek.Server;
-using Geek.Server.Logic.Handler;
-using Geek.Server.Logic.Login;
+﻿using Geek.Server.Logic.Handler;
 using Geek.Server.Message.Login;
 using System.Threading.Tasks;
 
-namespace Logic.Login
+namespace Geek.Server.Logic.Login
 {
 
     [TcpMsgMapping(typeof(ReqLogin))]

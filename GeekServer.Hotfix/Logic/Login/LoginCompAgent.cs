@@ -2,8 +2,6 @@
 using Geek.Server.Logic.Role;
 using Geek.Server.Message.Login;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Logic.Login
@@ -75,7 +73,7 @@ namespace Geek.Server.Logic.Login
                     return roleId;
                 return 0;
             }
-            state = await Comp.LoadState<PlayerInfoState>(playerId, () =>
+            state = await Comp.LoadState(playerId, () =>
             {
                 return new PlayerInfoState()
                 {
@@ -104,7 +102,7 @@ namespace Geek.Server.Logic.Login
                 Comp.PlayerMap[playerId] = state;
             }
             state.RoleMap[Settings.Ins.ServerId] = roleId;
-            return Comp.SaveState<PlayerInfoState>(playerId, state);
+            return Comp.SaveState(playerId, state);
         }
 
 
