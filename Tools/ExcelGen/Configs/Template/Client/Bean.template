@@ -1,0 +1,49 @@
+﻿/**
+ * Auto generated, do not edit it
+ */
+
+namespace Geek.Client.Config
+{
+	///<summary>{{SheetNameDesc}}</summary>
+    public class {{BeanClassName}} : BaseBin
+    {
+        {%- for field in Fields -%}
+        {%- if field.Datatype == "textmult" -%}
+        private int m_{{field.Name}};
+		///<summary>{{field.Desc}}</summary>
+        public string {{field.name}}
+		{
+			get           
+			{
+				if(m_{{field.Name}} == 0)
+					return "";
+				t_languageBean lanBean = ConfigBean.GetBean<t_languageBean, int>(m_{{field.Name}});
+				if (lanBean != null)
+					return lanBean.t_content;
+				else
+					return m_{{field.Name}}.ToString();
+			}
+		}
+        {%- else -%}
+		///<summary>{{field.Desc}}</summary>
+        public {{field.Datatype}} {{field.Name}};
+		{%- endif -%}
+        {%- endfor -%}
+
+        public void LoadData(byte[] data, ref int offset)
+        {
+            {%- for field in Fields -%}
+            {%- if field.Datatype == "int" -%}
+            {{field.Name}} = XBuffer.ReadInt(data, ref offset);
+            {%- elsif field.Datatype == "long" -%}
+            {{field.Name}} = XBuffer.ReadLong(data, ref offset);
+			{%- elsif field.Datatype == "textmult" -%}
+            m_{{field.Name}} = XBuffer.ReadInt(data, ref offset);
+			{%- elsif field.Datatype == "string" -%}
+			{{field.Name}} = XBuffer.ReadString(data, ref offset);
+            {%- endif -%}
+            {%- endfor -%}
+        }
+
+    }
+}

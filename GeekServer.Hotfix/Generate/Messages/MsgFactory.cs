@@ -9,14 +9,14 @@ namespace Geek.Server.Message
 		{
 			switch(msgId)
 			{
-				//玩家快照
-				case 101201: return new Geek.Server.Message.Login.ReqLogin();
-				case 101202: return new Geek.Server.Message.Login.ReqReLogin();
-				case 101101: return new Geek.Server.Message.Login.ResLogin();
-				case 101102: return new Geek.Server.Message.Login.ResReLogin();
+				//登陆
+				case 111001: return new Geek.Server.Message.Login.ReqLogin();
+				case 111002: return new Geek.Server.Message.Login.ResLogin();
+				case 111003: return new Geek.Server.Message.Login.ResLevelUp();
+				case 111004: return new Geek.Server.Message.Login.ResNotice();
+				case 111005: return new Geek.Server.Message.Login.ReqChangeName();
+				case 111006: return new Geek.Server.Message.Login.ResChangeName();
 				case 101303: return new Geek.Server.Message.Login.HearBeat();
-				case 101103: return new Geek.Server.Message.Login.ResPrompt();
-				case 101104: return new Geek.Server.Message.Login.ResUnlockScreen();
 				
 				//举例各种结构写法
 				case 111101: return new Geek.Server.Message.Sample.ReqTest();

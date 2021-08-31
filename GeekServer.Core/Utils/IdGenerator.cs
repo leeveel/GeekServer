@@ -2,6 +2,9 @@ using System;
 
 namespace Geek.Server
 {
+    /// <summary>
+    /// 非ActorID请使用此类
+    /// </summary>
     public class IdGenerator
     {
         static long cacheSecond = 0L;
@@ -18,7 +21,7 @@ namespace Geek.Server
         /// 生成全局唯一id，如roleId
         /// <para>服务器之间不能相同的统一用serverId</para>
         /// </summary>
-        public static long GetUniqueId(int serverOrModuleId)
+        public static long GetUniqueId(int moduleId)
         {
             long second = (long)(DateTime.UtcNow - utcTimeStart).TotalSeconds;
             long increaseNum = 0L;
@@ -32,8 +35,8 @@ namespace Geek.Server
                 }
                 else if (increaseNumber >= 0x1FFFF)
                 {
+                    //如果越界时间往后推35年,扩容数量9999-2020/35≈200,  (9999=DateTime.MaxValue.Year)
                     //自增17位，每秒可生成131071个*扩容倍数≈26214200个
-                    //如果越界时间往后推35年,扩容数量9999-2999/35≈200
                     second = genSecond += gapSecond;
                     increaseNumber = 0L;
                 }
@@ -45,7 +48,7 @@ namespace Geek.Server
             }
 
             //保证id为正数，最高位不用
-            long res = (long)(serverOrModuleId) << 47;//(63 - 16);//serverId 前16位[最大65535]
+            long res = (long)(moduleId) << 47;//(63 - 16);//serverId 前16位[最大65535]
             res |= 0x00007FFFFFFFFFFF & (second << 17);//(63-16-17)时间戳用中间30位(可表示1073741823秒≈34年=2020+34=2054年)
             return res | increaseNum;
         }
@@ -55,7 +58,7 @@ namespace Geek.Server
         /// </summary>
         public static DateTime GetGenerateTime(long id, bool utc = false)
         {
-            id &= 0x00007FFFFFFFFFFF;//去掉高16位(serverId)
+            id &= 0x00007FFFFFFFFFFF;//去掉高1+16位(符号位+serverId)
             id >>= 17;//去掉自增低17位
             var date = utcTimeStart.AddSeconds(id);
 
@@ -71,7 +74,7 @@ namespace Geek.Server
         /// <summary>
         /// 通过唯一id获取生成所在服务器id
         /// </summary>
-        public static int GetServerId(long id)
+        public static int GetModuleId(long id)
         {
             return (int)(id >> 47);
         }

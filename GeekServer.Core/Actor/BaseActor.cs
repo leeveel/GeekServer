@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 
@@ -9,12 +11,25 @@ namespace Geek.Server
         readonly static NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public const int TIME_OUT = 10000;
 
+        public static object Lockable = new object();
+        /// <summary>
+        /// 调用链 ---  正在等待的ActorId
+        /// </summary>
+        public static ConcurrentDictionary<long, BaseActor> WaitingMap = new ConcurrentDictionary<long, BaseActor>();
+        /// <summary>
+        /// 当前调用链id
+        /// </summary>
+        internal long curCallChainId;   
+        private static long idCounter = 1;
+        /// <summary>
+        /// 当前任务是否可以被交错执行
+        /// </summary>
+        public volatile bool CurCanBeInterleaved;
         public long ActorId { get; set; }
         public BaseActor(int parallelism = 1)
         {
-            if (Settings.Ins.IsDebug)
-                checkActor = new DeadlockCheckActor(this);
-            actionBlock = new ActionBlock<WorkWrapper>(InnerRun, new ExecutionDataflowBlockOptions() { MaxDegreeOfParallelism = parallelism });
+            actionBlock = new ActionBlock<WorkWrapper>(InnerRun, 
+                new ExecutionDataflowBlockOptions() { MaxDegreeOfParallelism = parallelism });
         }
 
         readonly ActionBlock<WorkWrapper> actionBlock;
@@ -31,63 +46,155 @@ namespace Geek.Server
             }
         }
 
-        DeadlockCheckActor checkActor;
-        public void SetActiveNode(ActorNode node)
+        private void IsNeedEnqueue(out bool needEnqueue, out long callChainId)
         {
-            checkActor.SetActiveNode(node);
+            callChainId = RuntimeContext.Current;
+            if (callChainId <= 0)
+            {
+                callChainId = Interlocked.Increment(ref idCounter);
+                needEnqueue = true;
+                return;
+            }
+            else if (callChainId == curCallChainId)
+            {
+                needEnqueue = false;
+                return;
+            }
+            needEnqueue = true;
+            long curChainId = Volatile.Read(ref curCallChainId);
+            if (curChainId > 0)
+            {
+                lock (Lockable)
+                {
+                    WaitingMap.TryGetValue(curChainId, out var waiting);
+                    //Console.WriteLine($"curCallChainId:{curCallChainId} waitingCallChainId:{waiting?.curCallChainId}");
+                    if (waiting != null && Volatile.Read(ref waiting.curCallChainId) == callChainId)
+                    {
+                        if (CurCanBeInterleaved)
+                            needEnqueue = false;
+                        else
+                            throw new DeadlockException("multi call chain dead lock");
+                    }
+                    else
+                    {
+                        WaitingMap[callChainId] = this;
+                    }
+                }
+            }
         }
 
-        public Task SendAsync(Action work, bool checkLock = true, int timeOut = TIME_OUT)
+        public Task SendAsync(Action work, bool isAwait = true, int timeOut = TIME_OUT)
         {
-            if (Settings.Ins.IsDebug)
-                return checkActor.SendAsync(work, checkLock, timeOut);
-
-            ActionWrapper at = new ActionWrapper(work);
-            at.Owner = this;
-            at.TimeOut = timeOut;
-            actionBlock.SendAsync(at);
-            return at.Tcs.Task;
+            long callChainId;
+            bool needEnqueue;
+            if (!isAwait)
+            {
+                callChainId = Interlocked.Increment(ref idCounter);
+                needEnqueue = true;
+            }
+            else
+            {
+                IsNeedEnqueue(out needEnqueue, out callChainId);
+            }
+            if (needEnqueue)
+            {
+                ActionWrapper at = new ActionWrapper(work);
+                at.Owner = this;
+                at.TimeOut = timeOut;
+                at.CallChainId = callChainId;
+                actionBlock.SendAsync(at);
+                return at.Tcs.Task;
+            }
+            else
+            {
+                work();
+                return Task.CompletedTask;
+            }
         }
 
-        public Task<T> SendAsync<T>(Func<T> work, bool checkLock = true, int timeOut = TIME_OUT)
+        public Task<T> SendAsync<T>(Func<T> work, bool isAwait = true, int timeOut = TIME_OUT)
         {
-            if (Settings.Ins.IsDebug)
-                return checkActor.SendAsync(work, checkLock, timeOut);
-
-            FuncWrapper<T> at = new FuncWrapper<T>(work);
-            at.Owner = this;
-            at.TimeOut = timeOut;
-            actionBlock.SendAsync(at);
-            return at.Tcs.Task;
+            long callChainId;
+            bool needEnqueue;
+            if (!isAwait)
+            {
+                callChainId = Interlocked.Increment(ref idCounter);
+                needEnqueue = true;
+            }
+            else
+            {
+                IsNeedEnqueue(out needEnqueue, out callChainId);
+            }
+            if (needEnqueue)
+            {
+                FuncWrapper<T> at = new FuncWrapper<T>(work);
+                at.Owner = this;
+                at.TimeOut = timeOut;
+                at.CallChainId = callChainId;
+                actionBlock.SendAsync(at);
+                return at.Tcs.Task;
+            }
+            else
+            {
+                return Task.FromResult(work());
+            }
         }
 
-        public Task SendAsync(Func<Task> work, bool checkLock = true, int timeOut = TIME_OUT)
+        public Task SendAsync(Func<Task> work, bool isAwait = true, int timeOut = TIME_OUT)
         {
-            if (Settings.Ins.IsDebug)
-                return checkActor.SendAsync(work, checkLock, timeOut);
-
-            ActionAsyncWrapper at = new ActionAsyncWrapper(work);
-            at.Owner = this;
-            at.TimeOut = timeOut;
-            actionBlock.SendAsync(at);
-            return at.Tcs.Task;
+            long callChainId;
+            bool needEnqueue;
+            if (!isAwait)
+            {
+                callChainId = Interlocked.Increment(ref idCounter);
+                needEnqueue = true;
+            }
+            else
+            {
+                IsNeedEnqueue(out needEnqueue, out callChainId);
+            }
+            if (needEnqueue)
+            {
+                ActionAsyncWrapper at = new ActionAsyncWrapper(work);
+                at.Owner = this;
+                at.TimeOut = timeOut;
+                at.CallChainId = callChainId;
+                actionBlock.SendAsync(at);
+                return at.Tcs.Task;
+            }
+            else
+            {
+                return work();
+            }
         }
 
-        public Task<T> SendAsync<T>(Func<Task<T>> work, bool checkLock = true, int timeOut = TIME_OUT)
+        public Task<T> SendAsync<T>(Func<Task<T>> work, bool isAwait = true, int timeOut = TIME_OUT)
         {
-            if (Settings.Ins.IsDebug)
-                return checkActor.SendAsync(work, checkLock, timeOut);
-
-            FuncAsyncWrapper<T> at = new FuncAsyncWrapper<T>(work);
-            at.Owner = this;
-            at.TimeOut = timeOut;
-            actionBlock.SendAsync(at);
-            return at.Tcs.Task;
+            long callChainId;
+            bool needEnqueue;
+            if (!isAwait)
+            {
+                callChainId = Interlocked.Increment(ref idCounter);
+                needEnqueue = true;
+            }
+            else
+            {
+                IsNeedEnqueue(out needEnqueue, out callChainId);
+            }
+            if (needEnqueue)
+            {
+                FuncAsyncWrapper<T> at = new FuncAsyncWrapper<T>(work);
+                at.Owner = this;
+                at.TimeOut = timeOut;
+                at.CallChainId = callChainId;
+                actionBlock.SendAsync(at);
+                return at.Tcs.Task;
+            }
+            else
+            {
+                return work();
+            }
         }
-
-        public abstract Task Active();
-
-        public abstract Task Deactive();
 
         public virtual Task<bool> ReadyToDeactive()
         {

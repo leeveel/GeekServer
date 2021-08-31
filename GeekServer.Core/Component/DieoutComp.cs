@@ -32,7 +32,7 @@ namespace Geek.Server
                     continue;
 
                 var col = GetDB().GetCollection<BsonDocument>(key);
-                var filter = Builders<BsonDocument>.Filter.Eq(MongoField.UniqueId, ActorId);
+                var filter = Builders<BsonDocument>.Filter.Eq(MongoField.Id, ActorId);
                 await col.DeleteOneAsync(filter);
             }
         }

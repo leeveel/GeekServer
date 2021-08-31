@@ -37,18 +37,20 @@ namespace Geek.Server
             //comp的active不一定在所属actor线程执行，谁来获取就在谁的线程执行
             return await owner.GetLifeActor(compType).SendAsync(async () =>
             {
-                activeCompMap.TryGetValue(compType, out var retComp);
+                var got = activeCompMap.TryGetValue(compType, out var retComp);
                 if (retComp == null)
-                {
                     retComp = ComponentMgr.Singleton.NewComponent(owner, compType);
-                    activeCompMap.TryAdd(compType, retComp);
-                }
+				if (retComp == null)//没有注册Comp
+					return retComp;
+				
                 if (!retComp.IsActive)
                 {
                     await retComp.Active();
                     if (retComp.GetAgent() != null)
                         await retComp.GetAgent().Active();
                 }
+				if (!got)
+                    activeCompMap.TryAdd(compType, retComp);
                 activeTimeMap[compType] = DateTime.Now;
                 return retComp;
             });
@@ -71,11 +73,11 @@ namespace Geek.Server
         /// <summary>actor线程执行</summary>
         public async Task InitListener()
         {
-            var list = HotfixMgr.GetEventListeners(owner.GetAgent().GetType());
+            var list = HotfixMgr.GetEventListeners(owner.ActorType);
             if (list == null)
                 return;
-            foreach(var listener in list)
-                await listener.InnerInitListener(owner.GetAgent());
+            foreach (var listener in list)
+                await listener.InnerInitListener(owner);
         }
 
         public async Task DeactiveAllComps()
@@ -127,8 +129,6 @@ namespace Geek.Server
                                 if (await comp.ReadyToDeactive())
                                 {
                                     await comp.Deactive();
-                                    if (comp.GetAgent() != null)
-                                        await comp.GetAgent().Deactive();
                                     activeCompMap.TryRemove(compType, out _);
                                     activeTimeMap.TryRemove(compType, out _);
                                 }

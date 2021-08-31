@@ -28,17 +28,12 @@ namespace Geek.Server
                     }
 
                     //握手
-                    var channel = ctx.Channel.GetAttribute(ChannelManager.Att_Channel).Get();
-                    if (channel != null)
+                    var session = ctx.Channel.GetAttribute(SessionManager.SESSION).Get();
+                    if (session != null)
                     {
-                        var actor = await ActorManager.Get<ComponentActor>(channel.Id);
+                        var actor = await ActorManager.Get(session.Id);
                         if (actor != null)
-                        {
-                            if (actor is IChannel ise)
-                                _ = actor.SendAsync(ise.Hand);
-                            if (actor.TransformAgent<IChannel>(out var seAgent))
-                                _ = actor.SendAsync(seAgent.Hand);
-                        }
+                            actor.EvtDispatcher.DispatchEvent((int)InnerEventID.OnMsgReceived);
                     }
 
                     handler.Time = DateTime.Now;
@@ -57,7 +52,7 @@ namespace Geek.Server
 
                     if (handler is TcpActorHandler actorHandler)
                     {
-                        actorHandler.Actor = await actorHandler.CacheActor();
+                        actorHandler.Actor = await actorHandler.GetActor();
                         if (actorHandler.Actor != null)
                             await actorHandler.Actor.SendAsync(actorHandler.ActionAsync);
                         else
@@ -83,10 +78,10 @@ namespace Geek.Server
         public override async void ChannelInactive(IChannelHandlerContext ctx)
         {
             LOGGER.Info("{} 断开连接.", ctx.Channel.RemoteAddress.ToString());
-            var channel = ctx.Channel.GetAttribute(ChannelManager.Att_Channel).Get();
+            var session = ctx.Channel.GetAttribute(SessionManager.SESSION).Get();
             try
             {
-                await ChannelManager.Remove(channel);
+                await SessionManager.Remove(session);
             }
             catch (Exception e)
             {

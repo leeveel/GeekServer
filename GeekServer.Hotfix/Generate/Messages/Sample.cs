@@ -175,17 +175,17 @@ namespace Geek.Server.Message.Sample
 		public long l1 { get{ return _l1_; } set{ _l1_ = value; _stateChanged = true; } }
 		long _l1_;
 
-		public StateList<string> l2 { get; private set; } = new StateList<string>();
+		public StateList<string> l2 { get; set; } = new StateList<string>();
 
-		public StateList<float> l3 { get; private set; } = new StateList<float>();
+		public StateList<float> l3 { get; set; } = new StateList<float>();
 
-		public StateList<Test1> l4 { get; private set; } = new StateList<Test1>();
-
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
-		public StateMap<long, string> m1 { get; private set; } = new StateMap<long, string>();
+		public StateList<Test1> l4 { get; set; } = new StateList<Test1>();
 
 		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
-		public StateMap<int, Test1> m2 { get; private set; } = new StateMap<int, Test1>();
+		public StateMap<long, string> m1 { get; set; } = new StateMap<long, string>();
+
+		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
+		public StateMap<int, Test1> m2 { get; set; } = new StateMap<int, Test1>();
 
 		///<summary>测试option</summary>
 		public long l5 { get{ return _l5_; } set{ _l5_ = value; _stateChanged = true; } }
@@ -361,7 +361,7 @@ namespace Geek.Server.Message.Sample
 			{
 				if(l4[_a_] == null)
 				{
-					LOGGER.Error("l4 has null item, idx == " + _a_);
+					LOGGER.Error("Sample.Test2.l4 has null item, idx == " + _a_);
 					XBuffer.WriteByte(0, _buffer_, ref _offset_);
 				}
 				else

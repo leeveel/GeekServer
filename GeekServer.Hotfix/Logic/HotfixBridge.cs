@@ -1,7 +1,8 @@
 ﻿using System;
-using Geek.Server.ConfigBean;
+using Geek.Server.Config;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Geek.Server.Logic.Server;
 
 namespace Geek.Server
 {
@@ -14,24 +15,37 @@ namespace Geek.Server
         {
             try
             {
-                HttpHandlerFactory.SetExtraHandlerGetter(HotfixMgr.GetHttpHandler);
-                TcpHandlerFactory.SetExtraHandlerGetter(Geek.Server.Message.MsgFactory.Create, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
-
                 if (isReload)
                 {
                     //热更
-                    LOGGER.Info("hotfix load success");
+                    LOGGER.Info("load配置表...");
+                    //配置表代码在hotfix，热更后当前域的GameDataManager=null，需要重新加载配置表
+                    (bool beanSuccess, string msg) = GameDataManager.ReloadAll();
+                    if(!beanSuccess)
+                    {
+                        LOGGER.Info("load配置表异常...");
+                        LOGGER.Error(msg);
+                        return false;
+                    }
+
+                    LOGGER.Info("清除缓存的agent...");
                     await ActorManager.ActorsForeach((actor) =>
                     {
-                        actor.SendAsync(actor.ClearCacheAgent, false);
+                        actor.SendAsync(actor.ClearCacheAgent, true);
                         return Task.CompletedTask;
                     });
-                }else
+                    LOGGER.Info("hotfix load success");
+                }
+                else
                 {
                     //起服
                     if (!await Start())
                         return false;
                 }
+				
+				//成功了才替换msg&handler
+				HttpHandlerFactory.SetHandlerGetter(HotfixMgr.GetHttpHandler);
+                TcpHandlerFactory.SetHandlerGetter(Message.MsgFactory.Create, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
                 return true;
             }
             catch(Exception e)
@@ -56,44 +70,44 @@ namespace Geek.Server
                 LOGGER.Info("启动回存timer......");
                 GlobalDBTimer.Singleton.Start();
 
-                LOGGER.Info("注册所有组件......");
-                ComponentTools.RegistAllComps();
-
                 LOGGER.Info("load配置表...");
-                (bool success, string msg) = GameDataManager.ReloadAll();
-                if (!success)
+                (bool beanSuccess, string msg) = GameDataManager.ReloadAll();
+                if (!beanSuccess)
+                {
+                    LOGGER.Error(msg);
                     return false;
+                }
 
-                LOGGER.Info("激活所有全局actor...");
+                LOGGER.Info("自动激活全局actor...");
                 var taskList = new List<Task>();
-                taskList.Add(activeActorAndItsComps<ServerActorAgent>(ServerActorID.GetID(ActorType.Normal)));
-                //激活其他全局actor
-
+                var list = ComponentMgr.Singleton.AutoActiveActorList;
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var task = ActorMgr.GetOrNew((ActorType)list[i]);
+                    taskList.Add(task);
+                }
                 await Task.WhenAll(taskList);
 
-                var serverActor = await ActorManager.GetOrNew<ServerActorAgent>(ServerActorID.GetID(ActorType.Normal));
-                _ = serverActor.SendAsync(serverActor.CheckCrossDay);
+                LOGGER.Info("起服检查是否跨天...");
+                var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
+                _ = serverComp.CheckCrossDay();
 
                 return true;
-            }catch(Exception e)
+            }
+            catch(Exception e)
             {
                 LOGGER.Fatal("起服失败\n" + e.ToString());
                 return false;
             }
         }
 
-        async Task activeActorAndItsComps<TActorAgent>(long actorId) where TActorAgent : IComponentActorAgent
-        {
-            var actor = await ActorManager.GetOrNew<TActorAgent>(actorId);
-            await ((ComponentActor)actor.Owner).ActiveAllComps();
-        }
 
         public async Task<bool> Stop()
         {
             try
             {
                 await QuartzTimer.Stop();
-                await ChannelManager.RemoveAll();
+                await SessionManager.RemoveAll();
                 await GlobalDBTimer.Singleton.OnShutdown();
                 await ActorManager.RemoveAll();
                 await TcpServer.Stop();

@@ -1,0 +1,280 @@
+//auto generated, do not modify it
+//限制：命名不能以下划线结尾(可能冲突)
+//限制：不能跨协议文件继承,不能跨文件使用继承关系
+//限制：map的key只支持short, int, long, string；list/map不能optional,list/map不能嵌套
+//兼容限制：字段只能添加，添加后不能删除，添加字段只能添加到最后,添加消息类型只能添加到最后
+//兼容限制：不能修改字段类型（如从bool改为long）
+//兼容限制：消息类型(含msdId)不能作为其他消息的成员类型
+using System.Collections.Generic;
+{{~ for use in usingspaces ~}}
+using {{use}};
+{{~ end ~}}
+{{~ LogFunc = "UnityEngine.Debug.LogError" ~}}
+
+{{ if explain != "" }}///<summary>{{explain}}</summary>{{ end }}
+namespace Geek.Client.Message.{{space}}
+{
+	internal class {{space}}MsgFactory
+	{
+		///<summary>通过msgIdx构造msg</summary>
+		public static BaseMessage Create(int msgIdx)
+		{
+			switch(msgIdx)
+			{
+				{{~ for state in states ~}}
+				case {{state.idx}}: return new {{state.name}}();
+				{{~ end ~}}
+				default: return default;
+			}
+		}
+	}
+	{{~ readMap = {"int":"XBuffer.ReadInt(_buffer_, ref _offset_)",
+				"long":"XBuffer.ReadLong(_buffer_, ref _offset_)",
+				"bool":"XBuffer.ReadBool(_buffer_, ref _offset_)",
+				"string":"XBuffer.ReadString(_buffer_, ref _offset_)",
+				"short":"XBuffer.ReadShort(_buffer_, ref _offset_)",
+				"float":"XBuffer.ReadFloat(_buffer_, ref _offset_)",
+				"double":"XBuffer.ReadDouble(_buffer_, ref _offset_)",
+				"byte[]":"XBuffer.ReadBytes(_buffer_, ref _offset_)"} ~}}
+	{{~ writeMap = {"int":"XBuffer.WriteInt(%s, _buffer_, ref _offset_)",
+				"long":"XBuffer.WriteLong(%s, _buffer_, ref _offset_)",
+				"bool":"XBuffer.WriteBool(%s, _buffer_, ref _offset_)",
+				"string":"XBuffer.WriteString(%s, _buffer_, ref _offset_)",
+				"short":"XBuffer.WriteShort(%s, _buffer_, ref _offset_)",
+				"float":"XBuffer.WriteFloat(%s, _buffer_, ref _offset_)",
+				"double":"XBuffer.WriteDouble(%s, _buffer_, ref _offset_)",
+				"byte[]":"XBuffer.WriteBytes(%s, _buffer_, ref _offset_)"} ~}}
+	
+	{{ for state in states }}
+	{{~ if state.explain != "" ~}}
+	///<summary>{{~state.explain~}}</summary>
+	{{~ end ~}}
+	{{~ if state.attribute != "" ~}}
+	{{state.attribute}}
+	{{~ end ~}}
+	{{~ if state.super != "" ~}}
+    public class {{state.name}} : {{state.super}}
+    {{~ else ~}}
+    public class {{state.name}} : BaseMessage
+    {{~ end ~}}
+	{
+		internal {{if supermap[state.name]}}override {{else}}virtual {{end}}byte _msgIdx_ => {{state.idx}};//最多支持255个消息类型
+		{{~ if state.msgid != "" ~}}
+        public override int GetMsgId() { return MsgId; }
+        public const int MsgId = {{state.msgid}};
+		{{~ end ~}}
+		
+		{{~ for field in state.fields ~}}
+		{{~ if field.explain != "" ~}}
+		///<summary>{{field.explain}}</summary>
+		{{~ end ~}}
+		{{~ if field.attribute != "" ~}}
+		{{field.attribute}}
+		{{~ end ~}}
+		{{~ if field.type == "list" ~}}{{~#类型list~}}
+		public List<{{field.clsname1}}> {{field.name}} { get; private set; } = new List<{{field.clsname1}}>();
+		{{~ else if field.type == "map" ~}}{{~#类型map~}}
+		public Dictionary<{{field.clsname1}}, {{field.clsname2}}> {{field.name}} { get; private set; } = new Dictionary<{{field.clsname1}}, {{field.clsname2}}>();
+		{{~ else ~}}{{~#其他类型~}}
+		{{~ if field.optional != "" ~}}
+		public {{field.clsname1}} {{field.name}}{ get{ return _{{field.name}}_; } set{ _{{field.name}}_ = value;  has{{field.name[0] | string.upcase}}{{field.name | string.slice 1}} = value != default; }}
+		{{field.clsname1}} _{{field.name}}_;
+		public bool has{{field.name[0] | string.upcase}}{{field.name | string.slice 1}} { get; private set; }
+		{{~ else ~}}
+		public {{field.clsname1}} {{field.name}} { get; set;}
+		{{~ end ~}}
+		{{~ end ~}}{{#类型结束}}
+		{{~ end ~}}{{#foreach结束 state.fields}}
+		
+		///<summary>反序列化，读取数据</summary>
+        public override int Read(byte[] _buffer_, int _offset_)
+		{
+			_offset_ = base.Read(_buffer_, _offset_);
+			{{~ if state.msgid == "" ~}}
+			int _startOffset_ = _offset_;
+			int _toReadLength_ = XBuffer.ReadInt(_buffer_, ref _offset_);
+			{{~ end ~}}
+			
+			//字段个数,最多支持255个
+			var _fieldNum_ = XBuffer.ReadByte(_buffer_, ref _offset_);
+			
+			{{~ readIdx = -1 ~}}
+			do {
+				{{~ for field in state.fields ~}}
+				{{~ readIdx = readIdx + 1 ~}}
+				if(_fieldNum_ > {{readIdx}}){
+					{{~ if field.type == "list" || field.type == "map" ~}}
+					short _count_ = XBuffer.ReadShort(_buffer_, ref _offset_);
+					for(int _a_ = 0; _a_ < _count_; ++_a_)
+					{
+						{{~ if field.type == "list" ~}}
+						{{~ if readMap[field.clsname1] ~}}
+						{{field.name}}.Add({{readMap[field.clsname1]}});
+						{{~ else ~}}
+						var _idx_ = XBuffer.ReadByte(_buffer_, ref _offset_);
+						if(_idx_ <= 0)
+						{
+							{{field.name}}.Add(default);
+							continue;//为空
+						}
+						{{~ if sublist | array.contains field.clsname1 ~}}{{~#有子类~}}
+						var _val_ = ({{field.clsname1}}){{space}}MsgFactory.Create(_idx_);
+						{{~ else ~}}
+						var _val_ = new {{field.clsname1}}();
+						{{~ end ~}}
+						_offset_ = _val_.Read(_buffer_, _offset_);
+						{{field.name}}.Add(_val_);
+						{{~ end ~}}
+						{{~else if field.type == "map" ~}}
+						var _key_ = {{readMap[field.clsname1]}};
+						{{~ if readMap[field.clsname2] ~}}
+						var _val_ = {{readMap[field.clsname2]}};
+						{{~ else ~}}
+						var _idx_ = XBuffer.ReadByte(_buffer_, ref _offset_);
+						if(_idx_ <= 0)
+						{
+							{{field.name}}[_key_] = default;
+							continue;//为空
+						}
+						{{~ if sublist | array.contains field.clsname2 ~}}{{~#有子类~}}
+						var _val_ = ({{field.clsname2}}){{space}}MsgFactory.Create(_idx_);
+						{{~ else ~}}
+						var _val_ = new {{field.clsname2}}();
+						{{~ end ~}}
+						_offset_ = _val_.Read(_buffer_, _offset_);
+						{{~ end ~}}
+						{{field.name}}[_key_] = _val_;
+						{{~ end ~}}
+					}
+					{{~ else ~}}
+					{{~ if field.optional != "" ~}}
+					has{{field.name[0] | string.upcase}}{{field.name | string.slice 1}} = XBuffer.ReadBool(_buffer_, ref _offset_);
+					if(has{{field.name[0] | string.upcase}}{{field.name | string.slice 1}}){
+					{{~ end ~}}
+					{{~ if readMap[field.clsname1] ~}}
+					{{field.name}} = {{readMap[field.clsname1]}};
+					{{~ else ~}}
+					var _idx_ = XBuffer.ReadByte(_buffer_, ref _offset_);
+					{{~ if sublist | array.contains field.clsname1 ~}}{{~#有子类~}}
+					{{field.name}} = ({{field.clsname1}}){{space}}MsgFactory.Create(_idx_);
+					{{~ else ~}}
+					{{field.name}} = new {{field.clsname1}}();
+					{{~ end ~}}
+					_offset_ = {{field.name}}.Read(_buffer_, _offset_);
+					{{~ end ~}}
+					{{if field.optional != ""}}}{{end}}{{~#if optional 反括号~}}
+					{{~ end ~}}{{~#end if list}}
+				}else break;
+				{{~ end ~}}{{~#foreach end state.fields~}}
+			}while(false);
+			
+			{{~ if state.msgid == "" ~}}
+			//剔除多余数据
+			if(_offset_ < _toReadLength_ - _startOffset_)
+				_offset_ += _toReadLength_ - _startOffset_;
+			{{~ end ~}}
+			return _offset_;
+		}
+		
+		///<summary>序列化，写入数据</summary>
+        public override int Write(byte[] _buffer_, int _offset_)
+        {	
+			_offset_ = base.Write(_buffer_, _offset_);
+			{{~ if state.msgid == "" ~}}
+			//先写入当前对象长度占位符
+			{{~ #msg不需要,结构体才需要,msg加了字段不影响,消息中只能包含结构体，不能包含其他消息 ~}}
+			int _startOffset_ = _offset_;
+			XBuffer.WriteInt(0, _buffer_, ref _offset_);
+			{{~ end ~}}
+			
+			//写入字段数量,最多支持255个
+			{{~ fieldNum = (state.fields | array.size) ~}}
+			XBuffer.WriteByte({{fieldNum}}, _buffer_, ref _offset_);
+			{{~ if fieldNum > 255 ~}}
+			throw new System.Exception("单个协议类型最多支持255个字段，当前{{fieldNum}}个");
+			{{~ end ~}}
+			
+			//写入数据
+			{{~ _lc_ = false ~}}
+			{{~ for field in state.fields ~}}
+			{{~ if field.type == "list" || field.type == "map" ~}}
+			{{if !_lc_ }}short {{ end }}_listCount_ = (short){{field.name}}.Count;
+			{{~ _lc_ = true ~}}
+			XBuffer.WriteShort(_listCount_, _buffer_, ref _offset_);
+			{{~ if field.type == "list" ~}}
+			for(int _a_=0; _a_<_listCount_; ++_a_)
+			{
+				{{~ if writeMap[field.clsname1] ~}}
+				{{ writeMap[field.clsname1] | string.replace "%s" field.name + "[_a_]" }};
+				{{~ else ~}}
+				if({{field.name}}[_a_] == null)
+				{
+					{{LogFunc}}("{{field.name}} has null item, idx == " + _a_);
+					XBuffer.WriteByte(0, _buffer_, ref _offset_);
+				}
+				else
+				{
+					XBuffer.WriteByte({{field.name}}[_a_]._msgIdx_, _buffer_, ref _offset_);
+					_offset_ = {{field.name}}[_a_].Write(_buffer_, _offset_);
+				}
+				{{~ end ~}}
+			}
+			
+			{{~else if field.type == "map"~}}
+			{{~ valueTypes = ["short", "int", "long", "string"] ~}}
+			{{~ if !(valueTypes | array.contains field.clsname1) ~}}
+			{{LogFunc}}("map key只支持short,int,long,string");
+			{{~ end ~}}
+			foreach(var kv in {{field.name}})
+			{
+				{{ writeMap[field.clsname1] | string.replace "%s" "kv.Key" }};
+				{{~ if writeMap[field.clsname2] ~}}
+				{{ writeMap[field.clsname2] | string.replace "%s" "kv.Value" }};
+				{{~ else ~}}
+				if(kv.Value == null)
+				{
+					{{LogFunc}}("{{field.name}} has null value, key == " + kv.Key);
+					XBuffer.WriteByte(0, _buffer_, ref _offset_);
+				}
+				else
+				{
+					XBuffer.WriteByte(kv.Value._msgIdx_, _buffer_, ref _offset_);
+					_offset_ = kv.Value.Write(_buffer_, _offset_);
+				}
+				{{~ end ~}}
+			}
+			{{~ end ~}}{{~#map/list~}}
+			
+			{{~ else ~}}{{~#不是map也不是list~}}
+			{{~ if field.optional != "" ~}}
+			XBuffer.WriteBool(has{{field.name[0] | string.upcase}}{{field.name | string.slice 1}}, _buffer_, ref _offset_);
+			if(has{{field.name[0] | string.upcase}}{{field.name | string.slice 1}})
+				{{~ if writeMap[field.clsname1] ~}}
+				{{ writeMap[field.clsname1] | string.replace "%s" field.name }};
+				{{~ else ~}}
+			{
+				XBuffer.WriteByte({{field.name}}._msgIdx_, _buffer_, ref _offset_);
+				_offset_ = {{field.name}}.Write(_buffer_, _offset_);
+			}
+				{{~ end ~}}
+				
+			{{~ else ~}}{{~#非optional~}}
+			{{~ if writeMap[field.clsname1] ~}}
+			{{ writeMap[field.clsname1] | string.replace "%s" field.name }};
+			{{~ else ~}}
+			XBuffer.WriteByte({{field.name}}._msgIdx_, _buffer_, ref _offset_);
+			_offset_ = {{field.name}}.Write(_buffer_, _offset_);
+			{{~ end ~}}
+			{{~ end ~}}{{~#optional end~}}
+			{{~ end ~}}{{~#if field.type~}}
+			{{~ end ~}}{{~#foreach state.fields~}}
+			
+			{{~ if state.msgid == "" ~}}
+			//覆盖当前对象长度
+			XBuffer.WriteInt(_offset_ - _startOffset_, _buffer_, ref _startOffset_);
+			{{~ end ~}}
+			return _offset_;
+		}
+	}
+	{{~ end ~}}
+}

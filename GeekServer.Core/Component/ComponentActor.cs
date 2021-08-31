@@ -5,10 +5,12 @@ using System.Collections.Concurrent;
 
 namespace Geek.Server
 {
-    public abstract class ComponentActor : BaseActor
+    public class ComponentActor : BaseActor
     {
-        ComponentDriver driver;
+        protected ComponentDriver driver;
 
+        public int ActorType { get; }
+        public EventDispatcher EvtDispatcher { get; }
         /// <summary>常驻内存组件</summary>
         public readonly List<Type> ConstCompTypeList = new List<Type>();
         /// <summary>actor/组件自动回收(玩家actor下线时开启，其他actor不开)</summary>
@@ -16,8 +18,10 @@ namespace Geek.Server
         /// <summary>readOnly=true则只会从数据库读不会回存(比如读取其他服数据)</summary>
         public bool ReadOnly { get; set; }
 
-        public ComponentActor()
+        public ComponentActor(int actorType)
         {
+            ActorType = actorType;
+            EvtDispatcher = new EventDispatcher(this);
             driver = new ComponentDriver(this);
         }
 
@@ -37,45 +41,18 @@ namespace Geek.Server
             return lifeActor;
         }
 
-        IComponentActorAgent cacheAgent;
-        /// <summary>
-        /// 获取actor的agent
-        /// </summary>
-        /// <param name="refAssemblyType">获取agent的Assembly，热更过程中执行的代码可能来自不同的Assembly，需要返回对应Assembly的对象才行</param>
-        /// <returns></returns>
-        internal IComponentActorAgent GetAgent(Type refAssemblyType = null)
-        {
-            if (cacheAgent != null && !HotfixMgr.DoingHotfix)
-                return cacheAgent;
-            var agent = HotfixMgr.GetAgent<IComponentActorAgent>(this, refAssemblyType);
-            if (!HotfixMgr.DoingHotfix)
-                cacheAgent = agent;
-            return agent;
-        }
-
         ///<summary>清除缓存的agent(热更时)</summary>
         public void ClearCacheAgent()
         {
-            cacheAgent = null;
             driver.ClearAllCompsAgent();
         }
 
-        public bool TransformAgent<T>(out T result) where T : class
+        public Task Active()
         {
-            var agent = GetAgent(typeof(T));
-            result = agent as T;
-            return result != null;
+            return ActiveAutoComps();
         }
 
-        public T GetAgentAs<T>() where T : IComponentActorAgent { return (T)GetAgent(typeof(T)); }
-        public string AgentTypeName => GetAgent().GetType().FullName;
-
-        public override Task Active()
-        {
-            return Task.CompletedTask;
-        }
-
-        public override async Task Deactive()
+        public async Task Deactive()
         {
             await driver.DeactiveAllComps();
             HotfixMgr.RemoveAgentCache(this);
@@ -89,6 +66,20 @@ namespace Geek.Server
             var list = ComponentMgr.Singleton.GetAllComps(this);
             foreach (var type in list)
                 await GetComponent(type);
+        }
+
+        /// <summary>
+        /// 激活自动激活组件
+        /// </summary>
+        /// <returns></returns>
+        public async Task ActiveAutoComps()
+        {
+            var list = ComponentMgr.Singleton.GetAutoActiveComps(this);
+            foreach (var type in list)
+            {
+                ConstCompTypeList.Add(type);
+                await GetComponent(type);
+            }
         }
 
         /// <summary>
@@ -126,13 +117,27 @@ namespace Geek.Server
         }
 
         /// <summary>
+        /// 获取组件Agent
+        /// </summary>
+        /// <typeparam name="TAgent"></typeparam>
+        /// <returns></returns>
+        public async Task<TAgent> GetCompAgent<TAgent>() where TAgent : IComponentAgent, new()
+        {
+            var type = typeof(TAgent).BaseType;
+            if (type.IsGenericType)
+            {
+                //Agent是不能被二次继承的,所以直接取泛型参数是安全的
+                var comp = await GetComponent(type.GenericTypeArguments[0]);
+                return comp.GetAgentAs<TAgent>();
+            }
+            return default;
+        }
+
+        /// <summary>
         /// actor永久消失，清除actor数据库数据，比如公会解散，玩家清档等
         /// </summary>
         public async Task Dieout()
         {
-            if (GetAgent() is IDeadable deadable)
-                await deadable.Dieout();
-
             ReadOnly = true;
             ConstCompTypeList.Clear();
             await Deactive();

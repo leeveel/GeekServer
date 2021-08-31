@@ -2,7 +2,7 @@
  * Auto generated, do not edit it server
  */
 
-namespace Geek.Server.ConfigBean
+namespace Geek.Server.Config
 {
 	///<summary>测试表</summary>
     public class t_testBean : BaseBin

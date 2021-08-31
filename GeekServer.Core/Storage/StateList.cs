@@ -27,6 +27,8 @@ namespace Geek.Server
                 {
                     foreach(var item in list)
                     {
+                        if (item == null)
+                            continue;
                         if ((item as BaseState).IsChanged)
                             return true;
                     }
@@ -38,6 +40,16 @@ namespace Geek.Server
         public override void ClearChanges()
         {
             _stateChanged = false;
+            if (typeof(T).IsSubclassOf(typeof(BaseState)))
+            {
+                foreach (var item in list)
+                {
+                    if (item == null)
+                        continue;
+                    if (item is BaseState bs)
+                        bs.ClearChanges();
+                }
+            }
         }
 
         public T this[int index]
@@ -78,6 +90,26 @@ namespace Geek.Server
         public T Find(Predicate<T> predicate)
         {
             return list.Find(predicate);
+        }
+
+        public List<T> FindAll(Predicate<T> match)
+        {
+            return list.FindAll(match);
+        }
+
+        public int FindIndex(int startIndex, int count, Predicate<T> match)
+        {
+            return list.FindIndex(startIndex, count, match);
+        }
+
+        public int FindIndex(int startIndex, Predicate<T> match)
+        {
+            return list.FindIndex(startIndex, match);
+        }
+
+        public int FindIndex(Predicate<T> match)
+        {
+            return list.FindIndex(match);
         }
 
         public void ForEach(Action<T> action)
@@ -130,8 +162,20 @@ namespace Geek.Server
                 _stateChanged = true;
                 return true;
             }
-
             return false;
+        }
+
+        public int RemoveAll(Predicate<T> match)
+        {
+            int removedNum = list.RemoveAll(match);
+            if (removedNum > 0)
+                _stateChanged = true;
+            return removedNum;
+        }
+
+        public bool Exists(Predicate<T> match)
+        {
+            return list.Exists(match);
         }
 
         public int Count

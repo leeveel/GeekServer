@@ -17,12 +17,12 @@ namespace Geek.Server
 
         //actor-actorAgent, comp-compAgent
         readonly Dictionary<Type, Type> agentTypeMap = new Dictionary<Type, Type>();
-        readonly ConcurrentDictionary<object, IAgent> agentCacheMap = new ConcurrentDictionary<object, IAgent>();
+        readonly ConcurrentDictionary<object, IComponentAgent> agentCacheMap = new ConcurrentDictionary<object, IComponentAgent>();
         readonly ConcurrentDictionary<string, object> typeCacheMap = new ConcurrentDictionary<string, object>();
 
         //actorAgentType-list[listenerType]
-        readonly ConcurrentDictionary<Type, List<Type>> evtTypeMap = new ConcurrentDictionary<Type, List<Type>>();
-        readonly ConcurrentDictionary<Type, List<IEventListener>> evtCacheMap = new ConcurrentDictionary<Type, List<IEventListener>>();
+        readonly ConcurrentDictionary<int, List<Type>> evtTypeMap = new ConcurrentDictionary<int, List<Type>>();
+        readonly ConcurrentDictionary<int, List<IEventListener>> evtCacheMap = new ConcurrentDictionary<int, List<IEventListener>>();
 
         readonly Dictionary<int, Type> tcpHandlerMap = new Dictionary<int, Type>();
         readonly Dictionary<string, Type> httpHandlerMap = new Dictionary<string, Type>();
@@ -86,7 +86,7 @@ namespace Geek.Server
                     }
                 }
 
-                loadDll();
+                ParseDll();
 
                 if (writeDllVersion)
                     File.WriteAllText(Path.Combine(currentAssemblyDirectory, "dllVersion.txt"), dllVersion);
@@ -124,15 +124,18 @@ namespace Geek.Server
             }
         }
 
-        void loadDll()
+        /// <summary>
+        /// 解析DLL
+        /// </summary>
+        void ParseDll()
         {
             var types = HotfixAssembly.GetTypes();
             foreach (var type in types)
             {
-                addAgent(type);
-                addEvent(type);
-                addTcpHandler(type);
-                addHttpHandler(type);
+                AddAgent(type);
+                AddEvent(type);
+                AddTcpHandler(type);
+                AddHttpHandler(type);
                 if (HotfixBridge == null && type.GetInterface(typeof(IHotfixBridge).FullName) != null)
                 {
                     var bridge = (IHotfixBridge)Activator.CreateInstance(type);
@@ -142,9 +145,11 @@ namespace Geek.Server
             }
         }
 
-        void addAgent(Type type)
+        private const string GenSurffix = "Wrapper";
+
+        void AddAgent(Type type)
         {
-            if (type.GetInterface(typeof(IAgent).FullName) == null)
+            if (type.GetInterface(typeof(IComponentAgent).FullName) == null || !type.Name.EndsWith(GenSurffix))
                 return;
 
             Type impType = type;
@@ -158,7 +163,7 @@ namespace Geek.Server
             agentTypeMap[argTypes[0]] = type;
         }
 
-        void addEvent(Type type)
+        void AddEvent(Type type)
         {
             if (type.GetInterface(typeof(IEventListener).FullName) == null)
                 return;
@@ -166,16 +171,31 @@ namespace Geek.Server
             if (!type.BaseType.IsGenericType)
                 return;
             var argTypes = type.BaseType.GenericTypeArguments;
-            if (argTypes.Length < 2)
+            if (argTypes.Length < 1)
                 return;
-            if (!evtTypeMap.ContainsKey(argTypes[0]))
-                evtTypeMap.TryAdd(argTypes[0], new List<Type>());
-            evtTypeMap[argTypes[0]].Add(type);
+
+            //comp agent
+            var agentType = argTypes[0];
+            if (!agentType.BaseType.IsGenericType)
+                return;
+            var agentArgTypes = agentType.BaseType.GenericTypeArguments;
+            if (agentArgTypes.Length < 0)
+                return;
+
+            var list = ComponentMgr.Singleton.GetActorTypeList(agentArgTypes[0]);
+            if (list == null || list.Count <= 0)
+                return;
+            foreach(var actorType in list)
+            {
+                if (!evtTypeMap.ContainsKey(actorType))
+                    evtTypeMap.TryAdd(actorType, new List<Type>());
+                evtTypeMap[actorType].Add(type);
+            }
         }
 
-        void addTcpHandler(Type type)
+        void AddTcpHandler(Type type)
         {
-            var attribute = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
+            var attribute = (TcpMsgMapping)type.GetCustomAttribute(typeof(TcpMsgMapping), true);
             if (attribute == null) return;
             var msgIdField = attribute.Msg.GetField("MsgId", BindingFlags.Static | BindingFlags.Public);
             if (msgIdField == null) return;
@@ -190,7 +210,7 @@ namespace Geek.Server
             }
         }
 
-        void addHttpHandler(Type type)
+        void AddHttpHandler(Type type)
         {
             var attribute = (HttpMsgMapping)type.GetCustomAttribute(typeof(HttpMsgMapping), true);
             if (attribute == null) return;
@@ -261,7 +281,7 @@ namespace Geek.Server
         /// <summary>
         /// 获取热更代理实例
         /// </summary>
-        public T GetAgent<T>(object refOwner) where T : IAgent
+        public T GetAgent<T>(object refOwner) where T : IComponentAgent
         {
             if (agentCacheMap.TryGetValue(refOwner, out var cache))
                 return (T)cache;
@@ -289,7 +309,7 @@ namespace Geek.Server
             agentCacheMap.TryRemove(refOwner, out var _);
         }
 
-        public List<IEventListener> GetEventListeners(Type actorAgentType)
+        public List<IEventListener> GetEventListeners(int actorAgentType)
         {
             evtCacheMap.TryGetValue(actorAgentType, out var list);
             if (list != null)
@@ -298,7 +318,7 @@ namespace Geek.Server
             if (!evtTypeMap.ContainsKey(actorAgentType))
                 return default;
 
-            lock (actorAgentType)
+            lock (evtTypeMap[actorAgentType])
             {
                 evtCacheMap.TryGetValue(actorAgentType, out list);
                 if (list != null)

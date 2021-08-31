@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using NLog;
 
-namespace Geek.Server.ConfigBean
+namespace Geek.Server.Config
 {
 	public class t_languageContainer : BaseContainer
 	{

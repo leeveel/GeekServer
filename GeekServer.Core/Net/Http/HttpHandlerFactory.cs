@@ -9,7 +9,7 @@ namespace Geek.Server
         static readonly Dictionary<string, Type> cmdHandlerMap = new Dictionary<string, Type>();
         static Func<string, BaseHttpHandler> handlerGetter;
         static Func<Dictionary<string, string>, BaseHttpHandler> noCmdHandlerGetter;
-        public static void SetExtraHandlerGetter(Func<string, BaseHttpHandler> func, Func<Dictionary<string, string>, BaseHttpHandler> noCmdFunc = null)
+        public static void SetHandlerGetter(Func<string, BaseHttpHandler> func, Func<Dictionary<string, string>, BaseHttpHandler> noCmdFunc = null)
         {
             handlerGetter = func;
             noCmdHandlerGetter = noCmdFunc;

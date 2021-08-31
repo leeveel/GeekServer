@@ -66,7 +66,7 @@ namespace Geek.Server
         /// <summary>
         /// 获取/更新热更代理实例
         /// </summary>
-        public static T GetAgent<T>(object refOwner, Type refAssemblyType) where T : IAgent
+        public static T GetAgent<T>(object refOwner, Type refAssemblyType) where T : IComponentAgent
         {
             if (oldModuleMap.Count > 0)
             {
@@ -90,18 +90,10 @@ namespace Geek.Server
             module.RemoveAgentCache(refOwner);
         }
 
-        public static List<IEventListener> GetEventListeners(Type actorAgentType)
+        public static List<IEventListener> GetEventListeners(int actorAgentType)
         {
-            if (oldModuleMap.Count > 0)
-            {
-                var asb = actorAgentType.Assembly;
-                foreach (var kv in oldModuleMap)
-                {
-                    var old = kv.Value;
-                    if (asb == old.HotfixAssembly)
-                        return old.GetEventListeners(actorAgentType);
-                }
-            }
+            if (module == null)
+                return null;
             return module.GetEventListeners(actorAgentType);
         }
 

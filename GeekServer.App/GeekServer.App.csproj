@@ -1,4 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
+	<ItemGroup>
+	  <PackageReference Include="Fody" Version="6.5.2">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+	<ItemGroup>
+		<WeaverFiles Include="$(OutputPath)/GeekServer.Weavers.dll" WeaverClassNames="StateWeaver" />
+	</ItemGroup>
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -20,11 +29,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="PropertyChanged.Fody" Version="3.3.3" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
+    <ProjectReference Include="..\GeekServer.Weavers\GeekServer.Weavers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

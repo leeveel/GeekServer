@@ -14,7 +14,6 @@ namespace Geek.Server
 
         const string ParamKey = "param";
         const string ActorIdKey = "actorId";
-        const string ActorAgentTypeKey = "actorType";
         const string HandlerTypeKey = "handlerType";
 
         class TimerJob : IJob
@@ -22,37 +21,24 @@ namespace Geek.Server
             public async Task Execute(IJobExecutionContext context)
             {
                 var actorId = context.JobDetail.JobDataMap.GetLong(ActorIdKey);
-                var actorType = context.JobDetail.JobDataMap.GetString(ActorAgentTypeKey);
                 var handlerType = context.JobDetail.JobDataMap.GetString(HandlerTypeKey);
 
                 var param = context.JobDetail.JobDataMap.Get(ParamKey) as Param;
-                await triggerTimer(actorId, actorType, handlerType, param);
+                await triggerTimer(actorId, handlerType, param);
             }
         }
 
-        static async Task triggerTimer(long actorId, string actorType, string handlerType, Param param)
+        static async Task triggerTimer(long actorId, string handlerType, Param param)
         {
             try
             {
                 var handler = HotfixMgr.GetInstance<ITimerHandler>(handlerType);
                 var agentType = handler.GetType().BaseType.GenericTypeArguments[0];
-                if (agentType.GetInterface(typeof(IComponentActorAgent).FullName) != null)
-                {
-                    //actor
-                    var agent = await ActorManager.GetOrNew(agentType, actorId);
-                    var actor = (ComponentActor)agent.Owner;
-                    _ = actor.SendAsync(() => handler.InternalHandleTimer(agent, param), false);
-                }
-                else if (agentType.GetInterface(typeof(IComponentAgent).FullName) != null)
-                {
-                    //component
-                    var actorAgentType = HotfixMgr.GetType(actorType, agentType);
-                    var compType = agentType.BaseType.GenericTypeArguments[0];
-                    var agent = await ActorManager.GetOrNew(actorAgentType, actorId);
-                    var actor = (ComponentActor)agent.Owner;
-                    var comp = await actor.GetComponent(compType);
-                    _ = actor.SendAsync(() => handler.InternalHandleTimer(comp.GetAgent(agentType), param), false);
-                }
+                //component
+                var compType = agentType.BaseType.GenericTypeArguments[0];
+                var actor = await ActorManager.GetOrNew(actorId);
+                var comp = await actor.GetComponent(compType);
+                _ = actor.SendAsync(() => handler.InternalHandleTimer(comp.GetAgent(agentType), param), false);
             }
             catch (Exception e)
             {
@@ -120,77 +106,76 @@ namespace Geek.Server
             scheduler.DeleteJob(JobKey.Create(id + ""));
         }
 
-        static IJobDetail getJobDetail(long id, long actorId, string actorAgentType, string handlerType, Param param)
+        static IJobDetail getJobDetail(long id, long actorId, string handlerType, Param param)
         {
             var job = JobBuilder.Create<TimerJob>().WithIdentity(id + "").Build();
             job.JobDataMap.Add(ParamKey, param);
             job.JobDataMap.Add(ActorIdKey, actorId);
-            job.JobDataMap.Add(ActorAgentTypeKey, actorAgentType);
             job.JobDataMap.Add(HandlerTypeKey, handlerType);
             return job;
         }
         
-        public static long AddDelay(long delay, long actorId, string actorAgentType, string handlerType, Param param)
+        public static long AddDelay(long delay, long actorId, string handlerType, Param param)
         {
             long id = newID();
             var delayTime = DateTimeOffset.Now.AddMilliseconds(delay);
             var trigger = TriggerBuilder.Create().StartAt(delayTime).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, actorAgentType, handlerType, param), trigger);
+            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
             return id;
         }
 
-        public static long AddTimer(long delay, long period, long actorId, string actorAgentType, string handlerType, Param param)
+        public static long AddTimer(long delay, long period, long actorId, string handlerType, Param param)
         {
             long id = newID();
             var delayTime = DateTimeOffset.Now.AddMilliseconds(delay);
             var trigger = TriggerBuilder.Create().StartAt(delayTime).WithSimpleSchedule(x=>x.WithInterval(TimeSpan.FromMilliseconds(period)).RepeatForever()).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, actorAgentType, handlerType, param), trigger);
+            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
             return id;
         }
 
         /// <summary>
         /// 一次性
         /// </summary>
-        public static long AddOnceSchedule(DateTime time, long actorId, string actorAgentType, string handlerType, Param param)
+        public static long AddOnceSchedule(DateTime time, long actorId, string handlerType, Param param)
         {
             long id = newID();
             var delta = time - DateTime.Now;
             var delayTime = DateTimeOffset.Now.Add(delta);
             var trigger = TriggerBuilder.Create().StartAt(delayTime).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, actorAgentType, handlerType, param), trigger);
+            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
             return id;
         }
 
         /// <summary>
         /// 每天
         /// </summary>
-        public static long AddDailySchedule(int hour, int minute, long actorId, string actorAgentType, string handlerType, Param param)
+        public static long AddDailySchedule(int hour, int minute, long actorId, string handlerType, Param param)
         {
             long id = newID();
             var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(hour, minute)).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, actorAgentType, handlerType, param), trigger);
+            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
             return id;
         }
 
         /// <summary>
         /// 每周
         /// </summary>
-        public static long AddWeeklySchedule(DayOfWeek[] days, int hour, int minute, long actorId, string actorAgentType, string handlerType, Param param)
+        public static long AddWeeklySchedule(DayOfWeek[] days, int hour, int minute, long actorId, string handlerType, Param param)
         {
             long id = newID();
             var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.AtHourAndMinuteOnGivenDaysOfWeek(hour, minute, days)).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, actorAgentType, handlerType, param), trigger);
+            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
             return id;
         }
 
         /// <summary>
         /// 每月
         /// </summary>
-        public static long AddMonthlySchedule(int dayOfMonth, int hour, int minute, long actorId, string actorAgentType, string handlerType, Param param)
+        public static long AddMonthlySchedule(int dayOfMonth, int hour, int minute, long actorId, string handlerType, Param param)
         {
             long id = newID();
             var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.MonthlyOnDayAndHourAndMinute(dayOfMonth, hour, minute)).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, actorAgentType, handlerType, param), trigger);
+            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
             return id;
         }
 

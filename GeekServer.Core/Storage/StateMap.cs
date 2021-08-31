@@ -15,6 +15,11 @@ namespace Geek.Server
         {
             map = new Dictionary<TKey, TValue>(dictionary.map);
         }
+		
+		public StateMap(Dictionary<TKey, TValue> dictionary)
+        {
+            map = dictionary;
+        }
 
         public StateMap(IDictionary<TKey, TValue> dictionary)
         {
@@ -32,6 +37,8 @@ namespace Geek.Server
                 {
                     foreach (var item in map)
                     {
+                        if (item.Key == null)
+                            continue;
                         if ((item.Key as BaseState).IsChanged)
                             return true;
                     }
@@ -41,6 +48,8 @@ namespace Geek.Server
                 {
                     foreach (var item in map)
                     {
+                        if (item.Value == null)
+                            continue;
                         if ((item.Value as BaseState).IsChanged)
                             return true;
                     }
@@ -53,11 +62,37 @@ namespace Geek.Server
         public override void ClearChanges()
         {
             _stateChanged = false;
+            if (typeof(TKey).IsSubclassOf(typeof(BaseState)))
+            {
+                foreach (var item in map)
+                {
+                    if (item.Key == null)
+                        continue;
+                    if (item.Key is BaseState bs)
+                        bs.ClearChanges();
+                }
+            }
+
+            if (typeof(TValue).IsSubclassOf(typeof(BaseState)))
+            {
+                foreach (var item in map)
+                {
+                    if (item.Value == null)
+                        continue;
+                    if (item.Value is BaseState bs)
+                        bs.ClearChanges();
+                }
+            }
         }
 
         public bool ContainsKey(TKey key)
         {
             return map.ContainsKey(key);
+        }
+		
+		public bool ContainsValue(TValue value)
+        {
+            return map.ContainsValue(value);
         }
 
         public void Add(TKey key, TValue value)
@@ -174,6 +209,16 @@ namespace Geek.Server
         IEnumerator IEnumerable.GetEnumerator()
         {
             return ((IEnumerable)map).GetEnumerator();
+        }
+
+        public static implicit operator StateMap<TKey, TValue>(Dictionary<TKey, TValue> dic)
+        {
+            return new StateMap<TKey, TValue>(dic);
+        }
+
+        public static implicit operator Dictionary<TKey, TValue>(StateMap<TKey, TValue> map)
+        {
+            return map.map;
         }
     }
 }

@@ -1,0 +1,30 @@
+//auto generated, do not modify it
+
+namespace Geek.Client.Message
+{
+	public class MsgFactory
+	{
+		///<summary>通过msgId构造msg</summary>
+		public static BaseMessage Create(int msgId)
+		{
+			switch(msgId)
+			{
+				{{~ for file in filelist ~}}
+				//{{file.explain}}
+				{{~ for state in file.states ~}}
+				{{~ if state.msgid != "" ~}}
+				case {{state.msgid}}: return new Geek.Client.Message.{{file.space}}.{{state.name}}();
+				{{~ end ~}}
+				{{~ end ~}}
+				
+				{{~ end ~}}
+				default: return default;
+			}
+		}
+		
+		public static T Create<T>(int msgId) where T : BaseMessage
+		{
+			return (T)Create(msgId);
+		}
+	}
+}

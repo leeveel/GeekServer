@@ -74,10 +74,10 @@ namespace Geek.Server.Message.{{space}}
 		{{field.attribute}}
 		{{~ end ~}}
 		{{~ if field.type == "list" ~}}{{~#类型list~}}
-		public StateList<{{field.clsname1}}> {{field.name}} { get; private set; } = new StateList<{{field.clsname1}}>();
+		public StateList<{{field.clsname1}}> {{field.name}} { get; set; } = new StateList<{{field.clsname1}}>();
 		{{~ else if field.type == "map" ~}}{{~#类型map~}}
 		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
-		public StateMap<{{field.clsname1}}, {{field.clsname2}}> {{field.name}} { get; private set; } = new StateMap<{{field.clsname1}}, {{field.clsname2}}>();
+		public StateMap<{{field.clsname1}}, {{field.clsname2}}> {{field.name}} { get; set; } = new StateMap<{{field.clsname1}}, {{field.clsname2}}>();
 		{{~ else ~}}{{~#其他类型~}}
 		{{~ if field.optional != "" ~}}
 		public {{field.clsname1}} {{field.name}}{ get{ return _{{field.name}}_; } set{ _{{field.name}}_ = value; _stateChanged = true; has{{field.name[0] | string.upcase}}{{field.name | string.slice 1}} = value != default; }}
@@ -243,7 +243,7 @@ namespace Geek.Server.Message.{{space}}
 				{{~ else ~}}
 				if({{field.name}}[_a_] == null)
 				{
-					{{LogFunc}}("{{field.name}} has null item, idx == " + _a_);
+					{{LogFunc}}("{{space}}.{{state.name}}.{{field.name}} has null item, idx == " + _a_);
 					XBuffer.WriteByte(0, _buffer_, ref _offset_);
 				}
 				else

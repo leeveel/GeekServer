@@ -12,15 +12,18 @@ namespace Geek.Server
         static readonly Dictionary<int, Type> msgMap = new Dictionary<int, Type>();
         static readonly Dictionary<int, Type> handlerMap = new Dictionary<int, Type>();
 
-        static Func<int, IMessage> extraMsgGetter;
-        static Func<int, BaseTcpHandler> extraHandlerGetter;
-        public static void SetExtraHandlerGetter(Func<int, IMessage> msgGetter, Func<int, BaseTcpHandler> handlerGetter)
+        static Func<int, IMessage> msgGetter;
+        static Func<int, BaseTcpHandler> handlerGetter;
+        public static void SetHandlerGetter(Func<int, IMessage> msgGetter, Func<int, BaseTcpHandler> handlerGetter)
         {
-            extraMsgGetter = msgGetter;
-            extraHandlerGetter = handlerGetter;
+            TcpHandlerFactory.msgGetter = msgGetter;
+            TcpHandlerFactory.handlerGetter = handlerGetter;
         }
 
-        /// <summary>消息初始化</summary>
+        /// <summary>
+        /// 仅供非热更模式调用
+        /// </summary>
+        /// <param name="assemblyType"></param>
         public static void InitHandler(Type assemblyType)
         {
             if(assemblyType != null)
@@ -28,14 +31,14 @@ namespace Geek.Server
         }
 
         /// <summary>消息初始化</summary>
-        public static void InitHandler(Assembly assembly)
+        private static void InitHandler(Assembly assembly)
         {
             msgMap.Clear();
             handlerMap.Clear();
             var types = assembly.GetTypes();
             foreach (var type in types)
             {
-                var att = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
+                var att = (TcpMsgMapping)type.GetCustomAttribute(typeof(TcpMsgMapping), true);
                 if (att == null)
                     continue;
                 var msgIdField = att.Msg.GetField("MsgId", BindingFlags.Static | BindingFlags.Public);
@@ -58,9 +61,9 @@ namespace Geek.Server
         /// <summary>获取消息Handler</summary>
         public static BaseTcpHandler GetHandler(int msgId)
         {
-            if(extraHandlerGetter != null)
+            if(handlerGetter != null)
             {
-                var extraHandler = extraHandlerGetter(msgId);
+                var extraHandler = handlerGetter(msgId);
                 if (extraHandler != null)
                     return extraHandler;
             }
@@ -81,9 +84,9 @@ namespace Geek.Server
         /// <summary> 获取消息</summary>
         public static IMessage GetMsg(int msgId)
         {
-            if (extraMsgGetter != null)
+            if (msgGetter != null)
             {
-                var extraMsg = extraMsgGetter(msgId);
+                var extraMsg = msgGetter(msgId);
                 if (extraMsg != null)
                     return extraMsg;
             }

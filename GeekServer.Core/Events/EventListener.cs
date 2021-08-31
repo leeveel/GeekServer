@@ -2,19 +2,17 @@
 
 namespace Geek.Server
 {
-    public abstract class EventListener<TActorAent, TAgent> : IEventListener where TAgent : IAgent where TActorAent : IComponentActorAgent
+    public abstract class EventListener<TAgent> : IEventListener where TAgent : IComponentAgent
     {
-        public Task InnerInitListener(IAgent owner)
+        public Task InnerInitListener(ComponentActor actor)
         {
-            return InitListener((TActorAent)owner);
+            return InitListener(actor);
         }
-
-        public Task InternalHandleEvent(IAgent agent, Event evt)
+        public Task InternalHandleEvent(IComponentAgent agent, Event evt)
         {
             return HandleEvent((TAgent)agent, evt);
         }
-
-        protected abstract Task InitListener(TActorAent actor);
         protected abstract Task HandleEvent(TAgent agent, Event evt);
+        protected abstract Task InitListener(ComponentActor actor);
     }
 }

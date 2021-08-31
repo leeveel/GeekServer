@@ -2,7 +2,7 @@
  * Auto generated, do not edit it client
  * {{SheetNameDesc}}
  */
-namespace Geek.Server.ConfigBean
+namespace Geek.Server.Config
 {
     public class {{BeanClassName}} : BaseBin
     {

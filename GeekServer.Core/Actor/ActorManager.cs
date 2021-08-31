@@ -11,6 +11,10 @@ namespace Geek.Server
         readonly static ConcurrentDictionary<long, ComponentActor> actorMap = new ConcurrentDictionary<long, ComponentActor>();
         readonly static ConcurrentDictionary<long, DateTime> activeTimeMap = new ConcurrentDictionary<long, DateTime>();
         readonly static ConcurrentDictionary<long, WorkerActor> lifeActorDic = new ConcurrentDictionary<long, WorkerActor>();
+        /// <summary>
+        /// ID规则
+        /// </summary>
+        public static Func<long, int> ID_RULE;
 
         static WorkerActor GetLifeActor(long actorId)
         {
@@ -27,21 +31,14 @@ namespace Geek.Server
             return actor;
         }
 
-        public static Task<T> Get<T>(long id) where T : ComponentActor
+        public static Task<ComponentActor> Get(long id)
         {
             return GetLifeActor(id).SendAsync(() =>
             {
                 //此接口允许actor返回空
                 //所以不更新访问时间[回存和链接不需要更新访问时间]
                 actorMap.TryGetValue(id, out var actor);
-                if (!(actor is T))
-                {
-                    LOGGER.Error("actor 类型不匹配>get:{}, org:{} id:{}", typeof(T), actor == null ? "null" : actor.GetType().FullName, id);
-#if DEBUG
-                    throw new Exception("actor Get类型转换错误");
-#endif
-                }
-                return (T)actor;
+                return actor;
             });
         }
 
@@ -55,12 +52,20 @@ namespace Geek.Server
             return Task.CompletedTask;
         }
 
-        public static async Task<T> GetOrNew<T>(long id) where T : IComponentActorAgent
+        /// <summary>
+        /// 获取Actor身上的组件
+        /// </summary>
+        /// <typeparam name="TAgent"></typeparam>
+        /// <param name="actorId"></param>
+        /// <returns></returns>
+        public static async Task<TAgent> GetCompAgent<TAgent>(long actorId) where TAgent : IComponentAgent, new()
         {
-            return (T)await GetOrNew(typeof(T), id);
+            var actor = await GetOrNew(actorId);
+            return await actor.GetCompAgent<TAgent>();
         }
 
-        internal static async Task<IComponentActorAgent> GetOrNew(Type agentType, long id)
+
+        public static async Task<ComponentActor> GetOrNew(long id)
         {
             var now = DateTime.Now;
             float threshold = Settings.Ins.ActorRecycleTime * 0.67f;//0.67 ~= 2/3
@@ -69,7 +74,7 @@ namespace Geek.Server
                 && actorMap.TryGetValue(id, out var actor))
             {
                 activeTimeMap[id] = DateTime.Now;
-                return actor.GetAgent(agentType);
+                return actor;
             }
 
             return await GetLifeActor(id).SendAsync(() =>
@@ -77,20 +82,18 @@ namespace Geek.Server
                 actorMap.TryGetValue(id, out var actor);
                 if (actor == null)
                 {
-                    var actorType = agentType.BaseType.GenericTypeArguments[0];
-                    actor = (ComponentActor)Activator.CreateInstance(actorType);
-
+                    int actorType = ID_RULE(id);
+                    actor = new ComponentActor(actorType);
                     actor.ActorId = id;
                     _ = actor.SendAsync(async () =>
                     {
                         await actor.Active();
-                        await actor.GetAgent(agentType).Active();
                         await actor.InitListener();
                     }, false);
                     actorMap.TryAdd(id, actor);
                 }
                 activeTimeMap[id] = DateTime.Now;
-                return actor.GetAgent(agentType);
+                return actor;
             });
         }
 
@@ -123,7 +126,6 @@ namespace Geek.Server
                 try
                 {
                     var task = actor.SendAsync(actor.Deactive);
-                    task = task.ContinueWith((o) => actor.SendAsync(actor.GetAgent().Deactive));
                     taskList.Add(task);
                     count++;
                 }
@@ -164,13 +166,12 @@ namespace Geek.Server
                                     actorMap.TryRemove(actorId, out var act);
                                     activeTimeMap.TryRemove(actorId, out _);
                                     await act.Deactive();
-                                    await act.GetAgent().Deactive();
                                 }
                             }
                         });
                     }
                     await actor.CheckIdle();
-                });
+                }, false);
             }
             return Task.CompletedTask;
         }

@@ -1,4 +1,5 @@
 ﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,6 +9,8 @@ namespace Geek.Server
     {
         public object Owner { get; set; }
         protected TComp Comp => (TComp)Owner;
+
+        public ComponentActor Actor => Comp.Actor;
 
         public virtual Task Active()
         {

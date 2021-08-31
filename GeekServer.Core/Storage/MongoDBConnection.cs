@@ -14,36 +14,77 @@ namespace Geek.Server
         {
             MongoClient client = new MongoClient(connectConfig);
             CurDateBase = client.GetDatabase(db);
+            client.ListDatabaseNames();
         }
 
-        public async Task<TState> LoadState<TState>(long aId) where TState : DBState, new()
+        public async Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : DBState, new()
         {
             try
             {
                 //读数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.UniqueId, aId);
+                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
                 var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
                 var state = await (await col.FindAsync(filter)).FirstOrDefaultAsync();
+                if (state == null && defaultGetter != null)
+                    state = defaultGetter();
                 if (state == null)
-                    state = new TState { _id = aId };
+                    state = new TState { Id = id };
                 state.ClearChanges();
                 return state;
-            }catch(Exception e)
+            }
+            catch(Exception e)
             {
                 LOGGER.Fatal(e.ToString());
-                await Task.Delay(500);
-                return await LoadState<TState>(aId);
+                //await Task.Delay(500);
+                //return await LoadState<TState>(id, defaultGetter);
+                return default;
+            }
+        }
+
+        public async Task<TState> LoadState<TState>(string id, Func<TState> defaultGetter = null) where TState : InnerDBState
+        {
+            try
+            {
+                //读数据
+                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
+                var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
+                var state = await (await col.FindAsync(filter)).FirstOrDefaultAsync();
+                if (state == null && defaultGetter != null)
+                    state = defaultGetter();
+                if (state != null)
+                    state.ClearChanges();
+                return state;
+            }
+            catch (Exception e)
+            {
+                LOGGER.Fatal(e.ToString());
+                //await Task.Delay(500);
+                //return await LoadState<TState>(id, defaultGetter);
+                return default;
             }
         }
 
         public async Task SaveState<TState>(TState state) where TState : DBState
         {
-            if (state.IsChangedRefDB())
+            if (state.IsChangedComparedToDB())
             {
-                state.UpdateChangeVersion();
                 state.ReadyToSaveToDB();
                 //保存数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.UniqueId, state._id);
+                var filter = Builders<TState>.Filter.Eq(MongoField.Id, state.Id);
+                var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
+                var ret = await col.ReplaceOneAsync(filter, state, new ReplaceOptions() { IsUpsert = true });
+                if (ret.IsAcknowledged)
+                    state.SavedToDB();
+            }
+        }
+
+        public async Task SaveState<TState>(string id, TState state) where TState : InnerDBState
+        {
+            if (state.IsChangedComparedToDB())
+            {
+                state.ReadyToSaveToDB();
+                //保存数据
+                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
                 var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
                 var ret = await col.ReplaceOneAsync(filter, state, new ReplaceOptions() { IsUpsert = true });
                 if (ret.IsAcknowledged)
@@ -55,7 +96,7 @@ namespace Geek.Server
         {
             var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
             var key1 = Builders<TState>.IndexKeys.Ascending(indexKey);
-            var key2 = Builders<TState>.IndexKeys.Ascending(MongoField.UniqueId);
+            var key2 = Builders<TState>.IndexKeys.Ascending(MongoField.Id);
             var model1 = new CreateIndexModel<TState>(key1);
             var model2 = new CreateIndexModel<TState>(key2);
             return col.Indexes.CreateManyAsync(new List<CreateIndexModel<TState>>() { model1, model2 });

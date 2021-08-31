@@ -9,8 +9,8 @@ namespace Geek.Server
 
     public abstract class BaseComponent
     {
-        IComponentAgent cacheAgent;
-        internal IComponentAgent GetAgent(Type agentAssemblyType = null)
+        protected IComponentAgent cacheAgent;
+        public virtual IComponentAgent GetAgent(Type agentAssemblyType = null)
         {
             if (cacheAgent != null && !HotfixMgr.DoingHotfix)
                 return cacheAgent;
@@ -45,12 +45,10 @@ namespace Geek.Server
             return Task.CompletedTask;
         }
 
-        public virtual async Task Deactive()
+        public virtual Task Deactive()
         {
-            var agent = GetAgent();
-            if (agent != null)
-                await agent.Deactive();
             HotfixMgr.RemoveAgentCache(this);
+            return Task.CompletedTask;
         }
 
         ///<summary>是否已经可以回收了</summary>

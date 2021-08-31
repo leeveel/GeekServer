@@ -44,11 +44,18 @@ namespace Geek.Server
             Ctx.WriteAndFlushAsync(msg);
         }
 
+        protected virtual void WriteAndFlush(BaseMessage msg)
+        {
+            WriteAndFlush(msg.GetMsgId(), msg.Serialize());
+        }
+
         protected virtual void WriteAndFlush(int msgId, byte[] data)
         {
             if (msgId > 0 && data != null)
                 WriteAndFlush(new NMessage() { MsgId = msgId, Data = data });
         }
+
+
 
         bool IsDisconnectChannel(IChannelHandlerContext ctx)
         {

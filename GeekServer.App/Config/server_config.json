@@ -1,6 +1,6 @@
 {
 	"IsDebug": true,
-	"ServerId": 10001,
+	"ServerId": 10001, //[1-60000],Ω®“È[10001-60000]
 
 	"DataFlushTimeMax": 360,
 	"DataFlushTimeMin": 300,
@@ -8,15 +8,16 @@
 	"CompRecycleTime": 15,
 	"ActorRecycleTime": 30,
 
-	"HttpInnerCode": "jkserver_http_inner_code",
-	"HttpCode": "jkserver_http_code",
-	"HttpUrl": "/jkserver/logic",
+	"HttpInnerCode": "geek_server_http_inner_code",
+	"HttpCode": "geek_server_http_code",
+	"HttpUrl": "/geek/server/logic",
 	"HttpPort": 20000,
 
 	"TcpPort": 10000,
 	"UseLibuv": true,
 
 	"MongoDB": "geek_game",
+	//"MongoUrl": "mongodb://192.168.1.214:6666?maxPoolSize=50&waitQueueMultiple=100&compressors=zlib",
 	"MongoUrl": "mongodb://localhost:27017?maxPoolSize=50&waitQueueMultiple=100&compressors=zlib",
 
 	"Language": "chinese"

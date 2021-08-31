@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using System;
+using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,14 +12,24 @@ namespace Geek.Server
             return MongoDBConnection.Singleton.CurDateBase;
         }
 
-        public Task<T> LoadState<T>(long aId) where T : DBState, new()
+        public Task<T> LoadState<T>(long id, Func<T> defaultGetter = null) where T : DBState, new()
         {
-            return MongoDBConnection.Singleton.LoadState<T>(aId);
+            return MongoDBConnection.Singleton.LoadState<T>(id, defaultGetter);
+        }
+
+        public Task<T> LoadState<T>(string id, Func<T> defaultGetter = null) where T : InnerDBState
+        {
+            return MongoDBConnection.Singleton.LoadState<T>(id, defaultGetter);
         }
 
         public Task SaveState<T>(T state) where T : DBState
         {
             return MongoDBConnection.Singleton.SaveState(state);
+        }
+
+        public Task SaveState<T>(string id, T state) where T : InnerDBState
+        {
+            return MongoDBConnection.Singleton.SaveState(id, state);
         }
 
         /// <summary>
@@ -31,7 +42,7 @@ namespace Geek.Server
 
             if (extraFilter != null)
                 filter &= extraFilter;
-            var project = Builders<T>.Projection.Include(MongoField.UniqueId).Include(key);
+            var project = Builders<T>.Projection.Include(MongoField.Id).Include(key);
 
             var option = new FindOptions<T, T>();
             option.Limit = 1;
@@ -39,7 +50,7 @@ namespace Geek.Server
             var ret = await col.FindAsync(filter, option);
             var state = await ret.FirstOrDefaultAsync();
             if (state != null)
-                return state._id;
+                return state.Id;
             return 0;
         }
 
@@ -54,7 +65,7 @@ namespace Geek.Server
             if (extraFilter != null)
                 filter &= extraFilter;
 
-            var project = Builders<T>.Projection.Include(MongoField.UniqueId).Include(key);
+            var project = Builders<T>.Projection.Include(MongoField.Id).Include(key);
             var option = new FindOptions<T, T>();
             option.Limit = searchNum;
             option.Projection = project;

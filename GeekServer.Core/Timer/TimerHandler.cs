@@ -2,9 +2,9 @@
 
 namespace Geek.Server
 {
-    public abstract class TimerHandler<T> : ITimerHandler where T : IAgent
+    public abstract class TimerHandler<T> : ITimerHandler where T : IComponentAgent
     {
-        public Task InternalHandleTimer(IAgent agent, Param param)
+        public Task InternalHandleTimer(IComponentAgent agent, Param param)
         {
             return HandleTimer((T)agent, param);
         }

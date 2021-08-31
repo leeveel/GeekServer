@@ -4,6 +4,6 @@ namespace Geek.Server
 {
     public interface ITimerHandler
     {
-        Task InternalHandleTimer(IAgent actor, Param param);
+        Task InternalHandleTimer(IComponentAgent actor, Param param);
     }
 }

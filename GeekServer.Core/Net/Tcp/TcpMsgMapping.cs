@@ -3,9 +3,9 @@ using System;
 namespace Geek.Server
 {
     [AttributeUsage(AttributeTargets.Class)]
-    public class MsgMapping : Attribute
+    public class TcpMsgMapping : Attribute
     {
-        public MsgMapping(Type msgType)
+        public TcpMsgMapping(Type msgType)
         {
             Msg = msgType;
         }

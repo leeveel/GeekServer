@@ -13,8 +13,7 @@ namespace Geek.Server
     public class EventDispatcher
     {
         readonly static NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-
-        readonly ComponentActor ownerActor;
+        public ComponentActor ownerActor { get; }
         readonly Dictionary<int, List<string>> eventHandlers;
         public EventDispatcher(ComponentActor actor)
         {
@@ -65,21 +64,13 @@ namespace Geek.Server
                     try
                     {
                         var handler = HotfixMgr.GetInstance<IEventListener>(handlerType);
-                        var agentType = handler.GetType().BaseType.GenericTypeArguments[1];
-                        if (agentType.GetInterface(typeof(IComponentActorAgent).FullName) != null)
-                        {
-                            //actor
-                            ownerActor.SendAsync(() => handler.InternalHandleEvent(ownerActor.GetAgent(agentType), evt));
-                        }
-                        else if (agentType.GetInterface(typeof(IComponentAgent).FullName) != null)
-                        {
-                            //component
-                            var compType = agentType.BaseType.GenericTypeArguments[0];
-                            ownerActor.SendAsync(async () => {
-                                var comp = await ownerActor.GetComponent(compType);
-                                await handler.InternalHandleEvent(comp.GetAgent(agentType), evt);
-                            }, false);
-                        }
+                        var agentType = handler.GetType().BaseType.GenericTypeArguments[0];
+                        //component
+                        var compType = agentType.BaseType.GenericTypeArguments[0];
+                        ownerActor.SendAsync(async () => {
+                            var comp = await ownerActor.GetComponent(compType);
+                            await handler.InternalHandleEvent(comp.GetAgent(agentType), evt);
+                        }, false);
                     }
                     catch (Exception e)
                     {

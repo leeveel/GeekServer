@@ -31,7 +31,7 @@ namespace Geek.Server
                 msgData = CompressGZip(msgData);
                 LOGGER.Debug($"msg:{msg.MsgId} zip before:{len}, after:{msgData.Length}");
             }
-            len = msgData.Length;
+            len = msgData.Length + sizeof(int) * 2;
             //用于标记数据包是否压缩
             if (zip)
                 len = -len;

@@ -2,7 +2,7 @@
  * Auto generated, do not edit it client
  * 语言表
  */
-namespace Geek.Server.ConfigBean
+namespace Geek.Server.Config
 {
     public class t_languageBean : BaseBin
     {

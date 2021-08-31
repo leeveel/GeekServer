@@ -7,25 +7,31 @@ using System.Threading.Tasks;
 
 namespace Geek.Server
 {
-    class Program
+    public class Program
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         static volatile Task gameloopTask;
         static void Main(string[] args)
         {
+            Console.WriteLine("Types in this assembly:");
+            foreach (Type t in typeof(Program).Assembly.GetTypes())
+            {
+                Console.WriteLine(t.FullName);
+            }
+
             try
             {
                 Console.WriteLine("init server...");
-                AppExitHandler.Init(handleExit);
+                AppExitHandler.Init(HandleExit);
                 Settings.Load("Config/server_config.json", ServerType.Game);
                 LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
                 LogManager.Configuration = new XmlLoggingConfiguration("Config/NLog.config");
                 LogManager.AutoShutdown = false;
 
-                gameloopTask = enterGameLoop();
+                gameloopTask = EnterGameLoop();
                 gameloopTask.Wait();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("start server failed. msg:" + e.Message);
                 LOGGER.Error("start server failed");
@@ -34,7 +40,7 @@ namespace Geek.Server
         }
 
         static bool isExitCalled = false;
-        static void handleExit()
+        static void HandleExit()
         {
             if (isExitCalled)
                 return;
@@ -53,9 +59,18 @@ namespace Geek.Server
             }).Wait();
         }
 
-        static async Task enterGameLoop()
+        static async Task EnterGameLoop()
         {
-            await HotfixMgr.ReloadModule("");//启动游戏[hotfix工程实现一个IHotfix接口]
+            //设置ID规则
+            ActorManager.ID_RULE = ActorID.ID_RULE;   
+            LOGGER.Info("注册所有组件......");
+            ComponentTools.RegistAllComps();
+            var ret = await HotfixMgr.ReloadModule("");//启动游戏[hotfix工程实现一个IHotfix接口]
+            if (!ret)
+            {
+                LOGGER.Error("起服失败");
+                return;
+            }
             Settings.Ins.StartServerTime = DateTime.Now;
             Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("enter game loop 使用[ctrl+C]退出程序，不要强退，否则无法回存State");
@@ -84,3 +99,4 @@ namespace Geek.Server
         }
     }
 }
+

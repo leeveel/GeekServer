@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Geek.Server
+namespace Geek.Server.Logic.Server
 {
     public class ServerState : DBState
     {
@@ -12,5 +12,6 @@ namespace Geek.Server
 
     public class ServerComp : StateComponent<ServerState>
     {
+        public const int CrossDayHour = 0;
     }
 }

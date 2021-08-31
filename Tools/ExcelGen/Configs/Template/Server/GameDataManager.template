@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using NLog;
 
-namespace Geek.Server.ConfigBean
+namespace Geek.Server.Config
 {
 	public class GameDataManager
 	{
