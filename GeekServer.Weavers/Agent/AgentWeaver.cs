@@ -67,7 +67,8 @@ namespace Geek.Server.Weavers
                     continue;
 
                 if (!typeDef.BaseType.Resolve().FullName.StartsWith("Geek.Server.StateComponentAgent")
-                        && !typeDef.BaseType.Resolve().FullName.StartsWith("Geek.Server.FuncComponentAgent"))
+                        && !typeDef.BaseType.Resolve().FullName.StartsWith("Geek.Server.FuncComponentAgent")
+                        && !typeDef.BaseType.Resolve().FullName.StartsWith("Geek.Server.QueryComponentAgent"))
                 {
                     WriteError($"{typeDef.FullName} Agent必须直接继承于StateComponentAgent或FuncComponentAgent，不允许二次继承");
                     continue;
@@ -79,6 +80,13 @@ namespace Geek.Server.Weavers
                 int n = 0;
                 foreach (var pm in typeDef.Methods)
                 {
+                    // 非构造函数返回值需要是Task形式
+                    if (!pm.IsConstructor && !pm.ReturnType.FullName.StartsWith("System.Threading.Tasks.Task"))
+                    {
+                        WriteError($"{pm.DeclaringType.FullName}.{pm.Name} 返回值非Task，应修改为Task形式");
+                        continue;
+                    }
+
                     //排除非pulic和静态函数
                     if (!pm.IsPublic || pm.IsStatic)
                         continue;
@@ -96,12 +104,6 @@ namespace Geek.Server.Weavers
                             Instruction.Create(OpCodes.Ret)
                             );
                         wrapperType.Methods.Add(cons);
-                        continue;
-                    }
-                    // public且非static且非override且非构造函数返回值需要是Task形式
-                    if (!pm.ReturnType.FullName.StartsWith("System.Threading.Tasks.Task"))
-                    {
-                        WriteError($"{pm.DeclaringType.FullName}.{pm.Name} 返回值非Task，应修改为Task形式");
                         continue;
                     }
 
