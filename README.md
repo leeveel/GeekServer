@@ -54,6 +54,18 @@ RegistComp<RoleLoginComp>(ActorType.Role);
 //调用Actor组件函数(就像调用普通函数一样,无需关心多线程或入队)
 var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
 _ = serverComp.CheckCrossDay();
+
+//定义状态(数据)
+public class RoleState : DBState
+{
+    public string RoleName { get; set; }
+    public long RoleId { get; set; }
+    ...
+}
+//绑定组件
+public class RoleComp : StateComponent<RoleState>{}
+//绑定组件Agent(Agent类逻辑可全部热更新)
+public class RoleCompAgent : StateComponentAgent<RoleComp, RoleState>{}
 ```
 
 # 推荐项目  
