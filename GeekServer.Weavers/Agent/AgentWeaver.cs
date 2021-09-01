@@ -212,7 +212,7 @@ namespace Geek.Server.Weavers
                         innerConsDef.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
                         innerWrapper.Methods.Add(innerConsDef);
 
-                        WriteWarning($"AgentWeaver End：{pm.Name}Wrapper");
+                        //WriteWarning($"AgentWeaver End：{pm.Name}Wrapper");
 
                         foreach (var item in pm.GenericParameters)
                         {
@@ -345,8 +345,7 @@ namespace Geek.Server.Weavers
                     wrapperMethod.Body.Variables.Add(new VariableDefinition(pm.ReturnType));
                 }
             }
-
-            WriteMessage($"AgentWeaver End：{ModuleDefinition.Assembly.Name}", MessageImportance.High);
+            //WriteMessage($"AgentWeaver End：{ModuleDefinition.Assembly.Name}", MessageImportance.High);
         }
 
         private static TypeDefinition FindBaseStateOrQueryType(TypeDefinition typeDef)
