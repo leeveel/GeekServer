@@ -83,6 +83,74 @@ public class RoleComp : StateComponent<RoleState>{}
 //绑定组件Agent(Agent类逻辑可全部热更新)
 public class RoleCompAgent : StateComponentAgent<RoleComp, RoleState>{}
 ```
+# 最佳实践
+GeekServer有严格的书写规范检查，如不符合规范编译直接报错  
+1.CompAgent不能被二次继承，Agent继承的需求理论上很少，如果有请采用组合模式  
+2.CompAgent中的所有方法必须以Task为返回值（理由：全面异步，防止出现async void导致异常无法捕捉，致使程序崩溃，详见微软AsyncGuidance.md）  
+3.CompAgent中不能书写构造函数（实际上也没有这样的需求）  
+4.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上[NotAwait]注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。如果逻辑上没有等待，又没加注解可能会存在线程安全问题
+```c#
+var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
+_ = serverComp.NotifyAllClient();
+
+[NotAwait]
+public Task NotifyAllClient()
+{
+   for(int i=0; i<clients.count; i++)
+   {
+     //notify client
+   }
+}
+```
+5.CompAgent中不需要提供给外部访问方法，请尽量声明为非public类型，这样会少一次入队判断，效率会更高 
+```c#
+public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
+{
+	//agent内部调用，非public
+	private Task OnCreate(ReqLogin reqLogin, long roleId)
+	{
+	    State.CreateTime = DateTime.Now;
+	    State.Level = 1;
+	    State.VipLevel = 1;
+	    State.RoleId = roleId;
+	    State.RoleName = new System.Random().Next(1000, 10000).ToString();//随机给一个
+	    return Task.CompletedTask;
+	}
+        //外部接口public
+	public async Task OnLogin(ReqLogin reqLogin, bool isNewRole, long roleId)
+	{
+	    if (isNewRole)
+	    {
+		await OnCreate(reqLogin, roleId);
+	    }
+	    State.LoginTime = DateTime.Now;
+	}
+}
+```
+6.为明确知道为线程安全的函数加上[ThreadSafe]注解，同样可以减少入队判断提高效率。（这个是非必须的操作，不加也不会有问题，如果你不知道什么线程安全忽略此项） 
+```c#
+public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
+{
+	[ThreadSafe] //我是线程安全的函数
+	public virtual Task<ResLogin> BuildLoginMsg()
+        {
+            var res = new ResLogin()
+            {
+                code = 0,
+                userInfo = new UserInfo()
+                {
+                    createTime = State.CreateTime.Ticks,
+                    level = State.Level,
+                    roleId = State.RoleId,
+                    roleName = State.RoleName,
+                    vipLevel = State.VipLevel
+                }
+            };
+            return Task.FromResult(res);
+        }
+}
+```
+更多异步书写规范请参考微软官方文档[AsyncGuidance.md](https://github.com/davidfowl/AspNetCoreDiagnosticScenarios/blob/master/AsyncGuidance.md)  
 
 # 推荐项目  
 [xbuffer](https://github.com/CodeZeg/xbuffer) 一种简化版本的 flatbuffer 序列化库  
