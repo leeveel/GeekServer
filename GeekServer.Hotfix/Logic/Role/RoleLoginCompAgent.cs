@@ -7,7 +7,7 @@ namespace Geek.Server.Logic.Role
     public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
     {
 
-        public Task OnCreate(ReqLogin reqLogin, long roleId)
+        private Task OnCreate(ReqLogin reqLogin, long roleId)
         {
             State.CreateTime = DateTime.Now;
             State.Level = 1;
@@ -32,7 +32,7 @@ namespace Geek.Server.Logic.Role
             return Task.CompletedTask;
         }
 
-        public virtual Task<ResLogin> BuildLoginMsg()
+        public Task<ResLogin> BuildLoginMsg()
         {
             var res = new ResLogin()
             {

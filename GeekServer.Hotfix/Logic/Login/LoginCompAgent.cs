@@ -64,7 +64,7 @@ namespace Geek.Server.Logic.Login
             SessionUtils.WriteAndFlush(ctx, resLogin);
         }
 
-        public virtual async Task<long> GetRoleIdOfPlayer(string userName, int sdkType)
+        public async Task<long> GetRoleIdOfPlayer(string userName, int sdkType)
         {
             var playerId = $"{sdkType}_{userName}";
             if (Comp.PlayerMap.TryGetValue(playerId, out var state))
@@ -89,7 +89,7 @@ namespace Geek.Server.Logic.Login
             return 0;
         }
 
-        public virtual Task CreateRoleToPlayer(string userName, int sdkType, long roleId)
+        public Task CreateRoleToPlayer(string userName, int sdkType, long roleId)
         {
             var playerId = $"{sdkType}_{userName}";
             Comp.PlayerMap.TryGetValue(playerId, out var state);
