@@ -14,7 +14,7 @@ __设计理念:大道至简，以简化繁__
 ### 3.TPL(Task Parallel Library) Actor模型  
 GeekServer的Actor模型构建于强大的TPL DataFlow之上，让Actor模型如虎添翼。（不了解Actor模型，可以搜一下相关资料，Akka，Orleans都是采用的Actor模型）
 ### 4.Actor入队透明化  
-GeekServer内部会自动处理线程上下文,编译期间会自动注入入队代码,开发人员无需关心多线程以及入队逻辑
+GeekServer内部会自动处理线程上下文,编译期间会自动注入入队代码,开发人员无需关心多线程以及入队逻辑,只需要像调用普通函数一样书写逻辑
 ```c#
 //编译期间会注入一个继承自xxxCompAgent的wrapper类,来实现自动入队
 //同时SendAsync内部自动处理了线程上下文,开发者只需要像调用普通函数一样书写逻辑
