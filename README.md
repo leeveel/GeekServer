@@ -132,7 +132,7 @@ public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoSta
 public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
 {
 	[ThreadSafe] //我是线程安全的函数
-	public virtual Task<ResLogin> BuildLoginMsg()
+	public Task<ResLogin> BuildLoginMsg()
         {
             var res = new ResLogin()
             {
