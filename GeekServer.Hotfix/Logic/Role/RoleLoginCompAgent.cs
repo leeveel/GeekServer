@@ -32,6 +32,7 @@ namespace Geek.Server.Logic.Role
             return Task.CompletedTask;
         }
 
+        [ThreadSafe]
         public Task<ResLogin> BuildLoginMsg()
         {
             var res = new ResLogin()

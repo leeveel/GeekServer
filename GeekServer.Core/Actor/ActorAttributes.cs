@@ -15,4 +15,10 @@ namespace Geek.Server
     [AttributeUsage(AttributeTargets.Method)]
     public class NotAwait : Attribute { }
 
+
+    /// <summary>
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
+    public class ThreadSafe : Attribute { }
+
 }

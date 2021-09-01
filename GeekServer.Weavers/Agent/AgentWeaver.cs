@@ -92,6 +92,9 @@ namespace Geek.Server.Weavers
                         continue;
                     if (pm.Name == "Active" || pm.Name == "Deactive")
                         continue;
+                    // 跳过ThreadSafe标记的方法
+                    if (pm.CustomAttributes.FirstOrDefault(a => a.AttributeType.Name == "ThreadSafe") != null)
+                        continue;
                     //// 跳过Agent中override的方法
                     if (pm.IsConstructor)
                     {
