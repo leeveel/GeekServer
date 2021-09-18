@@ -19,8 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GeekServer.App\GeekServer.App.csproj" />
     <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
-    <ProjectReference Include="..\GeekServer.Hotfix\GeekServer.Hotfix.csproj" />
+    <ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
   </ItemGroup>
 
   <ItemGroup>

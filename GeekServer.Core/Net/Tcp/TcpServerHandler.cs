@@ -40,16 +40,6 @@ namespace Geek.Server
                     handler.Ctx = ctx;
                     handler.Msg = msg;
 
-                    if (handler.GetType().Assembly != msg.GetType().Assembly)
-                    {
-                        //仅热更瞬间有极小几率触发
-                        LOGGER.Debug("热更过程替换msg和handler 重新构造msg让msg和handler来自同一个dll");
-                        var data = msg.Serialize();
-                        var newMsg = TcpHandlerFactory.GetMsg(msg.GetMsgId());
-                        newMsg.Deserialize(data);
-                        handler.Msg = newMsg;
-                    }
-
                     if (handler is TcpActorHandler actorHandler)
                     {
                         actorHandler.Actor = await actorHandler.GetActor();

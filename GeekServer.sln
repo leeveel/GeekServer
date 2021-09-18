@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Weavers", "GeekS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Test", "GeekServer.Test\GeekServer.Test.csproj", "{D8C79DBF-65E7-41B6-ADA1-EB600CC71E40}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekServer.Generate", "GeekServer.Generate\GeekServer.Generate.csproj", "{EC180538-95EF-419F-91D4-CD32C4E1A97A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{D8C79DBF-65E7-41B6-ADA1-EB600CC71E40}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8C79DBF-65E7-41B6-ADA1-EB600CC71E40}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8C79DBF-65E7-41B6-ADA1-EB600CC71E40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC180538-95EF-419F-91D4-CD32C4E1A97A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC180538-95EF-419F-91D4-CD32C4E1A97A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC180538-95EF-419F-91D4-CD32C4E1A97A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC180538-95EF-419F-91D4-CD32C4E1A97A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
