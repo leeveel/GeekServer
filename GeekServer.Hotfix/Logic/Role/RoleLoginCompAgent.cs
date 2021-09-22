@@ -1,4 +1,5 @@
-﻿using Geek.Server.Message.Login;
+﻿using Geek.Server.Logic.Bag;
+using Geek.Server.Message.Login;
 using System;
 using System.Threading.Tasks;
 
@@ -22,6 +23,8 @@ namespace Geek.Server.Logic.Role
             if (isNewRole)
             {
                 await OnCreate(reqLogin, roleId);
+                var bagComp = await GetCompAgent<BagCompAgent>();
+                await bagComp.Init();
             }
             State.LoginTime = DateTime.Now;
         }

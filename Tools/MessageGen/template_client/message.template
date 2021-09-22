@@ -89,6 +89,9 @@ namespace Geek.Client.Message.{{space}}
 		///<summary>反序列化，读取数据</summary>
         public override int Read(byte[] _buffer_, int _offset_)
 		{
+			{{~ if state.msgid != "" ~}}
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
+			{{~ end ~}}
 			_offset_ = base.Read(_buffer_, _offset_);
 			{{~ if state.msgid == "" ~}}
 			int _startOffset_ = _offset_;
@@ -179,6 +182,9 @@ namespace Geek.Client.Message.{{space}}
 		///<summary>序列化，写入数据</summary>
         public override int Write(byte[] _buffer_, int _offset_)
         {	
+			{{~ if state.msgid != "" ~}}
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
+			{{~ end ~}}
 			_offset_ = base.Write(_buffer_, _offset_);
 			{{~ if state.msgid == "" ~}}
 			//先写入当前对象长度占位符

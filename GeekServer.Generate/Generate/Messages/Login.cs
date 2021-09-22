@@ -194,6 +194,7 @@ namespace Geek.Server.Message.Login
 		///<summary>反序列化，读取数据</summary>
         public override int Read(byte[] _buffer_, int _offset_)
 		{
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
 			_offset_ = base.Read(_buffer_, _offset_);
 			
 			//字段个数,最多支持255个
@@ -228,6 +229,7 @@ namespace Geek.Server.Message.Login
 		///<summary>序列化，写入数据</summary>
         public override int Write(byte[] _buffer_, int _offset_)
         {	
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
 			_offset_ = base.Write(_buffer_, _offset_);
 			
 			//写入字段数量,最多支持255个
@@ -287,6 +289,7 @@ namespace Geek.Server.Message.Login
 		///<summary>反序列化，读取数据</summary>
         public override int Read(byte[] _buffer_, int _offset_)
 		{
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
 			_offset_ = base.Read(_buffer_, _offset_);
 			
 			//字段个数,最多支持255个
@@ -311,6 +314,7 @@ namespace Geek.Server.Message.Login
 		///<summary>序列化，写入数据</summary>
         public override int Write(byte[] _buffer_, int _offset_)
         {	
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
 			_offset_ = base.Write(_buffer_, _offset_);
 			
 			//写入字段数量,最多支持255个
@@ -361,6 +365,7 @@ namespace Geek.Server.Message.Login
 		///<summary>反序列化，读取数据</summary>
         public override int Read(byte[] _buffer_, int _offset_)
 		{
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
 			_offset_ = base.Read(_buffer_, _offset_);
 			
 			//字段个数,最多支持255个
@@ -379,6 +384,7 @@ namespace Geek.Server.Message.Login
 		///<summary>序列化，写入数据</summary>
         public override int Write(byte[] _buffer_, int _offset_)
         {	
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
 			_offset_ = base.Write(_buffer_, _offset_);
 			
 			//写入字段数量,最多支持255个
@@ -427,6 +433,7 @@ namespace Geek.Server.Message.Login
 		///<summary>反序列化，读取数据</summary>
         public override int Read(byte[] _buffer_, int _offset_)
 		{
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
 			_offset_ = base.Read(_buffer_, _offset_);
 			
 			//字段个数,最多支持255个
@@ -445,6 +452,7 @@ namespace Geek.Server.Message.Login
 		///<summary>序列化，写入数据</summary>
         public override int Write(byte[] _buffer_, int _offset_)
         {	
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
 			_offset_ = base.Write(_buffer_, _offset_);
 			
 			//写入字段数量,最多支持255个
@@ -493,6 +501,7 @@ namespace Geek.Server.Message.Login
 		///<summary>反序列化，读取数据</summary>
         public override int Read(byte[] _buffer_, int _offset_)
 		{
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
 			_offset_ = base.Read(_buffer_, _offset_);
 			
 			//字段个数,最多支持255个
@@ -511,6 +520,7 @@ namespace Geek.Server.Message.Login
 		///<summary>序列化，写入数据</summary>
         public override int Write(byte[] _buffer_, int _offset_)
         {	
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
 			_offset_ = base.Write(_buffer_, _offset_);
 			
 			//写入字段数量,最多支持255个
@@ -563,6 +573,7 @@ namespace Geek.Server.Message.Login
 		///<summary>反序列化，读取数据</summary>
         public override int Read(byte[] _buffer_, int _offset_)
 		{
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
 			_offset_ = base.Read(_buffer_, _offset_);
 			
 			//字段个数,最多支持255个
@@ -585,6 +596,7 @@ namespace Geek.Server.Message.Login
 		///<summary>序列化，写入数据</summary>
         public override int Write(byte[] _buffer_, int _offset_)
         {	
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
 			_offset_ = base.Write(_buffer_, _offset_);
 			
 			//写入字段数量,最多支持255个
@@ -634,6 +646,7 @@ namespace Geek.Server.Message.Login
 		///<summary>反序列化，读取数据</summary>
         public override int Read(byte[] _buffer_, int _offset_)
 		{
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
 			_offset_ = base.Read(_buffer_, _offset_);
 			
 			//字段个数,最多支持255个
@@ -652,6 +665,7 @@ namespace Geek.Server.Message.Login
 		///<summary>序列化，写入数据</summary>
         public override int Write(byte[] _buffer_, int _offset_)
         {	
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
 			_offset_ = base.Write(_buffer_, _offset_);
 			
 			//写入字段数量,最多支持255个

@@ -61,6 +61,7 @@ namespace Geek.Server.Logic.Login
             var roleComp = await ActorMgr.GetCompAgent<RoleLoginCompAgent>(roleId);
             await roleComp.OnLogin(reqLogin, isNewRole, roleId);
             var resLogin = await roleComp.BuildLoginMsg();
+            resLogin.UniId = reqLogin.UniId;
             SessionUtils.WriteAndFlush(ctx, resLogin);
         }
 

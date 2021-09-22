@@ -25,6 +25,10 @@ namespace Geek.Server.Test
             //登陆
             var login = await GetCompAgent<LoginCompAgent>();
             await login.ReqLogin();
+
+            //获取背包数据
+            var bag = await GetCompAgent<BagCompAgent>();
+            await bag.ReqBagInfo();
         }
 
         public async Task ConnectServer()

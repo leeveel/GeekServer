@@ -33,7 +33,7 @@ namespace Geek.Server.Test
                         else
                             LOGGER.Error($"handler actor 为空 {msg.GetMsgId()} {handler.GetType()}");
                         if (actorHandler is RobotHandler robotHandler)
-                            _ = robotHandler.OnReciveMsg(0);
+                            _ = robotHandler.OnReciveMsg(msg.UniId);
                     }
                     else
                     {

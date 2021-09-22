@@ -7,6 +7,8 @@ namespace Geek.Server
     [BsonIgnoreExtraElements(true, Inherited = true)]//ºöÂÔ´úÂëÉ¾³ıµÄ×Ö¶Î[Êı¾İ¿â¶àÓàµÄ×Ö¶Î]
     public abstract class BaseMessage : BaseState, IMessage
     {
+        public int UniId { get; set; }
+
         public virtual int Read(byte[] buffer, int offset)
         {
             return offset;

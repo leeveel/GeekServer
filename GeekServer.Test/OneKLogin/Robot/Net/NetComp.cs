@@ -10,6 +10,7 @@ namespace Geek.Server.Test
         public DateTime handTime;
         public IChannel channel;
         public MsgWaiter Waiter = new MsgWaiter();
+        public int UniId { set; get; } = 200;
     }
 
     public class NetCompAgent : FuncComponentAgent<NetComp>
@@ -26,9 +27,10 @@ namespace Geek.Server.Test
 
         public Task<bool> SendMsg(IMessage msg)
         {
+            msg.UniId = Comp.UniId++;
             NMessage nmsg = NMessage.Create(msg.GetMsgId(), msg.Serialize());
             Comp.channel.WriteAndFlushAsync(nmsg);
-            return Comp.Waiter.StartWait(msg.GetMsgId());
+            return Comp.Waiter.StartWait(msg.UniId);
         }
 
         public void ReciveMsg(int uniId)

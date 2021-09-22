@@ -1,4 +1,5 @@
-﻿using Geek.Server.Logic.Login;
+﻿using Geek.Server.Logic.Bag;
+using Geek.Server.Logic.Login;
 using Geek.Server.Logic.Role;
 using Geek.Server.Logic.Server;
 
@@ -22,6 +23,7 @@ namespace Geek.Server
             //role
             RegistComp<RoleComp>(ActorType.Role);
             RegistComp<RoleLoginComp>(ActorType.Role);
+            RegistComp<BagComp>(ActorType.Role);
         }
 
 
