@@ -51,14 +51,14 @@ namespace Geek.Client
             }
             else
             {
-                Debuger.Err("发现重复消息id：" + uniId);
+                UnityEngine.Debug.LogError("发现重复消息id：" + uniId);
             }
             return true;
         }
 
         public static void EndWait(int uniId, bool result=true)
         {
-            if(!result) Debuger.Err("await失败：" + uniId);
+            if(!result) UnityEngine.Debug.LogError("await失败：" + uniId);
             if (waitDic.ContainsKey(uniId))
             {
                 var waiter = waitDic[uniId];
@@ -76,7 +76,7 @@ namespace Geek.Client
             else
             {
                 if(uniId > 0)
-                    Debuger.Err("找不到EndWait：" + uniId + ">size：" + waitDic.Count);
+                    UnityEngine.Debug.LogError("找不到EndWait：" + uniId + ">size：" + waitDic.Count);
             }
         }
 
@@ -106,7 +106,7 @@ namespace Geek.Client
         private void TimeOut(object state)
         {
             End(false);
-            Debuger.Err("等待消息超时");
+            UnityEngine.Debug.LogError("等待消息超时");
         }
 
     }

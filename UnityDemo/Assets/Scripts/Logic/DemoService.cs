@@ -60,7 +60,7 @@ namespace Logic
             }
 
 #if UNITY_EDITOR
-            Debuger.Log("deal msg:" + msgId + ">" + typeof(T));
+            UnityEngine.Debug.Log("deal msg:" + msgId + ">" + typeof(T));
 #endif
             //已经提前解析好了
             if (rMsg.Msg != null)
@@ -98,13 +98,13 @@ namespace Logic
             }
             MsgWaiter.EndWait(res.UniId, res.errCode == (int)ErrCode.Success);
             if (!string.IsNullOrEmpty(res.desc))
-                Debuger.Log("服务器提示:" + res.desc);
+                UnityEngine.Debug.Log("服务器提示:" + res.desc);
         }
 
 
         private void OnConnectServer(Event e)
         {
-            Debuger.Log("-------OnConnectServer-->>>" + (NetCode)e.Data);
+            UnityEngine.Debug.Log("-------OnConnectServer-->>>" + (NetCode)e.Data);
             int code = (int)e.Data;
             if ((NetCode)code == NetCode.Success)
             {

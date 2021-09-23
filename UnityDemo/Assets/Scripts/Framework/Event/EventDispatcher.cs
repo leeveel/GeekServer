@@ -118,7 +118,7 @@ namespace Geek.Client
             }
             catch (System.Exception e)
             {
-                Debuger.Err($"evtId={evt.EventId} {e.ToString()}");
+                UnityEngine.Debug.LogError($"evtId={evt.EventId} {e.ToString()}");
             }
         }
 

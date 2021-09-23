@@ -21,7 +21,7 @@ namespace Geek.Client
             }
             else
             {
-                Debuger.Err("actor 执行超时 强制结束:" + wrapper.GetTrace());
+                UnityEngine.Debug.LogError("actor 执行超时 强制结束:" + wrapper.GetTrace());
                 wrapper.ForceSetResult();
             }
         }

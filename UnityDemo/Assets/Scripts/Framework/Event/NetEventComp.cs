@@ -20,7 +20,7 @@ namespace Geek.Client
             else
             {
                 //去重，一个网络消息只要一个监听
-                Debuger.Wrn("重复注册网络事件>" + evtId);
+                UnityEngine.Debug.LogWarning("重复注册网络事件>" + evtId);
                 GED.NED.removeListener(evtId, evtMap[evtId]);
                 evtMap[evtId] = handler;
             }

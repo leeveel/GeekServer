@@ -32,7 +32,7 @@ namespace Geek.Client
             }
             catch (Exception e)
             {
-                Debuger.Err(e.ToString());
+                UnityEngine.Debug.LogError(e.ToString());
             }
             finally
             {
@@ -74,7 +74,7 @@ namespace Geek.Client
             }
             catch (Exception e)
             {
-                Debuger.Err(e.ToString());
+                UnityEngine.Debug.LogError(e.ToString());
             }
             finally
             {
@@ -115,7 +115,7 @@ namespace Geek.Client
             }
             catch (Exception e)
             {
-                Debuger.Err(e.ToString());
+                UnityEngine.Debug.LogError(e.ToString());
             }
             finally
             {
@@ -155,7 +155,7 @@ namespace Geek.Client
             }
             catch (Exception e)
             {
-                Debuger.Err(e.ToString());
+                UnityEngine.Debug.LogError(e.ToString());
             }
             finally
             {

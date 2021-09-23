@@ -100,7 +100,7 @@ namespace Geek.Client
                     if (msg != null)
                         msg.Read(content, 0);
 #if UNITY_EDITOR
-                    Debuger.Wrn($"{(msg != null ? msg.GetType().FullName : "")} msgId={msgId} 数据长度解压前={(msgSize / 1024f).ToString("f2")}kb 解压后={(content.Length / 1024f).ToString("f2")}kb");
+                    UnityEngine.Debug.LogWarning($"{(msg != null ? msg.GetType().FullName : "")} msgId={msgId} 数据长度解压前={(msgSize / 1024f).ToString("f2")}kb 解压后={(content.Length / 1024f).ToString("f2")}kb");
 #endif
                     msgQueue.Enqueue(new RMessage() { MsgId = msgId, ByteContent = content, Msg = msg });
                 }
