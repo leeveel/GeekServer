@@ -75,7 +75,6 @@
     <Compile Include="Assets\Scripts\Framework\Net\MessageHandle.cs" />
     <Compile Include="Assets\Scripts\Framework\Net\NetBufferPool.cs" />
     <Compile Include="Assets\Scripts\Framework\Net\RMessage.cs" />
-    <Compile Include="Assets\Scripts\Framework\Utils\Debuger.cs" />
     <Compile Include="Assets\Scripts\Framework\Utils\IParam.cs" />
     <Compile Include="Assets\Scripts\Framework\Utils\TimeUtils.cs" />
     <Compile Include="Assets\Scripts\Framework\Utils\XBuffer.cs" />
