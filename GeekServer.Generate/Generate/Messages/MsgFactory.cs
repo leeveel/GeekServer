@@ -23,7 +23,8 @@ namespace Geek.Server.Message
 				case 111004: return new Geek.Server.Message.Login.ResNotice();
 				case 111005: return new Geek.Server.Message.Login.ReqChangeName();
 				case 111006: return new Geek.Server.Message.Login.ResChangeName();
-				case 101303: return new Geek.Server.Message.Login.HearBeat();
+				case 111007: return new Geek.Server.Message.Login.HearBeat();
+				case 111008: return new Geek.Server.Message.Login.ResErrorCode();
 				
 				//举例各种结构写法
 				case 111101: return new Geek.Server.Message.Sample.ReqTest();

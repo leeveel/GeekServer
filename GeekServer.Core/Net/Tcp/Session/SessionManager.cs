@@ -25,15 +25,15 @@ namespace Geek.Server
                     if (oldChanel.Sign != session.Sign)
                     {
                         //顶号,老链接不断开，需要发送被顶号的消息
-                        oldChanel.Ctx.Channel.GetAttribute(SESSION).Set(null);
+                        oldChanel.Channel.GetAttribute(SESSION).Set(null);
                         old = oldChanel;
                     }
-                    else if (oldChanel.Ctx != session.Ctx)
+                    else if (oldChanel.Channel != session.Channel)
                     {
-                        oldChanel.Ctx.CloseAsync();
+                        oldChanel.Channel.CloseAsync();
                     }
                 }
-                session.Ctx.Channel.GetAttribute(SESSION).Set(session);
+                session.Channel.GetAttribute(SESSION).Set(session);
                 sessionMap[session.Id] = session;
             }
             return old;
@@ -72,7 +72,7 @@ namespace Geek.Server
             var list = sessionMap.Values;
             foreach (var ch in list)
             {
-                _ = ch.Ctx.CloseAsync();
+                _ = ch.Channel.CloseAsync();
                 var actor = await ActorManager.Get(ch.Id);
                 if (actor != null)
                 {

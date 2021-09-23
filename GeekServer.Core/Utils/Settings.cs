@@ -29,9 +29,9 @@ public class Settings
 
 
     /// <summary>数据回存最大时间(秒)</summary>
-    public int DataFlushTimeMax { get; set; }
+    public int TimerSaveMax { get; set; }
     /// <summary>数据回存最小时间(秒)</summary>
-    public int DataFlushTimeMin { get; set; }
+    public int TimerSaveMin { get; set; }
     /// <summary>组件自动回收时间(分钟)</summary>
     public int CompRecycleTime { get; set; }
     /// <summary>actor自动回收时间(分钟)</summary>

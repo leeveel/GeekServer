@@ -7,7 +7,6 @@ namespace Geek.Server.Test
     {
 
         private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
-
         public override async Task<ComponentActor> GetActor()
         {
             if (Actor != null)
@@ -21,12 +20,5 @@ namespace Geek.Server.Test
 
             return Actor;
         }
-
-        public async Task OnReciveMsg(int uniId)
-        {
-            var net = await Actor.GetCompAgent<NetCompAgent>();
-            net.ReciveMsg(uniId);
-        }
-
     }
 }

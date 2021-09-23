@@ -52,5 +52,17 @@ namespace Geek.Server.Logic.Bag
             return Task.FromResult(res);
         }
 
+        public Task Test1()
+        {
+            return Task.CompletedTask;
+        }
+
+        [ThreadSafe]
+        public Task Test2()
+        {
+            return Task.CompletedTask;
+        }
+
+
     }
 }

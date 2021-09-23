@@ -53,9 +53,9 @@ namespace Geek.Server.Test
         {
             try
             {
-                var serverHost = new IPEndPoint(IPAddress.Parse(Host), Port);
+                //var serverHost = new IPEndPoint(IPAddress.Parse(Host), Port);
                 //long startTime = TimeUtils.CurrentTimeMillis();
-                var channel = await bootstrap.ConnectAsync(serverHost);
+                var channel = await bootstrap.ConnectAsync(IPAddress.Parse(Host), Port);
                 LOGGER.Info("tcp connect success>{}:{}", Host, Port);
                 //Console.WriteLine("connect耗时：" + (TimeUtils.CurrentTimeMillis() - startTime));
                 return channel;

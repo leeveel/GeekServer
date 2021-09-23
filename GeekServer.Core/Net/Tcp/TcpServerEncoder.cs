@@ -64,7 +64,7 @@ namespace Geek.Server
 
         public override void ExceptionCaught(IChannelHandlerContext context, Exception e)
         {
-            LOGGER.Error(e, "编码消息出现错误 {}", e.Message);
+            //LOGGER.Error(e, "编码消息出现错误 {}", e.Message);
             context.CloseAsync();
         }
     }

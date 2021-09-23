@@ -4,33 +4,33 @@ using Geek.Server;
 public class SessionUtils
 {
 
-	public static void WriteAndFlush(IChannelHandlerContext ctx, NMessage msg)
+	public static void WriteAndFlush(IChannel channel, NMessage msg)
 	{
-		if (IsDisconnectChannel(ctx))
+		if (IsDisconnectChannel(channel))
 			return;
-		ctx.WriteAndFlushAsync(msg);
+		channel.WriteAndFlushAsync(msg);
 	}
 
-	public static void WriteAndFlush(IChannelHandlerContext ctx, BaseMessage msg)
+	public static void WriteAndFlush(IChannel channel, BaseMessage msg)
 	{
-		WriteAndFlush(ctx, msg.GetMsgId(), msg.Serialize());
+		WriteAndFlush(channel, msg.GetMsgId(), msg.Serialize());
 	}
 
-	public static void WriteAndFlush(IChannelHandlerContext ctx, int msgId, byte[] data)
+	public static void WriteAndFlush(IChannel channel, int msgId, byte[] data)
 	{
 		if (msgId > 0 && data != null)
-			WriteAndFlush(ctx, new NMessage() { MsgId = msgId, Data = data });
+			WriteAndFlush(channel, new NMessage() { MsgId = msgId, Data = data });
 	}
 
-	public static bool IsDisconnectChannel(IChannelHandlerContext ctx)
+	public static bool IsDisconnectChannel(IChannel channel)
 	{
-		return ctx == null || ctx.Channel == null || !ctx.Channel.Active || !ctx.Channel.Open;
+		return channel == null || !channel.Active || !channel.Open;
 	}
 
-	public static void CloseChannel(IChannelHandlerContext ctx)
+	public static void CloseChannel(IChannelHandlerContext channel)
 	{
-		if (ctx != null)
-			ctx.CloseAsync();
+		if (channel != null)
+			channel.CloseAsync();
 	}
 
 }

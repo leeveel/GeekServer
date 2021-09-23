@@ -13,7 +13,8 @@ namespace Geek.Server.Logic.Login
         public override async Task ActionAsync()
         {
             var comp = await Actor.GetCompAgent<LoginCompAgent>();
-            await comp.Login(Ctx, (ReqLogin)Msg);
+            var msg = await comp.Login(Channel, (ReqLogin)Msg);
+            WriteAndFlush(msg);
         }
     }
 }

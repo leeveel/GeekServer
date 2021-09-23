@@ -20,7 +20,7 @@ namespace Geek.Server.Test
             {
                 typeof(TcpClientEncoder),
                 typeof(TcpClientDecoder),
-                typeof(RobotTcpHandler)
+                typeof(TcpServerHandler)
             };
             RobotClient.Init(host, port, handlerList);
             InnerStart();

@@ -26,6 +26,7 @@ namespace Geek.Server.Message.Login
 				case 6: return new ReqChangeName();
 				case 7: return new ResChangeName();
 				case 8: return new HearBeat();
+				case 9: return new ResErrorCode();
 				default: return default;
 			}
 		}
@@ -616,7 +617,7 @@ namespace Geek.Server.Message.Login
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 		internal virtual byte _msgIdx_ => 8;//最多支持255个消息类型
         public override int GetMsgId() { return MsgId; }
-        public const int MsgId = 101303;
+        public const int MsgId = 111007;
 		
 		///<summary>当前时间</summary>
 		public long timeTick { get{ return _timeTick_; } set{ _timeTick_ = value; _stateChanged = true; } }
@@ -673,6 +674,83 @@ namespace Geek.Server.Message.Login
 			
 			//写入数据
 			XBuffer.WriteLong(timeTick, _buffer_, ref _offset_);
+			
+			return _offset_;
+		}
+	}
+
+	///<summary>客户端每次请求都会回复错误码</summary>
+    public class ResErrorCode : BaseMessage
+	{
+		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+		internal virtual byte _msgIdx_ => 9;//最多支持255个消息类型
+        public override int GetMsgId() { return MsgId; }
+        public const int MsgId = 111008;
+		
+		///<summary>0:表示无错误</summary>
+		public int errCode { get{ return _errCode_; } set{ _errCode_ = value; _stateChanged = true; } }
+		int _errCode_;
+
+		///<summary>错误描述（不为0时有效）</summary>
+		public string desc { get{ return _desc_; } set{ _desc_ = value; _stateChanged = true; } }
+		string _desc_;
+
+
+		
+		///<summary>状态是否改变</summary>
+		public override bool IsChanged
+		{
+			get
+			{
+				if(_stateChanged)
+					return true;
+				return base.IsChanged;
+			}
+		}
+		
+		///<summary>清除所有改变[含子项]</summary>
+		public override void ClearChanges()
+		{
+			base.ClearChanges();
+			//_stateChanged = false;
+		}
+		
+		
+		///<summary>反序列化，读取数据</summary>
+        public override int Read(byte[] _buffer_, int _offset_)
+		{
+			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
+			_offset_ = base.Read(_buffer_, _offset_);
+			
+			//字段个数,最多支持255个
+			var _fieldNum_ = XBuffer.ReadByte(_buffer_, ref _offset_);
+			
+			do {
+				if(_fieldNum_ > 0){
+					errCode = XBuffer.ReadInt(_buffer_, ref _offset_);
+					
+				}else break;
+				if(_fieldNum_ > 1){
+					desc = XBuffer.ReadString(_buffer_, ref _offset_);
+					
+				}else break;
+			}while(false);
+			
+			return _offset_;
+		}
+		
+		///<summary>序列化，写入数据</summary>
+        public override int Write(byte[] _buffer_, int _offset_)
+        {	
+			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
+			_offset_ = base.Write(_buffer_, _offset_);
+			
+			//写入字段数量,最多支持255个
+			XBuffer.WriteByte(2, _buffer_, ref _offset_);
+			
+			//写入数据
+			XBuffer.WriteInt(errCode, _buffer_, ref _offset_);
+			XBuffer.WriteString(desc, _buffer_, ref _offset_);
 			
 			return _offset_;
 		}

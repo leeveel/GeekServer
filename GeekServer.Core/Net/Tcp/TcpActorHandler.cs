@@ -10,14 +10,7 @@ namespace Geek.Server
 
         protected Session GetChannel()
         {
-            return Ctx.Channel.GetAttribute(SessionManager.SESSION).Get();
-        }
-
-        protected override void WriteAndFlush(BaseMessage msg)
-        {
-            //将req的uniid带回去
-            msg.UniId = Msg.UniId;
-            base.WriteAndFlush(msg);
+            return Channel.GetAttribute(SessionManager.SESSION).Get();
         }
 
     }

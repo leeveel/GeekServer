@@ -1,11 +1,11 @@
 {
 	"IsDebug": true,
-	"ServerId": 10001, //[1-60000],建议[10001-60000]
+	"ServerId": 10001, //[1-16383]
 
-	"DataFlushTimeMax": 360,
-	"DataFlushTimeMin": 300,
+	"TimerSaveMax": 360, //定制回存(秒)
+	"TimerSaveMin": 300,
 
-	"CompRecycleTime": 15,
+	"CompRecycleTime": 15, //分
 	"ActorRecycleTime": 30,
 
 	"HttpInnerCode": "geek_server_http_inner_code",

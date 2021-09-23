@@ -7,6 +7,10 @@ namespace Geek.Server
     [BsonIgnoreExtraElements(true, Inherited = true)]//忽略代码删除的字段[数据库多余的字段]
     public abstract class BaseMessage : BaseState, IMessage
     {
+        /// <summary>
+        /// 消息唯一id
+        /// </summary>
+        [BsonIgnore]
         public int UniId { get; set; }
 
         public virtual int Read(byte[] buffer, int offset)

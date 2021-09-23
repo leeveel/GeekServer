@@ -36,8 +36,13 @@
 		<var type="field" class="string" name="msg" explain="为空表示改名成功，不为空则为提示内容" />
 		<var type="field" class="string" name="newName" explain="新名字" />
 	</message>
-	<message name="HearBeat" msgId="101303" super="" explain="双向心跳/收到恢复同样的消息">
+	<message name="HearBeat" msgId="111007" super="" explain="双向心跳/收到恢复同样的消息">
 		<var type="field" class="long" name="timeTick" explain="当前时间" />
+	</message>
+	
+	<message name="ResErrorCode" msgId="111008" super="" explain="客户端每次请求都会回复错误码">
+		<field class="int" name="errCode" explain="0:表示无错误"/>	
+		<field class="string" name="desc" explain="错误描述（不为0时有效）"/>	
 	</message>
 	
 </messages>

@@ -37,9 +37,8 @@ namespace Geek.Server
                     }
 
                     handler.Time = DateTime.Now;
-                    handler.Ctx = ctx;
+                    handler.Channel = ctx.Channel;
                     handler.Msg = msg;
-
                     if (handler is TcpActorHandler actorHandler)
                     {
                         actorHandler.Actor = await actorHandler.GetActor();

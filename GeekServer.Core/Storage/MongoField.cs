@@ -3,7 +3,7 @@
     public class MongoField
     {
         /// <summary>mongo唯一id，也是actorId</summary>
-        public const string Id = "Id";
+        public const string Id = "_id";
         /// <summary>role/公会名</summary>
         public const string Name = "Name";
         /// <summary>role/guild的serverID</summary>

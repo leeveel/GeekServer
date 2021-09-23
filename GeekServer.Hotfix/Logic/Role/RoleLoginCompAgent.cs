@@ -8,7 +8,7 @@ namespace Geek.Server.Logic.Role
     public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
     {
 
-        private Task OnCreate(ReqLogin reqLogin, long roleId)
+        public Task OnCreate(ReqLogin reqLogin, long roleId)
         {
             State.CreateTime = DateTime.Now;
             State.Level = 1;
@@ -29,7 +29,7 @@ namespace Geek.Server.Logic.Role
             State.LoginTime = DateTime.Now;
         }
 
-        public virtual Task OnLoginOut()
+        public Task OnLoginOut()
         {
             State.OfflineTime = DateTime.Now;
             return Task.CompletedTask;

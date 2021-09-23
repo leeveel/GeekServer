@@ -58,7 +58,7 @@ namespace Geek.Server
                     pipeline.AddLast(new TcpServerEncoder(), new TcpServerDecoder(), new TcpServerHandler());
                 }));
 
-                bootstrapChannel = await bootstrap.BindAsync(port);
+                bootstrapChannel = await bootstrap.BindAsync(port); 
                 LOGGER.Info("start tcp server success. listener port:[{}]", port);
             }
             catch (Exception e)

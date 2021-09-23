@@ -24,7 +24,7 @@ namespace Geek.Server
             var random = new System.Random();
             int onceDelta = 1000;
             int delayTime = 0;
-            int saveTime = random.Next(Settings.Ins.DataFlushTimeMin, Settings.Ins.DataFlushTimeMax);
+            int saveTime = random.Next(Settings.Ins.TimerSaveMin, Settings.Ins.TimerSaveMax);
             while (delayTime < saveTime * 1000)
             {
                 //不能一次性delay，退出程序时监听不到

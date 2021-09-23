@@ -19,7 +19,7 @@ namespace Geek.Server
         /// <summary>
         /// netty通道
         /// </summary>
-        public IChannelHandlerContext Ctx { set; get; }
+        public IChannel Channel { set; get; }
 
         /// <summary>
         /// 连接标示，避免自己顶自己的号,客户端每次启动游戏生成一次/或者每个设备一个

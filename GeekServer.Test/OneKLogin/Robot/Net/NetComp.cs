@@ -33,11 +33,6 @@ namespace Geek.Server.Test
             return Comp.Waiter.StartWait(msg.UniId);
         }
 
-        public void ReciveMsg(int uniId)
-        {
-            Comp.Waiter.EndWait(uniId);
-        }
-
         public double GetIdleTimeInSeconds()
         {
             return (DateTime.Now - Comp.handTime).TotalSeconds;

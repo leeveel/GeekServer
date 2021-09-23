@@ -9,7 +9,7 @@ namespace Geek.Server
         /// <summary>
         ///  连接
         /// </summary>
-        public IChannelHandlerContext Ctx { get; set; }
+        public IChannel Channel { get; set; }
 
         /// <summary>
         /// 从Decoder中转化出来的时间
@@ -39,9 +39,9 @@ namespace Geek.Server
 
         protected virtual void WriteAndFlush(NMessage msg)
         {
-            if (IsDisconnectChannel(Ctx))
+            if (IsDisconnectChannel(Channel))
                 return;
-            Ctx.WriteAndFlushAsync(msg);
+            Channel.WriteAndFlushAsync(msg);
         }
 
         protected virtual void WriteAndFlush(BaseMessage msg)
@@ -57,9 +57,9 @@ namespace Geek.Server
 
 
 
-        bool IsDisconnectChannel(IChannelHandlerContext ctx)
+        bool IsDisconnectChannel(IChannel ctx)
         {
-            return ctx == null || ctx.Channel == null || !ctx.Channel.Active || !ctx.Channel.Open;
+            return ctx == null|| !ctx.Active || !ctx.Open;
         }
     }
 }

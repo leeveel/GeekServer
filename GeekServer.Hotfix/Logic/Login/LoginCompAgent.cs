@@ -11,23 +11,17 @@ namespace Geek.Server.Logic.Login
 
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-
-        public async Task Login(IChannelHandlerContext ctx, ReqLogin reqLogin)
+        public async Task<MSG> Login(IChannel channel, ReqLogin reqLogin)
         {
-            var res = new ResLogin();
             if (string.IsNullOrEmpty(reqLogin.userName))
             {
-                res.code = 1; //账号不能为空
-                SessionUtils.WriteAndFlush(ctx, res);
-                return;
+                return MSG.Create(ErrCode.AccountCannotBeNull);
             }
 
             if (reqLogin.platform != "android" && reqLogin.platform != "ios" && reqLogin.platform != "unity")
             {
                 //验证平台合法性
-                res.code = 2;
-                SessionUtils.WriteAndFlush(ctx, res);
-                return;
+                return MSG.Create(ErrCode.UnknownPlatform);
             }
 
             if (reqLogin.sdkType > 0)
@@ -49,20 +43,21 @@ namespace Geek.Server.Logic.Login
                 LOGGER.Info("创建新号:" + roleId);
             }
 
-            //添加到chennel
-            var session = new Session();
-            session.Id = roleId;
-            session.Time = DateTime.Now;
-            session.Ctx = ctx;
-            session.Sign = reqLogin.device;
+            //添加到session
+            var session = new Session
+            {
+                Id = roleId,
+                Time = DateTime.Now,
+                Channel = channel,
+                Sign = reqLogin.device
+            };
             SessionManager.Add(session);
 
             //登陆流程
             var roleComp = await ActorMgr.GetCompAgent<RoleLoginCompAgent>(roleId);
             await roleComp.OnLogin(reqLogin, isNewRole, roleId);
             var resLogin = await roleComp.BuildLoginMsg();
-            resLogin.UniId = reqLogin.UniId;
-            SessionUtils.WriteAndFlush(ctx, resLogin);
+            return MSG.Create(resLogin);
         }
 
         public async Task<long> GetRoleIdOfPlayer(string userName, int sdkType)
