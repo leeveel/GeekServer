@@ -18,6 +18,7 @@ namespace Geek.Client
         public void Clear()
         {
             remainLength = 0;
+            Magic = 0x1234;
         }
 
         public void Encode(int msgId, ref byte[] data, int length)
@@ -25,12 +26,12 @@ namespace Geek.Client
             EncodePackage(msgId, ref data, length);
         }
 
-        private static int Magic = 988;
+        private int Magic = 0x1234;
         private void EncodePackage(int msgId, ref byte[] data, int length)
         {
             var times = TimeUtils.CurrentTimeMillis();
             var magic = Magic++;
-            magic ^= (0xFE98 << 8);
+            magic ^= (0x1234 << 8);
             magic ^= length;
 
             int offset = 0;

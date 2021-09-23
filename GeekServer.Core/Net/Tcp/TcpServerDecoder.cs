@@ -105,20 +105,15 @@ namespace Geek.Server
             order ^= (0x1234 << 8);
             order ^= msgLen;
             var _order = context.Channel.GetAttribute(LAST_RECV_ORDER).Get();
-            if (_order != null)
+            if (_order == null)
+                _order = new OneParam<int>(0x1234);
+            int lastOrder = _order.value;
+            if (order != lastOrder)
             {
-                int lastOrder = _order.value;
-                if (order != lastOrder + 1)
-                {
-                    LOGGER.Error("包序列出错, order=" + order + ", lastOrder=" + lastOrder);
-                    return false;
-                }
-                _order.value = order;
+                LOGGER.Error("包序列出错, order=" + order + ", lastOrder=" + lastOrder);
+                return false;
             }
-            else
-            {
-                _order = new OneParam<int>(order);
-            }
+            _order.value = order+1;
             context.Channel.GetAttribute(LAST_RECV_ORDER).Set(_order);
             return true;
         }
