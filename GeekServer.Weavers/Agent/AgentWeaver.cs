@@ -168,7 +168,7 @@ namespace Geek.Server.Weavers
                             ParameterDefinition param = pm.Parameters[i];
                             privateMethodDef.Parameters.Add(param);
                             var code = GetCodeByFieldIndex(i + 1);
-                            if (code == OpCodes.Ldarga_S)
+                            if (code == OpCodes.Ldarg_S)
                             {
                                 privateMethodInstructions.Add(Instruction.Create(code, param));
                             }
