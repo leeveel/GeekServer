@@ -1,7 +1,6 @@
 using NLog;
 using System;
 using System.IO;
-using System.Threading;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
@@ -16,7 +15,8 @@ namespace Geek.Server
     {
         private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        int Magic = 258;
+        private const int Magic = 0x1234;
+        int count = 0;
         /// <summary>
         /// 编码消息
         /// </summary>
@@ -25,9 +25,8 @@ namespace Geek.Server
             byte[] msgData = msg.Data;
             int len = 4 + 8 + 4 + 4 + msgData.Length;
 
-            Interlocked.Increment(ref Magic);
-            int magic = Magic;
-            magic ^= (0xFE98 << 8);
+            int magic = Magic + count++;
+            magic ^= Magic << 8;
             magic ^= len;
 
             output.WriteInt(len);

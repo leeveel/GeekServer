@@ -63,6 +63,11 @@ namespace Geek.Server.Logic.Bag
             return Task.CompletedTask;
         }
 
+        public Task Test3(int a, int b, int c, int d, string e)
+        {
+            return Task.CompletedTask;
+        }
+
 
     }
 }
