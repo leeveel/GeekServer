@@ -90,17 +90,21 @@ GeekServer有严格的书写规范检查，如不符合规范编译直接报错
 3.CompAgent中不能书写构造函数（实际上也没有这样的需求）  
 4.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上[NotAwait]注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。如果逻辑上没有等待，又没加注解可能会存在线程安全问题
 ```c#
-var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
-_ = serverComp.NotifyAllClient();
-
-[NotAwait]
 public Task NotifyAllClient()
 {
    for(int i=0; i<clients.count; i++)
    {
-     //notify client
+     _ = NotifyOneClient(clients[i].roleId);
    }
 }
+
+[NotAwait]
+public Task NotifyOneClient(long roleId)
+{
+	//...
+	//...
+}
+
 ```
 5.CompAgent中不需要提供给外部访问方法，请尽量声明为非public类型，这样会少一次入队判断，效率会更高 
 ```c#
