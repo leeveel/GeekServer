@@ -12,15 +12,13 @@ namespace Geek.Server
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         static readonly object lockObj = new object();
-        static Func<Task> shutdownFunc;
+        static List<Func<Task>> shutdownFunc = new List<Func<Task>>();
         static readonly ConcurrentQueue<Func<Task>> timerFuncList = new ConcurrentQueue<Func<Task>>();
         public static void AddShutdownSaveFunc(Func<Task> shutdown, Func<Task> timer)
         {
             lock (lockObj)
             {
-                shutdownFunc -= shutdown;
-                shutdownFunc += shutdown;
-
+                shutdownFunc.Add(shutdown);
                 if (!timerFuncList.Contains(timer))
                     timerFuncList.Enqueue(timer);
             }
@@ -34,8 +32,12 @@ namespace Geek.Server
             try
             {
                 var start = DateTime.Now;
-                if (shutdownFunc != null)
-                    await shutdownFunc();
+                var tasks = new List<Task>();
+                foreach (var item in shutdownFunc)
+                {
+                    tasks.Add(item());
+                }
+                await Task.WhenAll(tasks);
                 LOGGER.Info("all state save time:{}毫秒", (DateTime.Now - start).TotalMilliseconds);
             }
             catch (Exception e)
@@ -85,10 +87,13 @@ namespace Geek.Server
                 return;
 
             await ReadStateAsync();
-
-            StateComponent.AddShutdownSaveFunc(saveAllStateOfAType, timerSaveAllStateOfAType);
             aTypeAllStateMap.TryRemove(_State.Id, out _);
             aTypeAllStateMap.TryAdd(_State.Id, _State);
+        }
+
+        static StateComponent()
+        {
+            StateComponent.AddShutdownSaveFunc(saveAllStateOfAType, timerSaveAllStateOfAType);
         }
 
         static readonly ConcurrentDictionary<long, TState> aTypeAllStateMap = new ConcurrentDictionary<long, TState>();
