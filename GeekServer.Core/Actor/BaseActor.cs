@@ -61,26 +61,26 @@ namespace Geek.Server
                 return;
             }
             needEnqueue = true;
-            long curChainId = Volatile.Read(ref curCallChainId);
-            if (curChainId > 0)
-            {
-                lock (Lockable)
-                {
-                    WaitingMap.TryGetValue(curChainId, out var waiting);
-                    //Console.WriteLine($"curCallChainId:{curCallChainId} waitingCallChainId:{waiting?.curCallChainId}");
-                    if (waiting != null && Volatile.Read(ref waiting.curCallChainId) == callChainId)
-                    {
-                        if (CurCanBeInterleaved)
-                            needEnqueue = false;
-                        else
-                            throw new DeadlockException("multi call chain dead lock");
-                    }
-                    else
-                    {
-                        WaitingMap[callChainId] = this;
-                    }
-                }
-            }
+            //long curChainId = Volatile.Read(ref curCallChainId);
+            //if (curChainId > 0)
+            //{
+            //    lock (Lockable)
+            //    {
+            //        WaitingMap.TryGetValue(curChainId, out var waiting);
+            //        //Console.WriteLine($"curCallChainId:{curCallChainId} waitingCallChainId:{waiting?.curCallChainId}");
+            //        if (waiting != null && Volatile.Read(ref waiting.curCallChainId) == callChainId)
+            //        {
+            //            if (CurCanBeInterleaved)
+            //                needEnqueue = false;
+            //            else
+            //                throw new DeadlockException("multi call chain dead lock");
+            //        }
+            //        else
+            //        {
+            //            WaitingMap[callChainId] = this;
+            //        }
+            //    }
+            //}
         }
 
         public Task SendAsync(Action work, bool isAwait = true, int timeOut = TIME_OUT)
