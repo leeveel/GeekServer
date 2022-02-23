@@ -12,7 +12,7 @@ namespace Geek.Server.Test
         public override async Task Active()
         {
             await base.Active();
-            _ = Start();
+            _ = Actor.SendAsync(Start, false);
         }
 
 

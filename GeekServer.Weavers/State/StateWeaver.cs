@@ -56,6 +56,34 @@ namespace Geek.Server.Weavers
             var stList_AddMethodRef = ModuleDefinition.ImportReference(stList_AddMethodDef.MakeGeneric(baseStateTypeDef));
             var stList_RemoveMethodDef = stListTypeDef.Methods.FirstOrDefault(md => md.Name == "Remove");
             var stList_RemoveMethodRef = ModuleDefinition.ImportReference(stList_RemoveMethodDef.MakeGeneric(baseStateTypeDef));
+
+            var changedSetFieldDef = innerStateTypeDef.Fields.FirstOrDefault(fd => fd.Name == "changedSet");
+            if (stFieldDef == null)
+            {
+                WriteError("InnerDBState获取changedSet属性失败");
+                return;
+            }
+
+            var changedSetFieldRef = ModuleDefinition.ImportReference(changedSetFieldDef);
+
+            var changedSetListTypeDef = changedSetFieldDef.FieldType.Resolve();
+            if (changedSetListTypeDef == null)
+            {
+                WriteError("获取HashSet<string>类型失败");
+                return;
+            }
+
+            var stringTypeDef = FindTypeDefinition("System.String");
+            if (stringTypeDef == null)
+            {
+                WriteError("获取System.String类型失败");
+                return;
+            }
+
+            var changedSetList_AddMethodDef = changedSetListTypeDef.Methods.FirstOrDefault(md => md.Name == "Add");
+            var changedSetList_AddMethodRef = ModuleDefinition.ImportReference(changedSetList_AddMethodDef.MakeGeneric(stringTypeDef));
+            var changedSetList_RemoveMethodDef = changedSetListTypeDef.Methods.FirstOrDefault(md => md.Name == "Remove");
+            var changedSetList_RemoveMethodRef = ModuleDefinition.ImportReference(changedSetList_RemoveMethodDef.MakeGeneric(stringTypeDef));
             //import end
 
 
@@ -139,12 +167,20 @@ namespace Geek.Server.Weavers
                     if (proDef.PropertyType.IsValueType || proDef.PropertyType == ModuleDefinition.TypeSystem.String)
                     {
                         //_stateChanged = true;
-                        instructions.Insert(3,
+                        var idx = instructions.Insert(3,
                             Instruction.Create(OpCodes.Ldarg_0),
                             Instruction.Create(OpCodes.Ldc_I4_1),
                             Instruction.Create(OpCodes.Stfld, changeFieldRef),
                             Instruction.Create(OpCodes.Nop)
                         );
+
+                        instructions.Insert(idx,
+                            Instruction.Create(OpCodes.Ldarg_0),
+                            Instruction.Create(OpCodes.Ldfld, changedSetFieldRef),
+                            Instruction.Create(OpCodes.Ldstr, proDef.Name),
+                            Instruction.Create(OpCodes.Callvirt, changedSetList_AddMethodRef),
+                            Instruction.Create(OpCodes.Pop)
+                            );
                     }
                     else
                     {
@@ -210,6 +246,14 @@ namespace Geek.Server.Weavers
                             Instruction.Create(OpCodes.Callvirt, stList_AddMethodRef),//调用stList.add
                             Instruction.Create(OpCodes.Pop),
                             addEnd);
+
+                        index = instructions.Insert(index,
+                            Instruction.Create(OpCodes.Ldarg_0),
+                            Instruction.Create(OpCodes.Ldfld, changedSetFieldRef),
+                            Instruction.Create(OpCodes.Ldstr, proDef.Name),
+                            Instruction.Create(OpCodes.Callvirt, changedSetList_AddMethodRef),
+                            Instruction.Create(OpCodes.Pop)
+                            );
 
                         //_stateChanged = true;
                         index = instructions.Insert(index,

@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
 
 //此文件的类型会在编译时自动注入，以最低代价获取状态是否改变
@@ -17,6 +16,9 @@ namespace Geek.Server
     public abstract class InnerDBState : BaseState
     {
         protected HashSet<BaseState> stList = new HashSet<BaseState>();
+
+        public HashSet<string> changedSet = new HashSet<string>();
+
         public override bool IsChanged
         {
             get
@@ -34,8 +36,8 @@ namespace Geek.Server
 
         public override void ClearChanges()
         {
-            //base.ClearChanges();
             _stateChanged = false;
+            changedSet.Clear();
             foreach (var st in stList)
             {
                 if (st != null)
@@ -43,7 +45,6 @@ namespace Geek.Server
             }
         }
     }
-
 
     [BsonIgnoreExtraElements(true, Inherited = true)]//忽略代码删除的字段[数据库多余的字段]
     public abstract class BaseState
@@ -56,35 +57,5 @@ namespace Geek.Server
         {
             _stateChanged = false;
         }
-
-        #region thread safe save
-        volatile int changeVersion;
-        volatile int savedVersion;
-        volatile int tosaveVersion;
-
-        ///<summary>存数据库前先await入队保存要存数据库的change版本</summary>
-        public void ReadyToSaveToDB()
-        {
-            Interlocked.Exchange(ref tosaveVersion, changeVersion);
-        }
-
-        ///<summary>保存完后修改已保存版本号</summary>
-        public void SavedToDB()
-        {
-            Interlocked.Exchange(ref savedVersion, tosaveVersion);
-        }
-
-        ///<summary>相对数据库是否有改变</summary>
-        public bool IsChangedComparedToDB()
-        {
-            if (IsChanged)
-            {
-                Interlocked.Increment(ref changeVersion);
-                ClearChanges();
-            }
-            return changeVersion > savedVersion;
-        }
-
-        #endregion
     }
 }

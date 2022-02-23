@@ -99,8 +99,9 @@ namespace Geek.Server
         static readonly ConcurrentDictionary<long, TState> aTypeAllStateMap = new ConcurrentDictionary<long, TState>();
         static async Task saveAllStateOfAType()
         {
+            var type = typeof(TState);
             //批量回存当前类型的所有state
-            var batchList = new List<ReplaceOneModel<TState>>();
+            var batchList = new List<WriteModel<TState>>();
             foreach (var kv in aTypeAllStateMap)
             {
                 var state = kv.Value;
@@ -109,13 +110,11 @@ namespace Geek.Server
                     continue;
 
                 //关服时直接调用，actor逻辑已停，安全
-                if (!state.IsChangedComparedToDB())
+                if (!state.IsChanged)
                     continue;
 
-                state.ReadyToSaveToDB();
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, state.Id);
-                var saveModel = new ReplaceOneModel<TState>(filter, state) { IsUpsert = true };
-                batchList.Add(saveModel);
+                var model = MongoDBConnection.BuildUpdateOneModel(type, state, state.Id);
+                batchList.Add(model);
             }
 
             var db = MongoDBConnection.Singleton.CurDateBase;
@@ -143,23 +142,17 @@ namespace Geek.Server
                 {
                     LOGGER.Error("存数据库失败，可以先存到磁盘");
                 }
-                else
-                {
-                    foreach (var one in list)
-                    {
-                        var state = one.Replacement;
-                        state.SavedToDB();
-                    }
-                }
             }
         }
 
         static async Task timerSaveAllStateOfAType()
         {
+            var type = typeof(TState);
+
             //批量回存当前类型的所有state
             var taskList = new List<Task>();
             var changedStateIdEuque = new ConcurrentQueue<long>();
-            var batchQueue = new ConcurrentQueue<ReplaceOneModel<BsonDocument>>();
+            var batchQueue = new ConcurrentQueue<WriteModel<TState>>();
             foreach (var kv in aTypeAllStateMap)
             {
                 var state = kv.Value;
@@ -169,13 +162,11 @@ namespace Geek.Server
 
                 var filter = Builders<BsonDocument>.Filter.Eq(MongoField.Id, state.Id);
                 var task = actor.SendAsync(() => {
-                    if (!state.IsChangedComparedToDB())
+                    if (!state.IsChanged)
                         return;
 
-                    var bson = state.ToBsonDocument();
-                    state.ReadyToSaveToDB();
-                    var saveModel = new ReplaceOneModel<BsonDocument>(filter, bson) { IsUpsert = true };
-                    batchQueue.Enqueue(saveModel);
+                    var model = MongoDBConnection.BuildUpdateOneModel(type, state, state.Id);
+                    batchQueue.Enqueue(model);
                     changedStateIdEuque.Enqueue(state.Id);
 
                 });
@@ -183,12 +174,12 @@ namespace Geek.Server
             }
             await Task.WhenAll(taskList);
 
-            var batchList = new List<ReplaceOneModel<BsonDocument>>();
+            var batchList = new List<WriteModel<TState>>();
             batchList.AddRange(batchQueue);
             var changedStateIdList = new List<long>();
             changedStateIdList.AddRange(changedStateIdEuque);
             var db = MongoDBConnection.Singleton.CurDateBase;
-            var col = db.GetCollection<BsonDocument>(typeof(TState).FullName);
+            var col = db.GetCollection<TState>(typeof(TState).FullName);
             int idx = 0;
             int once = 500;
             while (idx < batchList.Count)
@@ -196,8 +187,8 @@ namespace Geek.Server
                 var list = batchList.GetRange(idx, Math.Min(once, batchList.Count - idx));
                 var stateIdList = changedStateIdList.GetRange(idx, list.Count);
                 idx += once;
-                var result = await col.BulkWriteAsync(list, new BulkWriteOptions() { IsOrdered = false });
-                if (result.IsAcknowledged)
+                var ret = await col.BulkWriteAsync(list, new BulkWriteOptions() { IsOrdered = false });
+                if (ret.IsAcknowledged)
                 {
                     foreach (var id in stateIdList)
                     {
@@ -205,9 +196,7 @@ namespace Geek.Server
                         if (state == null)
                             continue;
                         var actor = await ActorManager.Get(state.Id);
-                        _ = actor.SendAsync(() => {
-                            state.SavedToDB();
-                        }, false);
+                        _ = actor.SendAsync(state.ClearChanges, false);
                     }
                 }
                 await Task.Delay(100);
@@ -251,7 +240,7 @@ namespace Geek.Server
         {
             if (_State == null)
                 return Task.FromResult(true);
-            return Task.FromResult(!_State.IsChangedComparedToDB());
+            return Task.FromResult(!_State.IsChanged);
         }
     }
 }

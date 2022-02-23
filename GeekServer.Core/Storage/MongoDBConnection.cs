@@ -22,8 +22,8 @@ namespace Geek.Server
             try
             {
                 //读数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
-                var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
+                var filter = BuildFilter<TState>(id);
+                var col = BuildCol<TState>();
                 var state = await (await col.FindAsync(filter)).FirstOrDefaultAsync();
                 if (state == null && defaultGetter != null)
                     state = defaultGetter();
@@ -46,8 +46,8 @@ namespace Geek.Server
             try
             {
                 //读数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
-                var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
+                var filter = BuildFilter<TState>(id);
+                var col = BuildCol<TState>();
                 var state = await (await col.FindAsync(filter)).FirstOrDefaultAsync();
                 if (state == null && defaultGetter != null)
                     state = defaultGetter();
@@ -64,31 +64,81 @@ namespace Geek.Server
             }
         }
 
-        public async Task SaveState<TState>(TState state) where TState : DBState
+        public Task SaveState<TState>(TState state) where TState : DBState
         {
-            if (state.IsChangedComparedToDB())
+            return SaveState(state.Id, state);
+        }
+
+        public async Task SaveState<TState>(object id, TState state) where TState : InnerDBState
+        {
+            if (state.IsChanged)
             {
-                state.ReadyToSaveToDB();
                 //保存数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, state.Id);
-                var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
-                var ret = await col.ReplaceOneAsync(filter, state, new ReplaceOptions() { IsUpsert = true });
-                if (ret.IsAcknowledged)
-                    state.SavedToDB();
+                var filter = BuildFilter<TState>(id);
+                var col = BuildCol<TState>();
+                var update = BuildUpdateDefinition(typeof(TState), state);
+                await col.UpdateOneAsync(filter, update, new UpdateOptions() { IsUpsert = true });
             }
         }
 
-        public async Task SaveState<TState>(string id, TState state) where TState : InnerDBState
+        private IMongoCollection<TState> BuildCol<TState>() where TState : InnerDBState
         {
-            if (state.IsChangedComparedToDB())
+            return CurDateBase.GetCollection<TState>(typeof(TState).FullName);
+        }
+
+        public static UpdateOneModel<TState> BuildUpdateOneModel<TState>(Type type, TState state, object id) where TState : InnerDBState
+        {
+            var filter = BuildFilter<TState>(id);
+            var update = BuildUpdateDefinition(type, state);
+            return new UpdateOneModel<TState>(filter, update) { IsUpsert = true };
+        }
+
+        private static FilterDefinition<TState> BuildFilter<TState>(object id) where TState : InnerDBState
+        {
+            return Builders<TState>.Filter.Eq(MongoField.Id, id);
+        }
+
+        private static UpdateDefinition<TState> BuildUpdateDefinition<TState>(Type type, TState state) where TState : InnerDBState
+        {
+            UpdateDefinition<TState> update = null;
+            foreach (var p in type.GetProperties())
             {
-                state.ReadyToSaveToDB();
-                //保存数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
-                var col = CurDateBase.GetCollection<TState>(typeof(TState).FullName);
-                var ret = await col.ReplaceOneAsync(filter, state, new ReplaceOptions() { IsUpsert = true });
-                if (ret.IsAcknowledged)
-                    state.SavedToDB();
+                var v = p.GetValue(state);
+                if (state.changedSet.Contains(p.Name))
+                {
+                    UpdateModel(ref update, p.Name, v);
+                }
+                else if (v is InnerDBState ids)
+                {
+                    foreach (var pp in p.PropertyType.GetProperties())
+                    {
+                        var vv = pp.GetValue(v);
+
+                        if (ids.changedSet.Contains(pp.Name)
+                        || (vv is BaseState vvds && vvds.IsChanged))
+                        {
+                            UpdateModel(ref update, $"{p.Name}.{pp.Name}", vv);
+                        }
+                    }
+                }
+                else if (v is BaseState ds && ds.IsChanged)
+                {
+                    UpdateModel(ref update, p.Name, v);
+                }
+            }
+
+            return update;
+        }
+
+        private static void UpdateModel<TState>(ref UpdateDefinition<TState> update, string name, object v) where TState : InnerDBState
+        {
+            if (update == null)
+            {
+                update = Builders<TState>.Update.Set(name, v);
+            }
+            else
+            {
+                update = update.Set(name, v);
             }
         }
 
