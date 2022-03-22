@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -11,11 +10,6 @@ namespace Geek.Server
         readonly static NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public const int TIME_OUT = 10000;
 
-        public static object Lockable = new object();
-        /// <summary>
-        /// 调用链 ---  正在等待的ActorId
-        /// </summary>
-        public static ConcurrentDictionary<long, BaseActor> WaitingMap = new ConcurrentDictionary<long, BaseActor>();
         /// <summary>
         /// 当前调用链id
         /// </summary>
@@ -61,26 +55,6 @@ namespace Geek.Server
                 return;
             }
             needEnqueue = true;
-            //long curChainId = Volatile.Read(ref curCallChainId);
-            //if (curChainId > 0)
-            //{
-            //    lock (Lockable)
-            //    {
-            //        WaitingMap.TryGetValue(curChainId, out var waiting);
-            //        //Console.WriteLine($"curCallChainId:{curCallChainId} waitingCallChainId:{waiting?.curCallChainId}");
-            //        if (waiting != null && Volatile.Read(ref waiting.curCallChainId) == callChainId)
-            //        {
-            //            if (CurCanBeInterleaved)
-            //                needEnqueue = false;
-            //            else
-            //                throw new DeadlockException("multi call chain dead lock");
-            //        }
-            //        else
-            //        {
-            //            WaitingMap[callChainId] = this;
-            //        }
-            //    }
-            //}
         }
 
         public Task SendAsync(Action work, bool isAwait = true, int timeOut = TIME_OUT)

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Geek.Server
@@ -12,16 +11,15 @@ namespace Geek.Server
         public abstract string GetTrace();
         public abstract void ForceSetResult();
         public long CallChainId { get; set; }
-        public bool CanBeInterleaved { get; set; }
         protected void SetContext()
         {
             RuntimeContext.SetContext(CallChainId);
             Owner.curCallChainId = CallChainId;
-            Owner.CurCanBeInterleaved = CanBeInterleaved;
         }
         public void ResetContext()
         {
-            BaseActor.WaitingMap.TryRemove(CallChainId, out _);
+            Owner.curCallChainId = -1;
+            RuntimeContext.ResetContext();
         }
     }
 
@@ -35,7 +33,6 @@ namespace Geek.Server
         public ActionWrapper(Action work)
         {
             this.Work = work;
-            CanBeInterleaved = work.Method.GetCustomAttribute(typeof(InterleaveWhenDeadlock)) != null;
             Tcs = new TaskCompletionSource<bool>();
         }
 
@@ -52,8 +49,8 @@ namespace Geek.Server
             }
             finally
             {
-                Tcs.TrySetResult(true);
                 ResetContext();
+                Tcs.TrySetResult(true);
             }
             return Task.CompletedTask;
         }
@@ -65,8 +62,8 @@ namespace Geek.Server
 
         public override void ForceSetResult()
         {
-            Tcs.TrySetResult(false);
             ResetContext();
+            Tcs.TrySetResult(false);
         }
     }
 
@@ -80,7 +77,6 @@ namespace Geek.Server
         public FuncWrapper(Func<T> work)
         {
             this.Work = work;
-            CanBeInterleaved = work.Method.GetCustomAttribute(typeof(InterleaveWhenDeadlock)) != null;
             this.Tcs = new TaskCompletionSource<T>();
         }
 
@@ -98,8 +94,8 @@ namespace Geek.Server
             }
             finally
             {
-                Tcs.TrySetResult(ret);
                 ResetContext();
+                Tcs.TrySetResult(ret);
             }
             return Task.CompletedTask;
         }
@@ -111,8 +107,8 @@ namespace Geek.Server
 
         public override void ForceSetResult()
         {
-            Tcs.TrySetResult(default);
             ResetContext();
+            Tcs.TrySetResult(default);
         }
     }
 
@@ -126,7 +122,6 @@ namespace Geek.Server
         public ActionAsyncWrapper(Func<Task> work)
         {
             this.Work = work;
-            CanBeInterleaved = work.Method.GetCustomAttribute(typeof(InterleaveWhenDeadlock)) != null;
             Tcs = new TaskCompletionSource<bool>();
         }
 
@@ -143,8 +138,8 @@ namespace Geek.Server
             }
             finally
             {
-                Tcs.TrySetResult(true);
                 ResetContext();
+                Tcs.TrySetResult(true);
             }
         }
 
@@ -155,8 +150,8 @@ namespace Geek.Server
 
         public override void ForceSetResult()
         {
-            Tcs.TrySetResult(false);
             ResetContext();
+            Tcs.TrySetResult(false);
         }
     }
 
@@ -170,7 +165,6 @@ namespace Geek.Server
         public FuncAsyncWrapper(Func<Task<T>> work)
         {
             this.Work = work;
-            CanBeInterleaved = work.Method.GetCustomAttribute(typeof(InterleaveWhenDeadlock)) != null;
             this.Tcs = new TaskCompletionSource<T>();
         }
 
@@ -188,8 +182,8 @@ namespace Geek.Server
             }
             finally
             {
-                Tcs.TrySetResult(ret);
                 ResetContext();
+                Tcs.TrySetResult(ret);
             }
         }
 
@@ -200,8 +194,8 @@ namespace Geek.Server
 
         public override void ForceSetResult()
         {
-            Tcs.TrySetResult(default);
             ResetContext();
+            Tcs.TrySetResult(default);
         }
     }
 }
