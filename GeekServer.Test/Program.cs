@@ -35,9 +35,9 @@ namespace Geek.Server.Test
         private static void RegisterComps()
         {
             ComponentMgr.Singleton.RegistComp<RoleComp>((int)ActorType.Role, true);
-            ComponentMgr.Singleton.RegistComp<NetComp>((int)ActorType.Role, true);
-            ComponentMgr.Singleton.RegistComp<LoginComp>((int)ActorType.Role, true);
-            ComponentMgr.Singleton.RegistComp<BagComp>((int)ActorType.Role, true);
+            ComponentMgr.Singleton.RegistComp<NetComp>((int)ActorType.Role, false);
+            ComponentMgr.Singleton.RegistComp<LoginComp>((int)ActorType.Role, false);
+            ComponentMgr.Singleton.RegistComp<BagComp>((int)ActorType.Role, false);
         }
 
     }
