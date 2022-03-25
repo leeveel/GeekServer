@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace Geek.Server.Net.Udp
+namespace Geek.Server.Udp
 {
     public class LogEvent
     {

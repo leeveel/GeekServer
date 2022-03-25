@@ -76,6 +76,8 @@ namespace Geek.Server
             }
         }
 
+        public int UniId { get; private set; }
+
         public ErrInfo Info { get; private set; }
 
         public IMessage msg { get; private set; }
@@ -89,25 +91,37 @@ namespace Geek.Server
             return res;
         }
 
-        public static MSG Create(ErrInfo errInfo, IMessage msg = null)
+        public static MSG Create(ErrCode errCode, int uniId, string desc, IMessage msg = null)
         {
             var res = new MSG();
+            res.Info = new ErrInfo(errCode, desc);
+            res.UniId = uniId;
+            res.msg = msg;
+            return res;
+        }
+
+        public static MSG Create(ErrInfo errInfo, int uniId = 0, IMessage msg = null)
+        {
+            var res = new MSG();
+            res.UniId = uniId;
             res.Info = errInfo;
             res.msg = msg;
             return res;
         }
 
-        public static MSG Create(ErrCode errCode, IMessage msg = null)
+        public static MSG Create(ErrCode errCode, IMessage msg = null, int uniId = 0)
         {
             var res = new MSG();
+            res.UniId = uniId;
             res.Info = ErrInfo.Create(errCode);
             res.msg = msg;
             return res;
         }
 
-        public static MSG Create(IMessage msg = null)
+        public static MSG Create(IMessage msg = null, int uniId = 0)
         {
             var res = new MSG();
+            res.UniId = uniId;
             res.Info = ErrInfo.Success;
             res.msg = msg;
             return res;

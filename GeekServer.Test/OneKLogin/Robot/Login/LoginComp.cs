@@ -10,7 +10,7 @@ namespace Geek.Server.Test
     {
         public async Task<bool> ReqLogin()
         {
-            string playerId = ActorId.ToString();
+            string playerId = EntityId.ToString();
             ReqLogin msg = new ReqLogin
             {
                 userName = playerId,

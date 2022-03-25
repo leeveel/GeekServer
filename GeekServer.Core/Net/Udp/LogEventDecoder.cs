@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Geek.Server.Net.Udp
+namespace Geek.Server.Udp
 {
     public class LogEventDecoder : MessageToMessageDecoder<DatagramPacket>
     {

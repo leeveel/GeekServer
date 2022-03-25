@@ -21,7 +21,7 @@ namespace Geek.Server.Test
             Comp.channel = await RobotClient.Connect();
             //添加session
             Session session = new Session();
-            session.Id = ActorId;
+            session.Id = EntityId;
             Comp.channel.GetAttribute(SessionManager.SESSION).Set(session);
         }
 

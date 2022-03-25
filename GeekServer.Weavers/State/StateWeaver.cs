@@ -4,7 +4,7 @@ using Mono.Cecil.Cil;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Geek.Server.Weavers
+namespace Weavers
 {
     //自定义weaver配置说明
     //https://github.com/Fody/Home/blob/master/pages/in-solution-weaving.md
@@ -13,7 +13,7 @@ namespace Geek.Server.Weavers
         public override void Execute()
         {
             WriteMessage($"StateWeaver Start：{ModuleDefinition.Assembly.Name}", MessageImportance.High);
-            var baseStateTypeDef = FindTypeDefinition("Geek.Server.BaseState");
+            var baseStateTypeDef = FindTypeDefinition("Geek.Server.BaseDBState");
             if (baseStateTypeDef == null)
             {
                 WriteError("获取Geek.Server.BaseState类型失败");
@@ -28,18 +28,25 @@ namespace Geek.Server.Weavers
             }
             var changeFieldRef = ModuleDefinition.ImportReference(changeFieldDef);
 
+            //内网才开的state调用链检测
+            var chainCheckMethodDef = baseStateTypeDef.Methods.FirstOrDefault(m => m.Name == "CheckIsInCompActorCallChain");
+            MethodReference chainCheckMethodRef = null;
+            if (chainCheckMethodDef != null)
+                chainCheckMethodRef = ModuleDefinition.ImportReference(chainCheckMethodDef);
+            var setActorMethodDef = baseStateTypeDef.Methods.FirstOrDefault(m => m.Name == "SetCompActor");
+            MethodReference setActorMethodRef = null;
+            if (setActorMethodDef != null)
+                setActorMethodRef = ModuleDefinition.ImportReference(setActorMethodDef);
+            var chainCheckActorDef = baseStateTypeDef.Fields.FirstOrDefault(f => f.Name == "CompActor");
+            FieldReference chainCheckActorRef = null;
+            if (chainCheckActorDef != null)
+                chainCheckActorRef = ModuleDefinition.ImportReference(chainCheckActorDef);
 
-            var innerStateTypeDef = FindTypeDefinition("Geek.Server.InnerDBState");
-            if (innerStateTypeDef == null)
-            {
-                WriteError("获取Geek.Server.InnerDBState类型失败");
-                return;
-            }
 
-            var stFieldDef = innerStateTypeDef.Fields.FirstOrDefault(fd => fd.Name == "stList");
+            var stFieldDef = baseStateTypeDef.Fields.FirstOrDefault(fd => fd.Name == "stList");
             if (stFieldDef == null)
             {
-                WriteError("InnerDBState获取stList属性失败");
+                WriteError("DBState获取stList属性失败");
                 return;
             }
 
@@ -48,7 +55,7 @@ namespace Geek.Server.Weavers
             var stListTypeDef = stFieldDef.FieldType.Resolve();
             if (stListTypeDef == null)
             {
-                WriteError("获取HashSet<Geek.Server.BaseState>类型失败");
+                WriteError("获取HashSet<Geek.Server.BaseDBState>类型失败");
                 return;
             }
 
@@ -56,34 +63,6 @@ namespace Geek.Server.Weavers
             var stList_AddMethodRef = ModuleDefinition.ImportReference(stList_AddMethodDef.MakeGeneric(baseStateTypeDef));
             var stList_RemoveMethodDef = stListTypeDef.Methods.FirstOrDefault(md => md.Name == "Remove");
             var stList_RemoveMethodRef = ModuleDefinition.ImportReference(stList_RemoveMethodDef.MakeGeneric(baseStateTypeDef));
-
-            var changedSetFieldDef = innerStateTypeDef.Fields.FirstOrDefault(fd => fd.Name == "changedSet");
-            if (stFieldDef == null)
-            {
-                WriteError("InnerDBState获取changedSet属性失败");
-                return;
-            }
-
-            var changedSetFieldRef = ModuleDefinition.ImportReference(changedSetFieldDef);
-
-            var changedSetListTypeDef = changedSetFieldDef.FieldType.Resolve();
-            if (changedSetListTypeDef == null)
-            {
-                WriteError("获取HashSet<string>类型失败");
-                return;
-            }
-
-            var stringTypeDef = FindTypeDefinition("System.String");
-            if (stringTypeDef == null)
-            {
-                WriteError("获取System.String类型失败");
-                return;
-            }
-
-            var changedSetList_AddMethodDef = changedSetListTypeDef.Methods.FirstOrDefault(md => md.Name == "Add");
-            var changedSetList_AddMethodRef = ModuleDefinition.ImportReference(changedSetList_AddMethodDef.MakeGeneric(stringTypeDef));
-            var changedSetList_RemoveMethodDef = changedSetListTypeDef.Methods.FirstOrDefault(md => md.Name == "Remove");
-            var changedSetList_RemoveMethodRef = ModuleDefinition.ImportReference(changedSetList_RemoveMethodDef.MakeGeneric(stringTypeDef));
             //import end
 
 
@@ -97,7 +76,7 @@ namespace Geek.Server.Weavers
                 var checkTypeType = typeDef;
                 while (checkTypeType != null)
                 {
-                    if (checkTypeType.FullName == "Geek.Server.InnerDBState")
+                    if (checkTypeType.FullName == "Geek.Server.BaseDBState")
                     {
                         needTypeWeave = true;
                         break;
@@ -166,21 +145,21 @@ namespace Geek.Server.Weavers
 
                     if (proDef.PropertyType.IsValueType || proDef.PropertyType == ModuleDefinition.TypeSystem.String)
                     {
+                        //base.CheckIsInCompActorCallChain();
+                        if (chainCheckMethodRef != null)
+                        {
+                            instructions.Insert(3,
+                                Instruction.Create(OpCodes.Ldarg_0),
+                                Instruction.Create(OpCodes.Call, chainCheckMethodRef));
+                        }
+
                         //_stateChanged = true;
-                        var idx = instructions.Insert(3,
+                        instructions.Insert(3,
                             Instruction.Create(OpCodes.Ldarg_0),
                             Instruction.Create(OpCodes.Ldc_I4_1),
                             Instruction.Create(OpCodes.Stfld, changeFieldRef),
                             Instruction.Create(OpCodes.Nop)
                         );
-
-                        instructions.Insert(idx,
-                            Instruction.Create(OpCodes.Ldarg_0),
-                            Instruction.Create(OpCodes.Ldfld, changedSetFieldRef),
-                            Instruction.Create(OpCodes.Ldstr, proDef.Name),
-                            Instruction.Create(OpCodes.Callvirt, changedSetList_AddMethodRef),
-                            Instruction.Create(OpCodes.Pop)
-                            );
                     }
                     else
                     {
@@ -233,13 +212,25 @@ namespace Geek.Server.Weavers
 
                         //if(newValue != null) stList.Add(newValue);
                         var addEnd = Instruction.Create(OpCodes.Nop);
+                        //if(value != null)
                         index = instructions.Insert(index,
                             Instruction.Create(OpCodes.Ldarg_1), //value
                             Instruction.Create(OpCodes.Ldnull), //null
                             Instruction.Create(OpCodes.Cgt_Un), //比较
-                            Instruction.Create(OpCodes.Brfalse_S, addEnd), //if flase jump
+                            Instruction.Create(OpCodes.Brfalse_S, addEnd)); //if flase jump
 
-                            //if内
+                        if (chainCheckMethodRef != null)
+                        {
+                            //value.CompActor = this.CompActor
+                            index = instructions.Insert(index,
+                                Instruction.Create(OpCodes.Ldarg_1),//value
+                                Instruction.Create(OpCodes.Ldarg_0),//this
+                                Instruction.Create(OpCodes.Ldfld, chainCheckActorRef),//CompActor
+                                Instruction.Create(OpCodes.Call, setActorMethodRef));//.SetCompActor
+                        }
+
+                        //stList.Add(newValue);
+                        index = instructions.Insert(index,
                             Instruction.Create(OpCodes.Ldarg_0), //this
                             Instruction.Create(OpCodes.Ldfld, stFieldRef), //stList
                             Instruction.Create(OpCodes.Ldarg_1),
@@ -247,19 +238,19 @@ namespace Geek.Server.Weavers
                             Instruction.Create(OpCodes.Pop),
                             addEnd);
 
-                        index = instructions.Insert(index,
-                            Instruction.Create(OpCodes.Ldarg_0),
-                            Instruction.Create(OpCodes.Ldfld, changedSetFieldRef),
-                            Instruction.Create(OpCodes.Ldstr, proDef.Name),
-                            Instruction.Create(OpCodes.Callvirt, changedSetList_AddMethodRef),
-                            Instruction.Create(OpCodes.Pop)
-                            );
-
                         //_stateChanged = true;
                         index = instructions.Insert(index,
                             Instruction.Create(OpCodes.Ldarg_0),
                             Instruction.Create(OpCodes.Ldc_I4_1),
                             Instruction.Create(OpCodes.Stfld, changeFieldRef));
+
+                        if (chainCheckMethodRef != null)
+                        {
+                            //base.CheckIsInCompActorCallChain();
+                            index = instructions.Insert(index,
+                                Instruction.Create(OpCodes.Ldarg_0),
+                                Instruction.Create(OpCodes.Call, chainCheckMethodRef));
+                        }
                     }
                 }
             }
@@ -278,7 +269,7 @@ namespace Geek.Server.Weavers
                 var checkType = typeRef;
                 while (checkType != null)
                 {
-                    if (checkType.FullName == "Geek.Server.BaseState")
+                    if (checkType.FullName == "Geek.Server.BaseDBState")
                         return null;
 
                     if (checkType.IsGenericInstance) //泛型检测

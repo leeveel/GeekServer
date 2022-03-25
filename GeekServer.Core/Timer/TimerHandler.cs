@@ -1,14 +1,15 @@
-﻿using System.Threading.Tasks;
+﻿
+
+using System.Threading.Tasks;
 
 namespace Geek.Server
 {
-    public abstract class TimerHandler<T> : ITimerHandler where T : IComponentAgent
+    public abstract class TimerHandler<TAgent> : ITimerHandler where TAgent : IComponentAgent
     {
-        public Task InternalHandleTimer(IComponentAgent agent, Param param)
+        public Task InnerHandleTimer(IComponentAgent agent, Param param)
         {
-            return HandleTimer((T)agent, param);
+            return HandleTimer((TAgent)agent, param);
         }
-
-        protected abstract Task HandleTimer(T agent, Param param);
+        protected abstract Task HandleTimer(TAgent agent, Param param);
     }
 }

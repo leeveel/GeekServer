@@ -41,6 +41,7 @@ namespace Geek.Server
             {
                 LOGGER.Error("Unhandled Exception:" + e.ToString());
             }
+            ExceptionMonitor.Report(ExceptionType.UnhandledException, $"{e}").Wait(TimeSpan.FromSeconds(10));
             callBack?.Invoke();
         }
     }

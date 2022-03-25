@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Geek.Server.Test
 {
-    [TcpMsgMapping(typeof(ResBagInfo))]
+    [MsgMapping(typeof(ResBagInfo))]
     public class ResBagInfoHandler : RobotHandler
     {
         private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();

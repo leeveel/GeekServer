@@ -44,11 +44,6 @@ namespace Geek.Server
             Channel.WriteAndFlushAsync(msg);
         }
 
-        protected virtual void WriteAndFlush(BaseMessage msg)
-        {
-            WriteAndFlush(msg.GetMsgId(), msg.Serialize());
-        }
-
         protected virtual void WriteAndFlush(int msgId, byte[] data)
         {
             if (msgId > 0 && data != null)

@@ -24,7 +24,9 @@ namespace Geek.Server.Test
             Console.WriteLine("初始化消息工厂......");
             TcpHandlerFactory.InitHandler(typeof(RobotManager));
 
-            ActorManager.ID_RULE = ActorID.ID_RULE;
+            EntityMgr.Type2ID = EntityID.GetEntityIdFromType;
+            EntityMgr.ID2Type = EntityID.GetEntityTypeFromID;
+
             RegisterComps();
             RobotManager.Start();
 
@@ -34,10 +36,12 @@ namespace Geek.Server.Test
 
         private static void RegisterComps()
         {
-            ComponentMgr.Singleton.RegistComp<RoleComp>((int)ActorType.Role, true);
-            ComponentMgr.Singleton.RegistComp<NetComp>((int)ActorType.Role, false);
-            ComponentMgr.Singleton.RegistComp<LoginComp>((int)ActorType.Role, false);
-            ComponentMgr.Singleton.RegistComp<BagComp>((int)ActorType.Role, false);
+            CompSetting.Singleton.RegistComp<RoleComp>((int)EntityType.Role, false);
+            CompSetting.Singleton.RegistComp<NetComp>((int)EntityType.Role, false);
+            CompSetting.Singleton.RegistComp<LoginComp>((int)EntityType.Role, false);
+            CompSetting.Singleton.RegistComp<BagComp>((int)EntityType.Role, false);
+
+            CompSetting.Singleton.SetIfEntityCompShareActor((int)EntityType.Role, true);
         }
 
     }

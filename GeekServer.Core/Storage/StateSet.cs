@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Geek.Server
 {
-    public class StateSet<T> : BaseState, ISet<T>
+    public class StateSet<T> : BaseDBState, ISet<T>
     {
         readonly HashSet<T> set;
         public StateSet()
@@ -17,6 +17,16 @@ namespace Geek.Server
             set = new HashSet<T>(collection);
         }
 
+        readonly object lockObj = new object();
+        public StateSet<T> ShallowCopy()
+        {
+            lock (lockObj)
+            {
+                var copy = new StateSet<T>(set);
+                return copy;
+            }
+        }
+
         public int Count => set.Count;
         public bool IsReadOnly => false;
 
@@ -26,13 +36,13 @@ namespace Geek.Server
             {
                 if (_stateChanged)
                     return true;
-                if (typeof(T).IsSubclassOf(typeof(BaseState)))
+                if (typeof(T).IsSubclassOf(typeof(BaseDBState)))
                 {
                     foreach (var item in set)
                     {
                         if (item == null)
                             continue;
-                        if ((item as BaseState).IsChanged)
+                        if ((item as BaseDBState).IsChanged)
                             return true;
                     }
                 }
@@ -43,31 +53,46 @@ namespace Geek.Server
         public override void ClearChanges()
         {
             _stateChanged = false;
-            if (typeof(T).IsSubclassOf(typeof(BaseState)))
+            if (typeof(T).IsSubclassOf(typeof(BaseDBState)))
             {
                 foreach (var item in set)
                 {
                     if (item == null)
                         continue;
-                    (item as BaseState).ClearChanges();
+                    (item as BaseDBState).ClearChanges();
                 }
             }
         }
 
         public bool Add(T item)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            return set.Add(item);
+            lock (lockObj)
+            {
+                return set.Add(item);
+            }
         }
 
         public void Clear()
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            set.Clear();
+            lock (lockObj)
+            {
+                set.Clear();
+            }
         }
 
         public bool Contains(T item)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return set.Contains(item);
         }
 
@@ -78,19 +103,42 @@ namespace Geek.Server
 
         public void ExceptWith(IEnumerable<T> other)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            set.ExceptWith(other);
+            lock (lockObj)
+            {
+                set.ExceptWith(other);
+            }
         }
 
         public IEnumerator<T> GetEnumerator()
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return set.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            return ((IEnumerable)set).GetEnumerator();
         }
 
         public void IntersectWith(IEnumerable<T> other)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            set.IntersectWith(other);
+            lock (lockObj)
+            {
+                set.IntersectWith(other);
+            }
         }
 
         public bool IsProperSubsetOf(IEnumerable<T> other)
@@ -120,8 +168,14 @@ namespace Geek.Server
 
         public bool Remove(T item)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            return set.Remove(item);
+            lock (lockObj)
+            {
+                return set.Remove(item);
+            }
         }
 
         public bool SetEquals(IEnumerable<T> other)
@@ -131,24 +185,31 @@ namespace Geek.Server
 
         public void SymmetricExceptWith(IEnumerable<T> other)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            set.SymmetricExceptWith(other);
+            lock (lockObj)
+            {
+                set.SymmetricExceptWith(other);
+            }
         }
 
         public void UnionWith(IEnumerable<T> other)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            set.UnionWith(other);
+            lock (lockObj)
+            {
+                set.UnionWith(other);
+            }
         }
 
         void ICollection<T>.Add(T item)
         {
             throw new NotImplementedException();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable)set).GetEnumerator();
         }
 
         public static implicit operator StateSet<T>(HashSet<T> hash)

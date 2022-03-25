@@ -23,7 +23,7 @@ namespace Geek.Server
                 string uri = request.Uri;
                 QueryStringDecoder queryStringDecoder = new QueryStringDecoder(uri);
                 string path = queryStringDecoder.Path;
-                if (!path.Equals(Settings.Ins.HttpUrl))
+                if (!path.Equals(Settings.Ins.httpUrl))
                 {
                     await ctx.CloseAsync();
                     return;
@@ -137,7 +137,7 @@ namespace Geek.Server
             }
             LOGGER.Info(str.ToString());
 
-            if (!paramMap.TryGetValue("cmd", out var cmd))
+            if (!paramMap.TryGetValue("command", out var cmd))
                 return HttpResult.Undefine;
 
             if (!Settings.Ins.AppRunning)

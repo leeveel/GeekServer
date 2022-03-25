@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Geek.Server.Test
 {
-    [TcpMsgMapping(typeof(HearBeat))]
+    [MsgMapping(typeof(HearBeat))]
     public class ResHeartHandler : RobotHandler
     {
         private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
@@ -14,7 +14,7 @@ namespace Geek.Server.Test
             var msg = (HearBeat)Msg;
             var req = new HearBeat();
             req.timeTick = msg.timeTick;
-            var net = await Actor.GetCompAgent<NetCompAgent>();
+            var net = await GetCompAgent<NetCompAgent>();
             _ = net.SendMsg(req);
         }
     }

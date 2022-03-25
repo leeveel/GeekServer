@@ -4,7 +4,7 @@ namespace Geek.Server
 {
     public interface IEventListener
     {
-        Task InnerInitListener(ComponentActor actor);
-        Task InternalHandleEvent(IComponentAgent compAgent, Event evt);
+        Task InitListener(long entityId);
+        Task InnerHandleEvent(IComponentAgent compAgent, Event evt);
     }
 }

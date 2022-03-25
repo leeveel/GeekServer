@@ -1,4 +1,6 @@
 ﻿using System;
+
+
 using DotNetty.Transport.Channels;
 
 namespace Geek.Server
@@ -30,22 +32,26 @@ namespace Geek.Server
                     //握手
                     var session = ctx.Channel.GetAttribute(SessionManager.SESSION).Get();
                     if (session != null)
-                    {
-                        var actor = await ActorManager.Get(session.Id);
-                        if (actor != null)
-                            actor.EvtDispatcher.DispatchEvent((int)InnerEventID.OnMsgReceived);
-                    }
+                        EventDispatcher.DispatchEvent(session.Id, (int)InnerEventID.OnMsgReceived);
 
                     handler.Time = DateTime.Now;
                     handler.Channel = ctx.Channel;
                     handler.Msg = msg;
-                    if (handler is TcpActorHandler actorHandler)
+                    if (handler is TcpCompHandler compHandler)
                     {
-                        actorHandler.Actor = await actorHandler.GetActor();
-                        if (actorHandler.Actor != null)
-                            await actorHandler.Actor.SendAsync(actorHandler.ActionAsync);
+                        var entityId = await compHandler.GetEntityId();
+                        if (entityId != 0)
+                        {
+                            var agent = await EntityMgr.GetCompAgent(entityId, compHandler.CompAgentType);
+                            if (agent != null)
+                                _ = agent.Owner.Actor.SendAsync(compHandler.ActionAsync);
+                            else
+                                LOGGER.Error($"handler actor 为空 {msg.GetMsgId()} {handler.GetType()}");
+                        }
                         else
-                            LOGGER.Error($"handler actor 为空 {msg.GetMsgId()} {handler.GetType()}");
+                        {
+                            LOGGER.Error($"EntityId 为0 {msg.GetMsgId()} {handler.GetType()} {session.Id}");
+                        }
                     }
                     else
                     {

@@ -35,8 +35,8 @@ namespace Geek.Server
             return new HttpResult(Code_ActionFailed, retMsg);
         }
 
-        int code;
-        string msg;
+        public int code;
+        public string msg;
         readonly Dictionary<string, string> extraMap = new Dictionary<string, string>();
         public HttpResult(int retCode = 200, string retMsg = "ok")
         {

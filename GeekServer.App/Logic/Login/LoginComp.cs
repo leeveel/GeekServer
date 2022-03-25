@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace Geek.Server.Logic.Login
 {
 
-    public class PlayerInfoState : InnerDBState
+    public class PlayerInfoState : BaseDBState
     {
         //player相对特殊，id不是long，所以不继承DBState，自定义mongoDB的id
         public string Id { get; set; }

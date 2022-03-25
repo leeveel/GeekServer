@@ -3,22 +3,21 @@ using System.Threading.Tasks;
 
 namespace Geek.Server.Test
 {
-    public abstract class RobotHandler : TcpActorHandler
+    public abstract class RobotHandler : BaseTcpHandler
     {
-
         private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
-        public override async Task<ComponentActor> GetActor()
+
+        protected long RoleId => GetChannel().Id;
+
+        protected Session GetChannel()
         {
-            if (Actor != null)
-                return Actor;
-
-            var channel = GetChannel();
-            if (channel != null)
-                Actor = await ActorManager.GetOrNew(channel.Id);
-            else
-                LOGGER.Error("找不到Session:" + Actor.ActorId);
-
-            return Actor;
+            return Channel.GetAttribute(SessionManager.SESSION).Get();
         }
+
+        public async Task<OtherAgent> GetCompAgent<OtherAgent>() where OtherAgent : IComponentAgent
+        {
+            return await EntityMgr.GetCompAgent<OtherAgent>(RoleId);
+        }
+
     }
 }

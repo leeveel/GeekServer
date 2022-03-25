@@ -3,6 +3,7 @@ using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+
 namespace Geek.Server
 {
     public abstract class QueryComponent : BaseComponent
@@ -17,7 +18,7 @@ namespace Geek.Server
             return MongoDBConnection.Singleton.LoadState<T>(id, defaultGetter);
         }
 
-        public Task<T> LoadState<T>(string id, Func<T> defaultGetter = null) where T : InnerDBState
+        public Task<T> LoadState<T>(string id, Func<T> defaultGetter = null) where T : BaseDBState
         {
             return MongoDBConnection.Singleton.LoadState<T>(id, defaultGetter);
         }
@@ -27,7 +28,7 @@ namespace Geek.Server
             return MongoDBConnection.Singleton.SaveState(state);
         }
 
-        public Task SaveState<T>(string id, T state) where T : InnerDBState
+        public Task SaveState<T>(string id, T state) where T : BaseDBState
         {
             return MongoDBConnection.Singleton.SaveState(id, state);
         }

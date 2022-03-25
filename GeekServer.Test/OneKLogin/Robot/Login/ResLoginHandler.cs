@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Geek.Server.Test
 {
-    [TcpMsgMapping(typeof(ResLogin))]
+    [MsgMapping(typeof(ResLogin))]
     public class ResLoginHandler : RobotHandler
     {
         private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();

@@ -1,4 +1,6 @@
-﻿using DotNetty.Common.Utilities;
+﻿
+
+using DotNetty.Common.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -45,19 +47,18 @@ namespace Geek.Server
             return Remove(channel);
         }
 
-        public static async Task Remove(Session session)
+        public static Task Remove(Session session)
         {
             if (session != null)
             {
                 sessionMap.TryRemove(session.Id, out var se);
                 if (se == null)
-                    return;
+                    return Task.CompletedTask;
 
                 LOGGER.Info("移除channel {}", session.Id);
-                var actor = await ActorManager.Get(session.Id);
-                if (actor != null)
-                    actor.EvtDispatcher.DispatchEvent((int)InnerEventID.OnDisconnected);
+                EventDispatcher.DispatchEvent(session.Id, (int)InnerEventID.OnDisconnected);
             }
+            return Task.CompletedTask;
         }
 
         public static Session Get(long sessionId)
@@ -68,21 +69,12 @@ namespace Geek.Server
 
         public static async Task RemoveAll()
         {
-            var taskList = new List<Task>();
             var list = sessionMap.Values;
             foreach (var ch in list)
-            {
                 _ = ch.Channel.CloseAsync();
-                var actor = await ActorManager.Get(ch.Id);
-                if (actor != null)
-                {
-                    var task = actor.SendAsync(() => Task.Delay(1));
-                    taskList.Add(task);
-                }
-                await Remove(ch);
-            }
+            var task = EntityMgr.CompleteAllTask();
             //保证此函数执行完后所有actor队列为空
-            if (await Task.WhenAll(taskList).WaitAsync(TimeSpan.FromSeconds(30)))
+            if (await task.WaitAsync(TimeSpan.FromMinutes(10)))
                 LOGGER.Error("remove all channel timeout");
         }
     }

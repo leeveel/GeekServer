@@ -1,96 +1,76 @@
-﻿using NLog;
+﻿using System;
 using NLog.Config;
-using NLog.LayoutRenderers;
-using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using NLog;
+using NLog.LayoutRenderers;
 
 namespace Geek.Server
 {
-    public class Program
+    class Program
     {
-        static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
-        static volatile Task gameloopTask;
+        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+
+        volatile static Task GameloopTask;
+        volatile static Task ShutDownTask;
+
         static void Main(string[] args)
         {
             try
             {
-                Console.WriteLine("init server...");
                 AppExitHandler.Init(HandleExit);
-                Settings.Load("Config/server_config.json", ServerType.Game);
+                Console.WriteLine("init NLog config...");
                 LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
                 LogManager.Configuration = new XmlLoggingConfiguration("Config/NLog.config");
                 LogManager.AutoShutdown = false;
+                Settings.Load("Config/server_config.json", ServerType.Game);
 
-                gameloopTask = EnterGameLoop();
-                gameloopTask.Wait();
+                LOGGER.Warn("check restore data...");
+                if (!FileBackUp.CheckRestoreFromFile())
+                {
+                    ExceptionMonitor.Report(ExceptionType.StartFailed, "check restore from file失败")
+                        .Wait(TimeSpan.FromSeconds(10));
+                    return;
+                }
+
+                GameloopTask = GameLoop.Enter();
+                GameloopTask.Wait();
+
+                if (ShutDownTask != null)
+                    ShutDownTask.Wait();
             }
             catch (Exception e)
             {
-                Console.WriteLine("start server failed. msg:" + e.Message);
-                LOGGER.Error("start server failed");
-                LOGGER.Error(e.ToString());
+                if (Settings.Ins.AppRunning)
+                {
+                    ExceptionMonitor.Report(ExceptionType.UnhandledException, $"{e}").Wait(TimeSpan.FromSeconds(10));
+                }
+                else
+                {
+                    ExceptionMonitor.Report(ExceptionType.StartFailed, $"{e}").Wait(TimeSpan.FromSeconds(10));
+                }
             }
         }
 
-        static bool isExitCalled = false;
-        static void HandleExit()
-        {
-            if (isExitCalled)
-                return;
-            isExitCalled = true;
+        private static bool IsExitCalled = false;
 
+        private static void HandleExit()
+        {
+            if (IsExitCalled)
+                return;
+            IsExitCalled = true;
             LOGGER.Info("监听到退出程序消息");
-            Task.Run(() =>
+            ShutDownTask = Task.Run(() =>
             {
                 Settings.Ins.AppRunning = false;
-                if (gameloopTask != null)
-                    gameloopTask.Wait();
+                if (GameloopTask != null)
+                    GameloopTask.Wait();
 
                 LogManager.Shutdown();
-                Console.WriteLine("游戏退出");
+                Console.WriteLine("退出程序");
                 Process.GetCurrentProcess().Kill();
-            }).Wait();
-        }
-
-        static async Task EnterGameLoop()
-        {
-            //设置ID规则
-            ActorManager.ID_RULE = ActorID.ID_RULE;   
-            LOGGER.Info("注册所有组件......");
-            ComponentTools.RegistAllComps();
-            var ret = await HotfixMgr.ReloadModule("");//启动游戏[hotfix工程实现一个IHotfix接口]
-            if (!ret)
-            {
-                LOGGER.Error("起服失败");
-                return;
-            }
-            Settings.Ins.StartServerTime = DateTime.Now;
-            Console.ForegroundColor = ConsoleColor.DarkYellow;
-            Console.WriteLine("enter game loop 使用[ctrl+C]退出程序，不要强退，否则无法回存State");
-            Console.WriteLine("压力测试请将server_config.json中IsDebug改为false");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            LOGGER.Info("enter game loop");
-
-            int gcTime = 0;
-            Settings.Ins.AppRunning = true;
-            while (Settings.Ins.AppRunning)
-            {
-                gcTime += 1;
-                if (gcTime > 1000)//定时gc一下
-                {
-                    gcTime = 0;
-                    GC.Collect();
-                }
-                await Task.Delay(TimeSpan.FromSeconds(1));
-            }
-
-            Console.WriteLine("exit game loop 开服时长：" + (DateTime.Now - Settings.Ins.StartServerTime));
-            LOGGER.Info("exit game loop 开服时长：" + (DateTime.Now - Settings.Ins.StartServerTime));
-            await HotfixMgr.Stop();//退出游戏
-            Console.WriteLine("exit game loop succeed");
-            LOGGER.Info("exit game loop succeed");
+            });
+            ShutDownTask.Wait();
         }
     }
 }
-

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Geek.Server;
 
 namespace Geek.Server.Logic.Server
 {
@@ -10,10 +11,10 @@ namespace Geek.Server.Logic.Server
         public override async Task Active()
         {
             await base.Active();
-            this.AddDailySchedule<CorssDayTimerHandler>(ServerComp.CrossDayHour, 0);
-            if (State.OpenServerTime < new DateTime(2000, 1, 1))
+            this.Schedule<CorssDayTimerHandler>(ServerComp.CrossDayHour, 0);
+            if (State.OpenServerTimeTick < 0)
             {
-                State.OpenServerTime = DateTime.Now;
+                State.OpenServerTimeTick = DateTime.Now.Ticks;
                 LOGGER.Warn("新服开启");
             }
         }
@@ -28,8 +29,8 @@ namespace Geek.Server.Logic.Server
             }
         }
 
-        [NotAwait]
-        public async Task CheckCrossDay()
+        [MethodOption.NotAwait]
+        public virtual async Task CheckCrossDay()
         {
             var daysFromOpenServer = await GetDaysFromOpenServer();
             if (daysFromOpenServer != State.CacheDaysFromOpenServer)
@@ -47,7 +48,7 @@ namespace Geek.Server.Logic.Server
         /// </summary>
         public Task<int> GetDaysFromOpenServer()
         {
-            var open = State.OpenServerTime;
+            var open = new DateTime(State.OpenServerTimeTick);
             var now = DateTime.Now;
             if (open.Hour < ServerComp.CrossDayHour) //开始时间小于跨天时间，相当于昨天开服
                 open = new DateTime(open.Year, open.Month, open.Day, ServerComp.CrossDayHour, 0, 0).AddDays(-1);

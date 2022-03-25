@@ -19,7 +19,7 @@ namespace Geek.Server
         static IEventLoopGroup bossGroup;
         static IEventLoopGroup workerGroup;
         static DotNetty.Transport.Channels.IChannel bootstrapChannel;
-
+        private TcpServer() { }
         static async Task RunServerAsync(int port, bool useLibuv)
         {
             if (useLibuv)

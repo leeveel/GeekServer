@@ -1,18 +1,17 @@
-﻿using Geek.Server.Logic.Handler;
-using Geek.Server.Message.Login;
+﻿using Geek.Server.Message.Login;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Logic.Login
 {
 
-    [TcpMsgMapping(typeof(ReqLogin))]
-    public class ReqLoginHandler : SingletonActorHandler
+    [MsgMapping(typeof(ReqLogin))]
+    public class ReqLoginHandler : FixedIdEntityHandler<LoginCompAgent>
     {
-        public override ActorType ActorType => ActorType.Login;
+        public override EntityType EntityType => EntityType.Login;
 
         public override async Task ActionAsync()
         {
-            var comp = await Actor.GetCompAgent<LoginCompAgent>();
+            var comp = await GetCompAgent();
             var msg = await comp.Login(Channel, (ReqLogin)Msg);
             WriteAndFlush(msg);
         }

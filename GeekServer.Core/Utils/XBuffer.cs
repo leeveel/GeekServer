@@ -146,31 +146,15 @@ namespace Geek.Server
                 value = "";
             fixed (byte* ptr = buffer)
             {
-                int len = 0;
-                if (offset >= buffer.Length)
-                {
-                    //预判已经超出长度了，直接计算长度就行了
-                    len = System.Text.Encoding.UTF8.GetBytes(value).Length + shortSize;
-                }
-                else
-                {
-                    try
-                    {
-                        len = System.Text.Encoding.UTF8.GetBytes(value, 0, value.Length, buffer, offset + shortSize);
-                    }
-                    catch (Exception e)
-                    {
-                        len = System.Text.Encoding.UTF8.GetBytes(value).Length + shortSize;
-                        if (offset + len <= buffer.Length)
-                            throw e;
-                    }
-                }
-
+                int len = System.Text.Encoding.UTF8.GetByteCount(value);
+                //预判已经超出长度了，直接计算长度就行了
                 if (offset + len + shortSize > buffer.Length)
                 {
                     offset += len + shortSize;
                     return;
                 }
+
+                System.Text.Encoding.UTF8.GetBytes(value, 0, value.Length, buffer, offset + shortSize);
                 WriteShort((short)len, buffer, ref offset);
                 offset += len;
             }
@@ -278,7 +262,7 @@ namespace Geek.Server
         {
             var len = ReadInt(buffer, ref offset);
             //数据不可信
-            if (len == 0 || offset > buffer.Length + len * byteSize)
+            if (len <= 0 || offset > buffer.Length + len * byteSize)
                 return new byte[0];
 
             var data = new byte[len];
@@ -306,7 +290,7 @@ namespace Geek.Server
             {
                 var len = ReadShort(buffer, ref offset);
                 //数据不可信
-                if (len == 0 || offset > buffer.Length + len * byteSize)
+                if (len <= 0 || offset > buffer.Length + len * byteSize)
                     return "";
 
                 var value = System.Text.Encoding.UTF8.GetString(buffer, offset, len);

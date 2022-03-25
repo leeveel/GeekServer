@@ -3,7 +3,7 @@ using System;
 /// <summary>
 /// 时间戳工具类
 /// </summary>
-public class TimeUtils
+public static class TimeUtils
 {
     private static readonly DateTime epochLocal = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local);
     private static readonly DateTime epochUtc = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Utc);
@@ -37,6 +37,26 @@ public class TimeUtils
         if (utc)
             return epochUtc.AddMilliseconds(time);
         return epochLocal.AddMilliseconds(time);
+    }
+
+    public static bool isNowSameWeek(long start)
+    {
+        return IsSameWeek(new DateTime(start), DateTime.Now);
+    }
+    public static bool IsSameWeek(DateTime start, DateTime end)
+    {
+        var interval = end - start;
+        var totalDays = interval.TotalDays;
+        int dayWeek = (int)end.DayOfWeek;
+        if (dayWeek == 0) dayWeek = 7;
+        if (totalDays >= 7 || totalDays >= dayWeek)
+            return false;
+        return true;
+    }
+
+    public static bool IsSameDay(this DateTime start, DateTime end)
+    {
+        return start.ToString("yyyy-MM-dd").Equals(end.ToString("yyyy-MM-dd"));
     }
 
 }

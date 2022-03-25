@@ -1,9 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿
+
+using System.Threading.Tasks;
 
 namespace Geek.Server
 {
     public interface ITimerHandler
     {
-        Task InternalHandleTimer(IComponentAgent actor, Param param);
+        Task InnerHandleTimer(IComponentAgent actor, Param param);
     }
 }

@@ -35,10 +35,11 @@ namespace Geek.Server
             return result != null;
         }
 
-        public Task<TComp> GetComponent<TComp>() where TComp : BaseComponent, new() { return Actor.GetComponent<TComp>(); }
-        public ComponentActor Actor { get; protected set; }
+        //public Task<TComp> GetComponent<TComp>() where TComp : BaseComponent, new() { return Actor.GetComponent<TComp>(); }
+        internal WorkerActor Actor { get; private set; }
+        public long EntityId { get; private set; }
+        public int EntityType { get; private set; }
         public bool IsActive { get; protected set; }
-        public long ActorId => Actor.ActorId;
         public virtual Task Active()
         {
             IsActive = true;
@@ -51,15 +52,16 @@ namespace Geek.Server
             return Task.CompletedTask;
         }
 
-        ///<summary>是否已经可以回收了</summary>
         internal virtual Task<bool> ReadyToDeactive()
-        { 
+        {
             return Task.FromResult(true);
         }
 
-        public virtual void Init(ComponentActor actor)
+        public virtual void Init(WorkerActor actor, int entityType, long entityId)
         {
             Actor = actor;
+            EntityType = entityType;
+            this.EntityId = entityId;
         }
     }
 }

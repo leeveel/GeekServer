@@ -1,14 +1,15 @@
 using System;
 using MongoDB.Bson.Serialization.Attributes;
 
+
 namespace Geek.Server
 {
-    //¿ÉÄÜÓÃÓÚÊı¾İ¿â½á¹û
-    [BsonIgnoreExtraElements(true, Inherited = true)]//ºöÂÔ´úÂëÉ¾³ıµÄ×Ö¶Î[Êı¾İ¿â¶àÓàµÄ×Ö¶Î]
-    public abstract class BaseMessage : BaseState, IMessage
+    //å¯èƒ½ç”¨äºæ•°æ®åº“ç»“æœ
+    [BsonIgnoreExtraElements(true, Inherited = true)]//å¿½ç•¥ä»£ç åˆ é™¤çš„å­—æ®µ[æ•°æ®åº“å¤šä½™çš„å­—æ®µ]
+    public abstract class BaseMessage : BaseDBState, IMessage
     {
         /// <summary>
-        /// ÏûÏ¢Î¨Ò»id
+        /// æ¶ˆæ¯å”¯ä¸€id
         /// </summary>
         [BsonIgnore]
         public int UniId { get; set; }
@@ -16,6 +17,11 @@ namespace Geek.Server
         public virtual int Read(byte[] buffer, int offset)
         {
             return offset;
+        }
+
+        public virtual int WriteWithType(byte[] _buffer_, int _offset_)
+        {
+            return _offset_;
         }
 
         public virtual int Write(byte[] buffer, int offset)

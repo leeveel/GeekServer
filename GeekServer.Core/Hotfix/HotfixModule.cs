@@ -5,6 +5,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+
+
+
 namespace Geek.Server
 {
     public class HotfixModule
@@ -98,7 +101,7 @@ namespace Geek.Server
                 if (!isReload)
                     throw e;
                 LOGGER.Info("hotfix dll init failed..." + e.ToString());
-            }
+                            }
             return Task.FromResult(success);
         }
 
@@ -145,11 +148,12 @@ namespace Geek.Server
             }
         }
 
-        private const string GenSurffix = "Wrapper";
+        const string GenPreffix = "Wrapper.Agent.";
 
         void AddAgent(Type type)
         {
-            if (type.GetInterface(typeof(IComponentAgent).FullName) == null || !type.Name.EndsWith(GenSurffix))
+            if (type.GetInterface(typeof(IComponentAgent).FullName) == null
+                || !type.FullName.StartsWith(GenPreffix))
                 return;
 
             Type impType = type;
@@ -182,20 +186,20 @@ namespace Geek.Server
             if (agentArgTypes.Length < 0)
                 return;
 
-            var list = ComponentMgr.Singleton.GetActorTypeList(agentArgTypes[0]);
+            var list = CompSetting.Singleton.GetEntityTypeList(agentArgTypes[0]);
             if (list == null || list.Count <= 0)
                 return;
-            foreach(var actorType in list)
+            foreach(var entityType in list)
             {
-                if (!evtTypeMap.ContainsKey(actorType))
-                    evtTypeMap.TryAdd(actorType, new List<Type>());
-                evtTypeMap[actorType].Add(type);
+                if (!evtTypeMap.ContainsKey(entityType))
+                    evtTypeMap.TryAdd(entityType, new List<Type>());
+                evtTypeMap[entityType].Add(type);
             }
         }
 
         void AddTcpHandler(Type type)
         {
-            var attribute = (TcpMsgMapping)type.GetCustomAttribute(typeof(TcpMsgMapping), true);
+            var attribute = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
             if (attribute == null) return;
             var msgIdField = attribute.Msg.GetField("MsgId", BindingFlags.Static | BindingFlags.Public);
             if (msgIdField == null) return;
@@ -281,7 +285,7 @@ namespace Geek.Server
         /// <summary>
         /// 获取热更代理实例
         /// </summary>
-        public T GetAgent<T>(object refOwner) where T : IComponentAgent
+        public T GetAgent<T>(BaseComponent refOwner) where T : IComponentAgent
         {
             if (agentCacheMap.TryGetValue(refOwner, out var cache))
                 return (T)cache;
@@ -301,6 +305,12 @@ namespace Geek.Server
             }
         }
 
+        public Type GetAgentType(Type ownerType)
+        {
+            agentTypeMap.TryGetValue(ownerType, out var agentType);
+            return agentType;
+        }
+
         /// <summary>
         /// 移除cacheAgent
         /// </summary>
@@ -309,28 +319,28 @@ namespace Geek.Server
             agentCacheMap.TryRemove(refOwner, out var _);
         }
 
-        public List<IEventListener> GetEventListeners(int actorAgentType)
+        public List<IEventListener> GetEventListeners(int entityType)
         {
-            evtCacheMap.TryGetValue(actorAgentType, out var list);
+            evtCacheMap.TryGetValue(entityType, out var list);
             if (list != null)
                 return list;
 
-            if (!evtTypeMap.ContainsKey(actorAgentType))
+            if (!evtTypeMap.ContainsKey(entityType))
                 return default;
 
-            lock (evtTypeMap[actorAgentType])
+            lock (evtTypeMap[entityType])
             {
-                evtCacheMap.TryGetValue(actorAgentType, out list);
+                evtCacheMap.TryGetValue(entityType, out list);
                 if (list != null)
                     return list;
 
                 list = new List<IEventListener>();
-                foreach (var type in evtTypeMap[actorAgentType])
+                foreach (var type in evtTypeMap[entityType])
                 {
                     var listener = (IEventListener)Activator.CreateInstance(type);
                     list.Add(listener);
                 }
-                evtCacheMap[actorAgentType] = list;
+                evtCacheMap[entityType] = list;
             }
             return list;
         }

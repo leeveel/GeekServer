@@ -1,16 +1,37 @@
 ﻿using MongoDB.Driver;
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
+
 
 namespace Geek.Server
 {
     public abstract class QueryComponentAgent<TComp> : IComponentAgent where TComp : QueryComponent
     {
-        public object Owner { get; set; }
+        public BaseComponent Owner { get; set; }
+        internal WorkerActor Actor => Owner.Actor;
         protected TComp Comp => (TComp)Owner;
+        public long EntityId => Owner.EntityId;
 
-        public ComponentActor Actor => Comp.Actor;
+        public async Task Foreach<T>(IEnumerable<T> itor, Func<T, Task> dealFunc)
+        {
+            await Actor.SendAsync(async () => {
+                foreach (var item in itor)
+                {
+                    await dealFunc(item);
+                }
+            });
+        }
+
+        public Task<List<T>> Copy<T>(IEnumerable<T> itor)
+        {
+            return Actor.SendAsync(() => {
+                var list = new List<T>(itor);
+                return list;
+            });
+        }
 
         public virtual Task Active()
         {

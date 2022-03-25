@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Geek.Server
 {
-    public sealed class StateMap<TKey, TValue> : BaseState, IDictionary<TKey, TValue>
+    public sealed class StateMap<TKey, TValue> : BaseDBState, IDictionary<TKey, TValue>
     {
         readonly Dictionary<TKey, TValue> map;
         public StateMap()
@@ -15,8 +15,8 @@ namespace Geek.Server
         {
             map = new Dictionary<TKey, TValue>(dictionary.map);
         }
-		
-		public StateMap(Dictionary<TKey, TValue> dictionary)
+
+        public StateMap(Dictionary<TKey, TValue> dictionary)
         {
             map = dictionary;
         }
@@ -26,6 +26,18 @@ namespace Geek.Server
             map = new Dictionary<TKey, TValue>(dictionary);
         }
 
+        readonly object lockObj = new object();
+        public StateMap<TKey, TValue> ShallowCopy()
+        {
+            var copy = new StateMap<TKey, TValue>();
+            lock(lockObj)
+            {
+                foreach (var kv in map)
+                    copy[kv.Key] = kv.Value;
+            }
+            return copy;
+        }
+
         public override bool IsChanged
         {
             get
@@ -33,24 +45,24 @@ namespace Geek.Server
                 if (_stateChanged)
                     return true;
 
-                if (typeof(TKey).IsSubclassOf(typeof(BaseState)))
+                if (typeof(TKey).IsSubclassOf(typeof(BaseDBState)))
                 {
                     foreach (var item in map)
                     {
                         if (item.Key == null)
                             continue;
-                        if ((item.Key as BaseState).IsChanged)
+                        if ((item.Key as BaseDBState).IsChanged)
                             return true;
                     }
                 }
 
-                if (typeof(TValue).IsSubclassOf(typeof(BaseState)))
+                if (typeof(TValue).IsSubclassOf(typeof(BaseDBState)))
                 {
                     foreach (var item in map)
                     {
                         if (item.Value == null)
                             continue;
-                        if ((item.Value as BaseState).IsChanged)
+                        if ((item.Value as BaseDBState).IsChanged)
                             return true;
                     }
                 }
@@ -62,42 +74,52 @@ namespace Geek.Server
         public override void ClearChanges()
         {
             _stateChanged = false;
-            if (typeof(TKey).IsSubclassOf(typeof(BaseState)))
+            if (typeof(TKey).IsSubclassOf(typeof(BaseDBState)))
             {
                 foreach (var item in map)
                 {
                     if (item.Key == null)
                         continue;
-                    if (item.Key is BaseState bs)
-                        bs.ClearChanges();
+                    (item.Key as BaseDBState).ClearChanges();
                 }
             }
 
-            if (typeof(TValue).IsSubclassOf(typeof(BaseState)))
+            if (typeof(TValue).IsSubclassOf(typeof(BaseDBState)))
             {
                 foreach (var item in map)
                 {
                     if (item.Value == null)
                         continue;
-                    if (item.Value is BaseState bs)
-                        bs.ClearChanges();
+                    (item.Value as BaseDBState).ClearChanges();
                 }
             }
         }
 
         public bool ContainsKey(TKey key)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return map.ContainsKey(key);
         }
-		
-		public bool ContainsValue(TValue value)
+
+        public bool ContainsValue(TValue value)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return map.ContainsValue(value);
         }
 
         public void Add(TKey key, TValue value)
         {
-            map.Add(key, value);
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock(lockObj)
+            {
+                map.Add(key, value);
+            }
             _stateChanged = true;
         }
 
@@ -124,54 +146,101 @@ namespace Geek.Server
 
         public bool Remove(TKey key)
         {
-            if (map.ContainsKey(key))
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
             {
-                map.Remove(key);
-                _stateChanged = true;
-                return true;
+                if (map.ContainsKey(key))
+                {
+                    map.Remove(key);
+                    _stateChanged = true;
+                    return true;
+                }
             }
             return false;
         }
 
         public bool TryGetValue(TKey key, out TValue value)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return map.TryGetValue(key, out value);
+        }
+
+        public TValue GetValueOrDefault(TKey key, TValue value) 
+        {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            return map.GetValueOrDefault(key, value);
         }
 
         public TValue this[TKey key]
         {
             get
             {
+#if DEBUG_MODE
+                CheckIsInCompActorCallChain();
+#endif
                 return map[key];
             }
             set
             {
+#if DEBUG_MODE
+                CheckIsInCompActorCallChain();
+#endif
                 _stateChanged = true;
-                if (map.ContainsKey(key))
-                    map[key] = value;
-                else
-                    map.Add(key, value);
+                lock (lockObj)
+                {
+                    if (map.ContainsKey(key))
+                        map[key] = value;
+                    else
+                        map.Add(key, value);
+                }
             }
         }
 
         public ICollection<TKey> Keys
         {
-            get { return map.Keys; }
+            get
+            {
+#if DEBUG_MODE
+                CheckIsInCompActorCallChain();
+#endif
+                return map.Keys;
+            }
         }
 
         public ICollection<TValue> Values
         {
-            get { return map.Values; }
+            get
+            {
+#if DEBUG_MODE
+                CheckIsInCompActorCallChain();
+#endif
+                return map.Values;
+            }
         }
 
         public void Clear()
         {
-            map.Clear();
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
+            {
+                map.Clear();
+            }
             _stateChanged = true;
         }
 
         public bool Contains(KeyValuePair<TKey, TValue> item)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return ((ICollection<KeyValuePair<TKey, TValue>>)map).Contains(item);
         }
 
@@ -182,10 +251,16 @@ namespace Geek.Server
 
         public bool Remove(KeyValuePair<TKey, TValue> item)
         {
-            if (((ICollection<KeyValuePair<TKey, TValue>>)map).Remove(item))
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
             {
-                _stateChanged = true;
-                return true;
+                if (((ICollection<KeyValuePair<TKey, TValue>>)map).Remove(item))
+                {
+                    _stateChanged = true;
+                    return true;
+                }
             }
             return false;
         }
@@ -203,11 +278,17 @@ namespace Geek.Server
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return map.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return ((IEnumerable)map).GetEnumerator();
         }
 

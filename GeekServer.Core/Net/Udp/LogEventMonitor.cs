@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Geek.Server.Net.Udp
+namespace Geek.Server.Udp
 {
 
     /// <summary>

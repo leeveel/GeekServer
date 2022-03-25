@@ -1,6 +1,9 @@
-﻿using Quartz;
+﻿
+
+using Quartz;
 using Quartz.Impl;
 using Quartz.Logging;
+
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,11 +37,8 @@ namespace Geek.Server
             {
                 var handler = HotfixMgr.GetInstance<ITimerHandler>(handlerType);
                 var agentType = handler.GetType().BaseType.GenericTypeArguments[0];
-                //component
-                var compType = agentType.BaseType.GenericTypeArguments[0];
-                var actor = await ActorManager.GetOrNew(actorId);
-                var comp = await actor.GetComponent(compType);
-                _ = actor.SendAsync(() => handler.InternalHandleTimer(comp.GetAgent(agentType), param), false);
+                var comp = await EntityMgr.GetCompAgent(actorId, agentType);
+                _ = comp.Owner.Actor.SendAsync(() => handler.InnerHandleTimer(comp, param));
             }
             catch (Exception e)
             {
@@ -176,6 +176,15 @@ namespace Geek.Server
             long id = newID();
             var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.MonthlyOnDayAndHourAndMinute(dayOfMonth, hour, minute)).Build();
             scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
+            return id;
+        }
+
+        public static long Schedule<T>(DateTimeOffset startAt, TimeSpan interval) where T : IJob
+        {
+            long id = newID();
+            IJobDetail job = JobBuilder.Create<T>().WithIdentity(id + "").Build();
+            ITrigger _CronTrigger = TriggerBuilder.Create().StartAt(startAt).WithSimpleSchedule(x => x.WithInterval(interval).RepeatForever()).Build();
+            scheduler.ScheduleJob(job, _CronTrigger);
             return id;
         }
 

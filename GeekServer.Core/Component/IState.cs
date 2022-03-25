@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿
+using System.Threading.Tasks;
 
 namespace Geek.Server
 {
@@ -9,7 +10,5 @@ namespace Geek.Server
         Task ReadStateAsync();
 
         Task WriteStateAsync();
-
-        Task ReloadState(int coldTimeInMinutes = 30);
     }
 }

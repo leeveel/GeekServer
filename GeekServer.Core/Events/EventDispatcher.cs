@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+
 namespace Geek.Server
 {
     public struct Event
@@ -12,12 +13,38 @@ namespace Geek.Server
     
     public class EventDispatcher
     {
-        readonly static NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public ComponentActor ownerActor { get; }
-        readonly Dictionary<int, List<string>> eventHandlers;
-        public EventDispatcher(ComponentActor actor)
+        public static async void AddListener(long entityId, int evtType, string agentType)
         {
-            this.ownerActor = actor;
+            var entity = await EntityMgr.GetOrNewEntity(entityId);
+            entity.EvtDispatcher.AddListener(evtType, agentType);
+        }
+
+        public static async void RemoveListener(long entityId, int evtType, string agentType)
+        {
+            var entity = await EntityMgr.GetOrNewEntity(entityId);
+            entity.EvtDispatcher.RemoveListener(evtType, agentType);
+        }
+
+        public static async void DispatchEvent(long entityId, int evtType, Param param = null)
+        {
+            var entity = await EntityMgr.GetOrNewEntity(entityId);
+            entity.EvtDispatcher.DispatchEvent(evtType, param);
+        }
+
+        public static async void ClearEvent(long entityId)
+        {
+            var entity = await EntityMgr.GetOrNewEntity(entityId);
+            entity.EvtDispatcher.Clear();
+        }
+
+
+
+        readonly static NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+        public long EntityID { get; }
+        readonly Dictionary<int, List<string>> eventHandlers;
+        public EventDispatcher(long entityId)
+        {
+            this.EntityID = entityId;
             eventHandlers = new Dictionary<int, List<string>>();
         }
 
@@ -44,7 +71,7 @@ namespace Geek.Server
         /// <summary>
         /// 分发事件
         /// </summary>
-        public void DispatchEvent(int evtType, Param param = null)
+        public async void DispatchEvent(int evtType, Param param = null)
         {
             if(HotfixMgr.IsFromHotfix(param))
             {
@@ -58,6 +85,9 @@ namespace Geek.Server
 
             if(eventHandlers.ContainsKey(evtType))
             {
+                //GetCompAgent中会检测调用链 async void会误导系统，需要重置
+                //RuntimeContext.ResetContext();
+
                 var list = eventHandlers[evtType];
                 foreach (var handlerType in list)
                 {
@@ -65,12 +95,10 @@ namespace Geek.Server
                     {
                         var handler = HotfixMgr.GetInstance<IEventListener>(handlerType);
                         var agentType = handler.GetType().BaseType.GenericTypeArguments[0];
-                        //component
-                        var compType = agentType.BaseType.GenericTypeArguments[0];
-                        ownerActor.SendAsync(async () => {
-                            var comp = await ownerActor.GetComponent(compType);
-                            await handler.InternalHandleEvent(comp.GetAgent(agentType), evt);
-                        }, false);
+                        var compAgent = await EntityMgr.GetCompAgent(EntityID, agentType);
+                        _ = compAgent.Owner.Actor.SendAsync(() => {
+                            return handler.InnerHandleEvent(compAgent, evt);
+                        });
                     }
                     catch (Exception e)
                     {

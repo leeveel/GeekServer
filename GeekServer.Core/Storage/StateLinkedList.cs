@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Geek.Server
 {
-    public sealed class StateLinkedList<T> : BaseState, IEnumerable<T>
+    public sealed class StateLinkedList<T> : BaseDBState, IEnumerable<T>
     {
         readonly LinkedList<T> list;
         public StateLinkedList()
@@ -17,19 +17,29 @@ namespace Geek.Server
             list = new LinkedList<T>(collection);
         }
 
+        readonly object lockObj = new object();
+        public StateLinkedList<T> ShallowCopy()
+        {
+            lock (lockObj)
+            {
+                var copy = new StateLinkedList<T>(list);
+                return copy;
+            }
+        }
+
         public override bool IsChanged
         {
             get
             {
                 if (_stateChanged)
                     return true;
-                if(typeof(T).IsSubclassOf(typeof(BaseState)))
+                if(typeof(T).IsSubclassOf(typeof(BaseDBState)))
                 {
                     foreach(var item in list)
                     {
                         if (item == null)
                             continue;
-                        if ((item as BaseState).IsChanged)
+                        if ((item as BaseDBState).IsChanged)
                             return true;
                     }
                 }
@@ -40,13 +50,13 @@ namespace Geek.Server
         public override void ClearChanges()
         {
             _stateChanged = false;
-            if (typeof(T).IsSubclassOf(typeof(BaseState)))
+            if (typeof(T).IsSubclassOf(typeof(BaseDBState)))
             {
                 foreach (var item in list)
                 {
                     if (item == null)
                         continue;
-                    (item as BaseState).ClearChanges();
+                    (item as BaseDBState).ClearChanges();
                 }
             }
         }
@@ -54,55 +64,106 @@ namespace Geek.Server
 
         public void AddLast(T item)
         {
-            list.AddLast(item);
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
+            {
+                list.AddLast(item);
+            }
             _stateChanged = true;
         }
 
         public void AddLast(LinkedListNode<T> node)
         {
-            list.AddLast(node);
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
+            {
+                list.AddLast(node);
+            }
             _stateChanged = true;
         }
 
         public void RemoveLast()
         {
-            list.RemoveLast();
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
+            {
+                list.RemoveLast();
+            }
             _stateChanged = true;
         }
 
         public void AddAfter(LinkedListNode<T> node, LinkedListNode<T> newNode)
         {
-            list.AddAfter(node, newNode);
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
+            {
+                list.AddAfter(node, newNode);
+            }
             _stateChanged = true;
         }
 
         public LinkedListNode<T> AddFirst(T item)
         {
-            var node = list.AddFirst(item);
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            return node;
+            lock (lockObj)
+            {
+                var node = list.AddFirst(item);
+                return node;
+            }
         }
 
         public void AddFirst(LinkedListNode<T> node)
         {
-            list.AddFirst(node);
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
+            {
+                list.AddFirst(node);
+            }
             _stateChanged = true;
         }
 
         public void AddBefore(LinkedListNode<T> node, LinkedListNode<T> newNode)
         {
-            list.AddBefore(node, newNode);
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
+            {
+                list.AddBefore(node, newNode);
+            }
             _stateChanged = true;
         }
 
         public void Clear()
         {
-            list.Clear();
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
+            lock (lockObj)
+            {
+                list.Clear();
+            }
             _stateChanged = true;
         }
 
         public bool Contains(T item)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return list.Contains(item);
         }
 
@@ -123,24 +184,42 @@ namespace Geek.Server
 
         public IEnumerator<T> GetEnumerator()
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return list.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             return ((IEnumerable)list).GetEnumerator();
         }
 
         public bool Remove(T item)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            return list.Remove(item);
+            lock (lockObj)
+            {
+                return list.Remove(item);
+            }
         }
 
         public void Remove(LinkedListNode<T> node)
         {
+#if DEBUG_MODE
+            CheckIsInCompActorCallChain();
+#endif
             _stateChanged = true;
-            list.Remove(node);
+            lock (lockObj)
+            {
+                list.Remove(node);
+            }
         }
 
         public static implicit operator StateLinkedList<T>(LinkedList<T> list)

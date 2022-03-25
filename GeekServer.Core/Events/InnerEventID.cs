@@ -2,7 +2,7 @@
 {
     public enum InnerEventID
     {
-        OnDisconnected = 10000, //断线
-        OnMsgReceived = 10001,  //收到消息
+        OnDisconnected = 1000, //断线
+        OnMsgReceived = 1001,  //收到消息
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿
+
+using System;
 using System.Threading.Tasks;
 
 namespace Geek.Server
@@ -24,7 +26,7 @@ namespace Geek.Server
             var random = new System.Random();
             int onceDelta = 1000;
             int delayTime = 0;
-            int saveTime = random.Next(Settings.Ins.TimerSaveMin, Settings.Ins.TimerSaveMax);
+            int saveTime = random.Next(Settings.Ins.DataFlushTimeMin, Settings.Ins.DataFlushTimeMax);
             while (delayTime < saveTime * 1000)
             {
                 //不能一次性delay，退出程序时监听不到
@@ -44,7 +46,7 @@ namespace Geek.Server
                 if (!Working)
                     break;
 
-                await ActorManager.CheckIdle();
+                await EntityMgr.CheckIdle();
                 delta = DateTime.Now - start;
                 LOGGER.Info("db timer loop time:{}毫秒", delta.TotalMilliseconds);
 
@@ -77,6 +79,9 @@ namespace Geek.Server
             Working = false;
             if (timerTask != null)
                 await timerTask;
+#if DEBUG_MODE
+            Geek.Server.BaseDBState.CheckCallChainEnable = false;
+#endif
             await StateComponent.SaveAllState();
         }
     }

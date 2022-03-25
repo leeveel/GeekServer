@@ -3,6 +3,10 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 
+
+
+
+
 namespace Geek.Server
 {
     public class HotfixMgr
@@ -66,7 +70,7 @@ namespace Geek.Server
         /// <summary>
         /// 获取/更新热更代理实例
         /// </summary>
-        public static T GetAgent<T>(object refOwner, Type refAssemblyType) where T : IComponentAgent
+        public static T GetAgent<T>(BaseComponent refOwner, Type refAssemblyType) where T : IComponentAgent
         {
             if (oldModuleMap.Count > 0)
             {
@@ -83,6 +87,11 @@ namespace Geek.Server
             return module.GetAgent<T>(refOwner);
         }
 
+        public static Type GetAgentType(Type ownerType)
+        {
+            return module.GetAgentType(ownerType);
+        }
+
         public static void RemoveAgentCache(object refOwner)
         {
             foreach (var kv in oldModuleMap)
@@ -90,11 +99,11 @@ namespace Geek.Server
             module.RemoveAgentCache(refOwner);
         }
 
-        public static List<IEventListener> GetEventListeners(int actorAgentType)
+        public static List<IEventListener> GetEventListeners(int entityType)
         {
             if (module == null)
                 return null;
-            return module.GetEventListeners(actorAgentType);
+            return module.GetEventListeners(entityType);
         }
 
         /// <summary>

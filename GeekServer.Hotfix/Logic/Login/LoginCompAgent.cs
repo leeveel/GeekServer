@@ -38,7 +38,7 @@ namespace Geek.Server.Logic.Login
             if (isNewRole)
             {
                 //没有老角色，创建新号
-                roleId = ActorID.NewID(ActorType.Role);
+                roleId = EntityID.NewID(EntityType.Role);
                 await CreateRoleToPlayer(reqLogin.userName, reqLogin.sdkType, roleId);
                 LOGGER.Info("创建新号:" + roleId);
             }
@@ -54,7 +54,7 @@ namespace Geek.Server.Logic.Login
             SessionManager.Add(session);
 
             //登陆流程
-            var roleComp = await ActorMgr.GetCompAgent<RoleLoginCompAgent>(roleId);
+            var roleComp = await EntityMgr.GetCompAgent<RoleCompAgent>(roleId);
             await roleComp.OnLogin(reqLogin, isNewRole, roleId);
             var resLogin = await roleComp.BuildLoginMsg();
             return MSG.Create(resLogin);

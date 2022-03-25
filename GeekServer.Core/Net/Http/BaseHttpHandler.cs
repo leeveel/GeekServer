@@ -23,15 +23,16 @@ namespace Geek.Server
 
             if (inner)
             {
-                //内部校验多一步,（可自己修改验证方式）
-                //这里在md5最后再加上所有数字的和
-                int sum = 0;
+                int checkCode1 = 0;//校验码
+                int checkCode2 = 0;
                 for (int i = 0; i < md5.Length; ++i)
                 {
-                    if (md5[i] >= '0' && md5[i] <= '9')
-                        sum += md5[i] - '0';
+                    if (md5[i] >= 'a')
+                        checkCode1 += md5[i];
+                    else
+                        checkCode2 += md5[i];
                 }
-                md5 += sum;
+                md5 += checkCode1 + md5 + checkCode2;
             }
             return md5;
         }
@@ -41,42 +42,47 @@ namespace Geek.Server
             if (!CheckSign || Settings.Ins.IsDebug)
                 return "";
 
-            if (!paramMap.ContainsKey("sign") || !paramMap.ContainsKey("time"))
+            if (Inner)
             {
-                LOGGER.Error("http命令未包含验证参数");
-                return new HttpResult(HttpResult.Code_Illegal, "http命令未包含验证参数");
-            }
-            var sign = paramMap["sign"];
-            var time = paramMap["time"];
-            long.TryParse(time, out long timeTick);
-            var nowTick = DateTime.UtcNow.Ticks;
-            if (timeTick > nowTick)
-            {
-                var span = new TimeSpan(timeTick - nowTick);
-                if(span.TotalSeconds > 10)//提前10秒
+                //内部验证
+                if (!paramMap.ContainsKey("token") || !paramMap.ContainsKey("timeTick"))
                 {
-                    LOGGER.Error("http命令校验时间错误");
-                    return new HttpResult(HttpResult.Code_Illegal, "http命令校验时间错误");
+                    LOGGER.Error("http命令未包含验证参数");
+                    return new HttpResult(HttpResult.Code_Illegal, "http命令未包含验证参数");
                 }
-            }else
-            {
-                var span = new TimeSpan(nowTick - timeTick);
-                if (span.TotalSeconds > 30)//延后30秒有效
+                var sign = paramMap["token"];
+                var time = paramMap["timeTick"];
+                long.TryParse(time, out long timeTick);
+                var span = new TimeSpan(Math.Abs(DateTime.Now.Ticks - timeTick));
+                if (span.TotalMinutes > 5)//5分钟内有效
                 {
                     LOGGER.Error("http命令已过期");
                     return new HttpResult(HttpResult.Code_Illegal, "http命令已过期");
                 }
+
+                var str = Settings.Ins.httpInnerCode + time;
+                if (sign == GetStringSign(str, true))
+                    return "";
+                else
+                    return new HttpResult(HttpResult.Code_Illegal, "命令验证失败");
             }
-
-
-            var str = Settings.Ins.HttpCode + time;
-            if(Inner)
-                str = Settings.Ins.HttpInnerCode + time;
-
-            if (sign == GetStringSign(str, Inner))
-                return "";
             else
-                return new HttpResult(HttpResult.Code_Illegal, "命令验证失败");
+            {
+                //外部验证
+                if (!paramMap.ContainsKey("sign") || paramMap.ContainsKey("code"))
+                {
+                    LOGGER.Error("http命令未包含验证参数");
+                    return new HttpResult(HttpResult.Code_Illegal, "http命令未包含验证参数sign或者code");
+                }
+                var sign = paramMap["sign"];
+                var code = paramMap["code"];
+
+                var str = Settings.Ins.httpCode + code;
+                if (sign == GetStringSign(str, false))
+                    return "";
+                else
+                    return new HttpResult(HttpResult.Code_Illegal, "命令验证失败");
+            }
         }
 
         public abstract Task<string> Action(string ip, string url, Dictionary<string, string> paramMap);

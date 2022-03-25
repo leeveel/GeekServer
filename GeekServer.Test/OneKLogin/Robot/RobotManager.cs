@@ -31,7 +31,8 @@ namespace Geek.Server.Test
             int maxCount = RobotSetting.Ins.maxOnline;
             for (int i = 0; i < maxCount; i++)
             {
-                await ActorMgr.GetOrNew(CreateRoleId(i));
+                var role = await EntityMgr.GetCompAgent<RoleCompAgent>(CreateRoleId(i));
+                _ = role.Start();
                 await Task.Delay(5);
             }
         }
@@ -43,9 +44,9 @@ namespace Geek.Server.Test
         /// <returns></returns>
         private static long CreateRoleId(int index)
         {
-            long actorType = (long)ActorType.Role;
-            long res = (long)RobotSetting.Ins.localId << 49;//(63-14) serverId 前14位[最大16383]
-            res |= actorType << 42; //(63-14-7) actorType[最大127]
+            long actorType = (long)EntityType.Role;
+            long res = (long)RobotSetting.Ins.localId << 46;//(63-17) serverId 前17位[最大65535]
+            res |= actorType << 42; //(63-4-17) actorType[最大127]
             return res | (long)index;
         }
 

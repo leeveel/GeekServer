@@ -15,7 +15,7 @@ namespace Geek.Server
     {
         private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        private const int Magic = 0x1234;
+        private const int Magic = 0x9818;
         int count = 0;
         /// <summary>
         /// 编码消息
@@ -25,7 +25,7 @@ namespace Geek.Server
             byte[] msgData = msg.Data;
             int len = 4 + 8 + 4 + 4 + msgData.Length;
 
-            int magic = Magic + count++;
+            int magic = Magic + ++count;
             magic ^= Magic << 8;
             magic ^= len;
 

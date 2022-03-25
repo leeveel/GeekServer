@@ -11,7 +11,7 @@ namespace Geek.Server
     {
         class EventInfo
         {
-            public long ActorId { get; set; }
+            public long EntityId { get; set; }
             public string AgentHandler { get; set; }
         }
 
@@ -20,7 +20,7 @@ namespace Geek.Server
         readonly static NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         readonly static Dictionary<int, List<EventInfo>> eventHandlers = new Dictionary<int, List<EventInfo>>();
 
-        public static void AddListener(long actorId, int evtType, string agentHandlerType)
+        public static void AddListener(long entityId, int evtType, string agentHandlerType)
         {
             lineActor.SendAsync(() =>
             {
@@ -29,7 +29,7 @@ namespace Geek.Server
                     var list = eventHandlers[evtType];
                     for (int i = list.Count - 1; i >= 0; --i)
                     {
-                        if (list[i].ActorId == actorId && list[i].AgentHandler == agentHandlerType)
+                        if (list[i].EntityId == entityId && list[i].AgentHandler == agentHandlerType)
                         {
                             list.RemoveAt(i);
                             break;
@@ -42,13 +42,13 @@ namespace Geek.Server
                 }
                 eventHandlers[evtType].Add(new EventInfo()
                 {
-                    ActorId = actorId,
+                    EntityId = entityId,
                     AgentHandler = agentHandlerType,
                 });
-            }, false);
+            });
         }
 
-        public static void RemoveListener(long actorId, int evtType, string agentHandlerType)
+        public static void RemoveListener(long entityId, int evtType, string agentHandlerType)
         {
             lineActor.SendAsync(() =>
             {
@@ -57,16 +57,16 @@ namespace Geek.Server
                 var list = eventHandlers[evtType];
                 for (int i = list.Count - 1; i >= 0; --i)
                 {
-                    if (list[i].AgentHandler == agentHandlerType && list[i].ActorId == actorId)
+                    if (list[i].AgentHandler == agentHandlerType && list[i].EntityId == entityId)
                     {
                         list.RemoveAt(i);
                         break;
                     }
                 }
-            }, false);
+            });
         }
 
-        public static void ClearListener(long actorId)
+        public static void ClearListener(long entityId)
         {
             lineActor.SendAsync(() =>
             {
@@ -76,17 +76,17 @@ namespace Geek.Server
                     var list = eventHandlers[evt];
                     for (int i = list.Count - 1; i >= 0; --i)
                     {
-                        if (list[i].ActorId == actorId)
+                        if (list[i].EntityId == entityId)
                         {
                             list.RemoveAt(i);
                             break;
                         }
                     }
                 }
-            }, false);
+            });
         }
 
-        public static void DispatchEvent(int evtType, Func<int, ComponentActor, Type, Task<bool>> checkDispatchFunc, Param param = null)
+        public static void DispatchEvent(int evtType, Func<int, long, Type, Task<bool>> checkDispatchFunc, Param param = null)
         {
             lineActor.SendAsync(async () =>
             {
@@ -99,31 +99,30 @@ namespace Geek.Server
                 var list = eventHandlers[evtType];
                 foreach (var evtInfo in list)
                 {
-                    var actor = await ActorManager.Get(evtInfo.ActorId);
-                    if (actor == null)
+                    var info = evtInfo; //需要存个临时变量
+                    var handler = HotfixMgr.GetInstance<IEventListener>(info.AgentHandler);
+                    var agentType = handler.GetType().BaseType.GenericTypeArguments[0];
+                    var comp = await EntityMgr.GetCompAgent(evtInfo.EntityId, agentType);
+                    if (comp == null)
                         continue;
 
-                    var info = evtInfo; //需要存个临时变量
-                    _ = actor.SendAsync(async () =>
+                    _ = comp.Owner.Actor.SendAsync(async ()=>
                     {
                         try
                         {
-                            var handler = HotfixMgr.GetInstance<IEventListener>(info.AgentHandler);
-                            var agentType = handler.GetType().BaseType.GenericTypeArguments[0];
                             //component
                             var compType = agentType.BaseType.GenericTypeArguments[0];
-                            if (checkDispatchFunc != null && !(await checkDispatchFunc(evtType, actor, compType)))
+                            if (checkDispatchFunc != null && !(await checkDispatchFunc(evtType, info.EntityId, compType)))
                                 return;
-                            var comp = await actor.GetComponent(compType);
-                            await handler.InternalHandleEvent(comp.GetAgent(agentType), evt);
+                            await handler.InnerHandleEvent(comp, evt);
                         }
                         catch (Exception e)
                         {
                             LOGGER.Error(e.ToString());
                         }
-                    }, false);
+                    });
                 }
-            }, false);
+            });
         }
     }
 }
