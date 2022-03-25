@@ -24,7 +24,7 @@ namespace Geek.Server
             await HttpServer.Start(Settings.Ins.httpPort);
             //RedisMgr.Init();
             //ServerInfoUtils.Init();
-            GrpcServer.Init(Settings.Ins.GrpcPort);
+            //GrpcServer.Init(Settings.Ins.GrpcPort);
             //ConsulUtils.Init(Settings.Ins.configCenterUrl);
 
             LOGGER.Info($"connect mongo {Settings.Ins.mongoDB} {Settings.Ins.mongoUrl}...");
