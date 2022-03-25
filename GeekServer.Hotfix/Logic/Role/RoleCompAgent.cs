@@ -113,8 +113,6 @@ namespace Geek.Server.Logic.Role
             }
         }
 
-
-
         /// <summary>
         /// 此接口是
         /// </summary>
@@ -133,9 +131,7 @@ namespace Geek.Server.Logic.Role
                         await NotifyClient(msg.msg);
 
                     if (msg.UniId < 0 || uniId < 0)
-                    {
                         return;
-                    }
 
                     var errInfo = msg.Info;
                     ResErrorCode res = new ResErrorCode
@@ -144,22 +140,7 @@ namespace Geek.Server.Logic.Role
                         errCode = (int)errInfo.Code,
                         desc = errInfo.Desc,
                     };
-                    if (res.UniId <= 0)
-                    {
-                        if (msg.msg != null && msg.msg.UniId > 0)
-                        {
-                            res.UniId = msg.msg.UniId;
-                        }
-                        else
-                        {
-                            res.UniId = uniId;
-                        }
-                    }
                     await NotifyClient(res);
-                    if (res.UniId <= 0)
-                    {
-                        LOGGER.Error($"解锁屏幕消息为0,{msg.msg?.GetType()}");
-                    }
                 }
             }
         }
