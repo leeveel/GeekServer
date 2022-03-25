@@ -159,3 +159,4 @@ public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoSta
 # 推荐项目  
 [xbuffer](https://github.com/CodeZeg/xbuffer) 一种简化版本的 flatbuffer 序列化库  
 [ExcelToCode](https://github.com/leeveel/ExcelToCode) 一键从Excel中导出模板代码和二进制数据  
+[GeekProto](https://github.com/leeveel/GeekProto) Super Fast Binary Serialization Library  
