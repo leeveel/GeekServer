@@ -103,11 +103,11 @@ namespace Geek.Server
 
         bool CheckMagicNumber(IChannelHandlerContext context, int order, int msgLen)
         {
-            order ^= (0x9818 << 8);
+            order ^= (0x1234 << 8);
             order ^= msgLen;
             var _order = context.Channel.GetAttribute(LAST_RECV_ORDER).Get();
             if (_order == null)
-                _order = new OneParam<int>(0x9818);
+                _order = new OneParam<int>(0x1234);
             int lastOrder = _order.value;
             if (order != lastOrder + 1)
             {

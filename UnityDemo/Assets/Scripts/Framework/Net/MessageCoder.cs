@@ -31,7 +31,7 @@ namespace Geek.Client
         private void EncodePackage(int msgId, ref byte[] data, int length)
         {
             var times = TimeUtils.CurrentTimeMillis();
-            var magic = Magic + count++;
+            var magic = Magic + ++count;
             magic ^= Magic << 8;
             magic ^= length;
 
