@@ -45,8 +45,8 @@ namespace Geek.Server.Test
         private static long CreateRoleId(int index)
         {
             long actorType = (long)EntityType.Role;
-            long res = (long)RobotSetting.Ins.localId << 46;//(63-17) serverId 前17位[最大65535]
-            res |= actorType << 42; //(63-4-17) actorType[最大127]
+            long res = (long)RobotSetting.Ins.localId << 46;//(63-17) 
+            res |= actorType << 42; //(63-4-17) 
             return res | (long)index;
         }
 
