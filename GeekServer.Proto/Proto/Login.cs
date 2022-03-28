@@ -3,7 +3,7 @@
     /// <summary>
     /// 玩家基础信息
     /// </summary>
-    [SClass(SID._111100)]
+    [SClass(SID._111100, SO.NotMsg)]
 	public class UserInfo
 	{
 		/// <summary>
@@ -36,7 +36,7 @@
 	/// <summary>
 	/// 请求登录
 	/// </summary>
-	[SClass(SID._111101, SO.Msg)]
+	[SClass(SID._111101)]
 	public class ReqLogin
 	{
 		[SProperty(0)]
@@ -55,7 +55,7 @@
 	/// <summary>
 	/// 请求登录
 	/// </summary>
-	[SClass(SID._111102, SO.Msg)]
+	[SClass(SID._111102)]
 	public class ResLogin
 	{
 		/// <summary>
@@ -71,7 +71,7 @@
 	/// <summary>
 	/// 等级变化
 	/// </summary>
-	[SClass(SID._111103, SO.Msg)]
+	[SClass(SID._111103)]
 	public class ResLevelUp
 	{
 		/// <summary>
@@ -84,7 +84,7 @@
 	/// <summary>
 	/// 双向心跳/收到恢复同样的消息
 	/// </summary>
-	[SClass(SID._111104, SO.Msg)]
+	[SClass(SID._111104)]
 	public class HearBeat
 	{
 		/// <summary>
@@ -97,7 +97,7 @@
 	/// <summary>
 	/// 客户端每次请求都会回复错误码
 	/// </summary>
-	[SClass(SID._111105, SO.Msg)]
+	[SClass(SID._111105)]
 	public class ResErrorCode
 	{
 		/// <summary>

@@ -75,9 +75,9 @@ namespace Logic
         {
             AddListener(MessageHandle.ConnectSucceedEvt, OnConnectServer);
             AddListener(MessageHandle.DisconnectEvt, OnDisconnectServer);
-            AddListener(ResLogin.SID, OnResLogin); 
-            AddListener(ResBagInfo.SID, OnResBagInfo);
-            AddListener(ResErrorCode.SID, OnResErrorCode);
+            AddListener(ResLogin.MsgID, OnResLogin); 
+            AddListener(ResBagInfo.MsgID, OnResBagInfo);
+            AddListener(ResErrorCode.MsgID, OnResErrorCode);
         }
 
         private void OnResErrorCode(Event e)

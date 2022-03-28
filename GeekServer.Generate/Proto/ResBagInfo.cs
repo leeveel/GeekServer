@@ -17,9 +17,14 @@ namespace Geek.Server.Proto
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
 
+		/*********************************************************/
+
 		public Dictionary<int, long> ItemDic = new Dictionary<int, long>();
 
-		
+		/*********************************************************/
+
+
+		public const int MsgID = SID;
 		public override int Sid { get;} = 112002;
 		public const int SID = 112002;
 

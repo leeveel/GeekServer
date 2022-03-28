@@ -2,7 +2,7 @@
 
 using Geek.Client;
 
-namespace Geek.Client.Proto
+namespace Geek.Server.Proto
 {
 	public class SClassFactory
 	{

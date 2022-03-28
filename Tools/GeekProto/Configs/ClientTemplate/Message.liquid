@@ -60,8 +60,15 @@ namespace {{space}}
 		{{~ end ~}}
 		{{~ end ~}}
 		
+		{{~ if msgid != 0 ~}}
+		public const int MsgID = SID;
+		{{~ end ~}}		
 		public override int Sid { get;} = {{sid}};
+		{{~ if issubclass ~}}
+		public new const int SID = {{sid}};
+		{{~ else ~}}
 		public const int SID = {{sid}};
+		{{~ end ~}}
 
 		public override T Create<T>(int sid)
         {

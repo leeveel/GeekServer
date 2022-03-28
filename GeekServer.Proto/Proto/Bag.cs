@@ -5,13 +5,13 @@ namespace Geek.Server.Proto
     /// <summary>
     /// 请求背包数据
     /// </summary>
-    [SClass(SID._112001, SO.Msg)]
+    [SClass(SID._112001)]
 	public class ReqBagInfo : BaseMessage { }
 
 	/// <summary>
 	/// 返回背包数据
 	/// </summary>
-	[SClass(SID._112002, SO.Msg)]
+	[SClass(SID._112002)]
 	public class ResBagInfo : BaseMessage
 	{
 		[SProperty(0)]
@@ -21,7 +21,7 @@ namespace Geek.Server.Proto
 	/// <summary>
 	/// 使用道具
 	/// </summary>
-	[SClass(SID._112003, SO.Msg)]
+	[SClass(SID._112003)]
 	public class ReqUseItem : BaseMessage
 	{
 		/// <summary>
@@ -34,7 +34,7 @@ namespace Geek.Server.Proto
 	/// <summary>
 	/// 出售道具
 	/// </summary>
-	[SClass(SID._112004, SO.Msg)]
+	[SClass(SID._112004)]
 	public class ReqSellItem : BaseMessage
 	{
 		/// <summary>
@@ -44,7 +44,7 @@ namespace Geek.Server.Proto
 		public int ItemId { get; set; }
 	}
 
-	[SClass(SID._112005, SO.Msg)]
+	[SClass(SID._112005)]
 	public class ResItemChange : BaseMessage
 	{
 		/// <summary>

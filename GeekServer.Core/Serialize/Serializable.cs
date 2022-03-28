@@ -58,19 +58,29 @@ namespace Geek.Server
             return null;
         }
 
+        public bool IsState { get; }
         protected virtual List<T> GetList<T>()
         {
-            return new List<T>();
+            if (IsState)
+                return new StateList<T>();
+            else
+                return new List<T>();
         }
 
         protected virtual HashSet<T> GetSet<T>()
         {
-            return new HashSet<T>();
+            if (IsState)
+                return new StateSet<T>();
+            else
+                return new HashSet<T>();
         }
 
         protected virtual Dictionary<K, V> GetMap<K, V>()
         {
-            return new Dictionary<K, V>();
+            if (IsState)
+                return new StateMap<K, V>();
+            else
+                return new Dictionary<K, V>();
         }
 
 

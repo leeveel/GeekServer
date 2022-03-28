@@ -15,16 +15,5 @@ namespace Geek.Server
         public int UniId { get; set; }
         [BsonIgnore]
         public int MsgId { get { return Sid; } }
-
-        public virtual int WriteWithType(byte[] _buffer_, int _offset_)
-        {
-            return _offset_;
-        }
-
-        public virtual int GetMsgId()
-        {
-            return 0;
-        }
-
     }
 }

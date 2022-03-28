@@ -68,6 +68,7 @@
       "System.Threading.Tasks.Extensions/4.5.0": {},
       "Geek.Core/1.0.0": {
         "dependencies": {
+          "MongoDB.Bson": "2.15.0",
           "NLog": "4.7.14"
         },
         "runtime": {

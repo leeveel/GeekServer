@@ -16,12 +16,17 @@ namespace Geek.Server.Proto
 	{
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-		public string UserName { get; set; }
-		public string Platform { get; set; }
-		public int SdkType { get; set; }
-		public string SdkToken { get; set; }
-		public string Device { get; set; }
-		
+
+		/*********************************************************/
+		public string  UserName {get;set;}
+		public string Platform {get;set;}
+		public int SdkType {get;set;}
+		public string SdkToken {get;set;}
+		public string Device {get;set;}
+		/*********************************************************/
+
+
+		public const int MsgID = SID;
 		public override int Sid { get;} = 111101;
 		public const int SID = 111101;
 

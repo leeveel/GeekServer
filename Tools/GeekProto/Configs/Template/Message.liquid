@@ -40,30 +40,134 @@ namespace {{space}}
 	{
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
+		{{~ if isstate ~}}
+
+		/*********************************************************/
 		{{~ for field in fields ~}}
 		{{~ if field.type == "list"~}}
-		public List<{{field.clsname1}}> {{field.name}} { get; set; } = new List<{{field.clsname1}}>();
+		private {{listname}}<{{field.clsname1}}> _{{field.name}}_ = new {{listname}}<{{field.clsname1}}>();
+		public {{listname}}<{{field.clsname1}}> {{field.name}}
+		{
+			get{ return _{{field.name}}_; }
+			set{ _{{field.name}}_= value; _stateChanged=true;}
+		}
 		{{~ else if field.type == "set"~}}
-		public HashSet<{{field.clsname1}}> {{field.name}} { get; set; } = new HashSet<{{field.clsname1}}>();
+		private {{setname}}<{{field.clsname1}}> _{{field.name}}_ = new {{setname}}<{{field.clsname1}}>();
+		public {{setname}}<{{field.clsname1}}> {{field.name}}
+		{
+			get{ return _{{field.name}}_; }
+			set{ _{{field.name}}_= value; _stateChanged=true;}
+		}
 		{{~ else if field.type == "map"~}}
 
 		{{~ if field.nestmodel == 0 ~}}   {{~#无嵌套模式~}}
-		public Dictionary<{{field.clsname1}}, {{field.clsname2}}> {{field.name}} = new Dictionary<{{field.clsname1}}, {{field.clsname2}}>();
+		private {{mapname}}<{{field.clsname1}}, {{field.clsname2}}> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{field.clsname2}}>();
+		public {{mapname}}<{{field.clsname1}}, {{field.clsname2}}> {{field.name}}
+		{
+			get{ return _{{field.name}}_; }
+			set{ _{{field.name}}_= value; _stateChanged=true;}
+		}
 		{{~ else if field.nestmodel == 1 ~}}   {{~#嵌套list模式~}}
-		public Dictionary<{{field.clsname1}}, List<{{field.clsname3}}>> {{field.name}} = new Dictionary<{{field.clsname1}}, List<{{field.clsname3}}>>();
+		private {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>>();
+		public {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>> {{field.name}}
+		{
+			get{ return _{{field.name}}_; }
+			set{ _{{field.name}}_= value; _stateChanged=true;}
+		}
 		{{~ else if field.nestmodel == 2 ~}}   {{~#嵌套set模式~}}
-		public Dictionary<{{field.clsname1}}, HashSet<{{field.clsname3}}>> {{field.name}} = new Dictionary<{{field.clsname1}}, HashSet<{{field.clsname3}}>>();
+		private {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>>();
+		public {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>> {{field.name}}
+		{
+			get{ return _{{field.name}}_; }
+			set{ _{{field.name}}_= value; _stateChanged=true;}
+		}
 		{{~ else if field.nestmodel == 3 ~}}   {{~#嵌套map模式~}}
-		public Dictionary<{{field.clsname1}}, Dictionary<{{field.clsname3}}, {{field.clsname4}}>> {{field.name}} = new Dictionary<{{field.clsname1}}, Dictionary<{{field.clsname3}}, {{field.clsname4}}>>();
+		private {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>>();
+		public {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>> {{field.name}}
+		{
+			get{ return _{{field.name}}_; }
+			set{ _{{field.name}}_= value; _stateChanged=true;}
+		}
 		{{~ end ~}}
 
 		{{~ else ~}}
-		public {{field.clsname1}} {{field.name}} { get; set; }
+		private {{field.clsname1}} _{{field.name}}_;
+		public {{field.clsname1}} {{field.name}} 
+		{ 
+			get{ return _{{field.name}}_; }
+			set{ _{{field.name}}_= value; _stateChanged=true;}
+		}
 		{{~ end ~}}
 		{{~ end ~}}
+
+
+		{{ valueTypes = ["byte", "sbyte", "bool", "short", "int", "long", "string", "float", "byte[]"] }}
+		///<summary>状态是否改变</summary>
+		public override bool IsChanged
+		{
+			get
+			{
+				if(_stateChanged)
+					return true;
+				{{~ for field in fields ~}}
+				{{~ if field.type != "field" && !field.isenum1 && !(valueTypes | array.contains field.clsname1) ~}}
+				if({{field.name}}.IsChanged)
+					return true;
+				{{~ end ~}}
+				{{~ end ~}}
+				return false;
+			}
+		}
 		
+		///<summary>清除所有改变[含子项]</summary>
+		public override void ClearChanges()
+		{
+			_stateChanged = false;
+			{{~ for field in fields ~}}
+			{{~ if field.type != "field" && !field.isenum1 && !(valueTypes | array.contains field.clsname1) ~}}
+			{{field.name}}.ClearChanges();
+			{{~ end ~}}
+			{{~ end ~}}
+		}
+		/*********************************************************/
+
+		{{~ else ~}} {{~#非State模式~}}
+
+		/*********************************************************/
+		{{~ for field in fields ~}}
+		{{~ if field.type == "list"~}}
+		public {{listname}}<{{field.clsname1}}> {{field.name}} = new {{listname}}<{{field.clsname1}}>();
+		{{~ else if field.type == "set"~}}
+		public {{setname}}<{{field.clsname1}}> {{field.name}} = new {{setname}}<{{field.clsname1}}>();
+		{{~ else if field.type == "map"~}}
+
+		{{~ if field.nestmodel == 0 ~}}   {{~#无嵌套模式~}}
+		public {{mapname}}<{{field.clsname1}}, {{field.clsname2}}> {{field.name}} = new {{mapname}}<{{field.clsname1}}, {{field.clsname2}}>();
+		{{~ else if field.nestmodel == 1 ~}}   {{~#嵌套list模式~}}
+		public {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>> {{field.name}} = new {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>>();
+		{{~ else if field.nestmodel == 2 ~}}   {{~#嵌套set模式~}}
+		public {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>> {{field.name}} = new {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>>();
+		{{~ else if field.nestmodel == 3 ~}}   {{~#嵌套map模式~}}
+		public {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>> {{field.name}} = new {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>>();
+		{{~ end ~}}
+
+		{{~ else ~}}
+		public {{field.clsname1}} {{field.name}} {get;set;}
+		{{~ end ~}}
+		{{~ end ~}}
+		/*********************************************************/
+
+		{{~ end ~}}
+
+		{{~ if msgid != 0 ~}}
+		public const int MsgID = SID;
+		{{~ end ~}}		
 		public override int Sid { get;} = {{sid}};
+		{{~ if issubclass ~}}
+		public new const int SID = {{sid}};
+		{{~ else ~}}
 		public const int SID = {{sid}};
+		{{~ end ~}}
 
 		public override T Create<T>(int sid)
         {
@@ -185,9 +289,9 @@ namespace {{space}}
 						{{~ end ~}}
 
 						{{~ if field.nestmodel == 1 ~}}
-						var val = new List<{{field.clsname3}}>(); //TODO:类型处理
+						var val = new {{listname}}<{{field.clsname3}}>(); //TODO:类型处理
 						{{~ else if field.nestmodel == 2 ~}}
-						var val = new HashSet<{{field.clsname3}}>(); //TODO:类型处理
+						var val = new {{setname}}<{{field.clsname3}}>(); //TODO:类型处理
 						{{~ end ~}}
 						
 						//ReadPrimitiveCollection(val, buffer, ref offset);
@@ -213,9 +317,9 @@ namespace {{space}}
 						{{~ end ~}}
 
 						{{~ if field.nestmodel == 1 ~}}
-						var val = new List<{{field.clsname3}}>(); //TODO:类型处理
+						var val = new {{listname}}<{{field.clsname3}}>(); //TODO:类型处理
 						{{~ else if field.nestmodel == 2 ~}}
-						var val = new HashSet<{{field.clsname3}}>(); //TODO:类型处理
+						var val = new {{setname}}<{{field.clsname3}}>(); //TODO:类型处理
 						{{~ end ~}}
 
 						int count{{field.idx}}2 = XBuffer.ReadInt(_buffer_, ref _offset_);
@@ -250,7 +354,7 @@ namespace {{space}}
 						var key = {{readMap[field.clsname1]}};
 						{{~ end ~}}
 
-						var val = new Dictionary<{{field.clsname3}}, {{field.clsname4}}>();         //TODO:类型处理
+						var val = new {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>();         //TODO:类型处理
 						int count{{field.idx}}2 = XBuffer.ReadInt(_buffer_, ref _offset_);
 						for (int j = 0; j < count{{field.idx}}2; ++j)
 						{
@@ -276,7 +380,7 @@ namespace {{space}}
 					for (int i = 0; i < count{{field.idx}}; ++i)
 					{
 						var key = {{readMap[field.clsname1]}};
-						var val = new Dictionary<{{field.clsname3}}, {{field.clsname4}}>(); //TODO:类型处理
+						var val = new {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>(); //TODO:类型处理
 						//ReadCustomMap(val, buffer, ref offset);
 						int count{{field.idx}}2 = XBuffer.ReadInt(_buffer_, ref _offset_);
 						for (int j = 0; j < count{{field.idx}}2; ++j)

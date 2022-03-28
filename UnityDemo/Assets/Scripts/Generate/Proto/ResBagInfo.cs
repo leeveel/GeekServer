@@ -18,12 +18,13 @@ namespace Geek.Server.Proto
 		public Dictionary<int, long> ItemDic = new Dictionary<int, long>();
 
 		
+		public const int MsgID = SID;
 		public override int Sid { get;} = 112002;
 		public const int SID = 112002;
 
 		public override T Create<T>(int sid)
         {
-            return Geek.Client.Proto.SClassFactory.Create<T>(sid);
+            return Geek.Server.Proto.SClassFactory.Create<T>(sid);
         }
 
 		///<summary>反序列化，读取数据</summary>

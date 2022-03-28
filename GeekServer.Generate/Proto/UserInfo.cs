@@ -16,12 +16,16 @@ namespace Geek.Server.Proto
 	{
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-		public string RoleName { get; set; }
-		public long RoleId { get; set; }
-		public int Level { get; set; }
-		public long CreateTime { get; set; }
-		public int VipLevel { get; set; }
-		
+
+		/*********************************************************/
+		public string  RoleName {get;set;}
+		public long RoleId {get;set;}
+		public int Level {get;set;}
+		public long CreateTime {get;set;}
+		public int VipLevel {get;set;}
+		/*********************************************************/
+
+
 		public override int Sid { get;} = 111100;
 		public const int SID = 111100;
 

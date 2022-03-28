@@ -25,7 +25,7 @@ namespace Geek.Server.Proto
 
 		public override T Create<T>(int sid)
         {
-            return Geek.Client.Proto.SClassFactory.Create<T>(sid);
+            return Geek.Server.Proto.SClassFactory.Create<T>(sid);
         }
 
 		///<summary>反序列化，读取数据</summary>

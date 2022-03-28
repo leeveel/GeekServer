@@ -16,9 +16,14 @@ namespace Geek.Server.Proto
 	{
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-		public int Code { get; set; }
-		public Geek.Server.Proto.UserInfo UserInfo { get; set; }
-		
+
+		/*********************************************************/
+		public int  Code {get;set;}
+		public Geek.Server.Proto.UserInfo UserInfo {get;set;}
+		/*********************************************************/
+
+
+		public const int MsgID = SID;
 		public override int Sid { get;} = 111102;
 		public const int SID = 111102;
 
