@@ -1,6 +1,5 @@
 ﻿using Geek.Client;
-using Geek.Client.Message.Bag;
-using Geek.Client.Message.Login;
+using Geek.Server.Proto;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -27,16 +26,16 @@ namespace Logic
         {
             //登陆
             var req = new ReqLogin();
-            req.sdkType = 0;
-            req.sdkToken = "";
-            req.userName = "123456";
-            req.device = SystemInfo.deviceUniqueIdentifier;
+            req.SdkType = 0;
+            req.SdkToken = "";
+            req.UserName = "123456";
+            req.Device = SystemInfo.deviceUniqueIdentifier;
             if (Application.platform == RuntimePlatform.Android)
-                req.platform = "android";
+                req.Platform = "android";
             else if (Application.platform == RuntimePlatform.IPhonePlayer)
-                req.platform = "ios";
+                req.Platform = "ios";
             else
-                req.platform = "unity";
+                req.Platform = "unity";
             return DemoService.Singleton.SendMsg(req);
         }
 

@@ -20,12 +20,12 @@ namespace Geek.Server
             {
                 try
                 {
-                    var handler = TcpHandlerFactory.GetHandler(msg.GetMsgId());
-                    LOGGER.Debug($"-------------get msg {msg.GetMsgId()} {msg.GetType()}");
+                    var handler = TcpHandlerFactory.GetHandler(msg.MsgId);
+                    LOGGER.Debug($"-------------get msg {msg.MsgId} {msg.GetType()}");
 
                     if (handler == null)
                     {
-                        LOGGER.Error("找不到对应的handler " + msg.GetMsgId());
+                        LOGGER.Error("找不到对应的handler " + msg.MsgId);
                         return;
                     }
 
@@ -46,11 +46,11 @@ namespace Geek.Server
                             if (agent != null)
                                 _ = agent.Owner.Actor.SendAsync(compHandler.ActionAsync);
                             else
-                                LOGGER.Error($"handler actor 为空 {msg.GetMsgId()} {handler.GetType()}");
+                                LOGGER.Error($"handler actor 为空 {msg.MsgId} {handler.GetType()}");
                         }
                         else
                         {
-                            LOGGER.Error($"EntityId 为0 {msg.GetMsgId()} {handler.GetType()} {session.Id}");
+                            LOGGER.Error($"EntityId 为0 {msg.MsgId} {handler.GetType()} {session.Id}");
                         }
                     }
                     else

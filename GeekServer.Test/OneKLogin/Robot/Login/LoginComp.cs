@@ -1,4 +1,4 @@
-﻿using Geek.Server.Message.Login;
+﻿using Geek.Server.Proto;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Test
@@ -13,10 +13,10 @@ namespace Geek.Server.Test
             string playerId = EntityId.ToString();
             ReqLogin msg = new ReqLogin
             {
-                userName = playerId,
-                platform = "unity",
-                device = "device:" + playerId,
-                sdkType = 0
+                UserName = playerId,
+                Platform = "unity",
+                Device = "device:" + playerId,
+                SdkType = 0
             };
             var net = await GetCompAgent<NetCompAgent>();
             return await net.SendMsg(msg);

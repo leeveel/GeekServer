@@ -1,4 +1,4 @@
-﻿using Geek.Server.Message.Bag;
+﻿using Geek.Server.Proto;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Logic.Bag
@@ -48,7 +48,7 @@ namespace Geek.Server.Logic.Bag
         {
             var res = new ResBagInfo();
             foreach (var kv in State.ItemMap)
-                res.itemDic[kv.Key] = kv.Value;
+                res.ItemDic[kv.Key] = kv.Value;
             return Task.FromResult(res);
         }
 

@@ -1,4 +1,4 @@
-﻿using Geek.Server.Message.Bag;
+﻿using Geek.Server.Proto;
 using NLog;
 using System.Collections.Generic;
 using System.Text;
@@ -13,7 +13,7 @@ namespace Geek.Server.Test
         public override Task ActionAsync()
         {
             var msg = (ResBagInfo)Msg;
-            var data = msg.itemDic;
+            var data = msg.ItemDic;
             StringBuilder str = new StringBuilder();
             str.Append("收到背包数据:");
             foreach (KeyValuePair<int, long> keyVal in data)

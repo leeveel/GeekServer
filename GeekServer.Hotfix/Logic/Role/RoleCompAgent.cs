@@ -1,5 +1,5 @@
 ﻿using Geek.Server.Logic.Bag;
-using Geek.Server.Message.Login;
+using Geek.Server.Proto;
 using NLog;
 using System;
 using System.Threading.Tasks;
@@ -81,14 +81,14 @@ namespace Geek.Server.Logic.Role
         {
             var res = new ResLogin()
             {
-                code = 0,
-                userInfo = new UserInfo()
+                Code = 0,
+                UserInfo = new UserInfo()
                 {
-                    createTime = State.CreateTime.Ticks,
-                    level = State.Level,
-                    roleId = State.RoleId,
-                    roleName = State.RoleName,
-                    vipLevel = State.VipLevel
+                    CreateTime = State.CreateTime.Ticks,
+                    Level = State.Level,
+                    RoleId = State.RoleId,
+                    RoleName = State.RoleName,
+                    VipLevel = State.VipLevel
                 }
             };
             return Task.FromResult(res);
@@ -137,8 +137,8 @@ namespace Geek.Server.Logic.Role
                     ResErrorCode res = new ResErrorCode
                     {
                         UniId = msg.UniId,
-                        errCode = (int)errInfo.Code,
-                        desc = errInfo.Desc,
+                        ErrCode = (int)errInfo.Code,
+                        Desc = errInfo.Desc,
                     };
                     await NotifyClient(res);
                 }

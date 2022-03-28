@@ -83,13 +83,13 @@ namespace Geek.Server
                 }
                 else
                 {
-                    if (msg.GetMsgId() == msgId)
+                    if (msg.MsgId == msgId)
                     {
                         msg.Deserialize(msgData);
                     }
                     else
                     {
-                        LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", msg.GetMsgId(), msgId);
+                        LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", msg.MsgId, msgId);
                         return;
                     }
                 }

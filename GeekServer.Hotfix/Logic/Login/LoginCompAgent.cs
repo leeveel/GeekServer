@@ -1,6 +1,6 @@
 ﻿using DotNetty.Transport.Channels;
 using Geek.Server.Logic.Role;
-using Geek.Server.Message.Login;
+using Geek.Server.Proto;
 using System;
 using System.Threading.Tasks;
 
@@ -13,18 +13,18 @@ namespace Geek.Server.Logic.Login
 
         public async Task<MSG> Login(IChannel channel, ReqLogin reqLogin)
         {
-            if (string.IsNullOrEmpty(reqLogin.userName))
+            if (string.IsNullOrEmpty(reqLogin.UserName))
             {
                 return MSG.Create(ErrCode.AccountCannotBeNull);
             }
 
-            if (reqLogin.platform != "android" && reqLogin.platform != "ios" && reqLogin.platform != "unity")
+            if (reqLogin.Platform != "android" && reqLogin.Platform != "ios" && reqLogin.Platform != "unity")
             {
                 //验证平台合法性
                 return MSG.Create(ErrCode.UnknownPlatform);
             }
 
-            if (reqLogin.sdkType > 0)
+            if (reqLogin.SdkType > 0)
             {
                 //TODO 通过sdktype验证sdktoken
                 //可以放到玩家actor
@@ -33,13 +33,13 @@ namespace Geek.Server.Logic.Login
             //验证通过
 
             //查询角色账号，这里设定每个服务器只能有一个角色
-            var roleId = await GetRoleIdOfPlayer(reqLogin.userName, reqLogin.sdkType);
+            var roleId = await GetRoleIdOfPlayer(reqLogin.UserName, reqLogin.SdkType);
             var isNewRole = roleId <= 0;
             if (isNewRole)
             {
                 //没有老角色，创建新号
                 roleId = EntityID.NewID(EntityType.Role);
-                await CreateRoleToPlayer(reqLogin.userName, reqLogin.sdkType, roleId);
+                await CreateRoleToPlayer(reqLogin.UserName, reqLogin.SdkType, roleId);
                 LOGGER.Info("创建新号:" + roleId);
             }
 
@@ -49,7 +49,7 @@ namespace Geek.Server.Logic.Login
                 Id = roleId,
                 Time = DateTime.Now,
                 Channel = channel,
-                Sign = reqLogin.device
+                Sign = reqLogin.Device
             };
             SessionManager.Add(session);
 
@@ -57,7 +57,7 @@ namespace Geek.Server.Logic.Login
             var roleComp = await EntityMgr.GetCompAgent<RoleCompAgent>(roleId);
             await roleComp.OnLogin(reqLogin, isNewRole, roleId);
             var resLogin = await roleComp.BuildLoginMsg();
-            return MSG.Create(resLogin);
+            return MSG.Create(resLogin, reqLogin.UniId);
         }
 
         public async Task<long> GetRoleIdOfPlayer(string userName, int sdkType)

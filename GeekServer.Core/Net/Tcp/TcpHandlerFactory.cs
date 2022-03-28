@@ -41,7 +41,7 @@ namespace Geek.Server
                 var att = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
                 if (att == null)
                     continue;
-                var msgIdField = att.Msg.GetField("MsgId", BindingFlags.Static | BindingFlags.Public);
+                var msgIdField = att.Msg.GetField("SID", BindingFlags.Static | BindingFlags.Public);
                 if (msgIdField == null)
                     continue;
 

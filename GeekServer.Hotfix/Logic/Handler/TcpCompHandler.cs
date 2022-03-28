@@ -1,4 +1,4 @@
-﻿using Geek.Server.Message.Login;
+﻿using Geek.Server.Proto;
 using System;
 using System.Threading.Tasks;
 
@@ -27,10 +27,10 @@ namespace Geek.Server
             ResErrorCode res = new ResErrorCode
             {
                 UniId = Msg.UniId,  //写入req中的UniId
-                errCode = (int)errInfo.Code,
-                desc = errInfo.Desc
+                ErrCode = (int)errInfo.Code,
+                Desc = errInfo.Desc
             };
-            NMessage msg = NMessage.Create(ResErrorCode.MsgId, res.Serialize());
+            NMessage msg = NMessage.Create(ResErrorCode.SID, res.Serialize());
             WriteAndFlush(msg);
         }
 

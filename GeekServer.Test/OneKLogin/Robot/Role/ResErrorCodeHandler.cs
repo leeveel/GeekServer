@@ -1,4 +1,4 @@
-﻿using Geek.Server.Message.Login;
+﻿using Geek.Server.Proto;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Test

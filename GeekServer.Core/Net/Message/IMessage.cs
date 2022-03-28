@@ -7,7 +7,7 @@
         /// </summary>
         int UniId { get; set; }
 
-        int GetMsgId();
+        int MsgId { get; }
 
         byte[] Serialize();
 

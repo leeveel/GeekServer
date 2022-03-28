@@ -1,7 +1,7 @@
 ﻿using Geek.Server.Config;
 using Geek.Server.Logic.Role;
 using Geek.Server.Logic.Server;
-using Geek.Server.Message.Login;
+using Geek.Server.Proto;
 using System;
 using System.Threading.Tasks;
 

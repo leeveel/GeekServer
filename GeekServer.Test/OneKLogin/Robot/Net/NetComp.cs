@@ -28,7 +28,7 @@ namespace Geek.Server.Test
         public Task<bool> SendMsg(IMessage msg)
         {
             msg.UniId = Comp.UniId++;
-            NMessage nmsg = NMessage.Create(msg.GetMsgId(), msg.Serialize());
+            NMessage nmsg = NMessage.Create(msg.MsgId, msg.Serialize());
             Comp.channel.WriteAndFlushAsync(nmsg);
             return Comp.Waiter.StartWait(msg.UniId);
         }

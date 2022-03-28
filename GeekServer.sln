@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Weavers", "GeekS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Test", "GeekServer.Test\GeekServer.Test.csproj", "{D8C79DBF-65E7-41B6-ADA1-EB600CC71E40}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekServer.Generate", "GeekServer.Generate\GeekServer.Generate.csproj", "{EC180538-95EF-419F-91D4-CD32C4E1A97A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Generate", "GeekServer.Generate\GeekServer.Generate.csproj", "{EC180538-95EF-419F-91D4-CD32C4E1A97A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekServer.Proto", "GeekServer.Proto\GeekServer.Proto.csproj", "{9EC696B1-4529-421C-A135-FEF762171B3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{EC180538-95EF-419F-91D4-CD32C4E1A97A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC180538-95EF-419F-91D4-CD32C4E1A97A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC180538-95EF-419F-91D4-CD32C4E1A97A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EC696B1-4529-421C-A135-FEF762171B3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EC696B1-4529-421C-A135-FEF762171B3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EC696B1-4529-421C-A135-FEF762171B3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EC696B1-4529-421C-A135-FEF762171B3F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -17,7 +17,7 @@ namespace Geek.Server
             {
                 if (!type.IsSubclassOf(typeof(BaseMessage))) continue;
 
-                var msgIdField = type.GetField("MsgId", BindingFlags.Static | BindingFlags.Public);
+                var msgIdField = type.GetField("SID", BindingFlags.Static | BindingFlags.Public);
                 if (msgIdField == null) continue;
 
                 int msgId = (int)msgIdField.GetValue(null);

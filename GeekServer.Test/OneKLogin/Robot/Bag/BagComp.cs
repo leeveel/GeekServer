@@ -1,4 +1,4 @@
-﻿using Geek.Server.Message.Bag;
+﻿using Geek.Server.Proto;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Test

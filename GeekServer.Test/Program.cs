@@ -1,6 +1,4 @@
-﻿using Geek.Server.Config;
-using Geek.Server.Message;
-using NLog;
+﻿using NLog;
 using NLog.Config;
 using System;
 

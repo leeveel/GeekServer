@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -20,10 +20,6 @@
     <OutputPath>../app</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Net\Rpc\Protos\service.proto" />
-  </ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="DotNetty.Codecs" Version="0.6.0" />
@@ -56,10 +52,6 @@
 
 	<ItemGroup>
 		<WeaverFiles Include="$(OutputPath)/GeekServer.Weavers.dll" WeaverClassNames="CoreWeaver" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Protobuf Include="Net\Rpc\Protos\service.proto" GrpcServices="Both" />
 	</ItemGroup>
 
 </Project>

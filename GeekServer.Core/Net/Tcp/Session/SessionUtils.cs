@@ -15,7 +15,7 @@ namespace Geek.Server
 		{
 			if (IsDisconnectChannel(ctx))
 				return;
-			NMessage smsg = NMessage.Create(msg.GetMsgId(), msg.Serialize());
+			NMessage smsg = NMessage.Create(msg.MsgId, msg.Serialize());
 			ctx.WriteAndFlushAsync(smsg);
 		}
 
@@ -28,7 +28,7 @@ namespace Geek.Server
 
 		public static void WriteAndFlush(IChannel channel, IMessage msg)
 		{
-			WriteAndFlush(channel, msg.GetMsgId(), msg.Serialize());
+			WriteAndFlush(channel, msg.MsgId, msg.Serialize());
 		}
 
 		public static void WriteAndFlush(IChannel channel, int msgId, byte[] data)

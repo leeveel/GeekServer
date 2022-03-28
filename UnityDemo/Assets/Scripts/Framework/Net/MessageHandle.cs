@@ -61,7 +61,7 @@ namespace Geek.Client
                     data = NetBufferPool.Alloc(len);
                     len = msg.Write(data, MessageCoder.EncodeHeadLength);
                 }
-                coder.Encode(msg.GetMsgId(), ref data, len);
+                coder.Encode(msg.MsgId, ref data, len);
                 await socket.SendMsg(data, len);
                 NetBufferPool.Free(data);
             });

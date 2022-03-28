@@ -26,7 +26,7 @@ namespace Geek.Server
                 if (Msg == null)
                     return 0;
                 else
-                    return Msg.GetMsgId();
+                    return Msg.MsgId;
             }
         }
 

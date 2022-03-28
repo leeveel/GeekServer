@@ -1,5 +1,5 @@
 ﻿using Geek.Server.Logic.Role;
-using Geek.Server.Message.Bag;
+using Geek.Server.Proto;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Logic.Bag
@@ -14,7 +14,7 @@ namespace Geek.Server.Logic.Bag
             var bagComp = await GetCompAgent<BagCompAgent>();
             var msg = await bagComp.BuildInfoMsg();
             //WriteAndFlush(MSG.Create(msg));
-            await (await GetCompAgent<RoleCompAgent>()).NotifyClient(MSG.Create(msg), Msg.UniId);
+            await (await GetCompAgent<RoleCompAgent>()).NotifyClient(MSG.Create(msg, Msg.UniId));
         }
     }
 }

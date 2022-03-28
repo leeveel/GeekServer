@@ -1,6 +1,5 @@
 ﻿using Geek.Client;
-using Geek.Client.Message.Bag;
-using Geek.Client.Message.Login;
+using Geek.Server.Proto;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -76,15 +75,15 @@ namespace Logic
         {
             AddListener(MessageHandle.ConnectSucceedEvt, OnConnectServer);
             AddListener(MessageHandle.DisconnectEvt, OnDisconnectServer);
-            AddListener(ResLogin.MsgId, OnResLogin); 
-            AddListener(ResBagInfo.MsgId, OnResBagInfo);
-            AddListener(ResErrorCode.MsgId, OnResErrorCode);
+            AddListener(ResLogin.SID, OnResLogin); 
+            AddListener(ResBagInfo.SID, OnResBagInfo);
+            AddListener(ResErrorCode.SID, OnResErrorCode);
         }
 
         private void OnResErrorCode(Event e)
         {
             ResErrorCode res = GetCurMsg<ResErrorCode>(e.EventId);
-            switch (res.errCode)
+            switch (res.ErrCode)
             {
                 case (int)ErrCode.Success:
                     //do some thing
@@ -96,9 +95,9 @@ namespace Logic
                 default:
                     break;
             }
-            MsgWaiter.EndWait(res.UniId, res.errCode == (int)ErrCode.Success);
-            if (!string.IsNullOrEmpty(res.desc))
-                UnityEngine.Debug.Log("服务器提示:" + res.desc);
+            MsgWaiter.EndWait(res.UniId, res.ErrCode == (int)ErrCode.Success);
+            if (!string.IsNullOrEmpty(res.Desc))
+                UnityEngine.Debug.Log("服务器提示:" + res.Desc);
         }
 
 
@@ -126,13 +125,13 @@ namespace Logic
         private void OnResLogin(Event e)
         {
             var res = GetCurMsg<ResLogin>(e.EventId);
-            UnityEngine.Debug.Log($"{res.userInfo.roleName}:登录成功!");
+            UnityEngine.Debug.Log($"{res.UserInfo.RoleName}:登录成功!");
         }
 
         private void OnResBagInfo(Event e)
         {
             var msg = GetCurMsg<ResBagInfo>(e.EventId);
-            var data = msg.itemDic;
+            var data = msg.ItemDic;
             StringBuilder str = new StringBuilder();
             str.Append("收到背包数据:");
             foreach (KeyValuePair<int, long> keyVal in data)

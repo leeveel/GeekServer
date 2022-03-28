@@ -8,8 +8,4 @@
     <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Generate\Messages\" />
-  </ItemGroup>
-
 </Project>

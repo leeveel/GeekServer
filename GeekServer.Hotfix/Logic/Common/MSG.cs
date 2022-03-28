@@ -71,7 +71,7 @@ namespace Geek.Server
             get
             {
                 if (msg != null)
-                    return msg.GetMsgId();
+                    return msg.MsgId;
                 return 0;
             }
         }

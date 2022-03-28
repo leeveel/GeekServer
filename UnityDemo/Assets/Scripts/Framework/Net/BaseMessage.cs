@@ -1,38 +1,14 @@
 namespace Geek.Client
 {
-    public abstract class BaseMessage
+    public abstract class BaseMessage : Serializable
     {
         public virtual bool doCache => false;
         /// <summary>
         /// ÏûÏ¢Î¨Ò»id
         /// </summary>
         public int UniId { get; set; }
+        public int MsgId { get { return Sid; } }
 
-        public virtual int Read(byte[] buffer, int offset)
-        {
-            return offset;
-        }
-
-        public virtual int Write(byte[] buffer, int offset)
-        {
-            return offset;
-        }
-        
-        public virtual int WriteWithType(byte[] buffer, int offset)
-        {
-            return offset;
-        }
-
-        public virtual void Reset()
-        {
-
-        }
-
-        public virtual int GetMsgId()
-        {
-            return 0;
-        }
-        
         public byte[] GetLocalData()
         {
             var data = NetBufferPool.Alloc(1024);
