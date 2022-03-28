@@ -28,9 +28,9 @@ public class Settings
 
 
     /// <summary>数据回存最大时间(秒)</summary>
-    public int DataFlushTimeMax { get; set; }
+    public int TimerSaveMax { get; set; }
     /// <summary>数据回存最小时间(秒)</summary>
-    public int DataFlushTimeMin { get; set; }
+    public int TimerSaveMin { get; set; }
     /// <summary>数据每秒操作上限</summary>
     public int DataFPS { get; set; }
 
