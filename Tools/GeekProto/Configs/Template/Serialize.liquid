@@ -1,0 +1,542 @@
+//auto generated, do not modify it
+
+using Core.Serialize;
+using System;
+using System.Collections.Generic;
+
+namespace Proto
+{
+	public class SerializeTool
+	{
+		 static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+
+        {{~ readMap = {"int":"XBuffer.ReadInt(buffer, ref offset)",
+				"long":"XBuffer.ReadLong(buffer, ref offset)",
+                "byte":"XBuffer.ReadByte(buffer, ref offset)",
+                "sbyte":"XBuffer.ReadSByte(buffer, ref offset)",
+				"bool":"XBuffer.ReadBool(buffer, ref offset)",
+				"string":"XBuffer.ReadString(buffer, ref offset)",
+				"short":"XBuffer.ReadShort(buffer, ref offset)",
+				"float":"XBuffer.ReadFloat(buffer, ref offset)",
+				"double":"XBuffer.ReadDouble(buffer, ref offset)",
+				"byte[]":"XBuffer.ReadBytes(buffer, ref offset)"} ~}}
+	    {{~ writeMap = {"int":"XBuffer.WriteInt(%s, buffer, ref offset)",
+				"long":"XBuffer.WriteLong(%s, buffer, ref offset)",
+				"bool":"XBuffer.WriteBool(%s, buffer, ref offset)",
+                "byte":"XBuffer.WriteByte(%s, buffer, ref offset)",
+                "sbyte":"XBuffer.WriteSByte(%s, buffer, ref offset)",
+				"string":"XBuffer.WriteString(%s, buffer, ref offset)",
+				"short":"XBuffer.WriteShort(%s, buffer, ref offset)",
+				"float":"XBuffer.WriteFloat(%s, buffer, ref offset)",
+				"double":"XBuffer.WriteDouble(%s, buffer, ref offset)",
+				"byte[]":"XBuffer.WriteBytes(%s, buffer, ref offset)"} ~}}
+
+
+
+
+
+
+        #region Read
+        public static T Create<T>(int sid) where T : Serializable
+        {
+            return SClassFactory.Create<T>(sid);
+        }
+
+        public static T ReadCustom<T>(T target, bool optional, byte[] buffer, ref int offset) where T : Serializable
+        {
+            if (optional)
+            {
+                var hasVal = XBuffer.ReadBool(buffer, ref offset);
+                if (hasVal)
+                {
+                    var sid = XBuffer.ReadInt(buffer, ref offset);
+                    target = Create<T>(sid);
+                    offset = target.Read(buffer, offset);
+                }
+            }
+            else
+            {
+                var sid = XBuffer.ReadInt(buffer, ref offset);
+                target = Create<T>(sid);
+                offset = target.Read(buffer, offset);
+            }
+            return target;
+        }
+
+        {{~ for _type_ in typelist ~}}
+        public static {{_type_}} Read_{{_type_}}(bool optional, byte[] buffer, ref int offset)
+        {
+            if (optional)
+            {
+                var hasVal = XBuffer.ReadBool(buffer, ref offset);
+                if (hasVal)
+                    //return XBuffer.Read<T>(buffer, ref offset);
+                    return {{readMap[_type_]}};
+                else
+                    return default;
+            }
+            else
+            {
+               return {{readMap[_type_]}};
+            }
+        }
+        {{~ end ~}}
+
+        /// <summary>
+        /// 自定义类型 list-set
+        /// </summary>
+        public static int ReadCustomCollection<T>(ICollection<T> target, byte[] buffer, ref int offset) where T : Serializable
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                var sid = XBuffer.ReadInt(buffer, ref offset);
+                if (sid <= 0)
+                {
+                    target.Add(default);
+                    continue;
+                }
+                var val = Create<T>(sid);
+                offset = val.Read(buffer, offset);
+                target.Add(val);
+            }
+            return offset;
+        }
+
+        /// <summary>
+        /// 基础类型 list-set
+        /// </summary>
+        {{~ for _type_ in typelist ~}}
+        public static int Read_{{_type_}}_Collection(ICollection<{{_type_}}> target, byte[] buffer, ref int offset)
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                target.Add({{readMap[_type_]}});
+            }
+            return offset;
+        }
+        {{~ end ~}}
+
+        /// <summary>
+        /// 自定义类型 dictionary
+        /// </summary>
+        {{~ for _type_ in typelist ~}}
+        public static int Read_{{_type_}}_CustomMap<V>(Dictionary<{{_type_}}, V> target, byte[] buffer, ref int offset) where V : Serializable
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                //var key = XBuffer.Read<K>(buffer, ref offset);
+                var key = {{readMap[_type_]}};
+                var sid = XBuffer.ReadInt(buffer, ref offset);
+                if (sid <= 0)
+                {
+                    target[key] = default;
+                    continue;
+                }
+                var val = Create<V>(sid);
+                offset = val.Read(buffer, offset);
+                target.Add(key, val);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+
+        /// <summary>
+        /// 基础类型 dictionary
+        /// </summary>
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        public static int Read_{{_type1_}}_{{_type2_}}_Map(Dictionary<{{_type1_}}, {{_type2_}}> target, byte[] buffer, ref int offset)
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                //var key = XBuffer.Read<K>(buffer, ref offset);
+                //var val = XBuffer.Read<V>(buffer, ref offset);
+                var key = {{readMap[_type1_]}};
+                var val = {{readMap[_type2_]}};
+                target.Add(key, val);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+        {{~ end ~}}
+
+        /// <summary>
+        /// 嵌套dictionary (基础类型)
+        /// </summary>
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        {{~ for _type3_ in typelist ~}}
+        public static int Read_{{_type1_}}_{{_type2_}}_{{_type3_}}NestMap(Dictionary<{{_type1_}}, Dictionary<{{_type2_}}, {{_type3_}}>> target, byte[] buffer, ref int offset)
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                //var key = XBuffer.Read<K1>(buffer, ref offset);
+                var key = {{readMap[_type1_]}};
+                var val = new Dictionary<{{_type2_}}, {{_type3_}}>();         //TODO:类型处理
+                Read_{{_type2_}}_{{_type3_}}_Map(val, buffer, ref offset);
+                target.Add(key, val);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+        {{~ end ~}}
+        {{~ end ~}}
+
+        /// <summary>
+        /// 嵌套dictionary(自定义类型)
+        /// </summary>
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        public static int Read_{{_type1_}}_{{_type2_}}_NestCustomMap<V>(Dictionary<{{_type1_}}, Dictionary<{{_type2_}}, V>> target, byte[] buffer, ref int offset) where V : Serializable
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                //var key = XBuffer.Read<K1>(buffer, ref offset);
+                var key = {{readMap[_type1_]}};
+                var val = new Dictionary<{{_type2_}}, V>(); //TODO:类型处理
+                Read_{{_type2_}}_CustomMap<V>(val, buffer, ref offset);
+                target.Add(key, val);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+        {{~ end ~}}
+
+        /// <summary>
+        /// 嵌套list-set (基础类型)
+        /// </summary>
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        public static int Read_{{_type1_}}_{{_type2_}}_NestList(Dictionary<{{_type1_}}, List<{{_type2_}}>> target, byte[] buffer, ref int offset)
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                //var key = XBuffer.Read<K>(buffer, ref offset);
+                var key = {{readMap[_type1_]}};
+                var val = new List<{{_type2_}}>(); //TODO:类型处理
+                Read_{{_type2_}}_Collection(val, buffer, ref offset);
+                target.Add(key, val);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+        {{~ end ~}}
+
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        public static int Read_{{_type1_}}_{{_type2_}}_NestSet(Dictionary<{{_type1_}}, HashSet<{{_type2_}}>> target, byte[] buffer, ref int offset)
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                //var key = XBuffer.Read<K>(buffer, ref offset);
+                var key = {{readMap[_type1_]}};
+                var val = new HashSet<{{_type2_}}>(); //TODO:类型处理
+                Read_{{_type2_}}_Collection(val, buffer, ref offset);
+                target.Add(key, val);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+        {{~ end ~}}
+
+        /// <summary>
+        /// 嵌套list-set (自定义类型)
+        /// </summary>
+        {{~ for _type_ in typelist ~}}
+        public static int Read_{{_type_}}_NestCustomList<V>(Dictionary<{{_type_}}, List<V>> target, byte[] buffer, ref int offset) where V : Serializable
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                //var key = XBuffer.Read<K>(buffer, ref offset);
+                var key = {{readMap[_type_]}};
+                var val = new List<V>(); //TODO:类型处理
+                ReadCustomCollection<V>(val, buffer, ref offset);
+                target.Add(key, val);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+
+        {{~ for _type_ in typelist ~}}
+        public static int Read_{{_type_}}_NestCustomSet<V>(Dictionary<{{_type_}}, HashSet<V>> target, byte[] buffer, ref int offset) where V : Serializable
+        {
+            int count = XBuffer.ReadInt(buffer, ref offset);
+            for (int i = 0; i < count; ++i)
+            {
+                //var key = XBuffer.Read<K>(buffer, ref offset);
+                 var key = {{readMap[_type_]}};
+                var val = new HashSet<V>(); //TODO:类型处理
+                ReadCustomCollection<V>(val, buffer, ref offset);
+                target.Add(key, val);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+        #endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		#region Write
+
+        public static int WriteCustom<T>(T target, bool optional, bool hasVal, byte[] buffer, ref int offset) where T : Serializable
+        {
+            if (optional)
+            {
+                XBuffer.WriteBool(hasVal, buffer, ref offset);
+                if (hasVal)
+                {
+                    XBuffer.WriteInt(target.Sid, buffer, ref offset);
+                    offset = target.Write(buffer, offset);
+                }
+            }
+            else
+            {
+                XBuffer.WriteInt(target.Sid, buffer, ref offset);
+                offset = target.Write(buffer, offset);
+            }
+            return offset;
+        }
+
+        {{~ for _type_ in typelist ~}}
+        public static int WritePrimitive({{_type_}} val, bool optional, bool hasVal, byte[] buffer, ref int offset)
+        {
+            if (optional)
+            {
+                XBuffer.WriteBool(hasVal, buffer, ref offset);
+                if (hasVal)
+                {
+                    //XBuffer.Write<T>(val, buffer, ref offset);
+    				{{ writeMap[_type_] | string.replace "%s" "val" }};
+                }
+            }
+            else
+            {
+                //XBuffer.Write<T>(val, buffer, ref offset);
+                {{ writeMap[_type_] | string.replace "%s" "val" }};
+            }
+            return offset;
+        }
+        {{~ end ~}}
+
+        public static int WriteCustomCollection<T>(ICollection<T> target, byte[] buffer, ref int offset) where T : Serializable
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            int i = 0;
+            foreach (var item in target)
+            {
+                if (item == null)
+                {
+                    LOGGER.Error("App.Proto.Test3.List has null item, idx == " + i);
+                    XBuffer.WriteInt(0, buffer, ref offset);
+                }
+                else
+                {
+                    XBuffer.WriteInt(item.Sid, buffer, ref offset);
+                    offset = item.Write(buffer, offset);
+                }
+                i++;
+            }
+            return offset;
+        }
+
+        /// <summary>
+        /// 基础类型 list-set
+        /// </summary>
+        {{~ for _type_ in typelist ~}}
+        public static int WritePrimitiveCollection(ICollection<{{_type_}}> target, byte[] buffer, ref int offset)
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var item in target)
+            {
+                //XBuffer.Write<T>(item, buffer, ref offset);
+                {{ writeMap[_type_] | string.replace "%s" "item" }};
+            }
+            return offset;
+        }
+        {{~ end ~}}
+
+        /// <summary>
+        /// 自定义类型 dictionary
+        /// </summary>
+        {{~ for _type_ in typelist ~}}
+        public static int WriteCustomMap<V>(Dictionary<{{_type_}}, V> target, byte[] buffer, ref int offset) where V : Serializable
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var kv in target)
+            {
+                //XBuffer.Write<K>(kv.Key, buffer, ref offset);
+                {{ writeMap[_type_] | string.replace "%s" "kv.Key" }};
+                if (kv.Value == null)
+                {
+                    LOGGER.Error($"WriteCustomMap<{typeof(V).FullName}> has null item: {kv.Key.ToString()}");
+                    XBuffer.WriteInt(0, buffer, ref offset);
+                }
+                else
+                {
+                    XBuffer.WriteInt(kv.Value.Sid, buffer, ref offset);
+                    offset = kv.Value.Write(buffer, offset);
+                }
+            }
+            return offset;
+        }
+         {{~ end ~}}
+
+        /// <summary>
+        /// 基础类型 dictionary
+        /// </summary>
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        public static int WritePrimitiveMap(Dictionary<{{_type1_}}, {{_type2_}}> target, byte[] buffer, ref int offset)
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var kv in target)
+            {
+                //XBuffer.Write<K>(kv.Key, buffer, ref offset);
+                //XBuffer.Write<V>(kv.Value, buffer, ref offset);
+                {{ writeMap[_type1_] | string.replace "%s" "kv.Key" }};
+                {{ writeMap[_type2_] | string.replace "%s" "kv.Value" }};
+            }
+            return offset;
+        }
+		{{~ end ~}}
+		{{~ end ~}}
+
+        /// <summary>
+        /// 嵌套dictionary (基础类型)
+        /// </summary>
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        {{~ for _type3_ in typelist ~}}
+        public static int WriteNestPrimitiveMap<V>(Dictionary<{{_type1_}}, Dictionary<{{_type2_}}, {{_type3_}}>> target, byte[] buffer, ref int offset)
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var kv in target)
+            {
+                //XBuffer.Write<K1>(kv.Key, buffer, ref offset);
+                {{ writeMap[_type1_] | string.replace "%s" "kv.Key" }};
+                WritePrimitiveMap(kv.Value, buffer, ref offset);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+	    {{~ end ~}}
+        {{~ end ~}}
+
+        /// <summary>
+        /// 嵌套dictionary(自定义类型)
+        /// </summary>
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        public static int WriteNestCustomMap<V>(Dictionary<{{_type1_}}, Dictionary<{{_type2_}}, V>> target, byte[] buffer, ref int offset) where V : Serializable
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var kv in target)
+            {
+                //XBuffer.Write<K1>(kv.Key, buffer, ref offset);
+                //WriteCustomMap<K2, V>(kv.Value, buffer, ref offset);
+                {{ writeMap[_type1_] | string.replace "%s" "kv.Key" }};
+                WriteCustomMap<V>(kv.Value, buffer, ref offset);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+	    {{~ end ~}}
+
+        /// <summary>
+        /// 嵌套list-set (基础类型)
+        /// </summary>
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        public static int WriteNestPrimitiveList(Dictionary<{{_type1_}}, List<{{_type2_}}>> target, byte[] buffer, ref int offset)
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var kv in target)
+            {
+                //XBuffer.Write<K>(kv.Key, buffer, ref offset);
+                //WritePrimitiveCollection<V>(kv.Value, buffer, ref offset);
+                {{ writeMap[_type1_] | string.replace "%s" "kv.Key" }};
+                WritePrimitiveCollection(kv.Value, buffer, ref offset);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+	    {{~ end ~}}
+
+
+        {{~ for _type1_ in typelist ~}}
+        {{~ for _type2_ in typelist ~}}
+        public static int WriteNestPrimitiveSet(Dictionary<{{_type1_}}, HashSet<{{_type2_}}>> target, byte[] buffer, ref int offset)
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var kv in target)
+            {
+                //XBuffer.Write<K>(kv.Key, buffer, ref offset);
+                //WritePrimitiveCollection<V>(kv.Value, buffer, ref offset);
+                {{ writeMap[_type1_] | string.replace "%s" "kv.Key" }};
+                WritePrimitiveCollection(kv.Value, buffer, ref offset);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+	    {{~ end ~}}
+
+        /// <summary>
+        /// 嵌套list-set (自定义类型)
+        /// </summary>
+        {{~ for _type_ in typelist ~}}
+        public static int WriteNestCustomList<V>(Dictionary<{{_type_}}, List<V>> target, byte[] buffer, ref int offset) where V : Serializable
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var kv in target)
+            {
+                //XBuffer.Write<K>(kv.Key, buffer, ref offset);
+                {{ writeMap[_type_] | string.replace "%s" "kv.Key" }};
+                WriteCustomCollection<V>(kv.Value, buffer, ref offset);
+            }
+            return offset;
+        }
+	    {{~ end ~}}
+
+        {{~ for _type_ in typelist ~}}
+        public static int WriteNestCustomSet<V>(Dictionary<{{_type_}}, HashSet<V>> target, byte[] buffer, ref int offset) where V : Serializable
+        {
+            XBuffer.WriteInt(target.Count, buffer, ref offset);
+            foreach (var kv in target)
+            {
+                //XBuffer.Write<K>(kv.Key, buffer, ref offset);
+                {{ writeMap[_type_] | string.replace "%s" "kv.Key" }};
+                WriteCustomCollection<V>(kv.Value, buffer, ref offset);
+            }
+            return offset;
+        }
+        {{~ end ~}}
+
+        #endregion
+
+
+	}
+}

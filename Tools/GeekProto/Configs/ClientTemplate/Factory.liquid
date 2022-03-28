@@ -1,0 +1,27 @@
+//auto generated, do not modify it
+
+using Geek.Client;
+
+namespace Geek.Server.Proto
+{
+	public class SClassFactory
+	{
+		///<summary>通过msgId构造msg</summary>
+		public static Serializable Create(int sid)
+		{
+			switch(sid)
+			{
+				{{~ for sclass in sclasses ~}}
+				case {{sclass.sid}}: return new {{sclass.fullname}}();
+				{{~ end ~}}
+				default: return default;
+			}
+		}
+		
+		public static T Create<T>(int sid) where T : Serializable
+		{
+			return (T)Create(sid);
+		}
+
+	}
+}
