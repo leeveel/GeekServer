@@ -58,7 +58,8 @@ namespace Geek.Server
 
         public bool IsEntityShareActor(int entityType)
         {
-            entityActorTypeMap.TryGetValue(entityType, out var share);
+            if (!entityActorTypeMap.TryGetValue(entityType, out var share))
+                return true;
             return share;
         }
 

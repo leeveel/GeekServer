@@ -24,9 +24,8 @@ namespace Geek.Server
             RegistRoleComp<RoleLoginComp>();
             RegistRoleComp<BagComp>();
 
-
-            //设置实体共享actor
-            CompSetting.Singleton.SetIfEntityCompShareActor((int)EntityType.Role, true);
+            //设置实体共享actor (默认为true)
+            //CompSetting.Singleton.SetIfEntityCompShareActor((int)EntityType.Role, true);
         }
 
 

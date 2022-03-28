@@ -22,7 +22,7 @@ namespace Geek.Server
 
         WorkerActor workerActor;
         Dictionary<Type, WorkerActor> workerDic;
-        private bool isShareActor = false;
+        private bool isShareActor = true;
 
         internal Entity(int entityType, long entityId)
         {
