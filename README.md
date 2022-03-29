@@ -44,7 +44,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 ### 10.定期释放不活跃内存数据  
 以功能系统级别的粒度，定期剔除内存中不活跃的玩家数据，尽最大可能减少服务器内存开销。
 ### 11.高效的通信协议(GeekProto)  
-[GeekProto](https://github.com/leeveel/GeekProto)以扁平数据结构的xbuffer为基础（flatbuffer的简化版），序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。(已验证支持ILRunTime热更)
+[GeekProto](https://github.com/leeveel/GeekProto)以扁平数据结构的xbuffer为基础（flatbuffer的简化版），序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。(已验证支持ILRunTime热更)[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E5%85%B3%E4%BA%8E%E5%8D%8F%E8%AE%AE.md)
 ### 12.一键导表工具(GeekConfig)  
 [GeekConfig](https://github.com/leeveel/GeekConfig)是一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用   
 
