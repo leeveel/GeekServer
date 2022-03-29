@@ -21,7 +21,6 @@ namespace Geek.Server
 
             //role
             RegistRoleComp<RoleComp>();
-            RegistRoleComp<RoleLoginComp>();
             RegistRoleComp<BagComp>();
 
             //设置实体共享actor (默认为true)
