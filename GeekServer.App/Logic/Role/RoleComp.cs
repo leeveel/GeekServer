@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Geek.Server.Proto;
+using System;
 
 namespace Geek.Server.Logic.Role
 {

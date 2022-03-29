@@ -164,7 +164,7 @@ namespace Weavers
                     else
                     {
                         //属性是否需要weave
-                        var stateType = IsLegalStateType(proDef.PropertyType);
+                        var stateType = IsLegalStateType(proDef.PropertyType, typeDef, constructor);
                         if (stateType != null)
                         {
                             WriteError($"{proDef.DeclaringType.FullName}.{proDef.Name}【{stateType.FullName}】 不是基础类型也不是标准的BaseState，将无法检测State变化；请将基类改为BaseState/添加StateWeaveIgnore标签", getMethod);
@@ -258,7 +258,7 @@ namespace Weavers
             WriteMessage($"StateWeaver End：{ModuleDefinition.Assembly.Name}", MessageImportance.High);
         }
 
-        TypeReference IsLegalStateType(TypeReference typeRef)
+        TypeReference IsLegalStateType(TypeReference typeRef, TypeDefinition tdef, MethodDefinition mdef)
         {
             if (typeRef.IsValueType || typeRef == ModuleDefinition.TypeSystem.String)
             {
@@ -269,8 +269,32 @@ namespace Weavers
                 var checkType = typeRef;
                 while (checkType != null)
                 {
-                    if (checkType.FullName == "Geek.Server.BaseDBState")
+                    if (checkType.FullName == "Geek.Server.BaseDBState" || checkType.FullName == "Geek.Server.Serializable")
                         return null;
+
+                    var checkDef = checkType.Resolve();
+                    if (checkDef != null)
+                    {
+                        var tr = checkDef.GetAllInterfaces();
+                        foreach (var interf in tr)
+                        {
+                            if (interf.FullName.Equals("Geek.Server.ISerializable"))
+                            {
+                                var atts = checkDef.CustomAttributes;
+                                bool isLegal = false;
+                                foreach (var att in atts)
+                                {
+                                    if (att.AttributeType.FullName == "Geek.Server.IsStateAttribute")
+                                    {
+                                        isLegal = true;
+                                        break;
+                                    }
+                                }
+                                if(!isLegal)
+                                    WriteError($"{checkDef.FullName}被添加到了{tdef.FullName}当中但未添加IsStateAttribute注解,请添加后,并重新导出协议代码!", mdef);
+                            }
+                        }
+                    }
 
                     if (checkType.IsGenericInstance) //泛型检测
                     {
@@ -283,13 +307,13 @@ namespace Weavers
                             else
                             {
                                 //必须为state类型
-                                var legal = IsLegalStateType(generic);
+                                var legal = IsLegalStateType(generic, tdef, mdef);
                                 if (legal != null)
                                     return generic;
                             }
                         }
                     }
-                    var checkDef = checkType.Resolve();
+                    //var checkDef = checkType.Resolve();
                     if (checkDef == null) //泛型没有Definition
                         return null;
                     checkType = checkDef.BaseType;

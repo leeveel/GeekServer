@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
+    <ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
     <ProjectReference Include="..\GeekServer.Weavers\GeekServer.Weavers.csproj" />
   </ItemGroup>
 

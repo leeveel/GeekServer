@@ -3,6 +3,7 @@
     /// <summary>
     /// 玩家基础信息
     /// </summary>
+	[IsState]
     [SClass(SID._111100, SO.NotMsg)]
 	public class UserInfo
 	{

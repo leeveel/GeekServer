@@ -24,6 +24,7 @@ namespace Geek.Server.Proto
 		public const int MsgID = SID;
 		public override int Sid { get;} = 112001;
 		public const int SID = 112001;
+		public const bool IsState = false;
 
 		public override T Create<T>(int sid)
         {

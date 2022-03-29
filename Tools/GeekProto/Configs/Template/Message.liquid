@@ -36,6 +36,9 @@ namespace {{space}}
 				"double":"XBuffer.WriteDouble(%s, _buffer_, ref _offset_)",
 				"byte[]":"XBuffer.WriteBytes(%s, _buffer_, ref _offset_)"} ~}}
 	
+	{{~ if isstate ~}}
+	[IsState]
+	{{~ end ~}}
     public class {{name}} : {{super}}
 	{
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
@@ -167,6 +170,11 @@ namespace {{space}}
 		public new const int SID = {{sid}};
 		{{~ else ~}}
 		public const int SID = {{sid}};
+		{{~ end ~}}
+		{{~ if issubclass ~}}
+		public new const bool IsState = {{isstate}};
+		{{~ else ~}}
+		public const bool IsState = {{isstate}};
 		{{~ end ~}}
 
 		public override T Create<T>(int sid)

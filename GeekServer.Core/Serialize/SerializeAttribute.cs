@@ -3,6 +3,13 @@
 namespace Geek.Server
 {
 
+    /// <summary>
+    /// 标识该序列化类会作为dbstate的一部分回存数据库
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    public class IsStateAttribute : Attribute { }
+
+
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class SClassAttribute : Attribute
     {
@@ -10,16 +17,11 @@ namespace Geek.Server
         /// 是否将ClassId作为消息ID
         /// </summary>
         public bool IsMsg { get; private set; }
-        /// <summary>
-        /// 是否可以作为State回存数据库
-        /// </summary>
-        public bool IsState { get; private set; }
         public int Id { get; private set; }
-        public SClassAttribute(int id, bool isMsg = true, bool isState = false)
+        public SClassAttribute(int id, bool isMsg = true)
         {
             Id = id;
             IsMsg = isMsg;
-            IsState = isState;
         }
     }
 

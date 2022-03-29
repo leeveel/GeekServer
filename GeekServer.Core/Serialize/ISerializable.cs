@@ -10,5 +10,8 @@ namespace Geek.Server
 
         int Write(byte[] buffer, int offset);
 
+        byte[] Serialize();
+
+        void Deserialize(byte[] data);
     }
 }

@@ -12,22 +12,68 @@ using System.Collections.Generic;
 namespace Geek.Server.Proto
 {
 	
+	[IsState]
     public class UserInfo : Serializable
 	{
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
 
 		/*********************************************************/
-		public string  RoleName {get;set;}
-		public long RoleId {get;set;}
-		public int Level {get;set;}
-		public long CreateTime {get;set;}
-		public int VipLevel {get;set;}
+		private string _RoleName_;
+		public string  RoleName 
+		{ 
+			get{ return _RoleName_; }
+			set{ _RoleName_= value; _stateChanged=true;}
+		}
+		private long _RoleId_;
+		public long RoleId 
+		{ 
+			get{ return _RoleId_; }
+			set{ _RoleId_= value; _stateChanged=true;}
+		}
+		private int _Level_;
+		public int Level 
+		{ 
+			get{ return _Level_; }
+			set{ _Level_= value; _stateChanged=true;}
+		}
+		private long _CreateTime_;
+		public long CreateTime 
+		{ 
+			get{ return _CreateTime_; }
+			set{ _CreateTime_= value; _stateChanged=true;}
+		}
+		private int _VipLevel_;
+		public int VipLevel 
+		{ 
+			get{ return _VipLevel_; }
+			set{ _VipLevel_= value; _stateChanged=true;}
+		}
+
+
+		
+		///<summary>状态是否改变</summary>
+		public override bool IsChanged
+		{
+			get
+			{
+				if(_stateChanged)
+					return true;
+				return false;
+			}
+		}
+		
+		///<summary>清除所有改变[含子项]</summary>
+		public override void ClearChanges()
+		{
+			_stateChanged = false;
+		}
 		/*********************************************************/
 
 
 		public override int Sid { get;} = 111100;
 		public const int SID = 111100;
+		public const bool IsState = true;
 
 		public override T Create<T>(int sid)
         {

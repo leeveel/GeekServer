@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Geek.Server
 {
@@ -57,32 +56,6 @@ namespace Geek.Server
         {
             return null;
         }
-
-        public bool IsState { get; }
-        protected virtual List<T> GetList<T>()
-        {
-            if (IsState)
-                return new StateList<T>();
-            else
-                return new List<T>();
-        }
-
-        protected virtual HashSet<T> GetSet<T>()
-        {
-            if (IsState)
-                return new StateSet<T>();
-            else
-                return new HashSet<T>();
-        }
-
-        protected virtual Dictionary<K, V> GetMap<K, V>()
-        {
-            if (IsState)
-                return new StateMap<K, V>();
-            else
-                return new Dictionary<K, V>();
-        }
-
 
         protected virtual T ReadCustom<T>(T target, bool optional, byte[] buffer, ref int offset) where T : Serializable
         {
