@@ -88,7 +88,7 @@ namespace Weavers
                     //静态函数
                     if (mthDef.IsStatic)
                         continue;
-                    bool needWrap = mthDef.CustomAttributes.FirstOrDefault(a => a.AttributeType.FullName.StartsWith("Core.Actor.MethodOption")) != null;
+                    bool needWrap = mthDef.CustomAttributes.FirstOrDefault(a => a.AttributeType.FullName.StartsWith("Geek.Server.MethodOption")) != null;
                     if (!mthDef.IsPublic && !needWrap)
                         continue;
 
@@ -371,7 +371,7 @@ namespace Weavers
                         foreach (var att in mthDef.CustomAttributes)
                         {
                             var attName = att.AttributeType.FullName;
-                            if(attName.StartsWith("Core.Actor.MethodOption"))
+                            if(attName.StartsWith("Geek.Server.MethodOption"))
                                 innerMethod.CustomAttributes.Add(att);
                         }
 

@@ -58,13 +58,24 @@ namespace Geek.Server.Logic.Bag
         }
 
         [MethodOption.ThreadSafe]
-        public Task Test2()
+        public virtual Task Test2()
         {
+            System.Console.WriteLine("Test2 be Called");
+            Test4();
+            Test3(1, 2, 3, 4, "");
             return Task.CompletedTask;
         }
 
         public Task Test3(int a, int b, int c, int d, string e)
         {
+            return Task.CompletedTask;
+        }
+
+
+        [MethodOption.NotAwait]
+        public virtual Task Test4()
+        {
+            System.Console.WriteLine("Test412 be Called");
             return Task.CompletedTask;
         }
 

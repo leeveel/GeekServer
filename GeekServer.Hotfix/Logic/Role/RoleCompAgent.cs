@@ -77,7 +77,7 @@ namespace Geek.Server.Logic.Role
         }
 
         [MethodOption.ThreadSafe]
-        public Task<ResLogin> BuildLoginMsg()
+        public virtual Task<ResLogin> BuildLoginMsg()
         {
             var res = new ResLogin()
             {
