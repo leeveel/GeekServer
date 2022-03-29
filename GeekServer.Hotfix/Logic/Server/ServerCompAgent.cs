@@ -12,7 +12,7 @@ namespace Geek.Server.Logic.Server
         {
             await base.Active();
             this.Schedule<CorssDayTimerHandler>(ServerComp.CrossDayHour, 0);
-            if (State.OpenServerTimeTick < 0)
+            if (State.OpenServerTimeTick <= 0)
             {
                 State.OpenServerTimeTick = DateTime.Now.Ticks;
                 LOGGER.Warn("新服开启");
