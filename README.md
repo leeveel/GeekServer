@@ -32,7 +32,7 @@ public class ServerCompAgentWrapper : ServerCompAgent
 }
 ```
 ### 5.Actor死锁检测 
-Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer内部可检测环路死锁(即:A->B->C->A)，并采用调用链重入机制消除环路死锁。
+Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer内部可检测环路死锁(即:A->B->C->A)，并采用调用链重入机制消除环路死锁。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/1.Actor%E6%A8%A1%E5%9E%8B.md)
 ### 6.支持不停服更新 
 采用组件+状态的设计，状态只有属性，没有方法，组件只用方法，没有属性，并通过代理的方式全部放到热更dll中，运行时重新加载dll即可热更所有逻辑。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E7%83%AD%E6%9B%B4hotfix.md)
 ### 7.网络模块  
