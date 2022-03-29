@@ -32,37 +32,20 @@ public class TestHttpHandler : BaseHttpHandler
 ### tcp
 GeekServer的tcp协议为自定义协议，区别于google的protocolBuffer和flatBuffer，但是序列化和反序列化都要优于2者。
 ###### tcp使用步骤
-1. 在[协议目录](https://github.com/leeveel/GeekServer/tree/master/Tools/MessageGen/messages) 创建一个xml格式的协议文件。
-2. 运行MessageGen/msg.bat生成协议导[项目中](https://github.com/leeveel/GeekServer/tree/master/GeekServer.Hotfix/Generate/Messages)
-3. 创建任意脚本名字Handler，继承BaseTcpHandler/TcpActorHandler，使用TcpMsgMapping标记消息类型，实现ActionAsync函数即可,如果继承制TcpActorHandler还需实现CacheActor函数。BaseTcpHandler中的Msg即为解析好的当前类型协议数据
+1. [协议工具目录](https://github.com/leeveel/GeekServer/tree/master/Tools/GeekProto/messages)
+2. 运行GeekProto.exe生成协议导
+3. 创建任意脚本名字Handler，继承FixedIdEntityHandler/TcpCompHandler，使用MsgMapping标记消息类型，实现ActionAsync函数即可。BaseTcpHandler中的Msg即为解析好的当前类型协议数据
 ```csharp
-[TcpMsgMapping(typeof(Message.Sample.ReqTest))]
-public class SampleTcpHandler : BaseTcpHandler
+[MsgMapping(typeof(ReqBagInfo))]
+public class ReqBagInfoHandler : TcpCompHandler<BagCompAgent>
 {
 	public override Task ActionAsync()
 	{
-		var req = (Message.Sample.ReqTest)Msg;
+		var req = (ReqBagInfo)Msg;
 		//your logic here...
 		return Task.CompletedTask;
 	}
 }
 ```
 
-###### tcp协议
-1. 使用模板代码自动生成，类似protocolBuffer，生成后的代码不能修改
-2. 分为结构和消息，消息相对结构多1个msgId；一般的，消息和结构可包含结构，消息和结构不可包含消息
-3. 协议支持的数据结构：int,long,bool,string,short,float,double,byte[],list,map,任意自定义结构
-4. 支持引用其他协议文件类型，支持单协议文件内继承，不支持跨文件继承
-5. 支持兼容模式，如协议修改后，搭载新协议的服务器支持使用老协议的客户端（有兼容限制）
-6. 支持optional
-7. 其他限制
-	string/list/map最大长度32767(short.max)
-	单个消息/结构最多255个字段，单个文件最多255个消息/结构(byte.max)
-	字段消息命名不能以下划线结尾（可能冲突引发编译错误）
-	map的key只支持short, int, long, string；list/map不能optional，list不能嵌套list/map，map不能嵌套list/map(可使用结构多装一层)
-8. 其他兼容限制（如果每次服务器和客户端同步升级可忽略此条）
-	字段只能添加，添加后不能删除，添加字段只能添加到最后，添加消息类型只能添加到最后
-	不能修改字段类型（如从bool改为long）
-9. 协议配置方法参考[Sample](https://github.com/leeveel/GeekServer/tree/master/Tools/MessageGen/messages/Sample.xml)
-10. 根据项目需要可适当修改[协议生成模板](https://github.com/leeveel/GeekServer/Tools/MessageGen/template)
-11. 已有线上项目验证支持ILRunTime热更。如果客户端没有使用C#，需要自行书写模板/模板工具，模板工具使用[Scriban](https://github.com/scriban/scriban) 开发
+###### [GeekProto协议](https://github.com/leeveel/GeekServer/blob/main/Docs/%E5%85%B3%E4%BA%8E%E5%8D%8F%E8%AE%AE.md)
