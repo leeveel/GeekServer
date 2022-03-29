@@ -32,7 +32,7 @@ public class ServerCompAgentWrapper : ServerCompAgent
 }
 ```
 ### 5.Actor死锁检测 
-Actor模型本身是存在死锁的情况，且不容易被发现，~~GeekServer在debug模式下提供了检测机制，让死锁问题暴露在开发过程中~~。GeekServer内部可检测单路死锁和多路死锁，并采用调用链重入机制消除单路死锁，多路死锁时也可由开发人员判断是否可添加[InterleaveWhenDeadlock]属性以消除死锁。
+Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer内部可检测环路死锁(即:A->B->C->A)，并采用调用链重入机制消除环路死锁。
 ### 6.支持不停服更新 
 采用组件+状态的设计，状态只有属性，没有方法，组件只用方法，没有属性，并通过代理的方式全部放到热更dll中，运行时重新加载dll即可热更所有逻辑。
 ### 7.网络模块  
@@ -43,10 +43,10 @@ Actor模型本身是存在死锁的情况，且不容易被发现，~~GeekServer
 内置线程安全的Timer，Scheduler，Event系统，轻松应对游戏服务器常见的定时，任务计划，事件触发等业务需求。
 ### 10.定期释放不活跃内存数据  
 以功能系统级别的粒度，定期剔除内存中不活跃的玩家数据，尽最大可能减少服务器内存开销。
-### 11.高效的通信协议  
-通信协议，以扁平数据结构的xbuffer为基础（flatbuffer的简化版），序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。(已验证支持ILRunTime热更)
-### 12.一键导表工具  
-GeekServer包含一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用   
+### 11.高效的通信协议(GeekProto)  
+[GeekProto](https://github.com/leeveel/GeekProto)以扁平数据结构的xbuffer为基础（flatbuffer的简化版），序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。(已验证支持ILRunTime热更)
+### 12.一键导表工具(GeekConfig)  
+[GeekConfig](https://github.com/leeveel/GeekConfig)是一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用   
 
 # 运行
 1. 安装[.NetCore3.1](https://dotnet.microsoft.com/download/dotnet/3.1)
@@ -158,5 +158,5 @@ public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoSta
 
 # 推荐项目  
 [xbuffer](https://github.com/CodeZeg/xbuffer) 一种简化版本的 flatbuffer 序列化库  
-[ExcelToCode](https://github.com/leeveel/ExcelToCode) 一键从Excel中导出模板代码和二进制数据  
+[GeekConfig](https://github.com/leeveel/GeekConfig) 一键从Excel中导出模板代码和二进制数据  
 [GeekProto](https://github.com/leeveel/GeekProto) Super Fast Binary Serialization Library  
