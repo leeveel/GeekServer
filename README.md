@@ -40,7 +40,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 ### 8.持久化透明  
 采用Mongodb作为数据存储，状态的持久化全透明，框架会自动序列化/反序列（并在编译期间动态注入IL代码，高效过滤非变化的状态）让开发人员更加专注于业务逻辑，无需操心数据库。 [了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/2.Actor%26Component%26State.md)
 ### 9.Timer/Scheduler/Event  
-内置线程安全的Timer，Scheduler，Event系统，轻松应对游戏服务器常见的定时，任务计划，事件触发等业务需求。
+内置线程安全的Timer，Scheduler，Event系统，轻松应对游戏服务器常见的定时，任务计划，事件触发等业务需求。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E4%BA%8B%E4%BB%B6Event-timer.md)
 ### 10.定期释放不活跃内存数据  
 以功能系统级别的粒度，定期剔除内存中不活跃的玩家数据，尽最大可能减少服务器内存开销。
 ### 11.高效的通信协议(GeekProto)  
