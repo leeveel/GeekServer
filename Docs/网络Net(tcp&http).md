@@ -32,8 +32,8 @@ public class TestHttpHandler : BaseHttpHandler
 ### tcp
 GeekServer的tcp协议为自定义协议，区别于google的protocolBuffer和flatBuffer，但是序列化和反序列化都要优于2者。
 ###### tcp使用步骤
-1. [协议工具目录](https://github.com/leeveel/GeekServer/tree/master/Tools/GeekProto/messages)
-2. 运行GeekProto.exe生成协议导
+1. [协议工具目录](https://github.com/leeveel/GeekServer/tree/master/Tools/GeekProto)
+2. 运行Geek.Proto.exe生成协议导
 3. 创建任意脚本名字Handler，继承FixedIdEntityHandler/TcpCompHandler，使用MsgMapping标记消息类型，实现ActionAsync函数即可。BaseTcpHandler中的Msg即为解析好的当前类型协议数据
 ```csharp
 [MsgMapping(typeof(ReqBagInfo))]

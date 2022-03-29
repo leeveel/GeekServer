@@ -12,7 +12,7 @@ __设计理念:大道至简，以简化繁__
 ### 2.全面异步编程  
 全部采用异步编程（async/await），让逻辑代码变得整洁优雅，清晰易懂，让代码写起来行如流水。
 ### 3.TPL(Task Parallel Library) Actor模型  
-GeekServer的Actor模型构建于强大的TPL DataFlow之上，让Actor模型如虎添翼。（不了解Actor模型，可以搜一下相关资料，Akka，Orleans都是采用的Actor模型）
+GeekServer的Actor模型构建于强大的TPL DataFlow之上，让Actor模型如虎添翼。（不了解Actor模型，可以搜一下相关资料，Akka，Orleans都是采用的Actor模型）[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/1.Actor%E6%A8%A1%E5%9E%8B.md)
 ### 4.Actor入队透明化  
 GeekServer内部会自动处理线程上下文, 编译期间会自动注入入队代码, 开发人员无需关心多线程以及入队逻辑, 只需要像调用普通函数一样书写逻辑
 ```c#
@@ -38,7 +38,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 ### 7.网络模块  
 网络模块采用了DotNetty，DotNetty是微软Azure团队，使用C#实现的Netty的版本，性能强劲，功能强大。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E7%BD%91%E7%BB%9CNet(tcp%26http).md)
 ### 8.持久化透明  
-采用Mongodb作为数据存储，状态的持久化全透明，框架会自动序列化/反序列（并在编译期间动态注入IL代码，高效过滤非变化的状态）让开发人员更加专注于业务逻辑，无需操心数据库。 
+采用Mongodb作为数据存储，状态的持久化全透明，框架会自动序列化/反序列（并在编译期间动态注入IL代码，高效过滤非变化的状态）让开发人员更加专注于业务逻辑，无需操心数据库。 [了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/2.Actor%26Component%26State.md)
 ### 9.Timer/Scheduler/Event  
 内置线程安全的Timer，Scheduler，Event系统，轻松应对游戏服务器常见的定时，任务计划，事件触发等业务需求。
 ### 10.定期释放不活跃内存数据  
