@@ -53,7 +53,7 @@ RegistRoleComp<BagComp>();
 
 //调用Actor组件函数(就像调用普通函数一样,无需关心多线程或入队)
 var serverComp = await EntityMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
-_ = serverComp.CheckCrossDay();
+await serverComp.CheckCrossDay();
 
 //定义状态(数据)
 public class RoleState : DBState
@@ -79,13 +79,13 @@ public Task NotifyAllClient()
    for(int i=0; i<clients.count; i++)
    {
      //_ = NotifyOneClient(clients[i].roleId);
-	 //对于标记了	[NotAwait]的函数，等价于上面一行代码
+	 //对于标记了[NotAwait]的函数，等价于上面一行代码
 	 await NotifyOneClient(clients[i].roleId);
    }
 }
 
 [NotAwait]
-public Task NotifyOneClient(long roleId)
+public virtual Task NotifyOneClient(long roleId)
 {
    //...
    //...
