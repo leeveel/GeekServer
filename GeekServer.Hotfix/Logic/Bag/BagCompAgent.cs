@@ -1,4 +1,5 @@
 ﻿using Geek.Server.Proto;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Logic.Bag
@@ -76,6 +77,12 @@ namespace Geek.Server.Logic.Bag
         public virtual Task Test4()
         {
             System.Console.WriteLine("Test412 be Called");
+            return Task.CompletedTask;
+        }
+
+
+        public virtual Task Test5(int a, List<int> list)
+        {
             return Task.CompletedTask;
         }
 
