@@ -72,6 +72,11 @@ namespace Geek.Client
                 bool isZip = msgLength < 0;
                 if (msgLength < 0)
                     msgLength = -msgLength;
+				if (remainLength < msgLength)
+                {
+                    offset -= intSize;
+                    break;
+                }
 
                 remainLength -= msgLength;
                 if (msgLength > MAX_SEND_SIZE)
