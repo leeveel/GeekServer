@@ -50,16 +50,16 @@ namespace {{space}}
 		/*********************************************************/
 		{{~ for field in fields ~}}
 		{{~ if field.type == "list"~}}
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		private {{listname}}<{{field.clsname1}}> _{{field.name}}_ = new {{listname}}<{{field.clsname1}}>();
+		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{listname}}<{{field.clsname1}}> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
 			set{ _{{field.name}}_= value; _stateChanged=true;}
 		}
 		{{~ else if field.type == "set"~}}
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		private {{setname}}<{{field.clsname1}}> _{{field.name}}_ = new {{setname}}<{{field.clsname1}}>();
+		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{setname}}<{{field.clsname1}}> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
@@ -68,32 +68,32 @@ namespace {{space}}
 		{{~ else if field.type == "map"~}}
 
 		{{~ if field.nestmodel == 0 ~}}   {{~#无嵌套模式~}}
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		private {{mapname}}<{{field.clsname1}}, {{field.clsname2}}> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{field.clsname2}}>();
+		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{mapname}}<{{field.clsname1}}, {{field.clsname2}}> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
 			set{ _{{field.name}}_= value; _stateChanged=true;}
 		}
 		{{~ else if field.nestmodel == 1 ~}}   {{~#嵌套list模式~}}
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		private {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>>();
+		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
 			set{ _{{field.name}}_= value; _stateChanged=true;}
 		}
 		{{~ else if field.nestmodel == 2 ~}}   {{~#嵌套set模式~}}
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		private {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>>();
+		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
 			set{ _{{field.name}}_= value; _stateChanged=true;}
 		}
 		{{~ else if field.nestmodel == 3 ~}}   {{~#嵌套map模式~}}
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		private {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>>();
+		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
