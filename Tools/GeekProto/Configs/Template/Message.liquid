@@ -51,7 +51,6 @@ namespace {{space}}
 		{{~ for field in fields ~}}
 		{{~ if field.type == "list"~}}
 		private {{listname}}<{{field.clsname1}}> _{{field.name}}_ = new {{listname}}<{{field.clsname1}}>();
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{listname}}<{{field.clsname1}}> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
@@ -59,7 +58,6 @@ namespace {{space}}
 		}
 		{{~ else if field.type == "set"~}}
 		private {{setname}}<{{field.clsname1}}> _{{field.name}}_ = new {{setname}}<{{field.clsname1}}>();
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{setname}}<{{field.clsname1}}> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
