@@ -33,23 +33,23 @@ namespace Geek.Server.Logic.Role
             }
         }
 
-        public Task<bool> IsOnline()
+        public virtual Task<bool> IsOnline()
         {
             return Task.FromResult(true);
         }
 
-        public Task OnDisconnected()
+        public virtual Task OnDisconnected()
         {
             return Task.CompletedTask;
         }
 
-        public Task OnMsgReceived()
+        public virtual Task OnMsgReceived()
         {
             //可以用于心跳处理
             return Task.CompletedTask;
         }
 
-        public Task OnCreate(ReqLogin reqLogin, long roleId)
+        public virtual Task OnCreate(ReqLogin reqLogin, long roleId)
         {
             State.CreateTime = DateTime.Now;
             State.Level = 1;
@@ -59,7 +59,7 @@ namespace Geek.Server.Logic.Role
             return Task.CompletedTask;
         }
 
-        public async Task OnLogin(ReqLogin reqLogin, bool isNewRole, long roleId)
+        public async virtual Task OnLogin(ReqLogin reqLogin, bool isNewRole, long roleId)
         {
             if (isNewRole)
             {
@@ -70,7 +70,7 @@ namespace Geek.Server.Logic.Role
             State.LoginTime = DateTime.Now;
         }
 
-        public Task OnLoginOut()
+        public virtual Task OnLoginOut()
         {
             State.OfflineTime = DateTime.Now;
             return Task.CompletedTask;

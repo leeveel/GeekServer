@@ -74,7 +74,7 @@ namespace Geek.Server
                 _ = ch.Channel.CloseAsync();
             var task = EntityMgr.CompleteAllTask();
             //保证此函数执行完后所有actor队列为空
-            if (await task.WaitAsync(TimeSpan.FromMinutes(10)))
+            if (await task.WaitAsyncCustom(TimeSpan.FromMinutes(10)))
                 LOGGER.Error("remove all channel timeout");
         }
     }

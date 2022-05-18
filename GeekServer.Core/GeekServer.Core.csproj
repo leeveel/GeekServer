@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+	<TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Geek.Server</RootNamespace>
   </PropertyGroup>
   
@@ -44,10 +44,6 @@
 		<PackageReference Include="Quartz" Version="3.3.2" />
 		<PackageReference Include="SharpZipLib" Version="1.3.2" />
 		<PackageReference Include="StackExchange.Redis" Version="2.2.88" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\GeekServer.Weavers\GeekServer.Weavers.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -6,7 +6,7 @@ namespace Geek.Server.Logic.Bag
 {
     public class BagCompAgent : StateComponentAgent<BagComp, BagState>
     {
-        public Task Init()
+        public virtual Task Init()
         {
             //赠送默认道具
             if (State.ItemMap.Count <= 0)
@@ -17,7 +17,7 @@ namespace Geek.Server.Logic.Bag
             return Task.CompletedTask;
         }
 
-        public Task<long> GetItemNum(int itemId)
+        public virtual Task<long> GetItemNum(int itemId)
         {
             long num = 0;
             if (State.ItemMap.ContainsKey(itemId))
@@ -25,7 +25,7 @@ namespace Geek.Server.Logic.Bag
             return Task.FromResult(num);
         }
 
-        public Task AddItem(int itemId, long num)
+        public virtual Task AddItem(int itemId, long num)
         {
             if (State.ItemMap.ContainsKey(itemId))
                 State.ItemMap[itemId] += num;
@@ -34,7 +34,7 @@ namespace Geek.Server.Logic.Bag
             return Task.CompletedTask;
         }
 
-        public Task CutItem(int itemId, long num)
+        public virtual Task CutItem(int itemId, long num)
         {
             if (State.ItemMap.ContainsKey(itemId))
             {
@@ -45,7 +45,7 @@ namespace Geek.Server.Logic.Bag
             return Task.CompletedTask;
         }
 
-        public Task<ResBagInfo> BuildInfoMsg()
+        public virtual Task<ResBagInfo> BuildInfoMsg()
         {
             var res = new ResBagInfo();
             foreach (var kv in State.ItemMap)
@@ -53,7 +53,7 @@ namespace Geek.Server.Logic.Bag
             return Task.FromResult(res);
         }
 
-        public Task Test1()
+        public virtual Task Test1()
         {
             return Task.CompletedTask;
         }
@@ -67,12 +67,13 @@ namespace Geek.Server.Logic.Bag
             return Task.CompletedTask;
         }
 
-        public Task Test3(int a, int b, int c, int d, string e)
+        public virtual Task Test3(int a, int b, int c, int d, string e)
         {
             return Task.CompletedTask;
         }
 
 
+        [MethodOption.ThreadSafe]
         [MethodOption.NotAwait]
         public virtual Task Test4()
         {
@@ -81,11 +82,27 @@ namespace Geek.Server.Logic.Bag
         }
 
 
+        [MethodOption.ExecuteTime(-1)]
         public virtual Task Test5(int a, List<int> list)
         {
             return Task.CompletedTask;
         }
 
+        public virtual Task Test6<T, K>(int a, List<int> list) where T : class, new() where K : BagState
+        {
+            return Task.CompletedTask;
+        }
 
     }
+
+
+    class fff : BagCompAgent
+    {
+        public override Task Test6<T, K>(int a, List<int> list)
+        {
+            _ = base.Test6<T, K>(a, list);
+            return Task.CompletedTask;
+        }
+    }
+
 }

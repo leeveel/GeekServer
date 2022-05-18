@@ -31,6 +31,17 @@ namespace Geek.Server
         ///<summary>此方法会被同名组件调用(强制非public判断入队)</summary>
         [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
         public class CanBeCalledBySameComp : Attribute { };
-    }
 
+
+        [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+        public class ExecuteTime : Attribute 
+        {
+            public int Time { get; private set; }
+            public ExecuteTime(int time)
+            {
+                Time = time;
+            }
+        }
+
+    }
 }

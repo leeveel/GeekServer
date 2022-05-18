@@ -8,14 +8,14 @@ namespace Geek.Server.Logic.Role
     /// </summary>
     public class RoleState : DBState
     {
-        public string RoleName { get; set; }
-        public long RoleId { get; set; }
-        public int Level { get; set; } = 1;
-        public int VipLevel { get; set; } = 1;
-        public DateTime CreateTime { get; set; }
+        public virtual string RoleName { get; set; }
+        public virtual long RoleId { get; set; }
+        public virtual int Level { get; set; } = 1;
+        public virtual int VipLevel { get; set; } = 1;
+        public virtual DateTime CreateTime { get; set; }
 
-        public DateTime LoginTime { get; set; }
-        public DateTime OfflineTime { get; set; }
+        public virtual DateTime LoginTime { get; set; }
+        public virtual DateTime OfflineTime { get; set; }
     }
 
     /// <summary>

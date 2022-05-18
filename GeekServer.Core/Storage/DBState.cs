@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
 
 //此文件的类型会在编译时自动注入，以最低代价获取状态是否改变
 //不要随意改变类名和命名空间
@@ -21,6 +22,8 @@ namespace Geek.Server
     {
         protected HashSet<BaseDBState> stList = new HashSet<BaseDBState>();
         protected bool _stateChanged;
+        public const string StateSuffix = "Wrapper";
+
         public virtual bool IsChanged
         {
             get
@@ -46,6 +49,19 @@ namespace Geek.Server
                     st.ClearChanges();
             }
         }
+
+        public static BaseDBState CreateStateWrapper<T>() where T : BaseDBState
+        {
+            Type self = typeof(T);
+            var wrapperType = self.Assembly.GetType(self.FullName + StateSuffix);
+            return (BaseDBState)Activator.CreateInstance(wrapperType);
+        }
+
+        public static string WrapperFullName<T>() where T : BaseDBState
+        {
+            return typeof(T).FullName + StateSuffix;
+        }
+
 
         #region debug state
 #if DEBUG_MODE

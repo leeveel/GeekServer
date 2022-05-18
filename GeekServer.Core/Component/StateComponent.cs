@@ -7,10 +7,6 @@ using MongoDB.Driver;
 using MongoDB.Bson;
 
 
-
-
-
-
 namespace Geek.Server
 {
     public sealed class StateComponent
@@ -19,6 +15,7 @@ namespace Geek.Server
         static readonly object lockObj = new object();
         static readonly ConcurrentQueue<Func<Task>> shutdownFuncList = new ConcurrentQueue<Func<Task>>();
         static readonly ConcurrentQueue<Func<Task>> timerFuncList = new ConcurrentQueue<Func<Task>>();
+
         public static void AddShutdownSaveFunc(Func<Task> shutdown, Func<Task> timer)
         {
             lock (lockObj)
@@ -121,7 +118,7 @@ namespace Geek.Server
             }
 
             var db = MongoDBConnection.Singleton.CurDateBase;
-            var col = db.GetCollection<TState>(typeof(TState).FullName);
+            var col = db.GetCollection<TState>(BaseDBState.WrapperFullName<TState>());
             int idx = 0;
             int once = 500;
             while (idx < batchList.Count)
@@ -200,7 +197,7 @@ namespace Geek.Server
             var changedStateIdList = new List<long>();
             changedStateIdList.AddRange(changedStateIdEuque);
             var db = MongoDBConnection.Singleton.CurDateBase;
-            var col = db.GetCollection<BsonDocument>(typeof(TState).FullName);
+            var col = db.GetCollection<BsonDocument>(BaseDBState.WrapperFullName<TState>());
             int idx = 0;
             int once = 500;
             while (idx < batchList.Count)

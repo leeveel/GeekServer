@@ -46,7 +46,7 @@ namespace Geek.Server.Logic.Server
         /// <summary>
         /// 开服天数
         /// </summary>
-        public Task<int> GetDaysFromOpenServer()
+        public virtual Task<int> GetDaysFromOpenServer()
         {
             var open = new DateTime(State.OpenServerTimeTick);
             var now = DateTime.Now;

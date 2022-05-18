@@ -17,7 +17,7 @@ public static class TaskExtension
     /// <param name="task"></param>
     /// <param name="timeout"></param>
     /// <returns>不需要明确知道是否超时</returns>
-    public static async Task<TResult> WaitAsync<TResult>(this Task<TResult> task, TimeSpan timeout)
+    public static async Task<TResult> WaitAsyncCustom<TResult>(this Task<TResult> task, TimeSpan timeout)
     {
         using var timeoutCancellationTokenSource = new CancellationTokenSource();
         var delayTask = Task.Delay(timeout, timeoutCancellationTokenSource.Token);
@@ -69,7 +69,7 @@ public static class TaskExtension
     /// <param name="task"></param>
     /// <param name="timeout"></param>
     /// <returns>返回是否超时</returns>
-    public static async Task<bool> WaitAsync(this Task task, TimeSpan timeout)
+    public static async Task<bool> WaitAsyncCustom(this Task task, TimeSpan timeout)
     {
         using var timeoutCancellationTokenSource = new CancellationTokenSource();
         var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));

@@ -13,7 +13,7 @@ namespace Geek.Server
         public TComp Comp => (TComp)Owner;
         public BaseComponent Owner { get; set; }
         public long EntityId => Owner.EntityId;
-        internal WorkerActor Actor => Owner.Actor;
+        public WorkerActor Actor => Owner.Actor;
 
         /// <summary>
         /// 等待waitComp的之前的逻辑先执行完再回到当前actor执行callback

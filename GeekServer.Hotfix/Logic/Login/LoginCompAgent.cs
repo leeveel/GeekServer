@@ -11,7 +11,7 @@ namespace Geek.Server.Logic.Login
 
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-        public async Task<MSG> Login(IChannel channel, ReqLogin reqLogin)
+        public virtual async Task<MSG> Login(IChannel channel, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {
@@ -60,7 +60,7 @@ namespace Geek.Server.Logic.Login
             return MSG.Create(resLogin, reqLogin.UniId);
         }
 
-        public async Task<long> GetRoleIdOfPlayer(string userName, int sdkType)
+        public virtual async Task<long> GetRoleIdOfPlayer(string userName, int sdkType)
         {
             var playerId = $"{sdkType}_{userName}";
             if (Comp.PlayerMap.TryGetValue(playerId, out var state))
@@ -71,12 +71,11 @@ namespace Geek.Server.Logic.Login
             }
             state = await Comp.LoadState(playerId, () =>
             {
-                return new PlayerInfoState()
-                {
-                    Id = playerId,
-                    UserName = userName,
-                    SdkType = sdkType
-                };
+                var playerState = (PlayerInfoState)BaseDBState.CreateStateWrapper<PlayerInfoState>();
+                playerState.Id = playerId;
+                playerState.UserName = userName;
+                playerState.SdkType = sdkType;
+                return playerState;
             });
 
             Comp.PlayerMap[playerId] = state;
@@ -85,7 +84,7 @@ namespace Geek.Server.Logic.Login
             return 0;
         }
 
-        public Task CreateRoleToPlayer(string userName, int sdkType, long roleId)
+        public virtual Task CreateRoleToPlayer(string userName, int sdkType, long roleId)
         {
             var playerId = $"{sdkType}_{userName}";
             Comp.PlayerMap.TryGetValue(playerId, out var state);

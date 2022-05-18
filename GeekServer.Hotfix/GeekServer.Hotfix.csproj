@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>Geek.Server</RootNamespace>
   </PropertyGroup>
   
@@ -21,16 +21,16 @@
     <ProjectReference Include="..\GeekServer.App\GeekServer.App.csproj" />
     <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
     <ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
+    <ProjectReference Include="..\GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Fody" Version="6.5.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-	<WeaverFiles Include="$(OutputPath)/GeekServer.Weavers.dll" WeaverClassNames="AgentWeaver" />
-</ItemGroup>
+    <PropertyGroup>
+	    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <Target Name="CleanSourceGeneratedFiles" AfterTargets="Clean">
+	    <RemoveDir Directories="$(BaseIntermediateOutputPath)\GeneratedFiles" />
+    </Target>
 
 </Project>

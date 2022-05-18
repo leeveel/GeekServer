@@ -20,6 +20,7 @@ namespace Geek.Server
 
         static void handleFetalException(object e)
         {
+            var args = (UnhandledExceptionEventArgs)e;
             //这里可以发送短信或者钉钉消息通知到运维
             LOGGER.Error("get unhandled exception");
             if (e == null)

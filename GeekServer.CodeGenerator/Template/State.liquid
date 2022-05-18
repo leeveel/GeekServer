@@ -1,0 +1,55 @@
+using Geek.Server;
+{{~ for use in usingspaces ~}}
+using {{use}};
+{{~ end ~}}
+
+namespace {{space}}
+{
+    public class {{name}} : {{super}}
+	{
+		{{~ for info in props ~}}
+
+		{{info.declare}}
+		{
+			get => base.{{info.name}}; 
+
+			{{~ if info.iscontainer ~}}
+            set
+			{
+				if(base.{{info.name}} != null)
+				{
+					stList.Remove(base.{{info.name}});
+				}
+				if(value != null)
+				{
+					stList.Add(value);
+				}
+				base.{{info.name}} = value;
+				_stateChanged = true;
+			}
+			{{~ else ~}}
+			set
+			{
+				base.{{info.name}} = value;
+				_stateChanged = true;
+			}
+			{{~ end ~}}
+		}
+
+		{{~ end ~}}
+
+
+		public {{name}}()
+		{
+			{{~ for info in props ~}}
+			{{~ if info.iscontainer ~}}
+			if (base.{{info.name}} != null)
+			{
+				stList.Add(base.{{info.name}});
+			}
+			{{~ end ~}}
+			{{~ end ~}}
+		}
+
+	}
+}

@@ -11,7 +11,7 @@ namespace Geek.Server
     public abstract class QueryComponentAgent<TComp> : IComponentAgent where TComp : QueryComponent
     {
         public BaseComponent Owner { get; set; }
-        internal WorkerActor Actor => Owner.Actor;
+        public WorkerActor Actor => Owner.Actor;
         protected TComp Comp => (TComp)Owner;
         public long EntityId => Owner.EntityId;
 

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
@@ -33,8 +31,12 @@ namespace Geek.Server
 
         static async Task InnerRun(WorkWrapper wrapper)
         {
+            if (wrapper.TimeOut == -1)
+            {
+                await wrapper.DoTask();
+            }
             var task = wrapper.DoTask();
-            var res = await task.WaitAsync(TimeSpan.FromMilliseconds(wrapper.TimeOut));
+            var res = await task.WaitAsyncCustom(TimeSpan.FromMilliseconds(wrapper.TimeOut));
             if (res)
             {
                 LOGGER.Fatal("wrapper执行超时:" + wrapper.GetTrace());
@@ -43,7 +45,7 @@ namespace Geek.Server
             }
         }
 
-        internal long IsNeedEnqueue()
+        public long IsNeedEnqueue()
         {
             long callChainId = RuntimeContext.Current;
             if (callChainId > 0)
@@ -55,12 +57,12 @@ namespace Geek.Server
             return NewChainId();
         }
 
-        internal long NewChainId()
+        public long NewChainId()
         {
             return Interlocked.Increment(ref idCounter);
         }
 
-        internal Task Enqueue(Action work, long callChainId, int timeOut = TIME_OUT)
+        public Task Enqueue(Action work, long callChainId, int timeOut = TIME_OUT)
         {
             ActionWrapper at = new ActionWrapper(work);
             at.Owner = this;
@@ -80,7 +82,7 @@ namespace Geek.Server
             return at.Tcs.Task;
         }
 
-        internal Task<T> Enqueue<T>(Func<T> work, long callChainId, int timeOut = TIME_OUT)
+        public Task<T> Enqueue<T>(Func<T> work, long callChainId, int timeOut = TIME_OUT)
         {
             FuncWrapper<T> at = new FuncWrapper<T>(work);
             at.Owner = this;
@@ -100,7 +102,7 @@ namespace Geek.Server
             return at.Tcs.Task;
         }
 
-        internal Task Enqueue(Func<Task> work, long callChainId, int timeOut = TIME_OUT)
+        public Task Enqueue(Func<Task> work, long callChainId, int timeOut = TIME_OUT)
         {
             ActionAsyncWrapper at = new ActionAsyncWrapper(work);
             at.Owner = this;
@@ -120,7 +122,7 @@ namespace Geek.Server
             return at.Tcs.Task;
         }
 
-        internal Task<T> Enqueue<T>(Func<Task<T>> work, long callChainId, int timeOut = TIME_OUT)
+        public Task<T> Enqueue<T>(Func<Task<T>> work, long callChainId, int timeOut = TIME_OUT)
         {
             FuncAsyncWrapper<T> at = new FuncAsyncWrapper<T>(work);
             at.Owner = this;
