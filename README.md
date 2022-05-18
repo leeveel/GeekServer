@@ -14,7 +14,7 @@ __设计理念:大道至简，以简化繁__
 ### 3.TPL(Task Parallel Library) Actor模型  
 GeekServer的Actor模型构建于强大的TPL DataFlow之上，让Actor模型如虎添翼。（不了解Actor模型，可以搜一下相关资料，Akka，Orleans都是采用的Actor模型）[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/1.Actor%E6%A8%A1%E5%9E%8B.md)
 ### 4.Actor入队透明化  
-GeekServer内部会自动处理线程上下文, 编译期间会通过[Source Generator]自动生成入队代码, 开发人员无需关心多线程以及入队逻辑, 只需要像调用普通函数一样书写逻辑。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/Actor%E5%85%A5%E9%98%9F.md)
+GeekServer内部会自动处理线程上下文, 编译期间会通过[Source Generator](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)自动生成入队代码, 开发人员无需关心多线程以及入队逻辑, 只需要像调用普通函数一样书写逻辑。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/Actor%E5%85%A5%E9%98%9F.md)
 ### 5.Actor死锁检测 
 Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer内部可检测环路死锁(即:A->B->C->A)，并采用调用链重入机制消除环路死锁。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/1.Actor%E6%A8%A1%E5%9E%8B.md)
 ### 6.支持不停服更新 
@@ -72,7 +72,7 @@ GeekServer有严格的书写规范检查，如不符合规范编译直接报错
 1.CompAgent不能被二次继承，Agent继承的需求理论上很少，如果有请采用组合模式  
 2.CompAgent中的所有方法必须以Task为返回值（理由：全面异步，防止出现async void导致异常无法捕捉，致使程序崩溃，详见微软AsyncGuidance.md）  
 3.CompAgent中不能书写构造函数（实际上也没有这样的需求）  
-4.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上[NotAwait]注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。  同时[Source Generator]在编译期间对标记了[NotAwait]的函数做了处理，内部直接返回了Task.CompletedTask，所以外部使用**_**丢弃或是用await都是等价的，为了规范统一，可以全部使用await
+4.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上[NotAwait]注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。  同时[Source Generator](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)在编译期间对标记了[NotAwait]的函数做了处理，内部直接返回了Task.CompletedTask，所以外部使用**_**丢弃或是用await都是等价的，为了规范统一，可以全部使用await
 ```c#
 public Task NotifyAllClient()
 {
