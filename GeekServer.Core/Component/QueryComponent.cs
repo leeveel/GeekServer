@@ -38,7 +38,7 @@ namespace Geek.Server
         /// </summary>
         public async Task<long> QueryHash<T>(string key, string value, FilterDefinition<T> extraFilter) where T : DBState
         {
-            var col = GetDB().GetCollection<T>(typeof(T).FullName);
+            var col = GetDB().GetCollection<T>(BaseDBState.WrapperFullName<T>());
             var filter = Builders<T>.Filter.Eq(key, value);
 
             if (extraFilter != null)
@@ -61,7 +61,7 @@ namespace Geek.Server
         /// </summary>
         public async Task<List<T>> QueryHashKeys<T>(string key, string hashKeySearchPattern, int searchNum, FilterDefinition<T> extraFilter) where T : DBState
         {
-            var col = GetDB().GetCollection<T>(typeof(T).FullName);
+            var col = GetDB().GetCollection<T>(BaseDBState.WrapperFullName<T>());
             var filter = Builders<T>.Filter.Regex(key, hashKeySearchPattern);
             if (extraFilter != null)
                 filter &= extraFilter;
@@ -76,7 +76,7 @@ namespace Geek.Server
 
         public async Task UpdateField<T>(string key, string oldValue, string newValue) where T : DBState
         {
-            var col = GetDB().GetCollection<T>(typeof(T).FullName);
+            var col = GetDB().GetCollection<T>(BaseDBState.WrapperFullName<T>());
             var filter = Builders<T>.Filter.Eq(key, oldValue);
             var update = Builders<T>.Update.Set(key, newValue);
             await col.FindOneAndUpdateAsync(filter, update);
