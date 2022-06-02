@@ -1,5 +1,4 @@
 using System;
-using DotNetty.Transport.Channels;
 using System.Threading.Tasks;
 
 namespace Geek.Server
@@ -7,9 +6,9 @@ namespace Geek.Server
     public abstract class BaseTcpHandler
     {
         /// <summary>
-        ///  连接
+        /// 连接上下文
         /// </summary>
-        public IChannel Channel { get; set; }
+        public NetChannel Channel { get; set; }
 
         /// <summary>
         /// 从Decoder中转化出来的时间
@@ -37,24 +36,22 @@ namespace Geek.Server
 
         public abstract Task ActionAsync();
 
-        protected virtual void WriteAndFlush(NMessage msg)
+        protected virtual void WriteAndFlush(Message msg)
         {
             if (IsDisconnectChannel(Channel))
                 return;
-            Channel.WriteAndFlushAsync(msg);
+            _ = Channel.WriteAsync(msg);
         }
 
         protected virtual void WriteAndFlush(int msgId, byte[] data)
         {
             if (msgId > 0 && data != null)
-                WriteAndFlush(new NMessage() { MsgId = msgId, Data = data });
+                WriteAndFlush(new Message(msgId, data));
         }
 
-
-
-        bool IsDisconnectChannel(IChannel ctx)
+        bool IsDisconnectChannel(NetChannel ctx)
         {
-            return ctx == null|| !ctx.Active || !ctx.Open;
+            return ctx == null || ctx.Context == null;
         }
     }
 }

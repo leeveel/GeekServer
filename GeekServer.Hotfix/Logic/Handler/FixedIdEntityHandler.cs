@@ -10,7 +10,6 @@ namespace Geek.Server
     public abstract class FixedIdEntityHandler<TAgent> : TcpCompHandler<TAgent> where TAgent : IComponentAgent
     {
         public abstract EntityType EntityType { get; }
-        protected long RoleId => SessionId;
 
         public override Task<long> GetEntityId()
         {
@@ -20,7 +19,7 @@ namespace Geek.Server
 
         public Task<RoleAgent> GetRoleCompAgent<RoleAgent>() where RoleAgent : IComponentAgent
         {
-            return EntityMgr.GetCompAgent<RoleAgent>(RoleId);
+            return EntityMgr.GetCompAgent<RoleAgent>(SessionId);
         }
 
         protected virtual void WriteAndFlush(MSG msg)
@@ -32,7 +31,6 @@ namespace Geek.Server
             }
             NotifyErrorCode(msg.Info);
         }
-
 
     }
 }

@@ -1,6 +1,7 @@
 ﻿using NLog;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,7 +19,8 @@ namespace Geek.Server
         {
             //取md5
             var data = Encoding.UTF8.GetBytes(str);
-            byte[] md5Bytes = new System.Security.Cryptography.MD5CryptoServiceProvider().ComputeHash(data);
+            byte[] md5Bytes = MD5.Create().ComputeHash(data);
+            //byte[] md5Bytes = new System.Security.Cryptography.MD5CryptoServiceProvider().ComputeHash(data);
             string md5 = BitConverter.ToString(md5Bytes).Replace("-", "").ToLower();
 
             if (inner)

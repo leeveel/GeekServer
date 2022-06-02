@@ -12,19 +12,13 @@ namespace Geek.Server
         {
             if (cacheEntityId > 0)
                 return Task.FromResult(cacheEntityId);
-
-            var channel = GetChannel();
-            cacheEntityId = channel.Id;
+            cacheEntityId = SessionId;
             return Task.FromResult(cacheEntityId);
         }
 
         public abstract Type CompAgentType { get; }
 
-        protected Session GetChannel()
-        {
-            return Channel.GetAttribute(SessionManager.SESSION).Get();
-        }
-        protected long SessionId => GetChannel().Id;
+        protected long SessionId => SessionManager.GetSessionId(Channel);
     }
    
 }

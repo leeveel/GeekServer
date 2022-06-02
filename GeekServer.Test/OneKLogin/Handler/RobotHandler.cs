@@ -11,7 +11,8 @@ namespace Geek.Server.Test
 
         protected Session GetChannel()
         {
-            return Channel.GetAttribute(SessionManager.SESSION).Get();
+            return default;
+            //return Channel.GetAttribute(SessionManager.SESSION).Get();
         }
 
         public async Task<OtherAgent> GetCompAgent<OtherAgent>() where OtherAgent : IComponentAgent

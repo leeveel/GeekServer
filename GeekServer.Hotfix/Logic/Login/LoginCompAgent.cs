@@ -11,7 +11,7 @@ namespace Geek.Server.Logic.Login
 
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-        public virtual async Task<MSG> Login(IChannel channel, ReqLogin reqLogin)
+        public virtual async Task<MSG> Login(NetChannel channel, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {

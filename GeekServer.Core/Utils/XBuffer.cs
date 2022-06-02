@@ -14,6 +14,21 @@ namespace Geek.Server
         private static readonly int boolSize = sizeof(bool);
 
         #region Write
+
+
+        public static unsafe void WriteInt(Span<byte> span, int val, ref int offset)
+        {
+            if (offset + intSize > span.Length)
+            {
+                throw new ArgumentException($"xbuffer write out of index {offset + intSize}, {span.Length}");
+            }
+            fixed (byte* ptr = span)
+            {
+                *(int*)(ptr + offset) = System.Net.IPAddress.HostToNetworkOrder(val);
+                offset += intSize;
+            }
+        }
+
         public static unsafe void WriteInt(int value, byte[] buffer, ref int offset)
         {
             if (offset + intSize > buffer.Length)

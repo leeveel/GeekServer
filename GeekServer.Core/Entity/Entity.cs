@@ -71,7 +71,7 @@ namespace Geek.Server
 
         async Task<BaseComponent> GetComponent(Type compType)
         {
-            if (!CompSetting.Singleton.IsAutoActive(entityType)
+            if (CompSetting.Singleton.IsAutoActive(entityType)
                 && activeCompMap.TryGetValue(compType, out var comp))
             {
                 activeTimeMap[compType] = DateTime.Now;

@@ -1,64 +1,37 @@
-using DotNetty.Transport.Channels;
-
 namespace Geek.Server
 {
 	public class SessionUtils
 	{
-		public static void WriteAndFlush(IChannelHandlerContext ctx, NMessage msg)
+		public static void WriteAndFlush(NetChannel ctx, Message msg)
 		{
 			if (IsDisconnectChannel(ctx))
 				return;
-			ctx.WriteAndFlushAsync(msg);
+			ctx.WriteAsync(msg);
 		}
 
-		public static void WriteAndFlush(IChannelHandlerContext ctx, IMessage msg)
+		public static void WriteAndFlush(NetChannel ctx, IMessage msg)
 		{
 			if (IsDisconnectChannel(ctx))
 				return;
-			NMessage smsg = NMessage.Create(msg.MsgId, msg.Serialize());
-			ctx.WriteAndFlushAsync(smsg);
+			Message smsg = Message.Create(msg.MsgId, msg.Serialize());
+			ctx.WriteAsync(smsg);
 		}
 
-		public static void WriteAndFlush(IChannel channel, NMessage msg)
-		{
-			if (IsDisconnectChannel(channel))
-				return;
-			channel.WriteAndFlushAsync(msg);
-		}
-
-		public static void WriteAndFlush(IChannel channel, IMessage msg)
-		{
-			WriteAndFlush(channel, msg.MsgId, msg.Serialize());
-		}
-
-		public static void WriteAndFlush(IChannel channel, int msgId, byte[] data)
+		public static void WriteAndFlush(NetChannel channel, int msgId, byte[] data)
 		{
 			if (msgId > 0 && data != null)
-				WriteAndFlush(channel, new NMessage() { MsgId = msgId, Data = data });
+				WriteAndFlush(channel, new Message(msgId, data));
 		}
 
-		public static bool IsDisconnectChannel(IChannel channel)
+		public static bool IsDisconnectChannel(NetChannel channel)
 		{
-			return channel == null || !channel.Active || !channel.Open;
+			return channel == null || channel.Context == null;
 		}
 
-		public static bool IsDisconnectChannel(IChannelHandlerContext ctx)
-		{
-			// copy一份避免多线程问题
-			IChannelHandlerContext tmp = ctx;
-			return tmp == null || tmp.Channel == null || !tmp.Channel.Active || !tmp.Channel.Open;
-		}
-
-		public static void CloseChannel(IChannelHandlerContext channel)
+		public static void CloseChannel(NetChannel channel)
 		{
 			if (channel != null)
-				channel.CloseAsync();
-		}
-
-		public static void CloseChannel(IChannel channel)
-		{
-			if (channel != null)
-				channel.CloseAsync();
+				channel.Abort();
 		}
 	}
 }

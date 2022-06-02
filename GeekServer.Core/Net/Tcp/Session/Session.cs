@@ -1,5 +1,4 @@
 ﻿using System;
-using DotNetty.Transport.Channels;
 using System.Collections.Generic;
 
 namespace Geek.Server
@@ -17,9 +16,9 @@ namespace Geek.Server
         public DateTime Time { set; get; }
 
         /// <summary>
-        /// netty通道
+        /// 连接上下文
         /// </summary>
-        public IChannel Channel { set; get; }
+        public NetChannel Channel { get; set; }
 
         /// <summary>
         /// 连接标示，避免自己顶自己的号,客户端每次启动游戏生成一次/或者每个设备一个

@@ -20,8 +20,9 @@ namespace Geek.Server
             HttpHandlerFactory.SetHandlerGetter(HotfixMgr.GetHttpHandler);
             TcpHandlerFactory.SetHandlerGetter(MsgFactory.GetMsg, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
 
-            await TcpServer.Start(Settings.Ins.TcpPort, Settings.Ins.UseLibuv);
-            await HttpServer.Start(Settings.Ins.httpPort);
+            //await TcpServer.Start(Settings.Ins.TcpPort, Settings.Ins.UseLibuv);
+            //await HttpServer.Start(Settings.Ins.httpPort);
+            await GameServer.Start(Settings.Ins.TcpPort, Settings.Ins.httpPort);
             //RedisMgr.Init();
             //ServerInfoUtils.Init();
             //GrpcServer.Init(Settings.Ins.GrpcPort);
@@ -79,9 +80,10 @@ namespace Geek.Server
             await SessionManager.RemoveAll();
             await QuartzTimer.Stop();
             await GlobalDBTimer.Singleton.OnShutdown();
+            await GameServer.Stop();
             //await EntityMgr.RemoveAll();
-            await HttpServer.Stop();
-            await TcpServer.Stop();
+            //await HttpServer.Stop();
+            //await TcpServer.Stop();
             //ServerInfoUtils.Stop();
             //await GrpcServer.Stop().WaitAsync(TimeSpan.FromSeconds(10));
             //await GrpcClient.Showdown().WaitAsync(TimeSpan.FromSeconds(10));

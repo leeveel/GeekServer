@@ -47,6 +47,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Bedrock.Framework\Bedrock.Framework.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<WeaverFiles Include="$(OutputPath)/GeekServer.Weavers.dll" WeaverClassNames="CoreWeaver" />
 	</ItemGroup>
 

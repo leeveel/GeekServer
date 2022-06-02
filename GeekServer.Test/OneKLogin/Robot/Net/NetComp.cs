@@ -22,7 +22,7 @@ namespace Geek.Server.Test
             //添加session
             Session session = new Session();
             session.Id = EntityId;
-            Comp.channel.GetAttribute(SessionManager.SESSION).Set(session);
+            //Comp.channel.GetAttribute(SessionManager.SESSION).Set(session);
         }
 
         public Task<bool> SendMsg(IMessage msg)
