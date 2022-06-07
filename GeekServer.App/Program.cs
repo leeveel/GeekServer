@@ -32,7 +32,6 @@ namespace Geek.Server
                         .Wait(TimeSpan.FromSeconds(10));
                     return;
                 }
-
                 GameloopTask = GameLoop.Enter();
                 GameloopTask.Wait();
 

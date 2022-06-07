@@ -62,9 +62,7 @@ public class Settings
     /// <summary> http端口 </summary>
     public int httpPort { get; set; }
 
-    /// <summary> http内部命名验证 </summary>
-    public string httpInnerCode { get; set; }
-    /// <summary> http外部命令验证,可能提供给sdk方 </summary>
+    /// <summary> http命令验证码</summary>
     public string httpCode { get; set; }
     /// <summary> http指令路径 </summary>
     public string httpUrl { get; set; }

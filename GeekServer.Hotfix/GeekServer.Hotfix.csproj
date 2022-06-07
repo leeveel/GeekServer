@@ -21,7 +21,7 @@
     <ProjectReference Include="..\GeekServer.App\GeekServer.App.csproj" />
     <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
     <ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
-    <ProjectReference Include="..\GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+    <ProjectReference Include="..\GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
     <PropertyGroup>

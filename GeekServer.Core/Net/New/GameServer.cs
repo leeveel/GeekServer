@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
 using System;
 using System.Net;
 using System.Threading.Tasks;
@@ -41,15 +42,7 @@ namespace Geek.Server
         public static WebApplication CreateWebApplication(int tcpPort, int httpPort, int httpsPort)
         {
             var builder = WebApplication.CreateBuilder();
-            builder.WebHost.ConfigureServices(services =>
-            {
-                services.AddLogging(builder =>
-                {
-                    builder.SetMinimumLevel(LogLevel.Debug);
-                    builder.AddConsole();
-                });
-            })
-            .UseKestrel(options =>
+            builder.WebHost.UseKestrel(options =>
             {
                 // TCP 
                 if (tcpPort > 0)
@@ -76,36 +69,40 @@ namespace Geek.Server
                     });
                 }
 
-            });
+            })
+            .ConfigureLogging(logging =>
+            {
+                if(Settings.Ins.IsDebug)
+                    logging.SetMinimumLevel(LogLevel.Information);
+                else
+                    logging.SetMinimumLevel(LogLevel.None);
+            })
+            .UseNLog();
 
             var app = builder.Build();
-            app.MapGet("/", () => "Hello World!");
-            //app.MapGet("/Test", Test);
-            //app.Run();
+            app.MapGet("/game/{text}", (HttpContext context) => HttpHandler.HandleRequest(context));
+            app.MapPost("/game/{text}", (HttpContext context) => HttpHandler.HandleRequest(context));
             return app;
         }
 
         public static WebApplication CreateWebHostBuilder(IPEndPoint tcpEndPoint, IPEndPoint httpEndPoint, IPEndPoint httpsEndPoint)
         {
             var builder = WebApplication.CreateBuilder();
-            builder.WebHost.ConfigureServices(services =>
-            {
-                // This shows how a custom framework could plug in an experience without using Kestrel APIs directly
-                //services.AddFramework(new IPEndPoint(IPAddress.Loopback, 8009));
-                services.AddLogging(builder =>
-                {
-                    builder.SetMinimumLevel(LogLevel.Debug);
-                    builder.AddConsole();
-                });
-            })
-            .UseKestrel(options =>
+            //builder.WebHost.ConfigureServices(services =>
+            //{
+            //    services.AddLogging(builder =>
+            //    {
+            //        builder.SetMinimumLevel(LogLevel.Debug);
+            //        builder.AddConsole();
+            //    });
+            //});
+            builder.WebHost.UseKestrel(options =>
             {
                 // TCP 
                 if (tcpEndPoint != null)
                 {
                     options.Listen(tcpEndPoint, builder =>
                     {
-                        //builder.UseConnectionHandler<MyEchoConnectionHandler>();
                         //builder.UseConnectionLogging();
                         builder.UseConnectionHandler<TcpConnectionHandler>();
                     });

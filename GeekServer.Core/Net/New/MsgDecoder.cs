@@ -38,7 +38,6 @@ namespace Geek.Server
             }
         }
 
-
         public static IMessage Decode(ConnectionContext context, Message msg)
         {
 

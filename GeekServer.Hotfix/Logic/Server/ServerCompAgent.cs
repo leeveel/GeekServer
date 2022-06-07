@@ -8,6 +8,8 @@ namespace Geek.Server.Logic.Server
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
+        public static volatile int OnlineNum;
+
         public override async Task Active()
         {
             await base.Active();

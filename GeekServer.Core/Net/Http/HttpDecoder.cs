@@ -141,7 +141,7 @@ namespace Geek.Server
                 return HttpResult.Undefine;
 
             if (!Settings.Ins.AppRunning)
-                return new HttpResult(HttpResult.Code_ActionFailed, "服务器状态错误[正在起/关服]");
+                return new HttpResult(HttpResult.Stauts.ActionFailed, "服务器状态错误[正在起/关服]");
 
             try
             {
