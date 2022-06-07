@@ -88,14 +88,6 @@ namespace Geek.Server
         public static WebApplication CreateWebHostBuilder(IPEndPoint tcpEndPoint, IPEndPoint httpEndPoint, IPEndPoint httpsEndPoint)
         {
             var builder = WebApplication.CreateBuilder();
-            //builder.WebHost.ConfigureServices(services =>
-            //{
-            //    services.AddLogging(builder =>
-            //    {
-            //        builder.SetMinimumLevel(LogLevel.Debug);
-            //        builder.AddConsole();
-            //    });
-            //});
             builder.WebHost.UseKestrel(options =>
             {
                 // TCP 
@@ -125,9 +117,20 @@ namespace Geek.Server
                     });
                 }
 
-            });
+            })
+            .ConfigureLogging(logging =>
+            {
+                if (Settings.Ins.IsDebug)
+                    logging.SetMinimumLevel(LogLevel.Information);
+                else
+                    logging.SetMinimumLevel(LogLevel.None);
+            })
+            .UseNLog();
 
-            return builder.Build();
+            var app = builder.Build();
+            app.MapGet("/game/{text}", (HttpContext context) => HttpHandler.HandleRequest(context));
+            app.MapPost("/game/{text}", (HttpContext context) => HttpHandler.HandleRequest(context));
+            return app;
         }
 
     }
