@@ -8,18 +8,18 @@ namespace Geek.Server
     public class NetChannel
     {
         public const string SESSIONID = "SESSIONID";
-        public ConnectionContext Context { get; }
-        public ProtocolReader Reader { get; }
-        public ProtocolWriter Writer { get; }
+        public ConnectionContext Context { get; protected set; }
+        public ProtocolReader Reader { get; protected set; }
+        public ProtocolWriter Writer { get; protected set; }
 
-        public LengthPrefixedProtocol Protocol { get; }
+        public IProtocal<Message> Protocol { get; protected set; }
 
-        public NetChannel(ConnectionContext context)
+        public NetChannel(ConnectionContext context, IProtocal<Message> protocal)
         {
             Context = context;
             Reader = context.CreateReader();
             Writer = context.CreateWriter();
-            Protocol = new LengthPrefixedProtocol();
+            Protocol = protocal;
         }
 
         public void RemoveSessionId()

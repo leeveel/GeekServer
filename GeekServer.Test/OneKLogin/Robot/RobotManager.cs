@@ -16,13 +16,7 @@ namespace Geek.Server.Test
         {
             string host = RobotSetting.Ins.ipAdd;
             int port = RobotSetting.Ins.tcpPort;
-            var handlerList = new List<Type>
-            {
-                typeof(TcpClientEncoder),
-                typeof(TcpClientDecoder),
-                typeof(TcpServerHandler)
-            };
-            RobotClient.Init(host, port, handlerList);
+            RobotClient.Init(host, port);
             InnerStart();
         }
 

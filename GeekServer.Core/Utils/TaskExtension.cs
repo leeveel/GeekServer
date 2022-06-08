@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 public static class TaskExtension
 {
+
     public class WaitAsyncInfo<T>
     {
         public T Res;

@@ -96,7 +96,7 @@ namespace Geek.Server
         public static bool CheckMagicNumber(ConnectionContext context, int order, int msgLen)
         {
             order ^= (0x1234 << 8);
-            order ^= msgLen;
+            order ^= msgLen+4;
             context.Items.TryGetValue(LAST_RECV_ORDER, out object objOrder);
             if (objOrder != null)
             {
@@ -120,9 +120,9 @@ namespace Geek.Server
         {
             //消息长度+时间戳+magic+消息id+数据
             //4 + 8 + 4 + 4 + data
-            if (msgLen <= 20)
+            if (msgLen <= 16)//(消息长度已经被读取)
             {
-                LOGGER.Error("从客户端接收的包大小异常:" + msgLen + ":至少20个字节");
+                LOGGER.Error("从客户端接收的包大小异常:" + msgLen + ":至少16个字节");
                 return false;
             }
             else if (msgLen > MAX_RECV_SIZE)

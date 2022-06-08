@@ -36,7 +36,7 @@ namespace Geek.Server
         }
 
         //public Task<TComp> GetComponent<TComp>() where TComp : BaseComponent, new() { return Actor.GetComponent<TComp>(); }
-        internal WorkerActor Actor { get; private set; }
+        public WorkerActor Actor { get; private set; }
         public long EntityId { get; private set; }
         public int EntityType { get; private set; }
         public bool IsActive { get; protected set; }

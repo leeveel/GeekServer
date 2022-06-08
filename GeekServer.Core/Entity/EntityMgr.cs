@@ -47,7 +47,7 @@ namespace Geek.Server
             return GetCompAgent<T>((int)(object)entityType);
         }
 
-        internal static async Task<IComponentAgent> GetCompAgent(long entityId, Type compAgentType)
+        public static async Task<IComponentAgent> GetCompAgent(long entityId, Type compAgentType)
         {
             var type = compAgentType.BaseType;
             if (type.IsGenericType)

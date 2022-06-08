@@ -29,6 +29,19 @@ namespace Geek.Server
             }
         }
 
+        public static unsafe void WriteLong(Span<byte> span, long val, ref int offset)
+        {
+            if (offset + longSize > span.Length)
+            {
+                throw new ArgumentException($"xbuffer write out of index {offset + intSize}, {span.Length}");
+            }
+            fixed (byte* ptr = span)
+            {
+                *(long*)(ptr + offset) = System.Net.IPAddress.HostToNetworkOrder(val);
+                offset += longSize;
+            }
+        }
+
         public static unsafe void WriteInt(int value, byte[] buffer, ref int offset)
         {
             if (offset + intSize > buffer.Length)

@@ -1,5 +1,4 @@
-﻿using DotNetty.Transport.Channels;
-using Geek.Server.Logic.Role;
+﻿using Geek.Server.Logic.Role;
 using Geek.Server.Proto;
 using System;
 using System.Threading.Tasks;

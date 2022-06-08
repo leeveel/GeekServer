@@ -22,10 +22,6 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DotNetty.Codecs" Version="0.6.0" />
-		<PackageReference Include="DotNetty.Codecs.Http" Version="0.6.0" />
-		<PackageReference Include="DotNetty.Transport" Version="0.6.0" />
-		<PackageReference Include="DotNetty.Transport.Libuv" Version="0.6.0" />
 		<PackageReference Include="Google.Protobuf" Version="3.13.0" />
 		<PackageReference Include="Grpc" Version="2.43.0" />
 		<PackageReference Include="Grpc.AspNetCore.Server" Version="2.32.0" />

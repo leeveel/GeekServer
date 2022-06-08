@@ -1,5 +1,4 @@
-﻿using DotNetty.Transport.Channels;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
 namespace Geek.Server.Test
@@ -8,7 +7,7 @@ namespace Geek.Server.Test
     public class NetComp : NoHotfixComponent
     {
         public DateTime handTime;
-        public IChannel channel;
+        public ClientNetChannel Channel { get; set; }
         public MsgWaiter Waiter = new MsgWaiter();
         public int UniId { set; get; } = 200;
     }
@@ -18,18 +17,21 @@ namespace Geek.Server.Test
         public async Task Start()
         {
             Comp.handTime = DateTime.Now;
-            Comp.channel = await RobotClient.Connect();
+            Comp.Channel = await RobotClient.Connect();
+            Comp.Channel.Start();
             //添加session
             Session session = new Session();
             session.Id = EntityId;
             //Comp.channel.GetAttribute(SessionManager.SESSION).Set(session);
+            Comp.Channel.SetSessionId(session.Id);
         }
 
         public Task<bool> SendMsg(IMessage msg)
         {
             msg.UniId = Comp.UniId++;
-            NMessage nmsg = NMessage.Create(msg.MsgId, msg.Serialize());
-            Comp.channel.WriteAndFlushAsync(nmsg);
+            Message nmsg = Message.Create(msg.MsgId, msg.Serialize());
+            //Comp.channel.WriteAndFlushAsync(nmsg);
+            Comp.Channel.WriteAsync(nmsg);
             return Comp.Waiter.StartWait(msg.UniId);
         }
 
@@ -40,9 +42,7 @@ namespace Geek.Server.Test
 
         public bool IsConnected()
         {
-            if (Comp.channel != null)
-                return Comp.channel.Active && Comp.channel.Open;
-            return false;
+            return Comp.Channel != null && Comp.Channel.Context != null;
         }
 
         public Task Close()

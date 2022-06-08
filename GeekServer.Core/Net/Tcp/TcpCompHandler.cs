@@ -18,7 +18,7 @@ namespace Geek.Server
 
         public abstract Type CompAgentType { get; }
 
-        protected long SessionId => SessionManager.GetSessionId(Channel);
+        protected long SessionId => Channel.GetSessionId();
     }
    
 }

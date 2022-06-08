@@ -7,17 +7,13 @@ namespace Geek.Server.Test
     {
         private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        protected long RoleId => GetChannel().Id;
+        //protected long RoleId => GetChannel().Id;
 
-        protected Session GetChannel()
-        {
-            return default;
-            //return Channel.GetAttribute(SessionManager.SESSION).Get();
-        }
+        protected long SessionId => Channel.GetSessionId();
 
         public async Task<OtherAgent> GetCompAgent<OtherAgent>() where OtherAgent : IComponentAgent
         {
-            return await EntityMgr.GetCompAgent<OtherAgent>(RoleId);
+            return await EntityMgr.GetCompAgent<OtherAgent>(SessionId);
         }
 
     }

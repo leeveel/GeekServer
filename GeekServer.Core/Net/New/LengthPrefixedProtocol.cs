@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Buffers;
-using System.Buffers.Binary;
 using Bedrock.Framework.Protocols;
 
 namespace Geek.Server
 {
-    public class LengthPrefixedProtocol : IMessageReader<Message>, IMessageWriter<Message>
+    public class LengthPrefixedProtocol : IProtocal<Message>
     {
         public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out Message message)
         {

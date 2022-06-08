@@ -21,7 +21,7 @@ namespace Geek.Server
         public override async Task OnConnectedAsync(ConnectionContext connection)
         {
             OnConnection(connection);
-            NetChannel channel = new NetChannel(connection);
+            NetChannel channel = new NetChannel(connection, new LengthPrefixedProtocol());
             while (true)
             {
                 try
@@ -75,7 +75,7 @@ namespace Geek.Server
 
                 //握手
                 //var session = ctx.Channel.GetAttribute(SessionManager.SESSION).Get();
-                long sessionId = SessionManager.GetSessionId(channel);
+                long sessionId = channel.GetSessionId();
                 if (sessionId > 0)
                     EventDispatcher.DispatchEvent(sessionId, (int)InnerEventID.OnMsgReceived);
 
