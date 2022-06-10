@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Connections;
-using Microsoft.Extensions.Logging;
 
 namespace Geek.Server
 {
@@ -11,17 +10,12 @@ namespace Geek.Server
 
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-        private readonly ILogger _logger;
-
-        public TcpConnectionHandler(ILogger<TcpConnectionHandler> logger)
-        {
-            _logger = logger;
-        }
+        public TcpConnectionHandler() { }
 
         public override async Task OnConnectedAsync(ConnectionContext connection)
         {
             OnConnection(connection);
-            NetChannel channel = new NetChannel(connection, new LengthPrefixedProtocol());
+            var channel = new NetChannel(connection, new LengthPrefixedProtocol());
             while (true)
             {
                 try
@@ -29,13 +23,20 @@ namespace Geek.Server
                     var result = await channel.Reader.ReadAsync(channel.Protocol);
                     var message = result.Message;
 
-                    _logger.LogInformation("Received a message of {Length} bytes", message.Payload.Length);
-
+                    //LOGGER.Debug("Received a message of {Length} bytes", message.Payload.Length);
                     //分发消息
                     _ = Dispatcher(channel, MsgDecoder.Decode(connection, message));
 
                     if (result.IsCompleted)
                         break;
+                }
+                catch (ConnectionResetException)
+                {
+                    break;
+                }
+                catch (ConnectionAbortedException)
+                {
+                    break;
                 }
                 finally
                 {
@@ -47,12 +48,12 @@ namespace Geek.Server
 
         protected void OnConnection(ConnectionContext connection)
         {
-            _logger.LogInformation("{ConnectionId} connected", connection.ConnectionId);
+            LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
         }
 
         protected void OnDisconnection(NetChannel channel)
         {
-            _logger.LogInformation("{ConnectionId} disconnected", channel.Context.ConnectionId);
+            LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
             var sessionId = channel.GetSessionId();
             if (sessionId > 0)
                 SessionManager.Remove(sessionId);
@@ -74,7 +75,6 @@ namespace Geek.Server
                 }
 
                 //握手
-                //var session = ctx.Channel.GetAttribute(SessionManager.SESSION).Get();
                 long sessionId = channel.GetSessionId();
                 if (sessionId > 0)
                     EventDispatcher.DispatchEvent(sessionId, (int)InnerEventID.OnMsgReceived);

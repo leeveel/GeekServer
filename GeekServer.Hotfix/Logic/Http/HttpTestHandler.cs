@@ -29,7 +29,7 @@ namespace Geek.Server.Logic.Http
         public override bool CheckSign => true;
 
         /// <summary>
-        /// http://192.168.0.163:20000/game/api?command=online_num_query
+        /// http://192.168.0.163:20000/game/api?command=test
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="url"></param>

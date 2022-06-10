@@ -2,7 +2,7 @@ namespace Geek.Server
 {
 	public class SessionUtils
 	{
-		public static void WriteAndFlush(NetChannel ctx, Message msg)
+		public static void WriteAndFlush(NetChannel ctx, NMessage msg)
 		{
 			if (IsDisconnectChannel(ctx))
 				return;
@@ -13,14 +13,14 @@ namespace Geek.Server
 		{
 			if (IsDisconnectChannel(ctx))
 				return;
-			Message smsg = Message.Create(msg.MsgId, msg.Serialize());
+			NMessage smsg = NMessage.Create(msg.MsgId, msg.Serialize());
 			ctx.WriteAsync(smsg);
 		}
 
 		public static void WriteAndFlush(NetChannel channel, int msgId, byte[] data)
 		{
 			if (msgId > 0 && data != null)
-				WriteAndFlush(channel, new Message(msgId, data));
+				WriteAndFlush(channel, new NMessage(msgId, data));
 		}
 
 		public static bool IsDisconnectChannel(NetChannel channel)

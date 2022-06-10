@@ -38,7 +38,7 @@ namespace Geek.Server
             }
         }
 
-        public static IMessage Decode(ConnectionContext context, Message msg)
+        public static IMessage Decode(ConnectionContext context, NMessage msg)
         {
 
             var reader = new SequenceReader<byte>(msg.Payload);

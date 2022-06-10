@@ -36,7 +36,7 @@ namespace Geek.Server
 
         public abstract Task ActionAsync();
 
-        protected virtual void WriteAndFlush(Message msg)
+        protected virtual void WriteAndFlush(NMessage msg)
         {
             if (IsDisconnectChannel(Channel))
                 return;
@@ -46,7 +46,7 @@ namespace Geek.Server
         protected virtual void WriteAndFlush(int msgId, byte[] data)
         {
             if (msgId > 0 && data != null)
-                WriteAndFlush(new Message(msgId, data));
+                WriteAndFlush(new NMessage(msgId, data));
         }
 
         bool IsDisconnectChannel(NetChannel ctx)

@@ -51,6 +51,8 @@ namespace Geek.Server
                     return;
 
                 LOGGER.Info("移除channel {}", session.Id);
+                //if(!session.Channel.Context.ConnectionClosed.IsCancellationRequested)
+                session.Channel.Abort();
                 EventDispatcher.DispatchEvent(session.Id, (int)InnerEventID.OnDisconnected);
             }
         }

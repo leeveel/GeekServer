@@ -42,7 +42,7 @@ namespace Geek.Server
         public static WebApplication CreateWebApplication(int tcpPort, int httpPort, int httpsPort)
         {
             var builder = WebApplication.CreateBuilder();
-            builder.WebHost.UseKestrel(options =>
+            builder.WebHost.ConfigureKestrel(options =>
             {
                 // TCP 
                 if (tcpPort > 0)

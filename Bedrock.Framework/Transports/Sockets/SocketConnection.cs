@@ -20,6 +20,8 @@ namespace Bedrock.Framework
         private IDuplexPipe _application;
         private readonly SocketSender _sender;
         private readonly SocketReceiver _receiver;
+        private readonly CancellationTokenSource _connectionClosedTokenSource = new CancellationTokenSource();
+        private readonly TaskCompletionSource _waitForConnectionClosedTcs = new TaskCompletionSource();
 
         public SocketConnection(EndPoint endPoint)
         {
@@ -32,6 +34,8 @@ namespace Bedrock.Framework
             // Add IConnectionInherentKeepAliveFeature to the tcp connection impl since Kestrel doesn't implement
             // the IConnectionHeartbeatFeature
             Features.Set<IConnectionInherentKeepAliveFeature>(this);
+
+            ConnectionClosed = _connectionClosedTokenSource.Token;
         }
 
         public override IDuplexPipe Transport { get; set; }
@@ -153,6 +157,42 @@ namespace Bedrock.Framework
                 }
 
                 await _application.Output.CompleteAsync(error).ConfigureAwait(false);
+                FireConnectionClosed();
+                await _waitForConnectionClosedTcs.Task;
+            }
+        }
+
+        private bool _connectionClosed;
+        private void FireConnectionClosed()
+        {
+            //Console.WriteLine($"{ConnectionId} closed");
+            //Guard against scheduling this multiple times
+            if (_connectionClosed)
+            {
+                return;
+            }
+
+            _connectionClosed = true;
+            ThreadPool.UnsafeQueueUserWorkItem(state =>
+            {
+                state.CancelConnectionClosedToken();
+                state._waitForConnectionClosedTcs.TrySetResult();
+            },
+            this,
+            preferLocal: false);
+        }
+
+        public override CancellationToken ConnectionClosed { get; set; }
+
+        private void CancelConnectionClosedToken()
+        {
+            try
+            {
+                _connectionClosedTokenSource.Cancel();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected exception in {nameof(SocketConnection)}.{nameof(CancelConnectionClosedToken)}.{ex}");
             }
         }
 

@@ -4,26 +4,48 @@ using Bedrock.Framework.Protocols;
 
 namespace Geek.Server
 {
-    public class LengthPrefixedProtocol : IProtocal<Message>
+    public class LengthPrefixedProtocol : IProtocal<NMessage>
     {
-        public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out Message message)
+        public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out NMessage message)
         {
             var reader = new SequenceReader<byte>(input);
-            if (!reader.TryReadBigEndian(out int length) || reader.Remaining < length-4)
+
+            //if (!reader.TryReadBigEndian(out int length) || reader.Remaining < length-4)
+            //{
+            //    message = default;
+            //    return false;
+            //}
+
+            if (!reader.TryReadBigEndian(out int length))
+            {
+                message = default;
+                return false;
+            }
+
+            bool iszip = false;
+            if (length < 0)
+            {
+                iszip = true;
+                length = -length;
+            }
+
+            //客户端传过来的length包含了长度自身（data: [length:byte[1,2,3,4]] ==> 则length=int 4 个字节+byte数组长度4=8）
+            if (reader.Remaining < length - 4)
             {
                 message = default;
                 return false;
             }
 
             var payload = input.Slice(reader.Position, length-4);//length已经被TryReadBigEndian读取
-            message = new Message(payload);
+            message = new NMessage(payload);
+            message.Ziped = iszip;
 
             consumed = payload.End;
             examined = consumed;
             return true;
         }
 
-        public void WriteMessage(Message message, IBufferWriter<byte> output)
+        public void WriteMessage(NMessage message, IBufferWriter<byte> output)
         {
             int len = (int)message.Payload.Length;
             len += 8;
@@ -37,39 +59,5 @@ namespace Geek.Server
                 output.Write(memory.Span);
             }
         }
-    }
-
-    public struct Message
-    {
-
-        public int MsgId { get; set; } = 0;
-
-        public bool Ziped { get; set; } = false;
-
-        public ReadOnlySequence<byte> Payload { get; }
-
-        public Message(ReadOnlySequence<byte> payload)
-        {
-            Payload = payload;
-        }
-
-        public Message(int msgId, byte[] payload) 
-        {
-            int len = payload.Length;
-            if (len >= 512)
-            {
-                Ziped = true;
-                payload = MsgDecoder.CompressGZip(payload);
-                //LOGGER.Debug($"msg:{msg.MsgId} zip before:{len}, after:{msgData.Length}");
-            }
-            Payload = new ReadOnlySequence<byte>(payload);
-            MsgId = msgId;
-        }
-
-        public static Message Create(int msgId, byte[] payload)
-        {
-            return new Message(msgId, payload);
-        }
-
     }
 }

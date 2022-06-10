@@ -18,7 +18,6 @@ namespace Geek.Server.Test
         {
             Comp.handTime = DateTime.Now;
             Comp.Channel = await RobotClient.Connect();
-            Comp.Channel.Start();
             //添加session
             Session session = new Session();
             session.Id = EntityId;
@@ -29,7 +28,7 @@ namespace Geek.Server.Test
         public Task<bool> SendMsg(IMessage msg)
         {
             msg.UniId = Comp.UniId++;
-            Message nmsg = Message.Create(msg.MsgId, msg.Serialize());
+            NMessage nmsg = NMessage.Create(msg.MsgId, msg.Serialize());
             //Comp.channel.WriteAndFlushAsync(nmsg);
             Comp.Channel.WriteAsync(nmsg);
             return Comp.Waiter.StartWait(msg.UniId);

@@ -2,43 +2,65 @@
 using Microsoft.AspNetCore.Connections;
 using System;
 using System.Buffers;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace Geek.Server.Test
+namespace Geek.Server
 {
-    public class ClientNetChannel : NetChannel
+    public class ClientNetChannel : NetChannel, IThreadPoolWorkItem
     {
 
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-        public ClientNetChannel(ConnectionContext context, IProtocal<Message> protocal)
+        public ClientNetChannel(ConnectionContext context, IProtocal<NMessage> protocal)
             : base(context, protocal)
         {
+            ThreadPool.UnsafeQueueUserWorkItem(this, true);
+            //Task.Run(NetLooping);
         }
 
-        public void Start()
+        public void Execute()
         {
-            Task.Run(NetLooping);
+            //throw new NotImplementedException();
+            _ = NetLooping();
         }
 
+        protected override void ConnectionClosed()
+        {
+            base.ConnectionClosed();
+            LOGGER.Debug($"{Context.RemoteEndPoint?.ToString()} 服务器断开链接");
+            connectionClosed = true;
+        }
+
+        private bool connectionClosed = false;
         private async Task NetLooping()
         {
-            while (true)
+            while (!connectionClosed)
             {
-                var result = await Reader.ReadAsync(Protocol);
+                try
+                {
+                    var result = await Reader.ReadAsync(Protocol);
 
-                var message = result.Message;
-                //分发消息
-                _ = Dispatcher(Decode(message));
+                    var message = result.Message;
+                    //分发消息
+                    _ = Dispatcher(Decode(message));
 
-                if (result.IsCompleted)
+                    if (result.IsCompleted)
+                        break;
+                }
+                catch (ConnectionResetException)
+                {
+                    LOGGER.Debug("{ConnectionId} disconnected", Context.ConnectionId);
                     break;
-
-                Reader.Advance();
+                }
+                finally
+                {
+                    Reader.Advance();
+                }
             }
         }
 
-        private IMessage Decode(Message message)
+        private IMessage Decode(NMessage message)
         {
             var reader = new SequenceReader<byte>(message.Payload);
 
@@ -122,5 +144,6 @@ namespace Geek.Server.Test
             }
         }
 
+       
     }
 }

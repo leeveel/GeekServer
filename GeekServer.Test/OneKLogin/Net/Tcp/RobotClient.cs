@@ -38,7 +38,7 @@ namespace Geek.Server.Test
                                         //.UseConnectionLogging(loggerFactory: loggerFactory)
                                         .Build();
                 var connection = await client.ConnectAsync(new IPEndPoint(IPAddress.Parse(Host), Port));
-                Console.WriteLine($"Connected to {connection.LocalEndPoint}");
+                LOGGER.Debug($"Connected to {connection.LocalEndPoint}");
                 return new ClientNetChannel(connection, new ClientLengthPrefixedProtocol());
             }
             catch (Exception)
@@ -47,9 +47,9 @@ namespace Geek.Server.Test
             }
         }
 
-        public static Task Close()
+        public static void Close(NetChannel channel)
         {
-            return default;
+            channel?.Abort();
         }
 
     }

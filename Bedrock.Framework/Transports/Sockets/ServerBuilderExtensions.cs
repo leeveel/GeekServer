@@ -1,10 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Connections;
-
-namespace Bedrock.Framework
+﻿namespace Bedrock.Framework
 {
     public static partial class ServerBuilderExtensions
     {
@@ -18,7 +12,7 @@ namespace Bedrock.Framework
 
         public static ClientBuilder UseSockets(this ClientBuilder clientBuilder)
         {
-            return clientBuilder.UseConnectionFactory(new SocketConnectionFactory());
+            return clientBuilder.UseConnectionFactory(SocketConnectionFactory.Factory);
         }
     }
 }

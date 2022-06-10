@@ -99,9 +99,9 @@ namespace Geek.Server
             catch (Exception e)
             {
                 if (!isReload)
-                    throw e;
+                    throw;
                 LOGGER.Info("hotfix dll init failed..." + e.ToString());
-                            }
+            }
             return Task.FromResult(success);
         }
 
