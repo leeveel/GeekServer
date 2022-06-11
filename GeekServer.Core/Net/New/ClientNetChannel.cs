@@ -21,7 +21,6 @@ namespace Geek.Server
 
         public void Execute()
         {
-            //throw new NotImplementedException();
             _ = NetLooping();
         }
 
@@ -43,7 +42,7 @@ namespace Geek.Server
 
                     var message = result.Message;
                     //分发消息
-                    _ = Dispatcher(Decode(message));
+                    _ = Dispatcher(MsgDecoder.ClientDecode(message));
 
                     if (result.IsCompleted)
                         break;
@@ -60,40 +59,6 @@ namespace Geek.Server
             }
         }
 
-        private IMessage Decode(NMessage message)
-        {
-            var reader = new SequenceReader<byte>(message.Payload);
-
-            //数据包长度消息头两个int 8位
-            if (message.Payload.Length < MSG_HEAD_LENGTH)
-                return null;
-
-            //消息id
-            reader.TryReadBigEndian(out int msgId);
-
-            var msg = TcpHandlerFactory.GetMsg(msgId);
-            if (msg == null)
-            {
-                LOGGER.Error("消息ID:{} 找不到对应的Msg.", msgId);
-                return null;
-            }
-
-            if (msg.MsgId == msgId)
-            {
-                var span = new Span<byte>(new byte[reader.Length - 4]);
-                reader.TryCopyTo(span);
-                msg.Deserialize(span.ToArray());
-                return msg;
-            }
-            else
-            {
-                LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", msg.MsgId, msgId);
-                return null;
-            }
-        }
-
-
-        const int MSG_HEAD_LENGTH = sizeof(int) * 2;
         public async Task Dispatcher(IMessage msg)
         {
             try

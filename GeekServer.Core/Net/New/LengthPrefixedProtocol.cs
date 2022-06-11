@@ -37,7 +37,7 @@ namespace Geek.Server
             }
 
             var payload = input.Slice(reader.Position, length-4);//length已经被TryReadBigEndian读取
-            message = new NMessage(payload);
+            message = new NMessage(payload, iszip);
             message.Ziped = iszip;
 
             consumed = payload.End;

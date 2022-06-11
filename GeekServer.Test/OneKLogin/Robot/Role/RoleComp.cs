@@ -24,8 +24,6 @@ namespace Geek.Server.Test
             var login = await GetCompAgent<LoginCompAgent>();
             await login.ReqLogin();
 
-            //await Task.Delay(10000);
-
             //获取背包数据
             var bag = await GetCompAgent<BagCompAgent>();
             await bag.ReqBagInfo();

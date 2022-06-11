@@ -17,5 +17,12 @@ namespace Geek.Server.xUnit
                 outPut.WriteLine(msg);
         }
 
+
+        public static void WriteLine(object msg)
+        {
+            if (outPut != null)
+                outPut.WriteLine(msg.ToString());
+        }
+
     }
 }
