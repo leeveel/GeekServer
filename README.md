@@ -20,7 +20,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 ### 6.支持不停服更新 
 采用组件+状态的设计，状态只有属性，没有方法，组件只用方法，没有属性，并通过代理的方式全部放到热更dll中，运行时重新加载dll即可热更所有逻辑。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E7%83%AD%E6%9B%B4hotfix.md)
 ### 7.网络模块  
-网络模块采用了DotNetty，DotNetty是微软Azure团队，使用C#实现的Netty的版本，性能强劲，功能强大。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E7%BD%91%E7%BB%9CNet(tcp%26http).md)
+网络模块替换了原来的DotNetty，采用Asp.Net的默认服务器Kestrel，支持协议多（Tcp，udp,Http123,websocket，signalr等），而且性能比dotnetty高很多[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E7%BD%91%E7%BB%9CNet(tcp%26http).md)
 ### 8.持久化透明  
 采用Mongodb作为数据存储，状态的持久化全透明，框架会自动序列化/反序列（并在编译期通过[Source Generator]自动生成检测代码，高效过滤非变化的状态）让开发人员更加专注于业务逻辑，无需操心数据库。 [了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/2.Actor%26Component%26State.md)
 ### 9.Timer/Scheduler/Event  
