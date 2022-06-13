@@ -25,31 +25,14 @@ namespace Geek.Server
             return WriteAsBuffer(512);
         }
 
-        public PooledBuffer SerializeToPool()
-        {
-            return WriteAsPooledBuffer(512);
-        }
-
-        protected virtual PooledBuffer WriteAsPooledBuffer(int size)
-        {
-            var data = ArrayPool<byte>.Shared.Rent(size);
-            var offset = 0;
-            offset = Write(data, offset);
-            if (offset <= data.Length)
-            {
-                return new PooledBuffer(data, offset);
-            }
-            else
-            {
-                ArrayPool<byte>.Shared.Return(data); //归还
-                return WriteAsPooledBuffer(offset);
-            }
-        }
-
+        /// <summary>
+        /// TODO:PipeWriter.GetMemory 池化
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
         protected virtual byte[] WriteAsBuffer(int size)
         {
-            //var data = new byte[size];
-            var data = ArrayPool<byte>.Shared.Rent(size); 
+            var data = new byte[size];
             var offset = 0;
             offset = this.Write(data, offset);
             if (offset <= data.Length)
@@ -58,7 +41,6 @@ namespace Geek.Server
                 {
                     var ret = new byte[offset];
                     Array.Copy(data, 0, ret, 0, offset);
-                    ArrayPool<byte>.Shared.Return(data); //归还
                     data = ret;
                 }
                 return data;

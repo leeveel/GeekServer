@@ -31,16 +31,19 @@ namespace Geek.Server
 
         static async Task InnerRun(WorkWrapper wrapper)
         {
-            if (wrapper.TimeOut == -1)
+            try
             {
-                await wrapper.DoTask();
+                if (wrapper.TimeOut == -1)
+                {
+                    await wrapper.DoTask();
+                    return;
+                }
+                var task = wrapper.DoTask();
+                await task.WaitAsync(TimeSpan.FromSeconds(1));
             }
-            var task = wrapper.DoTask();
-            var res = await task.WaitAsyncCustom(TimeSpan.FromMilliseconds(wrapper.TimeOut));
-            if (res)
+            catch (TimeoutException)
             {
                 LOGGER.Fatal("wrapper执行超时:" + wrapper.GetTrace());
-                //强制设状态-取消该操作
                 wrapper.ForceSetResult();
             }
         }

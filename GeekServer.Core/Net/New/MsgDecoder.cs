@@ -109,11 +109,9 @@ namespace Geek.Server
 
             if (msg.MsgId == msgId)
             {
-                //var span = new Span<byte>(new byte[reader.Length - 4]);
-                //reader.TryCopyTo(span);
                 var unread = reader.UnreadSequence;
                 var unreadLen = (int)unread.Length;
-                var msgData = unread.ToPooledArray(); //获取池化的array
+                var msgData = unread.ToPooledArray(); //获取池化的array (TODO:让协议直接支持读取ReadOnlySequence，减少拷贝)
                 if (message.Ziped)
                 {
                     msgData = UnGZip(msgId, msgData, 0, unreadLen);

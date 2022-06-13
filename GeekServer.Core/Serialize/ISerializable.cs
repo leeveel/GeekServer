@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Buffers;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Geek.Server
 {
     public struct PooledBuffer
     {
         /// <summary>
-        /// 池化的buffer
+        /// 池化的buffer(因为从arraypool中rent回来的数组，通常是长于实际数据的)
         /// </summary>
         public byte[] Buffer { get; set; }
         /// <summary>
@@ -52,8 +50,6 @@ namespace Geek.Server
         int Write(byte[] buffer, int offset);
 
         byte[] Serialize();
-
-        PooledBuffer SerializeToPool();
 
         void Deserialize(byte[] data);
     }
