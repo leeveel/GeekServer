@@ -39,7 +39,7 @@ namespace Geek.Server
                     return;
                 }
                 var task = wrapper.DoTask();
-                await task.WaitAsync(TimeSpan.FromSeconds(1));
+                await task.WaitAsync(TimeSpan.FromMilliseconds(TIME_OUT));
             }
             catch (TimeoutException)
             {

@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 using System.Runtime.InteropServices;
 
 namespace Geek.Server
@@ -8,11 +9,10 @@ namespace Geek.Server
     /// </summary>
     public struct NMessage
     {
-        public int MsgId { get; set; } = 0;
 
         public bool Ziped { get; set; } = false;
 
-        public ReadOnlySequence<byte> Payload { get; }
+        public ReadOnlySequence<byte> Payload { get; } = default;
 
         public NMessage(ReadOnlySequence<byte> payload, bool isZip)
         {
@@ -22,36 +22,40 @@ namespace Geek.Server
 
         /// <summary>
         /// 对超过1K的数据进行压缩
+        /// 压缩会造成更多的拷贝和GC需要自己权衡
         /// </summary>
         public const int ZipThreshold = 1024;
 
-        public NMessage(int msgId, byte[] payload)
+        public BaseMessage Msg { get; } = null;
+
+        public byte[] Compressed { get; } = null;
+
+        private int serializeLength = 0;
+        public NMessage(BaseMessage msg)
         {
-            int len = payload.Length;
-            if (len >= ZipThreshold)
+            Msg = msg;
+            serializeLength = msg.GetSerializeLength();
+            if (serializeLength > ZipThreshold)
             {
                 Ziped = true;
-                payload = MsgDecoder.CompressGZip(payload);
-                //Console.WriteLine($"msg:{msgId} zip before:{len}, after:{payload.Length}");
+                var before = ArrayPool<byte>.Shared.Rent(serializeLength);
+                msg.Serialize(before);
+                Compressed = MsgDecoder.CompressGZip(before, serializeLength);
+                ArrayPool<byte>.Shared.Return(before);
             }
-            Payload = new ReadOnlySequence<byte>(payload);
-            MsgId = msgId;
         }
 
-        public static NMessage Create(int msgId, byte[] payload)
+        public int GetSerializeLength()
         {
-            return new NMessage(msgId, payload);
+            if (Ziped)
+                return Compressed.Length;
+            else
+                return serializeLength;
         }
 
-        public void Dispose()
+        public void Serialize(Span<byte> span, int offset=0)
         {
-            foreach (var item in Payload)
-            {
-                if (MemoryMarshal.TryGetArray(item, out var segment))
-                {
-                    ArrayPool<byte>.Shared.Return(segment.Array);
-                }
-            }
+            Msg.Serialize(span, offset);
         }
 
     }

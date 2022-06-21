@@ -1,16 +1,16 @@
-﻿namespace Geek.Server
-{
-    public interface IMessage
-    {
-        /// <summary>
-        /// 每次请求的UniqueId
-        /// </summary>
-        int UniId { get; set; }
+﻿//namespace Geek.Server
+//{
+//    public interface IMessage
+//    {
+//        /// <summary>
+//        /// 每次请求的UniqueId
+//        /// </summary>
+//        int UniId { get; set; }
 
-        int MsgId { get; }
+//        int MsgId { get; }
 
-        byte[] Serialize();
+//        byte[] Serialize();
 
-        void Deserialize(byte[] data);
-    }
-}
+//        void Deserialize(byte[] data);
+//    }
+//}

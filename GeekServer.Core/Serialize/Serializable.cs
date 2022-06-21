@@ -20,38 +20,43 @@ namespace Geek.Server
             return offset;
         }
 
-        public byte[] Serialize()
+        public virtual int Read(Span<byte> buffer, int offset)
         {
-            return WriteAsBuffer(512);
+            return offset;
         }
 
-        /// <summary>
-        /// TODO:PipeWriter.GetMemory 池化
-        /// </summary>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        protected virtual byte[] WriteAsBuffer(int size)
+        public virtual int Write(Span<byte> buffer, int offset)
         {
+            return offset;
+        }
+
+        public virtual int GetSerializeLength()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Serialize(Span<byte> span, int offset = 0)
+        {
+            Write(span, offset);
+        }
+
+        public byte[] Serialize()
+        {
+            int size = GetSerializeLength();
             var data = new byte[size];
-            var offset = 0;
-            offset = this.Write(data, offset);
-            if (offset <= data.Length)
-            {
-                if (offset < data.Length)
-                {
-                    var ret = new byte[offset];
-                    Array.Copy(data, 0, ret, 0, offset);
-                    data = ret;
-                }
-                return data;
-            }
-            else
-            {
-                return WriteAsBuffer(offset);
-            }
+            int offset = 0;
+            offset = Write(data, offset);
+            if (offset != data.Length)
+                throw new Exception($"{GetType().FullName}GetSerializeLength 计算错误!");
+            return data;
         }
 
         public void Deserialize(byte[] data)
+        {
+            this.Read(data, 0);
+        }
+
+        public void Deserialize(Span<byte> data)
         {
             this.Read(data, 0);
         }
@@ -84,7 +89,49 @@ namespace Geek.Server
             return target;
         }
 
+        protected virtual T ReadCustom<T>(T target, bool optional, Span<byte> buffer, ref int offset) where T : Serializable
+        {
+            if (optional)
+            {
+                var hasVal = XBuffer.ReadBool(buffer, ref offset);
+                if (hasVal)
+                {
+                    var sid = XBuffer.ReadInt(buffer, ref offset);
+                    target = Create<T>(sid);
+                    offset = target.Read(buffer, offset);
+                }
+            }
+            else
+            {
+                var sid = XBuffer.ReadInt(buffer, ref offset);
+                target = Create<T>(sid);
+                offset = target.Read(buffer, offset);
+            }
+            return target;
+        }
+
+
         protected virtual int WriteCustom<T>(T target, bool optional, byte[] buffer, ref int offset) where T : Serializable
+        {
+            if (optional)
+            {
+                bool hasVal = target != default;
+                XBuffer.WriteBool(hasVal, buffer, ref offset);
+                if (hasVal)
+                {
+                    XBuffer.WriteInt(target.Sid, buffer, ref offset);
+                    offset = target.Write(buffer, offset);
+                }
+            }
+            else
+            {
+                XBuffer.WriteInt(target.Sid, buffer, ref offset);
+                offset = target.Write(buffer, offset);
+            }
+            return offset;
+        }
+
+        protected virtual int WriteCustom<T>(T target, bool optional, Span<byte> buffer, ref int offset) where T : Serializable
         {
             if (optional)
             {

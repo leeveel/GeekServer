@@ -59,7 +59,7 @@ namespace Geek.Server
             }
         }
 
-        public async Task Dispatcher(IMessage msg)
+        public async Task Dispatcher(BaseMessage msg)
         {
             try
             {

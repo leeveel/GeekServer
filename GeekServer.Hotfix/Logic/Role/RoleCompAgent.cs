@@ -101,7 +101,7 @@ namespace Geek.Server.Logic.Role
 
         /// <summary> 通知客户端消息 </summary>
         [MethodOption.NotAwait]
-        public virtual async Task NotifyClient(IMessage msg)
+        public virtual async Task NotifyClient(BaseMessage msg)
         {
             if (await IsOnline())
             {

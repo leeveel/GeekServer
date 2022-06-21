@@ -32,7 +32,7 @@ namespace Geek.Server
         /// <summary>
         /// 消息体
         /// </summary>
-        public IMessage Msg { get; set; }
+        public BaseMessage Msg { get; set; }
 
         public abstract Task ActionAsync();
 
@@ -43,10 +43,10 @@ namespace Geek.Server
             _ = Channel.WriteAsync(msg);
         }
 
-        protected virtual void WriteAndFlush(int msgId, byte[] data)
+        protected virtual void WriteAndFlush(BaseMessage msg)
         {
-            if (msgId > 0 && data != null)
-                WriteAndFlush(new NMessage(msgId, data));
+            if (msg.MsgId > 0 && msg != null)
+                WriteAndFlush(new NMessage(msg));
         }
 
         bool IsDisconnectChannel(NetChannel ctx)

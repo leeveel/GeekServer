@@ -23,14 +23,13 @@ namespace Geek.Server
             try
             {
                 if (before == null)
-                    return null;
+                    return before;
                 using (MemoryStream ms = new MemoryStream(before, offset, msgSize))
                 {
                     using (ZipInputStream zipStream = new ZipInputStream(ms))
                     {
                         zipStream.IsStreamOwner = true;
                         var file = zipStream.GetNextEntry();
-                        //var after = NetBufferPool.Alloc((int)file.Size);
                         var after = ArrayPool<byte>.Shared.Rent((int)file.Size);
                         zipStream.Read(after, 0, (int)file.Size);
                         //Console.WriteLine($"unzip:{file.Size}");
@@ -41,21 +40,23 @@ namespace Geek.Server
             catch (Exception e)
             {
                 LOGGER.Error($"消息解压失败>{msgId}\n{e.ToString()}");
+                throw;
             }
-            return null;
         }
 
 
-        public static byte[] CompressGZip(byte[] rawData)
+        public static byte[] CompressGZip(byte[] buffer, int realLength=0)
         {
             try
             {
+                if (realLength <= 0)
+                    realLength = buffer.Length;
                 using MemoryStream ms = new MemoryStream();
                 using ZipOutputStream compressedzipStream = new ZipOutputStream(ms);
                 var entry = new ZipEntry("m");
-                entry.Size = rawData.Length;
+                entry.Size = realLength;
                 compressedzipStream.PutNextEntry(entry);
-                compressedzipStream.Write(rawData, 0, rawData.Length);
+                compressedzipStream.Write(buffer, 0, realLength);
                 compressedzipStream.CloseEntry();
                 compressedzipStream.Close();
                 return ms.ToArray();
@@ -63,33 +64,12 @@ namespace Geek.Server
             catch (Exception ex)
             {
                 LOGGER.Error("数据压缩失败{}", ex.Message);
-                return rawData;
-            }
-        }
-
-        public static byte[] CompressGZip(PooledBuffer rawData)
-        {
-            try
-            {
-                using MemoryStream ms = new MemoryStream();
-                using ZipOutputStream compressedzipStream = new ZipOutputStream(ms);
-                var entry = new ZipEntry("m");
-                entry.Size = rawData.RealLength;
-                compressedzipStream.PutNextEntry(entry);
-                compressedzipStream.Write(rawData.Buffer, 0, rawData.RealLength);
-                compressedzipStream.CloseEntry();
-                compressedzipStream.Close();
-                return ms.ToArray();
-            }
-            catch (Exception ex)
-            {
-                LOGGER.Error("数据压缩失败{}", ex.Message);
-                return rawData.NonRedundantBuffer();
+                return buffer;
             }
         }
 
 
-        public static IMessage ClientDecode(NMessage message)
+        public static BaseMessage ClientDecode(NMessage message)
         {
             var reader = new SequenceReader<byte>(message.Payload);
 
@@ -114,9 +94,11 @@ namespace Geek.Server
                 var msgData = unread.ToPooledArray(); //获取池化的array (TODO:让协议直接支持读取ReadOnlySequence，减少拷贝)
                 if (message.Ziped)
                 {
+                    var temp = msgData;
                     msgData = UnGZip(msgId, msgData, 0, unreadLen);
+                    ArrayPool<byte>.Shared.Return(temp); //归还压缩之前的数据
                 }
-                msg.Deserialize(msgData);
+                msg.Deserialize(msgData.AsSpan());
                 ArrayPool<byte>.Shared.Return(msgData); //归还
                 return msg;
             }
@@ -127,11 +109,10 @@ namespace Geek.Server
             }
         }
 
-        public static IMessage Decode(ConnectionContext context, NMessage msg)
+        public static BaseMessage Decode(ConnectionContext context, NMessage msg)
         {
-
             var reader = new SequenceReader<byte>(msg.Payload);
-
+            
             int msgLen = (int)msg.Payload.Length;  //4
             if (!CheckMsgLen(msgLen))
             {
@@ -155,14 +136,16 @@ namespace Geek.Server
 
             reader.TryReadBigEndian(out int msgId);  //4
 
-            //需要优化，让协议支持直接从SequenceReader读取, 避免额外分配
+            //需要优化，让协议支持直接从SequenceReader读取, 避免额外分配/拷贝
             var unread = reader.UnreadSequence;
             var unreadLen = (int)unread.Length;
             var msgData = unread.ToPooledArray(); //获取池化的array
             //处理压缩
             if (msg.Ziped)
             {
+                var temp = msgData;
                 msgData = UnGZip(msgId, msgData, 0, unreadLen);
+                ArrayPool<byte>.Shared.Return(temp); //归还压缩之前的数据
             }
 
             var protoMsg = TcpHandlerFactory.GetMsg(msgId);
@@ -175,7 +158,7 @@ namespace Geek.Server
             {
                 if (protoMsg.MsgId == msgId)
                 {
-                    protoMsg.Deserialize(msgData);
+                    protoMsg.Deserialize(msgData.AsSpan());
                     ArrayPool<byte>.Shared.Return(msgData); //归还
                 }
                 else

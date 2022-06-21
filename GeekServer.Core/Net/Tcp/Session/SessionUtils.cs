@@ -9,19 +9,19 @@ namespace Geek.Server
 			ctx.WriteAsync(msg);
 		}
 
-		public static void WriteAndFlush(NetChannel ctx, IMessage msg)
+		public static void WriteAndFlush(NetChannel ctx, BaseMessage msg)
 		{
 			if (IsDisconnectChannel(ctx))
 				return;
-			NMessage smsg = NMessage.Create(msg.MsgId, msg.Serialize());
+			NMessage smsg = new NMessage(msg);
 			ctx.WriteAsync(smsg);
 		}
 
-		public static void WriteAndFlush(NetChannel channel, int msgId, byte[] data)
-		{
-			if (msgId > 0 && data != null)
-				WriteAndFlush(channel, new NMessage(msgId, data));
-		}
+		//public static void WriteAndFlush(NetChannel channel, int msgId, byte[] data)
+		//{
+		//	if (msgId > 0 && data != null)
+		//		WriteAndFlush(channel, new NMessage(msgId, data));
+		//}
 
 		public static bool IsDisconnectChannel(NetChannel channel)
 		{

@@ -12,9 +12,9 @@ namespace Geek.Server
         static readonly Dictionary<int, Type> msgMap = new Dictionary<int, Type>();
         static readonly Dictionary<int, Type> handlerMap = new Dictionary<int, Type>();
 
-        static Func<int, IMessage> msgGetter;
+        static Func<int, BaseMessage> msgGetter;
         static Func<int, BaseTcpHandler> handlerGetter;
-        public static void SetHandlerGetter(Func<int, IMessage> msgGetter, Func<int, BaseTcpHandler> handlerGetter)
+        public static void SetHandlerGetter(Func<int, BaseMessage> msgGetter, Func<int, BaseTcpHandler> handlerGetter)
         {
             TcpHandlerFactory.msgGetter = msgGetter;
             TcpHandlerFactory.handlerGetter = handlerGetter;
@@ -82,7 +82,7 @@ namespace Geek.Server
         }
 
         /// <summary> 获取消息</summary>
-        public static IMessage GetMsg(int msgId)
+        public static BaseMessage GetMsg(int msgId)
         {
             if (msgGetter != null)
             {
@@ -98,7 +98,7 @@ namespace Geek.Server
             }
 
             Type msgType = msgMap[msgId];
-            var msg = Activator.CreateInstance(msgType) as IMessage;
+            var msg = Activator.CreateInstance(msgType) as BaseMessage;
             if (msg == null)
                 LOGGER.Error("创建Msg失败:{}", msgType.ToString());
             return msg;

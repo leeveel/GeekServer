@@ -27,7 +27,7 @@ namespace Geek.Server
             if (msg.MsgId > 0)
             {
                 msg.msg.UniId = Msg.UniId;  //写入req中的UniId
-                WriteAndFlush(msg.MsgId, msg.ByteArr);
+                WriteAndFlush(msg.msg);
             }
             NotifyErrorCode(msg.Info);
         }

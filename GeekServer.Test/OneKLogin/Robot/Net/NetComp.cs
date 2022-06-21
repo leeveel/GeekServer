@@ -25,10 +25,11 @@ namespace Geek.Server.Test
             Comp.Channel.SetSessionId(session.Id);
         }
 
-        public Task<bool> SendMsg(IMessage msg)
+        public Task<bool> SendMsg(BaseMessage msg)
         {
             msg.UniId = Comp.UniId++;
-            NMessage nmsg = NMessage.Create(msg.MsgId, msg.Serialize());
+            //NMessage nmsg = NMessage.Create(msg.MsgId, msg.Serialize());
+            var nmsg = new NMessage(msg);
             //Comp.channel.WriteAndFlushAsync(nmsg);
             Comp.Channel.WriteAsync(nmsg);
             return Comp.Waiter.StartWait(msg.UniId);

@@ -45,19 +45,18 @@ namespace Geek.Server
             return true;
         }
 
-        public void WriteMessage(NMessage message, IBufferWriter<byte> output)
+        public void WriteMessage(NMessage nmsg, IBufferWriter<byte> output)
         {
-            int len = (int)message.Payload.Length;
-            len += 8;
-            var header = output.GetSpan(8);                                         
+            int len = 8 + nmsg.GetSerializeLength();
+            var span = output.GetSpan(len);                                         
             int offset = 0;                                      //负号，用于标记数据包是否压缩
-            XBuffer.WriteInt(header, message.Ziped ? -len : len, ref offset);
-            XBuffer.WriteInt(header, message.MsgId, ref offset);
-            output.Advance(8);
-            foreach (var memory in message.Payload)
-            {
-                output.Write(memory.Span);
-            }
+            XBuffer.WriteInt(nmsg.Ziped ? -len : len, span, ref offset);
+            XBuffer.WriteInt(nmsg.Msg.MsgId, span, ref offset);
+            if (nmsg.Ziped)
+                XBuffer.WriteBytesWithoutLength(nmsg.Compressed, span, ref offset);
+            else
+                nmsg.Serialize(span, 8);
+            output.Advance(len);
         }
     }
 }

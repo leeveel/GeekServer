@@ -80,10 +80,10 @@ namespace Geek.Server
 
         public ErrInfo Info { get; private set; }
 
-        public IMessage msg { get; private set; }
+        public BaseMessage msg { get; private set; }
 
 
-        public static MSG Create(ErrCode errCode, string desc, IMessage msg = null)
+        public static MSG Create(ErrCode errCode, string desc, BaseMessage msg = null)
         {
             var res = new MSG();
             res.Info = new ErrInfo(errCode, desc);
@@ -91,7 +91,7 @@ namespace Geek.Server
             return res;
         }
 
-        public static MSG Create(ErrCode errCode, int uniId, string desc, IMessage msg = null)
+        public static MSG Create(ErrCode errCode, int uniId, string desc, BaseMessage msg = null)
         {
             var res = new MSG();
             res.Info = new ErrInfo(errCode, desc);
@@ -100,7 +100,7 @@ namespace Geek.Server
             return res;
         }
 
-        public static MSG Create(ErrInfo errInfo, int uniId = 0, IMessage msg = null)
+        public static MSG Create(ErrInfo errInfo, int uniId = 0, BaseMessage msg = null)
         {
             var res = new MSG();
             res.UniId = uniId;
@@ -109,7 +109,7 @@ namespace Geek.Server
             return res;
         }
 
-        public static MSG Create(ErrCode errCode, IMessage msg = null, int uniId = 0)
+        public static MSG Create(ErrCode errCode, BaseMessage msg = null, int uniId = 0)
         {
             var res = new MSG();
             res.UniId = uniId;
@@ -118,7 +118,7 @@ namespace Geek.Server
             return res;
         }
 
-        public static MSG Create(IMessage msg = null, int uniId = 0)
+        public static MSG Create(BaseMessage msg = null, int uniId = 0)
         {
             var res = new MSG();
             res.UniId = uniId;

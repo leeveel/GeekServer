@@ -30,7 +30,7 @@ namespace Geek.Server
                 ErrCode = (int)errInfo.Code,
                 Desc = errInfo.Desc
             };
-            NMessage msg = new NMessage(ResErrorCode.SID, res.Serialize());
+            NMessage msg = new NMessage(res);
             WriteAndFlush(msg);
         }
 

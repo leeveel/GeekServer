@@ -28,7 +28,7 @@ namespace Geek.Server
             }
         }
 
-        public static IMessage GetMsg(int msgId)
+        public static BaseMessage GetMsg(int msgId)
         {
             if (!MsgDic.ContainsKey(msgId))
             {
@@ -36,7 +36,7 @@ namespace Geek.Server
                 return null;
             }
             Type msgType = MsgDic[msgId];
-            var msg = Activator.CreateInstance(msgType) as IMessage;
+            var msg = Activator.CreateInstance(msgType) as BaseMessage;
             if (msg == null)
                 LOGGER.Error($"创建msg失败 msgId:{msgId} msgTy[e:{msgType}");
             return msg;

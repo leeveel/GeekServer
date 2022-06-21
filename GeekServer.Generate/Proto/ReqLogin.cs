@@ -4,14 +4,16 @@
 //兼容限制：字段只能添加，添加后不能删除，添加字段只能添加到最后,添加消息类型只能添加到最后
 //兼容限制：不能修改字段类型（如从bool改为long）
 //兼容限制：消息类型(含msdId)不能作为其他消息的成员类型
-
+using System;
+using System.Text;
 using Geek.Server;
 using System.Collections.Generic;
 
 ///<summary></summary>
 namespace Geek.Server.Proto
 {
-	
+
+
     public class ReqLogin : BaseMessage
 	{
 		static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
@@ -37,7 +39,7 @@ namespace Geek.Server.Proto
         }
 
 		///<summary>反序列化，读取数据</summary>
-        public override int Read(byte[] _buffer_, int _offset_)
+        public override int Read(Span<byte> _buffer_, int _offset_)
 		{
 			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
 			_offset_ = base.Read(_buffer_, _offset_);
@@ -113,7 +115,7 @@ namespace Geek.Server.Proto
 
 		
 		///<summary>序列化，写入数据</summary>
-        public override int Write(byte[] _buffer_, int _offset_)
+        public override int Write(Span<byte> _buffer_, int _offset_)
         {	
 			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
 			_offset_ = base.Write(_buffer_, _offset_);
@@ -164,6 +166,31 @@ namespace Geek.Server.Proto
 
 			
 			return _offset_;
+		}
+
+
+
+		/*********************************************************/
+		public  override int GetSerializeLength()
+		{
+			int len = XBuffer.IntSize + XBuffer.ByteSize; //UniId + _fieldNum_
+	
+			
+					len += XBuffer.ShortSize + (string.IsNullOrEmpty(UserName)?0:Encoding.UTF8.GetByteCount(UserName)); //UserName
+
+			
+					len += XBuffer.ShortSize + (string.IsNullOrEmpty(Platform)?0:Encoding.UTF8.GetByteCount(Platform)); //Platform
+
+			
+					len += XBuffer.IntSize;	//SdkType
+
+			
+					len += XBuffer.ShortSize + (string.IsNullOrEmpty(SdkToken)?0:Encoding.UTF8.GetByteCount(SdkToken)); //SdkToken
+
+			
+					len += XBuffer.ShortSize + (string.IsNullOrEmpty(Device)?0:Encoding.UTF8.GetByteCount(Device)); //Device
+
+			return len;
 		}
 	}
 }
