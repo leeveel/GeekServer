@@ -4,11 +4,10 @@
 //兼容限制：字段只能添加，添加后不能删除，添加字段只能添加到最后,添加消息类型只能添加到最后
 //兼容限制：不能修改字段类型（如从bool改为long）
 //兼容限制：消息类型(含msdId)不能作为其他消息的成员类型
-
+using System;
+using System.Text;
 using Geek.Server;
 using System.Collections.Generic;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Options;
 {{~ for use in usingspaces ~}}
 using {{use}};
 {{~ end ~}}
@@ -37,7 +36,18 @@ namespace {{space}}
 				"float":"XBuffer.WriteFloat(%s, _buffer_, ref _offset_)",
 				"double":"XBuffer.WriteDouble(%s, _buffer_, ref _offset_)",
 				"byte[]":"XBuffer.WriteBytes(%s, _buffer_, ref _offset_)"} ~}}
-	
+
+	{{~ basicTypeMap = {"int":"len += XBuffer.IntSize",
+				"long":"len += XBuffer.LongSize",
+				"bool":"len += XBuffer.BoolSize",
+				"byte":"len += XBuffer.ByteSize",
+				"sbyte":"len += XBuffer.SbyteSize",
+				"string":"len += XBuffer.ShortSize + (string.IsNullOrEmpty(%s)?0:Encoding.UTF8.GetByteCount(%s))",
+				"short":"len += XBuffer.ShortSize",
+				"float":"len += XBuffer.FloatSize",
+				"double":"len += XBuffer.DoubleSize",
+				"byte[]":"if(%s != null && %s.Length > 0){len += %s.Length + XBuffer.IntSize;}"} ~}}
+
 	{{~ if isstate ~}}
 	[IsState]
 	{{~ end ~}}
@@ -67,7 +77,6 @@ namespace {{space}}
 
 		{{~ if field.nestmodel == 0 ~}}   {{~#无嵌套模式~}}
 		private {{mapname}}<{{field.clsname1}}, {{field.clsname2}}> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{field.clsname2}}>();
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{mapname}}<{{field.clsname1}}, {{field.clsname2}}> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
@@ -75,7 +84,6 @@ namespace {{space}}
 		}
 		{{~ else if field.nestmodel == 1 ~}}   {{~#嵌套list模式~}}
 		private {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>>();
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{mapname}}<{{field.clsname1}}, {{listname}}<{{field.clsname3}}>> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
@@ -83,7 +91,6 @@ namespace {{space}}
 		}
 		{{~ else if field.nestmodel == 2 ~}}   {{~#嵌套set模式~}}
 		private {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>>();
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{mapname}}<{{field.clsname1}}, {{setname}}<{{field.clsname3}}>> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
@@ -91,7 +98,6 @@ namespace {{space}}
 		}
 		{{~ else if field.nestmodel == 3 ~}}   {{~#嵌套map模式~}}
 		private {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>> _{{field.name}}_ = new {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>>();
-		[BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
 		public {{mapname}}<{{field.clsname1}}, {{mapname}}<{{field.clsname3}}, {{field.clsname4}}>> {{field.name}}
 		{
 			get{ return _{{field.name}}_; }
@@ -105,6 +111,8 @@ namespace {{space}}
 		{ 
 			get{ return _{{field.name}}_; }
 			set{ _{{field.name}}_= value; _stateChanged=true;}
+
+			
 		}
 		{{~ end ~}}
 		{{~ end ~}}
@@ -189,7 +197,7 @@ namespace {{space}}
         }
 
 		///<summary>反序列化，读取数据</summary>
-        public override int Read(byte[] _buffer_, int _offset_)
+        public override int Read(Span<byte> _buffer_, int _offset_)
 		{
 			{{~ if msgid != 0 ~}}
 			UniId = XBuffer.ReadInt(_buffer_, ref _offset_);
@@ -462,7 +470,7 @@ namespace {{space}}
 
 		
 		///<summary>序列化，写入数据</summary>
-        public override int Write(byte[] _buffer_, int _offset_)
+        public override int Write(Span<byte> _buffer_, int _offset_)
         {	
 			{{~ if msgid != 0 ~}}
 			XBuffer.WriteInt(UniId, _buffer_, ref _offset_);
@@ -713,6 +721,197 @@ namespace {{space}}
 			XBuffer.WriteInt(_offset_ - _startOffset_, _buffer_, ref _startOffset_);
 			{{~ end ~}}
 			return _offset_;
+		}
+
+
+
+		/*********************************************************/
+		public  override int GetSerializeLength()
+		{
+			int len = XBuffer.IntSize + XBuffer.ByteSize; //UniId + _fieldNum_
+	
+			{{~ for field in fields ~}}
+			{{~ if field.type == "list" || field.type == "set" ~}} 
+			len += XBuffer.IntSize;//{{field.name}}.Count
+			{{~ if basicTypeMap[field.clsname1]~}}
+			{{~ if field.clsname1 == "string"~}}
+			foreach(string item in  {{field.name}})  
+			{
+				{{basicTypeMap[field.clsname1] | string.replace "%s" "item"}};
+			}
+			{{~ else if field.clsname1 == "byte[]"~}}
+			foreach(byte[] item in  {{field.name}})
+			{
+				{{basicTypeMap[field.clsname1] | string.replace "%s" "item"}};
+			}
+			{{~ else if basicTypeMap[field.clsname1] ~}} 
+				{{basicTypeMap[field.clsname1]}} * {{field.name}}.Count;	
+			{{~ else~}}
+			foreach(var item in  {{field.name}})
+			{
+				if({{field.name}} != null) len += item.GetSerializeLength();
+			}
+			{{~ end ~}}
+
+			{{~ else ~}} 
+			foreach(var item in {{field.name}})
+			{
+				if({{field.name}} != null) len += item.GetSerializeLength();
+			}
+		   {{~ end ~}}
+			{{~ else if field.type == "map"~}}
+			len += XBuffer.IntSize;//{{field.name}}.Count
+			{{~ if field.nestmodel == 0 ~}} {{~#无嵌套模式~}} 
+			{{~ if field.clsname1 == "string" ~}}
+			foreach(string item in {{field.name}}.Keys) {{basicTypeMap[field.clsname1] | string.replace "%s" "item"}};
+			{{~ if basicTypeMap[field.clsname2]~}}
+			{{~ if field.clsname2 == "string" || field.clsname2 == "byte[]"~}}
+			foreach(var item in  {{field.name}}.Values) {{basicTypeMap[field.clsname1] | string.replace "%s" "item"}};
+		
+			{{~ else ~}} 
+				{{basicTypeMap[field.clsname2]}} * {{field.name}}.Count;
+			{{~ end ~}}
+			{{~ else ~}} 
+			foreach(var item in {{field.name}}.Values)
+			{
+				if({{field.name}} != null) len += item.GetSerializeLength(); 
+			
+			}
+			{{~ end ~}}
+			{{~ else if basicTypeMap[field.clsname1]~}}
+			{{basicTypeMap[field.clsname1]}} * {{field.name}}.Count; 
+
+
+
+			{{~ if basicTypeMap[field.clsname2]~}}
+			{{~ if field.clsname2 == "string" || field.clsname2 == "byte[]" ~}}
+			foreach(var item in  {{field.name}}.Values)  {{basicTypeMap[field.clsname2] | string.replace "%s" "item"}};
+			{{~ else ~}} 
+			{{basicTypeMap[field.clsname2]}} * {{field.name}}.Count;	
+			{{~ end ~}}
+			{{~ else ~}} 
+			foreach(var item in {{field.name}}.Values)
+			{
+				if({{field.name}} != null) len += item.GetSerializeLength();
+			}
+
+
+
+			{{~ end ~}}
+			{{~ end ~}}
+			{{~ else if field.nestmodel == 1 || field.nestmodel == 2~}} {{~#嵌套list和set模式~}}  
+			len += XBuffer.IntSize;//{{field.name}}.Value.Count
+			len += {{field.name}}.Count * XBuffer.IntSize;//{{field.name}}.Value.Count
+			{{~ if field.clsname1 == "string" ~}}
+				foreach(string item in {{field.name}}.Keys) {{basicTypeMap[field.clsname1] | string.replace "%s" "item"}};
+				{{~ if field.clsname3 == "string" || field.clsname3 == "byte[]"~}}
+				foreach(var item in  {{field.name}}.Values){{basicTypeMap[field.clsname3] | string.replace "%s" "item"}};
+				{{~ else if basicTypeMap[field.clsname3] ~}} 
+					{{basicTypeMap[field.clsname3]}} * {{field.name}}.Values.Count;	
+				{{~ else ~}} 
+				foreach(var map in {{field.name}}.Values)
+				{
+					foreach(var map_value_list in map)
+					{
+						if({{field.name}} != null) len += map_value_list.GetSerializeLength();
+					}
+				}
+				{{~ end ~}}
+
+		   {{~ else ~}} 
+				{{basicTypeMap[field.clsname1]}} * {{field.name}}.Count;
+					
+				{{~ if field.clsname3 == "string" || field.clsname3 == "byte[]"~}}
+					foreach(var item in  {{field.name}}.Values)	
+						{{basicTypeMap[field.clsname3] | string.replace "%s" "item"}};
+				{{~ else if basicTypeMap[field.clsname3] ~}} 
+					{{basicTypeMap[field.clsname3]}} * {{field.name}}.Values.Count;	
+				{{~ else ~}} 
+				foreach(var map in {{field.name}}.Values)
+				{
+					foreach(var map_value_list in map)
+					{
+						if({{field.name}} != null) len += map_value_list.GetSerializeLength();
+					}
+				}
+				{{~ end ~}}
+			{{~ end ~}}
+		
+			{{~ else if field.nestmodel == 3 ~}}   {{~#嵌套map模式~}}
+			  len += {{field.name}}.Count * XBuffer.IntSize;//{{field.name}}.Value.Count
+			  {{~ if field.clsname1 == "string" ~}}
+				foreach(string item in {{field.name}}.Keys) {{basicTypeMap[field.clsname1] | string.replace "%s" "item"}};
+				foreach(var map in  {{field.name}}.Values)
+				{
+					foreach(var map_key in map.Keys)
+					{
+						{{~ if field.clsname3 == "string" ~}} 
+							{{basicTypeMap[field.clsname3] | string.replace "%s" " map_key"}};
+						{{~ else ~}} 
+							{{basicTypeMap[field.clsname4]}};
+						{{~ end ~}}
+					}
+				
+					foreach(var map_value in map.Values)
+					{
+						{{~ if field.clsname4 == "string" || field.clsname4 == "byte[]"~}}	
+							{{basicTypeMap[field.clsname4] | string.replace "%s" "map_value"}};
+						{{~ else if basicTypeMap[field.clsname4] ~}} 
+							{{basicTypeMap[field.clsname4] }};
+						{{~ else ~}} 	
+								if(map_value != null) len += map_value.GetSerializeLength();
+						{{~ end ~}}
+					}
+				}
+		
+			{{~ else ~}} 
+				//{{field.name}}
+				{{basicTypeMap[field.clsname1]}} *  {{field.name}}.Count;		
+				foreach(var map in  {{field.name}}.Values)
+				{
+					foreach(var map_key in map.Keys)
+					{
+						{{~ if field.clsname3 == "string" ~}} 
+							{{basicTypeMap[field.clsname3] | string.replace "%s" "map_key"}};
+						{{~ else ~}} 
+							{{basicTypeMap[field.clsname3] }} ;
+						{{~ end ~}}
+					}
+				
+					foreach(var map_value in map.Values)
+					{
+						{{~ if field.clsname4 == "string" || field.clsname4 == "byte[]"~}}	
+							{{basicTypeMap[field.clsname4] | string.replace "%s" "map_value"}};
+						{{~ else if basicTypeMap[field.clsname4] ~}} 
+							{{basicTypeMap[field.clsname4] }};
+						{{~ else ~}} 	
+								if(map_value  != null) len += map_value.GetSerializeLength();
+						{{~ end ~}}
+					}
+				}
+		
+	   		{{~ end ~}}
+			{{~ end ~}}
+			{{~ else ~}}
+			{{~ if basicTypeMap[field.clsname1]~}}
+			
+				{{~ if field.clsname1 == "string" ~}}
+					len += XBuffer.ShortSize + (string.IsNullOrEmpty({{field.name}})?0:Encoding.UTF8.GetByteCount({{field.name}})); //{{field.name}}
+				{{~ else if field.clsname1 == "byte[]"~}}
+					len +=  XBuffer.IntSize + ({{field.name}}!=null?{{field.name}}.Length:0); //{{field.name}}
+				{{~ else ~}} 
+					{{basicTypeMap[field.clsname1]}};	//{{field.name}}
+				{{~ end ~}}
+			{{~ else ~}} 
+				if({{field.name}} != null) 
+				{
+					len += {{field.name}}.GetSerializeLength(); //{{field.name}}
+				}
+			{{~ end ~}}
+
+			{{~ end ~}}
+			{{~ end ~}}
+			return len;
 		}
 	}
 }
