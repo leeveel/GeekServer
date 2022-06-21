@@ -86,6 +86,7 @@
     <Compile Include="Assets\Scripts\Generate\Proto\ReqBagInfo.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\ReqLogin.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\ReqSellItem.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\ReqTest.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\ReqUseItem.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\ResBagInfo.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\ResErrorCode.cs" />
@@ -93,6 +94,10 @@
     <Compile Include="Assets\Scripts\Generate\Proto\ResLevelUp.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\ResLogin.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\SClassFactory.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Test1.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Test2.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Test3.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Test4.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\UserInfo.cs" />
     <Compile Include="Assets\Scripts\Logic\DemoService.cs" />
     <Compile Include="Assets\Scripts\Logic\GameMain.cs" />
