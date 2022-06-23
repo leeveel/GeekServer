@@ -1,8 +1,6 @@
 
-__QQ交流群 : 228688193__  
-
 # GeekServer介绍：
-GeekServer是一个开源的[分区分服](https://mp.weixin.qq.com/s?__biz=MzI3MTQ1NzU2NA==&mid=2247483884&idx=1&sn=3547c769a300f1d82cc04e9b1852c6d5&chksm=eac0cd9fddb7448997e38a74e2d26bde259cd2127583e31bc488511bc1fdcd9f35caff27d4a3&scene=21#wechat_redirect)的游戏服务器框架，采用C# .Netcore开发，开发效率高，性能强，跨平台，并内置不停服热更新机制，支持http tcp。可以满足绝大部分游戏类型的需求，特别是和Unity3D协同开发更佳。  [分布式分支火热进行中。。。](https://github.com/leeveel/GeekServer/tree/distributed)  
+GeekServer是一个开源的[分区分服](https://mp.weixin.qq.com/s?__biz=MzI3MTQ1NzU2NA==&mid=2247483884&idx=1&sn=3547c769a300f1d82cc04e9b1852c6d5&chksm=eac0cd9fddb7448997e38a74e2d26bde259cd2127583e31bc488511bc1fdcd9f35caff27d4a3&scene=21#wechat_redirect)的游戏服务器框架，采用C# .Netcore开发，开发效率高，性能强，跨平台，并内置不停服热更新机制。可以满足绝大部分游戏类型的需求，特别是和Unity3D协同开发更佳。    
 __设计理念:大道至简，以简化繁__
 
 # GeekServer功能：
@@ -33,7 +31,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 [GeekConfig](https://github.com/leeveel/GeekConfig)是一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用   
 
 # 运行
-1. 安装[.NetCore3.1](https://dotnet.microsoft.com/download/dotnet/3.1)
+1. 安装[.NetCore6.0](https://dotnet.microsoft.com/download/dotnet/6.0),**vs2022建议大于17.2.2**(低版本Source Generator有可能工作不正常)
 2. 安装[mongodb4.x](https://www.mongodb.com/try/download/community)
 3. 打开git clone本项目https://github.com/leeveel/GeekServer.git
 4. 运行Tools/ExcelGen/ExcelConverter.exe 点击[服务器-ALL]导出配置表
