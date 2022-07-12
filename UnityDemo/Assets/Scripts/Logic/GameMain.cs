@@ -9,17 +9,23 @@ namespace Logic
     {
         async void Start()
         {
+            GameClient.Singleton.Init();
             DemoService.Singleton.RegisterEventListener();
             await ConnectServer();
             await Login();
-            await ReqBagInfo();
+
+            for (int i = 0; i < 1; i++)
+            {
+                await ReqBagInfo();
+                await Task.Delay(1000);
+            }
         }
 
         private async Task ConnectServer()
         {
             //这里填写你的本机的内网ip地址,不要使用127.0.0.1（有可能由于hosts设置连不上）
-            MessageHandle.GetInstance().BeginConnect("192.168.0.163", 10000);
-            await MsgWaiter.StartWait(MessageHandle.ConnectSucceedEvt);
+            _ = GameClient.Singleton.Connect("192.168.0.163", 10000);
+            await MsgWaiter.StartWait(GameClient.ConnectEvt);
         }
 
         private Task Login()
@@ -45,9 +51,12 @@ namespace Logic
             return DemoService.Singleton.SendMsg(req);
         }
 
-        void Update()
+
+
+        private void OnApplicationQuit()
         {
-            MessageHandle.GetInstance().Update(GED.NED);
+            Debug.Log("OnApplicationQuit");
+            GameClient.Singleton.Close();
         }
 
     }

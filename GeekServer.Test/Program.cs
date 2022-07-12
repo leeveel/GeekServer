@@ -1,5 +1,8 @@
-﻿using NLog;
+﻿using Geek.Server.Proto;
+using MessagePack.Resolvers;
+using NLog;
 using NLog.Config;
+using PolymorphicMessagePack;
 using System;
 
 namespace Geek.Server.Test
@@ -10,6 +13,7 @@ namespace Geek.Server.Test
 
         static void Main(string[] args)
         {
+            PolymorphicRegister.Load();
             Console.WriteLine("init NLog config...");
             LogManager.Configuration = new XmlLoggingConfiguration("Config/test_nlog.config");
 

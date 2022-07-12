@@ -1,0 +1,29 @@
+//auto generated, do not modify it
+
+using System;
+namespace Geek.Server.Proto
+{
+	public class MsgFactory
+	{
+		private static readonly System.Collections.Generic.Dictionary<int, Type> lookup;
+
+        static MsgFactory()
+        {
+            lookup = new System.Collections.Generic.Dictionary<int, Type>({{count}})
+            {
+                {{~ for msg in msgs ~}}
+			    { {{msg.sid}}, typeof({{msg.typename}}) },
+			    {{~ end ~}}
+            };
+        }
+
+        public static Type GetType(int msgId)
+		{
+			if (lookup.TryGetValue(msgId, out Type res))
+				return res;
+			else
+				throw new Exception($"can not find msg type :{msgId}");
+		}
+
+	}
+}

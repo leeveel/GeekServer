@@ -13,10 +13,17 @@ namespace Geek.Server
         static readonly Dictionary<int, Type> handlerMap = new Dictionary<int, Type>();
 
         static Func<int, BaseMessage> msgGetter;
+        static Func<int, Type> msgTypeGetter;
         static Func<int, BaseTcpHandler> handlerGetter;
         public static void SetHandlerGetter(Func<int, BaseMessage> msgGetter, Func<int, BaseTcpHandler> handlerGetter)
         {
             TcpHandlerFactory.msgGetter = msgGetter;
+            TcpHandlerFactory.handlerGetter = handlerGetter;
+        }
+
+        public static void SetHandlerGetter(Func<int, Type> msgTypeGetter, Func<int, BaseTcpHandler> handlerGetter)
+        {
+            TcpHandlerFactory.msgTypeGetter = msgTypeGetter;
             TcpHandlerFactory.handlerGetter = handlerGetter;
         }
 
@@ -41,7 +48,7 @@ namespace Geek.Server
                 var att = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
                 if (att == null)
                     continue;
-                var msgIdField = att.Msg.GetField("SID", BindingFlags.Static | BindingFlags.Public);
+                var msgIdField = att.Msg.GetField(MsgFactory.KEY, BindingFlags.Static | BindingFlags.Public);
                 if (msgIdField == null)
                     continue;
 
@@ -103,5 +110,27 @@ namespace Geek.Server
                 LOGGER.Error("创建Msg失败:{}", msgType.ToString());
             return msg;
         }
+
+
+        public static Type GetMsgType(int msgId)
+        {
+            if (msgTypeGetter != null)
+            {
+                var extraMsg = msgTypeGetter(msgId);
+                if (extraMsg != null)
+                    return extraMsg;
+            }
+
+            if (msgMap.TryGetValue(msgId, out var msg))
+            {
+                return msg;
+            }
+            else
+            {
+                LOGGER.Error("未注册的消息ID:{}", msgId);
+                return null;
+            }
+        }
+
     }
 }

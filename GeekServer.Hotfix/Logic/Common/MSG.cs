@@ -62,8 +62,8 @@ namespace Geek.Server
         public byte[] ByteArr {
             get
             {
-                if (msg != null)
-                    return msg.Serialize();
+                //if (msg != null)
+                //    return msg.Serialize();
                 return null;
             }
         }

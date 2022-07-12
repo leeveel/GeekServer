@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using NLog;
 using NLog.LayoutRenderers;
+using Geek.Server.Proto;
 
 namespace Geek.Server
 {
@@ -24,6 +25,8 @@ namespace Geek.Server
                 LogManager.Configuration = new XmlLoggingConfiguration("Config/NLog.config");
                 LogManager.AutoShutdown = false;
                 Settings.Load("Config/server_config.json", ServerType.Game);
+                //初始MessagePack多态信息
+                PolymorphicRegister.Load();
 
                 LOGGER.Warn("check restore data...");
                 if (!FileBackUp.CheckRestoreFromFile())

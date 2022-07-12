@@ -1,0 +1,25 @@
+//auto generated, do not modify it
+
+{{~ for using in usings ~}}
+using {{using}};
+{{~ end ~}}
+
+namespace {{space}}
+{
+	[MessagePackObject]
+	public class {{name}} {{supercode}}
+	{
+		[IgnoreMember]
+		public const int Sid = {{sid}};
+		{{~ if ismsg~}}
+		[IgnoreMember]
+		public const int MsgID = Sid;
+		[IgnoreMember]
+		public override int MsgId => MsgID;
+		{{~ end ~}}
+
+		{{~ for field in fields ~}}
+		{{~field.propcode~}}
+		{{~ end ~}}
+	}
+}

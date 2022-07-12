@@ -1,4 +1,5 @@
 ﻿using Geek.Client;
+using Geek.Server;
 using Geek.Server.Proto;
 using System.Collections.Generic;
 using System.Text;
@@ -43,13 +44,13 @@ namespace Logic
         public Task<bool> SendMsg(BaseMessage msg)
         {
             msg.UniId = UniId++;
-            MessageHandle.GetInstance().Send(msg);
+            GameClient.Singleton.Send(msg);
             return MsgWaiter.StartWait(msg.UniId);
         }
 
         protected T GetCurMsg<T>(int msgId) where T : BaseMessage, new()
         {
-            var rMsg = MessageHandle.GetInstance().GetCurMsg();
+            var rMsg = GameClient.Singleton.GetCurMsg();
             if (rMsg == null)
                 return null;
             if (rMsg.MsgId != msgId)
@@ -61,20 +62,15 @@ namespace Logic
 #if UNITY_EDITOR
             UnityEngine.Debug.Log("deal msg:" + msgId + ">" + typeof(T));
 #endif
-            //已经提前解析好了
-            if (rMsg.Msg != null)
-                return rMsg.Msg as T;
 
-            T msg = new T();
-            int offset = 0;
-            offset = msg.Read(rMsg.ByteContent, offset);
-            return msg;
+            //已经提前解析好了
+            return rMsg as T;
         }
 
         public void RegisterEventListener()
         {
-            AddListener(MessageHandle.ConnectSucceedEvt, OnConnectServer);
-            AddListener(MessageHandle.DisconnectEvt, OnDisconnectServer);
+            AddListener(GameClient.ConnectEvt, OnConnectServer);
+            AddListener(GameClient.DisconnectEvt, OnDisconnectServer);
             AddListener(ResLogin.MsgID, OnResLogin); 
             AddListener(ResBagInfo.MsgID, OnResBagInfo);
             AddListener(ResErrorCode.MsgID, OnResErrorCode);
@@ -108,12 +104,12 @@ namespace Logic
             if ((NetCode)code == NetCode.Success)
             {
                 UnityEngine.Debug.Log("连接服务器成功!");
-                MsgWaiter.EndWait(MessageHandle.ConnectSucceedEvt);
+                MsgWaiter.EndWait(GameClient.ConnectEvt);
             }
             else
             {
                 UnityEngine.Debug.Log("连接服务器失败!");
-                MsgWaiter.EndWait(MessageHandle.ConnectSucceedEvt, false);
+                MsgWaiter.EndWait(GameClient.ConnectEvt, false);
             }
         }
 
