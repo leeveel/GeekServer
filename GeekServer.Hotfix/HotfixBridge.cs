@@ -18,7 +18,8 @@ namespace Geek.Server
             LOGGER.Info("\n\n\nstart server...");
             MsgFactory.InitMsg(typeof(ReqLogin));
             HttpHandlerFactory.SetHandlerGetter(HotfixMgr.GetHttpHandler);
-            TcpHandlerFactory.SetHandlerGetter(MsgFactory.GetMsg, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
+            //TcpHandlerFactory.SetHandlerGetter(MsgFactory.GetMsg, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
+            TcpHandlerFactory.SetHandlerGetter(MsgFactory.GetMsgType, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
 
             //await TcpServer.Start(Settings.Ins.TcpPort, Settings.Ins.UseLibuv);
             //await HttpServer.Start(Settings.Ins.httpPort);
@@ -56,7 +57,8 @@ namespace Geek.Server
                 LOGGER.Info("hotfix load success");
                 EntityMgr.ClearEntityAgent();
                 HttpHandlerFactory.SetHandlerGetter(HotfixMgr.GetHttpHandler);
-                TcpHandlerFactory.SetHandlerGetter(MsgFactory.GetMsg, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
+                //TcpHandlerFactory.SetHandlerGetter(MsgFactory.GetMsg, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
+                TcpHandlerFactory.SetHandlerGetter(MsgFactory.GetMsgType, msgId => HotfixMgr.GetHandler<BaseTcpHandler>(msgId));
                 return true;
             }
 
