@@ -1,5 +1,4 @@
 using System;
-using System.Buffers;
 
 namespace Geek.Server
 {
@@ -164,6 +163,9 @@ namespace Geek.Server
                 value = "";
 
             int len = System.Text.Encoding.UTF8.GetByteCount(value);
+            if (len > short.MaxValue)
+                throw new ArgumentException($"string length exceed short.MaxValue {len}, {short.MaxValue}");
+
             //预判已经超出长度了，直接计算长度就行了
             if (offset + len + ShortSize > buffer.Length)
             {
@@ -472,6 +474,10 @@ namespace Geek.Server
                 value = "";
 
             int len = System.Text.Encoding.UTF8.GetByteCount(value);
+
+            if (len > short.MaxValue)
+                throw new ArgumentException($"string length exceed short.MaxValue {len}, {short.MaxValue}");
+
             //预判已经超出长度了，直接计算长度就行了
             if (offset + len + ShortSize > buffer.Length)
             {
