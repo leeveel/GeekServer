@@ -14,12 +14,12 @@ namespace Geek.Server.Proto
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-		/// <summary>
-		/// 登陆结果，0成功，其他时候为错误码
-		/// </summary>
-		[Key(1)]
+        /// <summary>
+        /// 登陆结果，0成功，其他时候为错误码
+        /// </summary>
+        [Key(1)]
         public int Code { get; set; }
-		[Key(2)]
+        [Key(2)]
         public UserInfo UserInfo { get; set; }
 	}
 }

@@ -16,6 +16,7 @@ namespace Geek.Server.Proto
 			settings.RegisterType<Geek.Server.BaseMessage, Geek.Server.Proto.ReqUseItem>(112003);
 			settings.RegisterType<Geek.Server.BaseMessage, Geek.Server.Proto.ReqSellItem>(112004);
 			settings.RegisterType<Geek.Server.BaseMessage, Geek.Server.Proto.ResItemChange>(112005);
+			settings.RegisterType<Geek.Server.Proto.A, Geek.Server.Proto.B>(111112);
 			settings.RegisterType<Geek.Server.BaseMessage, Geek.Server.Proto.ReqLogin>(111001);
 			settings.RegisterType<Geek.Server.BaseMessage, Geek.Server.Proto.ResLogin>(111002);
 			settings.RegisterType<Geek.Server.BaseMessage, Geek.Server.Proto.ResLevelUp>(111003);

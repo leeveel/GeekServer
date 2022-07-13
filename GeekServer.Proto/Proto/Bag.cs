@@ -3,12 +3,13 @@ using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
-    /// <summary>
-    /// 请求背包数据
-    /// </summary>
+
+	/// <summary>
+	/// 请求背包数据
+	/// </summary>
 	[MessagePackObject]
     [Serialize(112001, true)]
-	public class ReqBagInfo 
+	public class ReqBagInfo : BaseMessage
 	{
 	}
 
@@ -17,9 +18,9 @@ namespace Geek.Server.Proto
 	/// </summary>
 	[MessagePackObject]
 	[Serialize(112002, true)]
-	public class ResBagInfo
+	public class ResBagInfo : BaseMessage
 	{
-		[Key(0)]
+		[Key(1)]
 		public Dictionary<int, long> ItemDic { get; set; } = new Dictionary<int, long>();
 	}
 
@@ -28,12 +29,12 @@ namespace Geek.Server.Proto
 	/// </summary>
 	[MessagePackObject]
 	[Serialize(112003, true)]
-	public class ReqUseItem
+	public class ReqUseItem : BaseMessage
 	{
 		/// <summary>
 		/// 道具id
 		/// </summary>
-		[Key(0)]
+		[Key(1)]
 		public int ItemId { get; set; }
 	}
 
@@ -42,23 +43,23 @@ namespace Geek.Server.Proto
 	/// </summary>
 	[MessagePackObject]
 	[Serialize(112004, true)]
-	public class ReqSellItem
+	public class ReqSellItem : BaseMessage
 	{
 		/// <summary>
 		/// 道具id
 		/// </summary>
-		[Key(0)]
+		[Key(1)]
 		public int ItemId { get; set; }
 	}
 
 	[MessagePackObject]
 	[Serialize(112005, true)]
-	public class ResItemChange
+	public class ResItemChange : BaseMessage
 	{
 		/// <summary>
 		/// 变化的道具
 		/// </summary>
-		[Key(0)]
+		[Key(1)]
 		public Dictionary<int, long> ItemDic { get; set; }
 	}
 

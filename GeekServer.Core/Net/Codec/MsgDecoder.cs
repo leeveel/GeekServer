@@ -129,7 +129,7 @@ namespace Geek.Server
                 return null;
             }
 
-            var protoMsg = (BaseMessage)MessagePack.MessagePackSerializer.Deserialize(msgType, reader.UnreadSequence);
+            var protoMsg = MessagePack.MessagePackSerializer.Deserialize<BaseMessage>(reader.UnreadSequence);
             if (protoMsg.MsgId != msgId)
             {
                 LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", protoMsg.MsgId, msgId);

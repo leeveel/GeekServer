@@ -14,11 +14,13 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>../app_debug</OutputPath>
     <Optimize>false</Optimize>
+    <DefineConstants>$(DefineConstants)TRACE;</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>../app</OutputPath>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>$(DefineConstants)TRACE;</DefineConstants>
   </PropertyGroup>
 
 	<ItemGroup>
