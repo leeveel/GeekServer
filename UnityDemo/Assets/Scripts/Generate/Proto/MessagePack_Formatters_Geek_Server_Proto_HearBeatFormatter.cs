@@ -27,7 +27,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteArrayHeader(1);
+            writer.WriteArrayHeader(2);
+            writer.WriteNil();
             writer.Write(value.TimeTick);
         }
 
@@ -46,7 +47,7 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             {
                 switch (i)
                 {
-                    case 0:
+                    case 1:
                         ____result.TimeTick = reader.ReadInt64();
                         break;
                     default:

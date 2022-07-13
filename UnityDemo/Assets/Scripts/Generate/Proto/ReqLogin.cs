@@ -14,15 +14,15 @@ namespace Geek.Server.Proto
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-		[Key(1)]
+        [Key(1)]
         public string UserName { get; set; }
-		[Key(2)]
+        [Key(2)]
         public string Platform { get; set; }
-		[Key(3)]
+        [Key(3)]
         public int SdkType { get; set; }
-		[Key(4)]
+        [Key(4)]
         public string SdkToken { get; set; }
-		[Key(5)]
-		public string Device { get; set; }
+        [Key(5)]
+        public string Device { get; set; }
 	}
 }

@@ -28,7 +28,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(5);
+            writer.WriteArrayHeader(6);
+            writer.Write(value.UniId);
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.UserName, options);
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.Platform, options);
             writer.Write(value.SdkType);
@@ -53,18 +54,21 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 switch (i)
                 {
                     case 0:
-                        ____result.UserName = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                        ____result.UniId = reader.ReadInt32();
                         break;
                     case 1:
-                        ____result.Platform = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                        ____result.UserName = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 2:
-                        ____result.SdkType = reader.ReadInt32();
+                        ____result.Platform = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     case 3:
-                        ____result.SdkToken = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                        ____result.SdkType = reader.ReadInt32();
                         break;
                     case 4:
+                        ____result.SdkToken = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                        break;
+                    case 5:
                         ____result.Device = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     default:

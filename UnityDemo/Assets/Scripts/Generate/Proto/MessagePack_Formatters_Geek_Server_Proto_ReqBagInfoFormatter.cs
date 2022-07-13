@@ -27,7 +27,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteArrayHeader(0);
+            writer.WriteArrayHeader(1);
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ReqBagInfo Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -37,8 +38,25 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return null;
             }
 
-            reader.Skip();
-            return new global::Geek.Server.Proto.ReqBagInfo();
+            options.Security.DepthStep(ref reader);
+            var length = reader.ReadArrayHeader();
+            var ____result = new global::Geek.Server.Proto.ReqBagInfo();
+
+            for (int i = 0; i < length; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        ____result.UniId = reader.ReadInt32();
+                        break;
+                    default:
+                        reader.Skip();
+                        break;
+                }
+            }
+
+            reader.Depth--;
+            return ____result;
         }
     }
 

@@ -28,7 +28,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(1);
+            writer.WriteArrayHeader(2);
+            writer.Write(value.UniId);
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, long>>(formatterResolver).Serialize(ref writer, value.ItemDic, options);
         }
 
@@ -49,6 +50,9 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 switch (i)
                 {
                     case 0:
+                        ____result.UniId = reader.ReadInt32();
+                        break;
+                    case 1:
                         ____result.ItemDic = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, long>>(formatterResolver).Deserialize(ref reader, options);
                         break;
                     default:

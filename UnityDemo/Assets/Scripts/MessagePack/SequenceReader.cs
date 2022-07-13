@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 
 namespace MessagePack
 {
-    internal ref partial struct SequenceReader<T>
+    public ref partial struct SequenceReader<T>
         where T : unmanaged, IEquatable<T>
     {
         /// <summary>

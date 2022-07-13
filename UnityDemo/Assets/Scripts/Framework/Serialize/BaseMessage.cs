@@ -11,6 +11,6 @@ namespace Geek.Server
         [Key(0)]
         public int UniId { get; set; }
         [IgnoreMember]
-        public abstract int MsgId { get; }
+        public virtual int MsgId { get; }
     }
 }

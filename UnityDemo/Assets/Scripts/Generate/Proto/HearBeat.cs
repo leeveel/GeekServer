@@ -14,10 +14,10 @@ namespace Geek.Server.Proto
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-		/// <summary>
-		/// 当前时间
-		/// </summary>
-		[Key(1)]
-		public long TimeTick { get; set; }
+        /// <summary>
+        /// 当前时间
+        /// </summary>
+        [Key(1)]
+        public long TimeTick { get; set; }
 	}
 }

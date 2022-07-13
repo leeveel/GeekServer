@@ -1,4 +1,6 @@
 ﻿using Geek.Server.Proto;
+using MessagePack;
+using MessagePack.Resolvers;
 using UnityEngine;
 
 namespace Logic

@@ -27,7 +27,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteArrayHeader(1);
+            writer.WriteArrayHeader(2);
+            writer.Write(value.UniId);
             writer.Write(value.Level);
         }
 
@@ -47,6 +48,9 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 switch (i)
                 {
                     case 0:
+                        ____result.UniId = reader.ReadInt32();
+                        break;
+                    case 1:
                         ____result.Level = reader.ReadInt32();
                         break;
                     default:

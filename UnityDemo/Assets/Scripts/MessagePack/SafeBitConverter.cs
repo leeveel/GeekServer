@@ -6,9 +6,9 @@ using System.Runtime.InteropServices;
 
 namespace MessagePack
 {
-    internal static class SafeBitConverter
+    public static class SafeBitConverter
     {
-        internal static long ToInt64(ReadOnlySpan<byte> value)
+        public static long ToInt64(ReadOnlySpan<byte> value)
         {
 #if UNITY_ANDROID
             if (BitConverter.IsLittleEndian)
@@ -28,9 +28,9 @@ namespace MessagePack
 #endif
         }
 
-        internal static ulong ToUInt64(ReadOnlySpan<byte> value) => unchecked((ulong)ToInt64(value));
+        public static ulong ToUInt64(ReadOnlySpan<byte> value) => unchecked((ulong)ToInt64(value));
 
-        internal static ushort ToUInt16(ReadOnlySpan<byte> value)
+        public static ushort ToUInt16(ReadOnlySpan<byte> value)
         {
 #if UNITY_ANDROID
             if (BitConverter.IsLittleEndian)
@@ -46,7 +46,7 @@ namespace MessagePack
 #endif
         }
 
-        internal static uint ToUInt32(ReadOnlySpan<byte> value)
+        public static uint ToUInt32(ReadOnlySpan<byte> value)
         {
 #if UNITY_ANDROID
             if (BitConverter.IsLittleEndian)

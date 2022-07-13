@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Buffers;
-using Bedrock.Framework;
 using Bedrock.Framework.Protocols;
+using MessagePack;
 
 namespace Geek.Client
 {

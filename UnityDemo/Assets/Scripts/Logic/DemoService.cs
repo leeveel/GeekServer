@@ -122,6 +122,7 @@ namespace Logic
         {
             var res = GetCurMsg<ResLogin>(e.EventId);
             UnityEngine.Debug.Log($"{res.UserInfo.RoleName}:登录成功!");
+            GameMain.Singleton.AppendLog($"{res.UserInfo.RoleName}:登录成功!");
         }
 
         private void OnResBagInfo(Event e)
@@ -135,6 +136,7 @@ namespace Logic
                 str.Append($"{keyVal.Key}:{keyVal.Value},");
             }
             UnityEngine.Debug.Log(str);
+            GameMain.Singleton.AppendLog(str.ToString());
         }
 
     }

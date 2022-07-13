@@ -16,10 +16,10 @@
 
 namespace MessagePack.Formatters.Geek.Server.Proto
 {
-    public sealed class ResItemChangeFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ResItemChange>
+    public sealed class AFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.A>
     {
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResItemChange value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.A value, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (value == null)
             {
@@ -27,13 +27,11 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(2);
-            writer.Write(value.UniId);
-            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, long>>(formatterResolver).Serialize(ref writer, value.ItemDic, options);
+            writer.WriteArrayHeader(1);
+            writer.Write(value.Age);
         }
 
-        public global::Geek.Server.Proto.ResItemChange Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Geek.Server.Proto.A Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -41,19 +39,15 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
             var length = reader.ReadArrayHeader();
-            var ____result = new global::Geek.Server.Proto.ResItemChange();
+            var ____result = new global::Geek.Server.Proto.A();
 
             for (int i = 0; i < length; i++)
             {
                 switch (i)
                 {
                     case 0:
-                        ____result.UniId = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.ItemDic = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, long>>(formatterResolver).Deserialize(ref reader, options);
+                        ____result.Age = reader.ReadInt32();
                         break;
                     default:
                         reader.Skip();

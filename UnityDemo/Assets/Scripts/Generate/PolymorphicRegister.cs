@@ -13,7 +13,12 @@ namespace Geek.Server.Proto
         {
             if (!serializerRegistered)
             {
-                settings = new PolymorphicMessagePackSettings(StandardResolver.Instance);
+                StaticCompositeResolver.Instance.Register(
+                    MessagePack.Resolvers.GeneratedResolver.Instance,
+                    MessagePack.Resolvers.BuiltinResolver.Instance
+                );
+
+                settings = new PolymorphicMessagePackSettings(StaticCompositeResolver.Instance);
                 var options = new PolymorphicMessagePackSerializerOptions(settings);
                 MessagePackSerializer.DefaultOptions = options;
                 serializerRegistered = true;

@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace MessagePack
 {
-    internal static partial class SequenceReaderExtensions
+    public static partial class SequenceReaderExtensions
     {
         /// <summary>
         /// Try to read the given type out of the buffer if possible. Warning: this is dangerous to use with arbitrary
