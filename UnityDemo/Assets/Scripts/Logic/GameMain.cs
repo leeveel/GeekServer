@@ -20,25 +20,6 @@ namespace Logic
 
         async void Start()
         {
-
-            //登陆
-            //var req = new ReqLogin();
-            //req.SdkType = 0;
-            //req.SdkToken = "";
-            //req.UserName = "123456";
-            //req.Device = SystemInfo.deviceUniqueIdentifier;
-            //if (Application.platform == RuntimePlatform.Android)
-            //    req.Platform = "android";
-            //else if (Application.platform == RuntimePlatform.IPhonePlayer)
-            //    req.Platform = "ios";
-            //else
-            //    req.Platform = "unity";
-
-            //req.UniId = 9090;
-            //var bytes = MessagePack.MessagePackSerializer.Serialize(req);
-            //var req2 = MessagePack.MessagePackSerializer.Deserialize<ReqLogin>(bytes);
-            //return;
-
             GameClient.Singleton.Init();
             DemoService.Singleton.RegisterEventListener();
             await ConnectServer();
@@ -80,7 +61,6 @@ namespace Logic
             ReqBagInfo req = new ReqBagInfo();
             return DemoService.Singleton.SendMsg(req);
         }
-
 
 
         private void OnApplicationQuit()
