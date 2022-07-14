@@ -201,7 +201,7 @@ namespace Geek.Server
         {
             var attribute = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
             if (attribute == null) return;
-            var msgIdField = attribute.Msg.GetField(MsgFactory.KEY, BindingFlags.Static | BindingFlags.Public);
+            var msgIdField = attribute.Msg.GetField(TcpHandlerFactory.KEY, BindingFlags.Static | BindingFlags.Public);
             if (msgIdField == null) return;
             int msgId = (int)msgIdField.GetValue(null);
             if (!tcpHandlerMap.ContainsKey(msgId))

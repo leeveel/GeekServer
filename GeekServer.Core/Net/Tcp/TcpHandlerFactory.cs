@@ -9,6 +9,7 @@ namespace Geek.Server
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
+        public const string KEY = "MsgID";
         static readonly Dictionary<int, Type> msgMap = new Dictionary<int, Type>();
         static readonly Dictionary<int, Type> handlerMap = new Dictionary<int, Type>();
 
@@ -48,7 +49,7 @@ namespace Geek.Server
                 var att = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
                 if (att == null)
                     continue;
-                var msgIdField = att.Msg.GetField(MsgFactory.KEY, BindingFlags.Static | BindingFlags.Public);
+                var msgIdField = att.Msg.GetField(KEY, BindingFlags.Static | BindingFlags.Public);
                 if (msgIdField == null)
                     continue;
 
