@@ -17,58 +17,6 @@ namespace Geek.Server
         /// 从客户端接收的包大小最大值（单位：字节 1M）
         const int MAX_RECV_SIZE = 1024 * 1024;
 
-
-        public static byte[] UnGZip(int msgId, byte[] before, int offset, int msgSize)
-        {
-            try
-            {
-                if (before == null)
-                    return before;
-                using (MemoryStream ms = new MemoryStream(before, offset, msgSize))
-                {
-                    using (ZipInputStream zipStream = new ZipInputStream(ms))
-                    {
-                        zipStream.IsStreamOwner = true;
-                        var file = zipStream.GetNextEntry();
-                        var after = ArrayPool<byte>.Shared.Rent((int)file.Size);
-                        zipStream.Read(after, 0, (int)file.Size);
-                        //Console.WriteLine($"unzip:{file.Size}");
-                        return after;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                LOGGER.Error($"消息解压失败>{msgId}\n{e.ToString()}");
-                throw;
-            }
-        }
-
-
-        public static byte[] CompressGZip(byte[] buffer, int realLength=0)
-        {
-            try
-            {
-                if (realLength <= 0)
-                    realLength = buffer.Length;
-                using MemoryStream ms = new MemoryStream();
-                using ZipOutputStream compressedzipStream = new ZipOutputStream(ms);
-                var entry = new ZipEntry("m");
-                entry.Size = realLength;
-                compressedzipStream.PutNextEntry(entry);
-                compressedzipStream.Write(buffer, 0, realLength);
-                compressedzipStream.CloseEntry();
-                compressedzipStream.Close();
-                return ms.ToArray();
-            }
-            catch (Exception ex)
-            {
-                LOGGER.Error("数据压缩失败{}", ex.Message);
-                return buffer;
-            }
-        }
-
-
         public static Message ClientDecode(NMessage message)
         {
             var reader = new SequenceReader<byte>(message.Payload);
@@ -86,7 +34,7 @@ namespace Geek.Server
                 LOGGER.Error("消息ID:{} 找不到对应的Msg.", msgId);
                 return null;
             }
-            var msg = (Message)MessagePack.MessagePackSerializer.Deserialize(msgType, reader.UnreadSequence);
+            var msg = MessagePack.MessagePackSerializer.Deserialize<Message>(reader.UnreadSequence);
             if (msg.MsgId != msgId)
             {
                 LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", msg.MsgId, msgId);

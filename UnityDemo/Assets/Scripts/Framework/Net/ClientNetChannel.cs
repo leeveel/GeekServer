@@ -68,7 +68,12 @@ namespace Geek.Client
             reader.TryReadBigEndian(out int msgId);
 
             var msgType = MsgFactory.GetType(msgId);
-            var msg = (Message)MessagePack.MessagePackSerializer.Deserialize(msgType, message.Payload.Slice(4));
+            if (msgType == null)
+            {
+                Logger.LogError($"消息ID:{msgId} 找不到对应的Msg.");
+                return;
+            }
+            var msg = MessagePack.MessagePackSerializer.Deserialize<Message>(message.Payload.Slice(4));
             if (msg.MsgId != msgId)
             {
                 Logger.LogError($"后台解析消息失败，注册消息id和消息无法对应.real:{msg.MsgId}, register:{msgId}");
