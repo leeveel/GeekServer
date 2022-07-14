@@ -15,9 +15,9 @@ namespace Geek.Server
             Payload = payload;
         }
 
-        public BaseMessage Msg { get; } = null;
+        public Message Msg { get; } = null;
 
-        public NMessage(BaseMessage msg)
+        public NMessage(Message msg)
         {
             Msg = msg;
         }

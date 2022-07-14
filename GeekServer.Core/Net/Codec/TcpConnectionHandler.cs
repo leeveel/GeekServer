@@ -59,7 +59,7 @@ namespace Geek.Server
                 SessionManager.Remove(sessionId);
         }
 
-        protected async Task Dispatcher(NetChannel channel, BaseMessage msg)
+        protected async Task Dispatcher(NetChannel channel, Message msg)
         {
             if (msg == null)
                 return;

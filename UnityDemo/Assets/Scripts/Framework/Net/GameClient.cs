@@ -20,7 +20,7 @@ namespace Geek.Client
     public class GameClient 
     {
         public static GameClient Singleton = new GameClient();
-        private readonly Queue<BaseMessage> msgQueue = new Queue<BaseMessage>(); 
+        private readonly Queue<Message> msgQueue = new Queue<Message>(); 
         private ClientNetChannel Channel { get; set; }
         private UniActor receiveActor = null;
         private GameClient() { }
@@ -35,12 +35,12 @@ namespace Geek.Client
             receiveActor = new UniActor();
         }
 
-        public BaseMessage GetCurMsg()
+        public Message GetCurMsg()
         {
             return msgQueue.Peek();
         }
 
-        public void Receive(BaseMessage msg)
+        public void Receive(Message msg)
         {
             receiveActor.SendAsync(() =>
             {
@@ -50,7 +50,7 @@ namespace Geek.Client
             });
         }
 
-        public void Send(BaseMessage msg)
+        public void Send(Message msg)
         {
             Channel?.WriteAsync(new NMessage(msg));
         }

@@ -69,7 +69,7 @@ namespace Geek.Server
         }
 
 
-        public static BaseMessage ClientDecode(NMessage message)
+        public static Message ClientDecode(NMessage message)
         {
             var reader = new SequenceReader<byte>(message.Payload);
 
@@ -86,7 +86,7 @@ namespace Geek.Server
                 LOGGER.Error("消息ID:{} 找不到对应的Msg.", msgId);
                 return null;
             }
-            var msg = (BaseMessage)MessagePack.MessagePackSerializer.Deserialize(msgType, reader.UnreadSequence);
+            var msg = (Message)MessagePack.MessagePackSerializer.Deserialize(msgType, reader.UnreadSequence);
             if (msg.MsgId != msgId)
             {
                 LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", msg.MsgId, msgId);
@@ -95,7 +95,7 @@ namespace Geek.Server
             return msg;
         }
 
-        public static BaseMessage Decode(ConnectionContext context, NMessage msg)
+        public static Message Decode(ConnectionContext context, NMessage msg)
         {
             var reader = new SequenceReader<byte>(msg.Payload);
             
@@ -129,7 +129,7 @@ namespace Geek.Server
                 return null;
             }
 
-            var protoMsg = MessagePack.MessagePackSerializer.Deserialize<BaseMessage>(reader.UnreadSequence);
+            var protoMsg = MessagePack.MessagePackSerializer.Deserialize<Message>(reader.UnreadSequence);
             if (protoMsg.MsgId != msgId)
             {
                 LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", protoMsg.MsgId, msgId);

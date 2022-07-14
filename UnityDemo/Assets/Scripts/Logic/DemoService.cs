@@ -41,14 +41,14 @@ namespace Logic
         public static int UniId { private set; get; } = 200;
 
 
-        public Task<bool> SendMsg(BaseMessage msg)
+        public Task<bool> SendMsg(Message msg)
         {
             msg.UniId = UniId++;
             GameClient.Singleton.Send(msg);
             return MsgWaiter.StartWait(msg.UniId);
         }
 
-        protected T GetCurMsg<T>(int msgId) where T : BaseMessage, new()
+        protected T GetCurMsg<T>(int msgId) where T : Message, new()
         {
             var rMsg = GameClient.Singleton.GetCurMsg();
             if (rMsg == null)

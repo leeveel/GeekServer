@@ -25,7 +25,7 @@ namespace Geek.Server.Test
             Comp.Channel.SetSessionId(session.Id);
         }
 
-        public Task<bool> SendMsg(BaseMessage msg)
+        public Task<bool> SendMsg(Message msg)
         {
             msg.UniId = Comp.UniId++;
             //NMessage nmsg = NMessage.Create(msg.MsgId, msg.Serialize());

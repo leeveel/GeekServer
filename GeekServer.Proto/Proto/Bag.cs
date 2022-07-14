@@ -8,8 +8,8 @@ namespace Geek.Server.Proto
 	/// 请求背包数据
 	/// </summary>
 	[MessagePackObject]
-    [Serialize(112001, true)]
-	public class ReqBagInfo : BaseMessage
+    [Serialize(112001)]
+	public class ReqBagInfo : Message
 	{
 	}
 
@@ -17,8 +17,8 @@ namespace Geek.Server.Proto
 	/// 返回背包数据
 	/// </summary>
 	[MessagePackObject]
-	[Serialize(112002, true)]
-	public class ResBagInfo : BaseMessage
+	[Serialize(112002)]
+	public class ResBagInfo : Message
 	{
 		[Key(1)]
 		public Dictionary<int, long> ItemDic { get; set; } = new Dictionary<int, long>();
@@ -28,8 +28,8 @@ namespace Geek.Server.Proto
 	/// 使用道具
 	/// </summary>
 	[MessagePackObject]
-	[Serialize(112003, true)]
-	public class ReqUseItem : BaseMessage
+	[Serialize(112003)]
+	public class ReqUseItem : Message
 	{
 		/// <summary>
 		/// 道具id
@@ -42,8 +42,8 @@ namespace Geek.Server.Proto
 	/// 出售道具
 	/// </summary>
 	[MessagePackObject]
-	[Serialize(112004, true)]
-	public class ReqSellItem : BaseMessage
+	[Serialize(112004)]
+	public class ReqSellItem : Message
 	{
 		/// <summary>
 		/// 道具id
@@ -53,8 +53,8 @@ namespace Geek.Server.Proto
 	}
 
 	[MessagePackObject]
-	[Serialize(112005, true)]
-	public class ResItemChange : BaseMessage
+	[Serialize(112005)]
+	public class ResItemChange : Message
 	{
 		/// <summary>
 		/// 变化的道具

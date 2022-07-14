@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Geek.Server.Proto
 {
 	[MessagePackObject]
-	public class ResItemChange : Geek.Server.BaseMessage
+	public class ResItemChange : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 112005;

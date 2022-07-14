@@ -28,7 +28,7 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             writer.WriteArrayHeader(2);
-            writer.WriteNil();
+            writer.Write(value.UniId);
             writer.Write(value.TimeTick);
         }
 
@@ -47,6 +47,9 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             {
                 switch (i)
                 {
+                    case 0:
+                        ____result.UniId = reader.ReadInt32();
+                        break;
                     case 1:
                         ____result.TimeTick = reader.ReadInt64();
                         break;

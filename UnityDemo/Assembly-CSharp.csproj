@@ -85,15 +85,15 @@
     <Compile Include="Assets\Scripts\Framework\Net\ClientLengthPrefixedProtocol.cs" />
     <Compile Include="Assets\Scripts\Framework\Net\ClientNetChannel.cs" />
     <Compile Include="Assets\Scripts\Framework\Net\GameClient.cs" />
+    <Compile Include="Assets\Scripts\Framework\Net\Message.cs" />
     <Compile Include="Assets\Scripts\Framework\Net\NMessage.cs" />
     <Compile Include="Assets\Scripts\Framework\Net\NetChannel.cs" />
-    <Compile Include="Assets\Scripts\Framework\Serialize\BaseMessage.cs" />
+    <Compile Include="Assets\Scripts\Framework\Serialize\Logger.cs" />
     <Compile Include="Assets\Scripts\Framework\Serialize\PolymorphicMessagePack\PolymorphicDelegate.cs" />
     <Compile Include="Assets\Scripts\Framework\Serialize\PolymorphicMessagePack\PolymorphicFormatter.cs" />
     <Compile Include="Assets\Scripts\Framework\Serialize\PolymorphicMessagePack\PolymorphicMessagePackSerializerOptions.cs" />
     <Compile Include="Assets\Scripts\Framework\Serialize\PolymorphicMessagePack\PolymorphicMessagePackSettings.cs" />
     <Compile Include="Assets\Scripts\Framework\Serialize\PolymorphicMessagePack\PolymorphicResolver.cs" />
-    <Compile Include="Assets\Scripts\Framework\Serialize\SerializeLogger.cs" />
     <Compile Include="Assets\Scripts\Framework\Utils\IParam.cs" />
     <Compile Include="Assets\Scripts\Framework\Utils\TimeUtils.cs" />
     <Compile Include="Assets\Scripts\Framework\Utils\XBuffer.cs" />

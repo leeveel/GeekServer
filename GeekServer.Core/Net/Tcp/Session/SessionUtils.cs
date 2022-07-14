@@ -9,7 +9,7 @@ namespace Geek.Server
 			ctx.WriteAsync(msg);
 		}
 
-		public static void WriteAndFlush(NetChannel ctx, BaseMessage msg)
+		public static void WriteAndFlush(NetChannel ctx, Message msg)
 		{
 			if (IsDisconnectChannel(ctx))
 				return;

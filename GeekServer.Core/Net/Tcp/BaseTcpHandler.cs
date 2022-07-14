@@ -32,7 +32,7 @@ namespace Geek.Server
         /// <summary>
         /// 消息体
         /// </summary>
-        public BaseMessage Msg { get; set; }
+        public Message Msg { get; set; }
 
         public abstract Task ActionAsync();
 
@@ -43,7 +43,7 @@ namespace Geek.Server
             _ = Channel.WriteAsync(msg);
         }
 
-        protected virtual void WriteAndFlush(BaseMessage msg)
+        protected virtual void WriteAndFlush(Message msg)
         {
             if (msg.MsgId > 0 && msg != null)
                 WriteAndFlush(new NMessage(msg));

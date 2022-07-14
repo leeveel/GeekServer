@@ -5,7 +5,7 @@ using MessagePack;
 namespace Geek.Server.Proto
 {
 	[MessagePackObject]
-	public class HearBeat : Geek.Server.BaseMessage
+	public class HearBeat : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 111004;

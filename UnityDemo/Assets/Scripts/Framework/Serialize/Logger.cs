@@ -1,6 +1,6 @@
 ﻿namespace Geek.Server
 {
-    public static class SerializeLogger
+    public static class Logger
     {
 
 #if NETCOREAPP

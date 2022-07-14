@@ -5,7 +5,7 @@ using MessagePack;
 namespace Geek.Server.Proto
 {
 	[MessagePackObject]
-	public class ResErrorCode : Geek.Server.BaseMessage
+	public class ResErrorCode : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 111005;

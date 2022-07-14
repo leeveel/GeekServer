@@ -68,10 +68,10 @@ namespace Geek.Client
             reader.TryReadBigEndian(out int msgId);
 
             var msgType = MsgFactory.GetType(msgId);
-            var msg = (BaseMessage)MessagePack.MessagePackSerializer.Deserialize(msgType, message.Payload.Slice(4));
+            var msg = (Message)MessagePack.MessagePackSerializer.Deserialize(msgType, message.Payload.Slice(4));
             if (msg.MsgId != msgId)
             {
-                SerializeLogger.LogError($"后台解析消息失败，注册消息id和消息无法对应.real:{msg.MsgId}, register:{msgId}");
+                Logger.LogError($"后台解析消息失败，注册消息id和消息无法对应.real:{msg.MsgId}, register:{msgId}");
                 return;
             }
             GameClient.Singleton.Receive(msg);
