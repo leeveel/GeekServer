@@ -6,11 +6,14 @@ using {{using}};
 
 namespace {{space}}
 {
-	[MessagePackObject]
-	public class {{name}} {{supercode}}
+	[MessagePackObject(true)]
+	public {{typename}} {{name}} {{supercode}}
 	{
+		{{~ if typename != "enum" ~}}
 		[IgnoreMember]
-	{{sidcode}};
+		{{sidcode}};
+		{{~end~}}
+
 		{{~ if ismsg~}}
 		[IgnoreMember]
 		public const int MsgID = Sid;
