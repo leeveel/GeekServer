@@ -4,11 +4,12 @@ using MessagePack;
 
 namespace Geek.Server.Proto
 {
-	[MessagePackObject]
+	[MessagePackObject(true)]
 	public class ResLogin : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 111002;
+
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
@@ -17,9 +18,7 @@ namespace Geek.Server.Proto
         /// <summary>
         /// 登陆结果，0成功，其他时候为错误码
         /// </summary>
-        [Key(1)]
         public int Code { get; set; }
-        [Key(2)]
         public UserInfo UserInfo { get; set; }
 	}
 }

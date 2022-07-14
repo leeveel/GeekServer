@@ -18,20 +18,29 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ResErrorCodeFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ResErrorCode>
     {
+        // ErrCode
+        private static global::System.ReadOnlySpan<byte> GetSpan_ErrCode() => new byte[1 + 7] { 167, 69, 114, 114, 67, 111, 100, 101 };
+        // Desc
+        private static global::System.ReadOnlySpan<byte> GetSpan_Desc() => new byte[1 + 4] { 164, 68, 101, 115, 99 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResErrorCode value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteNil();
                 return;
             }
 
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(3);
-            writer.Write(value.UniId);
+            var formatterResolver = options.Resolver;
+            writer.WriteMapHeader(3);
+            writer.WriteRaw(GetSpan_ErrCode());
             writer.Write(value.ErrCode);
+            writer.WriteRaw(GetSpan_Desc());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.Desc, options);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ResErrorCode Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -42,26 +51,35 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            var length = reader.ReadArrayHeader();
+            var formatterResolver = options.Resolver;
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.ResErrorCode();
 
             for (int i = 0; i < length; i++)
             {
-                switch (i)
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
                 {
-                    case 0:
-                        ____result.UniId = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.ErrCode = reader.ReadInt64();
-                        break;
-                    case 2:
-                        ____result.Desc = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
-                        break;
                     default:
-                        reader.Skip();
-                        break;
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 7:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 28539401683497541UL) { goto FAIL; }
+
+                        ____result.ErrCode = reader.ReadInt64();
+                        continue;
+                    case 4:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 1668506948UL) { goto FAIL; }
+
+                        ____result.Desc = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                        continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
+                        continue;
+
                 }
             }
 

@@ -18,18 +18,24 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ReqUseItemFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ReqUseItem>
     {
+        // ItemId
+        private static global::System.ReadOnlySpan<byte> GetSpan_ItemId() => new byte[1 + 6] { 166, 73, 116, 101, 109, 73, 100 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ReqUseItem value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteNil();
                 return;
             }
 
-            writer.WriteArrayHeader(2);
-            writer.Write(value.UniId);
+            writer.WriteMapHeader(2);
+            writer.WriteRaw(GetSpan_ItemId());
             writer.Write(value.ItemId);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ReqUseItem Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -40,22 +46,29 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            var length = reader.ReadArrayHeader();
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.ReqUseItem();
 
             for (int i = 0; i < length; i++)
             {
-                switch (i)
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
                 {
-                    case 0:
-                        ____result.UniId = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.ItemId = reader.ReadInt32();
-                        break;
                     default:
-                        reader.Skip();
-                        break;
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 6:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 110266530755657UL) { goto FAIL; }
+
+                        ____result.ItemId = reader.ReadInt32();
+                        continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
+                        continue;
+
                 }
             }
 

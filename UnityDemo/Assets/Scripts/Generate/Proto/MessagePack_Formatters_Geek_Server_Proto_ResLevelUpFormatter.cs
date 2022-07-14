@@ -18,18 +18,24 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ResLevelUpFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ResLevelUp>
     {
+        // Level
+        private static global::System.ReadOnlySpan<byte> GetSpan_Level() => new byte[1 + 5] { 165, 76, 101, 118, 101, 108 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResLevelUp value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteNil();
                 return;
             }
 
-            writer.WriteArrayHeader(2);
-            writer.Write(value.UniId);
+            writer.WriteMapHeader(2);
+            writer.WriteRaw(GetSpan_Level());
             writer.Write(value.Level);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ResLevelUp Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -40,22 +46,30 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            var length = reader.ReadArrayHeader();
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.ResLevelUp();
 
             for (int i = 0; i < length; i++)
             {
-                switch (i)
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
                 {
-                    case 0:
-                        ____result.UniId = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.Level = reader.ReadInt32();
-                        break;
                     default:
-                        reader.Skip();
-                        break;
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 5:
+                        switch (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey))
+                        {
+                            default: goto FAIL;
+                            case 465558725964UL:
+                                ____result.Level = reader.ReadInt32();
+                                continue;
+                            case 430728375893UL:
+                                ____result.UniId = reader.ReadInt32();
+                                continue;
+                        }
+
                 }
             }
 

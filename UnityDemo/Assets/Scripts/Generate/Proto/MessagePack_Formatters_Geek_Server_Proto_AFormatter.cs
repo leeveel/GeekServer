@@ -18,16 +18,19 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class AFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.A>
     {
+        // Age
+        private static global::System.ReadOnlySpan<byte> GetSpan_Age() => new byte[1 + 3] { 163, 65, 103, 101 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.A value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteNil();
                 return;
             }
 
-            writer.WriteArrayHeader(1);
+            writer.WriteMapHeader(1);
+            writer.WriteRaw(GetSpan_Age());
             writer.Write(value.Age);
         }
 
@@ -39,19 +42,24 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            var length = reader.ReadArrayHeader();
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.A();
 
             for (int i = 0; i < length; i++)
             {
-                switch (i)
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
                 {
-                    case 0:
-                        ____result.Age = reader.ReadInt32();
-                        break;
                     default:
-                        reader.Skip();
-                        break;
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 3:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 6645569UL) { goto FAIL; }
+
+                        ____result.Age = reader.ReadInt32();
+                        continue;
+
                 }
             }
 

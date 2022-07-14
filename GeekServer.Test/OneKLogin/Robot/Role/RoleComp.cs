@@ -18,7 +18,7 @@ namespace Geek.Server.Test
         {
             //连接服务器
             await ConnectServer();
-            await Task.Delay(500);
+            //await Task.Delay(500);
 
             //登陆
             var login = await GetCompAgent<LoginCompAgent>();

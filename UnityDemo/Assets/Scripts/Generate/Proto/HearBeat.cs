@@ -4,11 +4,12 @@ using MessagePack;
 
 namespace Geek.Server.Proto
 {
-	[MessagePackObject]
+	[MessagePackObject(true)]
 	public class HearBeat : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 111004;
+
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
@@ -17,7 +18,6 @@ namespace Geek.Server.Proto
         /// <summary>
         /// 当前时间
         /// </summary>
-        [Key(1)]
         public long TimeTick { get; set; }
 	}
 }

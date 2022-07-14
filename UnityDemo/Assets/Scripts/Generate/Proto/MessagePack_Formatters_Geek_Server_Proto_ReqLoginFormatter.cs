@@ -18,23 +18,41 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ReqLoginFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ReqLogin>
     {
+        // UserName
+        private static global::System.ReadOnlySpan<byte> GetSpan_UserName() => new byte[1 + 8] { 168, 85, 115, 101, 114, 78, 97, 109, 101 };
+        // Platform
+        private static global::System.ReadOnlySpan<byte> GetSpan_Platform() => new byte[1 + 8] { 168, 80, 108, 97, 116, 102, 111, 114, 109 };
+        // SdkType
+        private static global::System.ReadOnlySpan<byte> GetSpan_SdkType() => new byte[1 + 7] { 167, 83, 100, 107, 84, 121, 112, 101 };
+        // SdkToken
+        private static global::System.ReadOnlySpan<byte> GetSpan_SdkToken() => new byte[1 + 8] { 168, 83, 100, 107, 84, 111, 107, 101, 110 };
+        // Device
+        private static global::System.ReadOnlySpan<byte> GetSpan_Device() => new byte[1 + 6] { 166, 68, 101, 118, 105, 99, 101 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ReqLogin value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteNil();
                 return;
             }
 
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(6);
-            writer.Write(value.UniId);
+            var formatterResolver = options.Resolver;
+            writer.WriteMapHeader(6);
+            writer.WriteRaw(GetSpan_UserName());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.UserName, options);
+            writer.WriteRaw(GetSpan_Platform());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.Platform, options);
+            writer.WriteRaw(GetSpan_SdkType());
             writer.Write(value.SdkType);
+            writer.WriteRaw(GetSpan_SdkToken());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.SdkToken, options);
+            writer.WriteRaw(GetSpan_Device());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.Device, options);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ReqLogin Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -45,35 +63,49 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            var length = reader.ReadArrayHeader();
+            var formatterResolver = options.Resolver;
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.ReqLogin();
 
             for (int i = 0; i < length; i++)
             {
-                switch (i)
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
                 {
-                    case 0:
-                        ____result.UniId = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.UserName = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
-                        break;
-                    case 2:
-                        ____result.Platform = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
-                        break;
-                    case 3:
-                        ____result.SdkType = reader.ReadInt32();
-                        break;
-                    case 4:
-                        ____result.SdkToken = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
-                        break;
-                    case 5:
-                        ____result.Device = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
-                        break;
                     default:
-                        reader.Skip();
-                        break;
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 8:
+                        switch (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey))
+                        {
+                            default: goto FAIL;
+                            case 7308604759846777685UL:
+                                ____result.UserName = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                                continue;
+                            case 7886488383309048912UL:
+                                ____result.Platform = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                                continue;
+                            case 7954882442721715283UL:
+                                ____result.SdkToken = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                                continue;
+                        }
+                    case 7:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 28552639057454163UL) { goto FAIL; }
+
+                        ____result.SdkType = reader.ReadInt32();
+                        continue;
+                    case 6:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 111477645534532UL) { goto FAIL; }
+
+                        ____result.Device = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                        continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
+                        continue;
+
                 }
             }
 

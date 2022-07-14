@@ -18,19 +18,25 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class BFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.B>
     {
+        // Name
+        private static global::System.ReadOnlySpan<byte> GetSpan_Name() => new byte[1 + 4] { 164, 78, 97, 109, 101 };
+        // Age
+        private static global::System.ReadOnlySpan<byte> GetSpan_Age() => new byte[1 + 3] { 163, 65, 103, 101 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.B value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteNil();
                 return;
             }
 
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(2);
-            writer.Write(value.Age);
+            var formatterResolver = options.Resolver;
+            writer.WriteMapHeader(2);
+            writer.WriteRaw(GetSpan_Name());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.Name, options);
+            writer.WriteRaw(GetSpan_Age());
+            writer.Write(value.Age);
         }
 
         public global::Geek.Server.Proto.B Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -41,23 +47,30 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            var length = reader.ReadArrayHeader();
+            var formatterResolver = options.Resolver;
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.B();
 
             for (int i = 0; i < length; i++)
             {
-                switch (i)
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
                 {
-                    case 0:
-                        ____result.Age = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.Name = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
-                        break;
                     default:
-                        reader.Skip();
-                        break;
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 4:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 1701667150UL) { goto FAIL; }
+
+                        ____result.Name = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                        continue;
+                    case 3:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 6645569UL) { goto FAIL; }
+
+                        ____result.Age = reader.ReadInt32();
+                        continue;
+
                 }
             }
 

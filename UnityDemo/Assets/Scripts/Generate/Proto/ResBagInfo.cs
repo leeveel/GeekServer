@@ -5,17 +5,17 @@ using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
-	[MessagePackObject]
+	[MessagePackObject(true)]
 	public class ResBagInfo : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 112002;
+
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-		[Key(1)]
 		public Dictionary<int, long> ItemDic { get; set; } = new Dictionary<int, long>();
 	}
 }

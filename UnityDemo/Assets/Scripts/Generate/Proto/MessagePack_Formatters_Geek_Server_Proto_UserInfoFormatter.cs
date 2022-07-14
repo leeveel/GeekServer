@@ -18,21 +18,36 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class UserInfoFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.UserInfo>
     {
+        // RoleName
+        private static global::System.ReadOnlySpan<byte> GetSpan_RoleName() => new byte[1 + 8] { 168, 82, 111, 108, 101, 78, 97, 109, 101 };
+        // RoleId
+        private static global::System.ReadOnlySpan<byte> GetSpan_RoleId() => new byte[1 + 6] { 166, 82, 111, 108, 101, 73, 100 };
+        // Level
+        private static global::System.ReadOnlySpan<byte> GetSpan_Level() => new byte[1 + 5] { 165, 76, 101, 118, 101, 108 };
+        // CreateTime
+        private static global::System.ReadOnlySpan<byte> GetSpan_CreateTime() => new byte[1 + 10] { 170, 67, 114, 101, 97, 116, 101, 84, 105, 109, 101 };
+        // VipLevel
+        private static global::System.ReadOnlySpan<byte> GetSpan_VipLevel() => new byte[1 + 8] { 168, 86, 105, 112, 76, 101, 118, 101, 108 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.UserInfo value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteNil();
                 return;
             }
 
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(5);
+            var formatterResolver = options.Resolver;
+            writer.WriteMapHeader(5);
+            writer.WriteRaw(GetSpan_RoleName());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.RoleName, options);
+            writer.WriteRaw(GetSpan_RoleId());
             writer.Write(value.RoleId);
+            writer.WriteRaw(GetSpan_Level());
             writer.Write(value.Level);
+            writer.WriteRaw(GetSpan_CreateTime());
             writer.Write(value.CreateTime);
+            writer.WriteRaw(GetSpan_VipLevel());
             writer.Write(value.VipLevel);
         }
 
@@ -44,32 +59,46 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            var length = reader.ReadArrayHeader();
+            var formatterResolver = options.Resolver;
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.UserInfo();
 
             for (int i = 0; i < length; i++)
             {
-                switch (i)
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
                 {
-                    case 0:
-                        ____result.RoleName = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
-                        break;
-                    case 1:
-                        ____result.RoleId = reader.ReadInt64();
-                        break;
-                    case 2:
-                        ____result.Level = reader.ReadInt32();
-                        break;
-                    case 3:
-                        ____result.CreateTime = reader.ReadInt64();
-                        break;
-                    case 4:
-                        ____result.VipLevel = reader.ReadInt32();
-                        break;
                     default:
-                        reader.Skip();
-                        break;
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 8:
+                        switch (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey))
+                        {
+                            default: goto FAIL;
+                            case 7308604759629131602UL:
+                                ____result.RoleName = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                                continue;
+                            case 7810779306190203222UL:
+                                ____result.VipLevel = reader.ReadInt32();
+                                continue;
+                        }
+                    case 6:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 110266396995410UL) { goto FAIL; }
+
+                        ____result.RoleId = reader.ReadInt64();
+                        continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 465558725964UL) { goto FAIL; }
+
+                        ____result.Level = reader.ReadInt32();
+                        continue;
+                    case 10:
+                        if (!global::System.MemoryExtensions.SequenceEqual(stringKey, GetSpan_CreateTime().Slice(1))) { goto FAIL; }
+
+                        ____result.CreateTime = reader.ReadInt64();
+                        continue;
+
                 }
             }
 

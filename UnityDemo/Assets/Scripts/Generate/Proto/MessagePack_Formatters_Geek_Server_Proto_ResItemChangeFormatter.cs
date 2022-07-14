@@ -18,19 +18,25 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ResItemChangeFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ResItemChange>
     {
+        // ItemDic
+        private static global::System.ReadOnlySpan<byte> GetSpan_ItemDic() => new byte[1 + 7] { 167, 73, 116, 101, 109, 68, 105, 99 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResItemChange value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value == null)
+            if (value is null)
             {
                 writer.WriteNil();
                 return;
             }
 
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            writer.WriteArrayHeader(2);
-            writer.Write(value.UniId);
+            var formatterResolver = options.Resolver;
+            writer.WriteMapHeader(2);
+            writer.WriteRaw(GetSpan_ItemDic());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, long>>(formatterResolver).Serialize(ref writer, value.ItemDic, options);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ResItemChange Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -41,23 +47,30 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
-            global::MessagePack.IFormatterResolver formatterResolver = options.Resolver;
-            var length = reader.ReadArrayHeader();
+            var formatterResolver = options.Resolver;
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.ResItemChange();
 
             for (int i = 0; i < length; i++)
             {
-                switch (i)
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
                 {
-                    case 0:
-                        ____result.UniId = reader.ReadInt32();
-                        break;
-                    case 1:
-                        ____result.ItemDic = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, long>>(formatterResolver).Deserialize(ref reader, options);
-                        break;
                     default:
-                        reader.Skip();
-                        break;
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 7:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 27981765308413001UL) { goto FAIL; }
+
+                        ____result.ItemDic = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.Dictionary<int, long>>(formatterResolver).Deserialize(ref reader, options);
+                        continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
+                        continue;
+
                 }
             }
 

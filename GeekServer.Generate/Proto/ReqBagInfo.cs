@@ -5,11 +5,12 @@ using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
-	[MessagePackObject]
+	[MessagePackObject(true)]
 	public class ReqBagInfo : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 112001;
+
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
