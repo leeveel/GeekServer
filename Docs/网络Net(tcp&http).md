@@ -1,5 +1,9 @@
 # 网络
-GeekServer网络层接入DotNetty，目前只支持tcp和http，GeekServer进行了深度包装，tcp和http都开发者来说用起来都非常简单。
+GeekServer网络层使用kestrel，GeekServer目前只接入了tcp和http，但是kestrel是支持UDP，websocket，Http123，singalr等几乎所有的常见协议的，如有所需请自行接入（工作量很小）。
+
+### donetty vs kestrel
+![](https://github.com/leeveel/GeekServer/blob/main/Docs/imgs/dotnetty.png)
+![](https://github.com/leeveel/GeekServer/blob/main/Docs/imgs/kestrel.png)  
 
 ### http
 创建任意脚本名字Handler，继承BaseHttpHandler，使用HttpMsgMapping标记指令，实现Action函数即可使用。Action中调用或者实现对应指令的逻辑，并返回结果给客户端。此外httpHandler还有2个字段可以重写标示是否验证，CheckSign是否验证，Inner是否使用内部验证方式。GeekServer支持post和get方式访问。
