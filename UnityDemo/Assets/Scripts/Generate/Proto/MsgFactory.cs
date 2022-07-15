@@ -9,13 +9,14 @@ namespace Geek.Server.Proto
 
         static MsgFactory()
         {
-            lookup = new System.Collections.Generic.Dictionary<int, Type>(13)
+            lookup = new System.Collections.Generic.Dictionary<int, Type>(14)
             {
 			    { 112001, typeof(Geek.Server.Proto.ReqBagInfo) },
 			    { 112002, typeof(Geek.Server.Proto.ResBagInfo) },
 			    { 112003, typeof(Geek.Server.Proto.ReqUseItem) },
 			    { 112004, typeof(Geek.Server.Proto.ReqSellItem) },
 			    { 112005, typeof(Geek.Server.Proto.ResItemChange) },
+			    { 111113, typeof(Geek.Server.Proto.TestStruct) },
 			    { 111111, typeof(Geek.Server.Proto.A) },
 			    { 111112, typeof(Geek.Server.Proto.B) },
 			    { 111000, typeof(Geek.Server.Proto.UserInfo) },

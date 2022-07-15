@@ -16,44 +16,34 @@
 
 namespace MessagePack.Formatters.Geek.Server.Proto
 {
-    public sealed class AFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.A>
+    public sealed class TestStructFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.TestStruct>
     {
         // Age
         private static global::System.ReadOnlySpan<byte> GetSpan_Age() => new byte[1 + 3] { 163, 65, 103, 101 };
-        // E
-        private static global::System.ReadOnlySpan<byte> GetSpan_E() => new byte[1 + 1] { 161, 69 };
-        // TS
-        private static global::System.ReadOnlySpan<byte> GetSpan_TS() => new byte[1 + 2] { 162, 84, 83 };
+        // Name
+        private static global::System.ReadOnlySpan<byte> GetSpan_Name() => new byte[1 + 4] { 164, 78, 97, 109, 101 };
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.A value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.TestStruct value, global::MessagePack.MessagePackSerializerOptions options)
         {
-            if (value is null)
-            {
-                writer.WriteNil();
-                return;
-            }
-
             var formatterResolver = options.Resolver;
-            writer.WriteMapHeader(3);
+            writer.WriteMapHeader(2);
             writer.WriteRaw(GetSpan_Age());
             writer.Write(value.Age);
-            writer.WriteRaw(GetSpan_E());
-            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Geek.Server.Proto.TestEnum>(formatterResolver).Serialize(ref writer, value.E, options);
-            writer.WriteRaw(GetSpan_TS());
-            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Geek.Server.Proto.TestStruct>(formatterResolver).Serialize(ref writer, value.TS, options);
+            writer.WriteRaw(GetSpan_Name());
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.Name, options);
         }
 
-        public global::Geek.Server.Proto.A Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Geek.Server.Proto.TestStruct Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
-                return null;
+                throw new global::System.InvalidOperationException("typecode is null, struct not supported");
             }
 
             options.Security.DepthStep(ref reader);
             var formatterResolver = options.Resolver;
             var length = reader.ReadMapHeader();
-            var ____result = new global::Geek.Server.Proto.A();
+            var ____result = new global::Geek.Server.Proto.TestStruct();
 
             for (int i = 0; i < length; i++)
             {
@@ -69,15 +59,10 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 
                         ____result.Age = reader.ReadInt32();
                         continue;
-                    case 1:
-                        if (stringKey[0] != 69) { goto FAIL; }
+                    case 4:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 1701667150UL) { goto FAIL; }
 
-                        ____result.E = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Geek.Server.Proto.TestEnum>(formatterResolver).Deserialize(ref reader, options);
-                        continue;
-                    case 2:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 21332UL) { goto FAIL; }
-
-                        ____result.TS = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Geek.Server.Proto.TestStruct>(formatterResolver).Deserialize(ref reader, options);
+                        ____result.Name = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         continue;
 
                 }

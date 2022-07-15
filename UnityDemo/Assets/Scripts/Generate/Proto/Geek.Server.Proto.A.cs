@@ -12,5 +12,7 @@ namespace Geek.Server.Proto
 
 
         public int Age { get; set; }
+        public TestEnum E { get; set; } = TestEnum.B;
+        public TestStruct TS { get; set; }
 	}
 }

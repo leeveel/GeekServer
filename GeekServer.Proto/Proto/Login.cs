@@ -2,12 +2,27 @@
 
 namespace Geek.Server.Proto
 {
+    public enum TestEnum
+    {
+        A,B,C,D,E,F,G,H,I,J,K,L,
+    }
+
+
+    [MessagePackObject(true)]
+    [Serialize(111113)]
+    public struct TestStruct
+    {
+        public int Age { get; set; }
+        public string Name { get; set; }
+    }
 
     [MessagePackObject(true)]
     [Serialize(111111)]
     public class A
     {
         public int Age { get; set; }
+        public TestEnum E { get; set; } = TestEnum.B;
+        public TestStruct TS { get; set; }
     }
 
     [MessagePackObject(true)]
