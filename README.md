@@ -35,8 +35,9 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 2. 安装[mongodb4.x](https://www.mongodb.com/try/download/community)
 3. 打开git clone本项目https://github.com/leeveel/GeekServer.git
 4. 运行Tools/ExcelGen/ExcelConverter.exe 点击[服务器-ALL]导出配置表
-5. 用VisualStudio2019打开GeekServer.sln 启动GeekServer.App
-6. 启动GeekServer.Test (一个1000人登录的demo)
+5. 用VisualStudio2022打开GeekServer.sln 启动GeekServer.App
+6. 修改GeekServer\GeekServer.Test\Config\test_config.json中ip地址
+7. 启动GeekServer.Test (一个1000人登录的demo)
 
 # 文档&例子&Demo
 [文档](https://github.com/leeveel/GeekServer/tree/master/Docs)  
