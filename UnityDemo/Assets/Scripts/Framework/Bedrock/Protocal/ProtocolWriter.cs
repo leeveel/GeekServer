@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Bedrock.Framework.Protocols
 {
-    public class ProtocolWriter : IAsyncDisposable
+    public class ProtocolWriter //: IAsyncDisposable
     {
         private readonly PipeWriter _writer;
         private readonly SemaphoreSlim _semaphore;

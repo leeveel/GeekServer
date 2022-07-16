@@ -9,7 +9,7 @@ namespace Geek.Client
     {
         public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out NMessage message)
         {
-            var reader = new SequenceReader<byte>(input);
+            var reader = new MessagePack.SequenceReader<byte>(input);
             //客户端传过来的length包含了长度自身（data: [length:byte[1,2,3,4]] ==> 则length=int 4 个字节+byte数组长度4=8）
             if (!reader.TryReadBigEndian(out int length) || reader.Remaining < length - 4)
             {

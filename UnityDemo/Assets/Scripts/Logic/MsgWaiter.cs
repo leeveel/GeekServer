@@ -40,6 +40,15 @@ namespace Geek.Client
             return true;
         }
 
+        public static void DisposeAll()
+        {
+            if (waitDic.Count > 0)
+            {
+                foreach (var item in waitDic)
+                    item.Value.Timer?.Dispose();
+            }
+        }
+
         public static async Task<bool> StartWait(int uniId)
         {
             if (!waitDic.ContainsKey(uniId))
@@ -80,24 +89,19 @@ namespace Geek.Client
             }
         }
 
-        long timerId;
         public TaskCompletionSource<bool> Tcs { private set; get; }
 
-        void Reset()
-        {
-            Tcs = new TaskCompletionSource<bool>();
-        }
 
-        private Timer timer;
+        public Timer Timer { private set; get; }
         void Start()
         {
             Tcs = new TaskCompletionSource<bool>();
-            timer = new Timer(TimeOut, null, 10000, -1);
+            Timer = new Timer(TimeOut, null, 10000, -1);
         }
 
-        void End(bool result)
+        public void End(bool result)
         {
-            timer.Dispose();
+            Timer.Dispose();
             if (Tcs != null)
                 Tcs.TrySetResult(result);
             Tcs = null;

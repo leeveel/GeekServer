@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Bedrock.Framework.Protocols
 {
-    public class ProtocolReader : IAsyncDisposable
+    public class ProtocolReader //: IAsyncDisposable
     {
         private readonly PipeReader _reader;
         private SequencePosition _examined;

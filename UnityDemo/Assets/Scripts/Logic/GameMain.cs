@@ -67,6 +67,7 @@ namespace Logic
         {
             Debug.Log("OnApplicationQuit");
             GameClient.Singleton.Close();
+            MsgWaiter.DisposeAll();
         }
 
 
