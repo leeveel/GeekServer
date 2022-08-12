@@ -34,7 +34,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 1. 安装[.NetCore6.0](https://dotnet.microsoft.com/download/dotnet/6.0),**vs2022建议大于17.2.2**(低版本Source Generator有可能工作不正常)
 2. 安装[mongodb4.x](https://www.mongodb.com/try/download/community)
 3. 打开git clone本项目https://github.com/leeveel/GeekServer.git
-4. 运行Tools/ExcelGen/ExcelConverter.exe 点击[服务器-ALL]导出配置表
+4. 运行Tools/ExcelGen/ExcelToCode.exe 点击[服务器-ALL]导出配置表
 5. 用VisualStudio2022打开GeekServer.sln 启动GeekServer.App
 6. 修改GeekServer\GeekServer.Test\Config\test_config.json中ip地址
 7. 启动GeekServer.Test (一个1000人登录的demo)
