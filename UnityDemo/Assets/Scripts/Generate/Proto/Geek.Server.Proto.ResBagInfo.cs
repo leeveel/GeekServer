@@ -9,13 +9,13 @@ namespace Geek.Server.Proto
 	public class ResBagInfo : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 112002;
+		public const int Sid = -1516249246;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-		public Dictionary<int, long> ItemDic { get; set; } = new Dictionary<int, long>();
+        public Dictionary<int, long> ItemDic { get; set; } = new Dictionary<int, long>();
 	}
 }

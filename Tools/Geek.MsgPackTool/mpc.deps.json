@@ -799,6 +799,14 @@
           }
         }
       },
+      "Standart.Hash.xxHash/4.0.4": {
+        "runtime": {
+          "lib/net6.0/Standart.Hash.xxHash.dll": {
+            "assemblyVersion": "4.0.4.0",
+            "fileVersion": "4.0.4.0"
+          }
+        }
+      },
       "System.AppContext/4.3.0": {
         "dependencies": {
           "System.Runtime": "4.3.0"
@@ -1554,6 +1562,7 @@
           "MessagePack": "2.4.35",
           "Microsoft.CodeAnalysis.CSharp.Workspaces": "4.0.1",
           "Scriban": "5.4.6",
+          "Standart.Hash.xxHash": "4.0.4",
           "System.CodeDom": "6.0.0"
         },
         "runtime": {
@@ -2001,6 +2010,13 @@
       "sha512": "sha512-08MfrLDM9Rz08/toBVjTqcUmdGyKbLQ5eTLp2MHUv4k8cox2jN6E/3Ss8NaqUuL2psU2cp0sy2aNEDep7jp0Kg==",
       "path": "scriban/5.4.6",
       "hashPath": "scriban.5.4.6.nupkg.sha512"
+    },
+    "Standart.Hash.xxHash/4.0.4": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-PZKDtzlKbkEgnk9k4bbi39Do7FTnd2FdlpsFu6tWLmUqOnSwAHFKH01U+QRDydykwtaWiq04MlFMc7jn5VV4fQ==",
+      "path": "standart.hash.xxhash/4.0.4",
+      "hashPath": "standart.hash.xxhash.4.0.4.nupkg.sha512"
     },
     "System.AppContext/4.3.0": {
       "type": "package",

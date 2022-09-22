@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<config>
-  <project-path>..\..\GeekServer.Proto</project-path> <!-- proto project path-->
-  <server-out-path>..\..\GeekServer.Generate\Proto</server-out-path> <!-- 服务器代码导出路径 -->
-  <client-out-path>..\..\UnityDemo\Assets\Scripts\Generate\Proto</client-out-path><!-- 客户端代码导出路径-->
-  <gen-first>false</gen-first><!-- 服务器是否使用代码生成的Resovler -->
-</config>

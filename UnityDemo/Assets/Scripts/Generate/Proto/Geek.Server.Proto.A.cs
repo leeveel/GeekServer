@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class A 
 	{
 		[IgnoreMember]
-		public const int Sid = 111111;
+		public const int Sid = 1544071388;
 
 
         public int Age { get; set; }

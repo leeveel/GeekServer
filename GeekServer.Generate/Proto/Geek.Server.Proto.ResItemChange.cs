@@ -9,16 +9,16 @@ namespace Geek.Server.Proto
 	public class ResItemChange : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 112005;
+		public const int Sid = -202674947;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-		/// <summary>
-		/// 变化的道具
-		/// </summary>
-		public Dictionary<int, long> ItemDic { get; set; }
+        /// <summary>
+        /// 变化的道具
+        /// </summary>
+        public Dictionary<int, long> ItemDic { get; set; }
 	}
 }

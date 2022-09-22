@@ -1,0 +1,6 @@
+{
+  "ProjectPath": "../../GeekServer.Proto",
+  "ServerOutPath": "../../GeekServer.Generate/Proto",
+  "ClientOutPath": "../../UnityDemo/Assets/Scripts/Generate/Proto",
+  "GeneratedFirst": false
+}

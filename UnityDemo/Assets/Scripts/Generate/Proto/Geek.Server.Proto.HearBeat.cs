@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class HearBeat : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 111004;
+		public const int Sid = -1620014636;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class UserInfo 
 	{
 		[IgnoreMember]
-		public const int Sid = 111000;
+		public const int Sid = 2003858448;
 
 
         /// <summary>
