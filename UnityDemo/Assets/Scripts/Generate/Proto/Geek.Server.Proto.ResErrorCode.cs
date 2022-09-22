@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class ResErrorCode : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 111005;
+		public const int Sid = -488702425;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

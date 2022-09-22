@@ -9,16 +9,16 @@ namespace Geek.Server.Proto
 	public class ReqUseItem : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 112003;
+		public const int Sid = -693612441;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-		/// <summary>
-		/// 道具id
-		/// </summary>
-		public int ItemId { get; set; }
+        /// <summary>
+        /// 道具id
+        /// </summary>
+        public int ItemId { get; set; }
 	}
 }

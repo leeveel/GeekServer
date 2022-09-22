@@ -4,12 +4,11 @@ namespace Geek.Server.Proto
 {
     public enum TestEnum
     {
-        A,B,C,D,E,F,G,H,I,J,K,L,
+        A, B, C, D, E, F, G, H, I, J, K, L,
     }
 
 
     [MessagePackObject(true)]
-    [Serialize(111113)]
     public struct TestStruct
     {
         public int Age { get; set; }
@@ -17,7 +16,6 @@ namespace Geek.Server.Proto
     }
 
     [MessagePackObject(true)]
-    [Serialize(111111)]
     public class A
     {
         public int Age { get; set; }
@@ -26,7 +24,6 @@ namespace Geek.Server.Proto
     }
 
     [MessagePackObject(true)]
-    [Serialize(111112)]
     public class B : A
     {
         public string Name { get; set; }
@@ -39,7 +36,6 @@ namespace Geek.Server.Proto
     /// 玩家基础信息
     /// </summary>
     [MessagePackObject(true)]
-    [Serialize(111000)]
     public class UserInfo
     {
         /// <summary>
@@ -68,7 +64,6 @@ namespace Geek.Server.Proto
     /// 请求登录
     /// </summary>
     [MessagePackObject(true)]
-    [Serialize(111001)]
     public class ReqLogin : Message
     {
         public string UserName { get; set; }
@@ -83,7 +78,6 @@ namespace Geek.Server.Proto
     /// 请求登录
     /// </summary>
     [MessagePackObject(true)]
-    [Serialize(111002)]
     public class ResLogin : Message
     {
         /// <summary>
@@ -98,7 +92,6 @@ namespace Geek.Server.Proto
     /// 等级变化
     /// </summary>
     [MessagePackObject(true)]
-    [Serialize(111003)]
     public class ResLevelUp : Message
     {
         /// <summary>
@@ -111,7 +104,6 @@ namespace Geek.Server.Proto
     /// 双向心跳/收到恢复同样的消息
     /// </summary>
     [MessagePackObject(true)]
-    [Serialize(111004)]
     public class HearBeat : Message
     {
         /// <summary>
@@ -124,7 +116,6 @@ namespace Geek.Server.Proto
     /// 客户端每次请求都会回复错误码
     /// </summary>
     [MessagePackObject(true)]
-    [Serialize(111005)]
     public class ResErrorCode : Message
     {
         /// <summary>

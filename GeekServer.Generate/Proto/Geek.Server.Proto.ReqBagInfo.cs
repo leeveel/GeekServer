@@ -9,7 +9,7 @@ namespace Geek.Server.Proto
 	public class ReqBagInfo : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 112001;
+		public const int Sid = -1612046553;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
