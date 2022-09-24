@@ -45,7 +45,7 @@ namespace Geek.Server
 
         protected virtual void WriteAndFlush(Message msg)
         {
-            if (msg.MsgId > 0 && msg != null)
+            if (msg != null)
                 WriteAndFlush(new NMessage(msg));
         }
 
