@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Exe</OutputType>
@@ -14,12 +14,12 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<DefineConstants>$(DefineConstants)TRACE</DefineConstants>
-		<OutputPath>..\test_debug</OutputPath>
+		<OutputPath>..\package_debug</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DefineConstants>$(DefineConstants)TRACE</DefineConstants>
-		<OutputPath>..\test_release</OutputPath>
+		<OutputPath>..\package</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -28,10 +28,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="Configs\config.json">
+		<None Update="Configs\test_config.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="Configs\NLog.config">
+		<None Update="Configs\test_NLog.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

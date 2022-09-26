@@ -29,7 +29,7 @@
 		<None Update="Configs\NLog.xsd">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="Configs\logic_config.json">
+		<None Update="Configs\app_config.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Configs\openServerActivity.json">

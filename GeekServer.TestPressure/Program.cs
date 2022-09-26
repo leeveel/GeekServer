@@ -6,9 +6,9 @@ namespace Test.Pressure
         public static async Task Main(string[] args)
         {
             PolymorphicRegister.Load();
-            LogManager.Configuration = new XmlLoggingConfiguration("Configs/NLog.config");
+            LogManager.Configuration = new XmlLoggingConfiguration("Configs/test_NLog.config");
 
-            TestSettings.Load("Configs/config.json");
+            TestSettings.Load("Configs/test_config.json");
             var maxCount = TestSettings.Ins.clientCount;
             for (int i = 0; i < maxCount; i++)
             {

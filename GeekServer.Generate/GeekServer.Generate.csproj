@@ -22,11 +22,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
+	  <Compile Remove="Share\**" />
+	  <EmbeddedResource Remove="Share\**" />
+	  <None Remove="Share\**" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Share\Rank\" />
+		<ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
 	</ItemGroup>
 
 </Project>

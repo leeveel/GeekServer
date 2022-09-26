@@ -1,7 +1,7 @@
 ﻿{
   "IsDebug": true,
-  "ServerId": 10197,
-  "ServerName": "mrc",
+  "ServerId": 10001,
+  "ServerName": "geek_server",
   "LocalIp": "127.0.0.1",
   "TcpPort": 8899,
   "HttpCode": "inner_httpcode",
