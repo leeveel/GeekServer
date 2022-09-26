@@ -30,7 +30,7 @@ namespace Geek.Server
                 var attribute = (HttpMsgMapping)type.GetCustomAttribute(typeof(HttpMsgMapping), true);
                 if (attribute == null)
                     continue;
-                var cmd = attribute.cmd;
+                var cmd = attribute.Cmd;
                 cmdHandlerMap[cmd] = type;
             }
         }

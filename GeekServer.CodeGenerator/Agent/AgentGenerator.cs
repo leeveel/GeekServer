@@ -45,7 +45,7 @@ namespace Geek.Server
                         if (member is MethodDeclarationSyntax method)
                         {
 
-                            if (method.Identifier.Text.Equals("Active") 
+                            if (method.Identifier.Text.Equals("Active")
                                 || method.Identifier.Text.Equals("Deactive"))
                             {
                                 continue;

@@ -1,0 +1,17 @@
+﻿{
+  "IsDebug": true,
+  "ServerId": 10197,
+  "ServerName": "mrc",
+  "LocalIp": "127.0.0.1",
+  "TcpPort": 8899,
+  "HttpCode": "chengdu98_inner_secretkey",
+  "HttpUrl": "/game98/logic",
+  "HttpPort": 20000,
+  "GrpcPort": 30000,
+  "MongoUrl": "mongodb://127.0.0.1:27017/?authSource=admin",
+  "DbName": "gm_logic_10197",
+  "Language": "chinese",
+  "DataCenter": "zrj_gm",
+  "CenterUrl": "http://192.168.0.183:8500",
+  "SDKType": 0
+}

@@ -1,114 +1,88 @@
-﻿using System;
+﻿using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using NLog;
 
 namespace Geek.Server
 {
-    public class MongoDBConnection
+    public static class MongoDBConnection
     {
-        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public static readonly MongoDBConnection Singleton = new MongoDBConnection();
-        public IMongoDatabase CurDateBase { get; private set; }
-        public MongoClient Client { get; private set; }
-        public void Connect(string db, string connectConfig)
-        {
-            MongoClient client = new MongoClient(connectConfig);
-            CurDateBase = client.GetDatabase(db);
-            client.ListDatabaseNames();
-        }
 
-        public async Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : DBState, new()
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+        public static MongoClient Client { get; private set; }
+
+        public static IMongoDatabase CurDB { get; private set; }
+
+        public static void Init(string url, string dbName)
         {
             try
             {
-                var look = EntityStateSeeker.GetState<TState>(id);
-                if (look != null)
-                    return look;
+                var settings = MongoClientSettings.FromConnectionString(url);
+                Client = new MongoClient(settings);
+                CurDB = Client.GetDatabase(dbName);
+                Log.Info($"初始化MongoDB服务完成 Url:{url} DbName:{dbName}");
+            }
+            catch (Exception)
+            {
+                Log.Error($"初始化MongoDB服务失败 Url:{url} DbName:{dbName}");
+                throw;
+            }
+        }
 
-                //读数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
-                var col = CurDateBase.GetCollection<TState>(BaseDBState.WrapperFullName<TState>());
-                var state = await (await col.FindAsync(filter)).FirstOrDefaultAsync();
+        public static readonly StatisticsTool statisticsTool = new();
+
+        public static async Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
+        {
+            statisticsTool.Count(typeof(TState).FullName);
+            var state = RoleStateLoader.GetState<TState>(id);
+            bool isNew;
+            if (state == null)
+            {
+                var filter = Builders<TState>.Filter.Eq(CacheState.UniqueId, id);
+                var col = CurDB.GetCollection<TState>();
+                using var cursor = await col.FindAsync(filter);
+                state = await cursor.FirstOrDefaultAsync();
+                isNew = state == null;
                 if (state == null && defaultGetter != null)
                     state = defaultGetter();
                 if (state == null)
+                    state = new TState { Id = id };
+            }
+            else
+            {
+                isNew = false;
+            }
+
+            state.AfterLoadFromDB(isNew);
+            return state;
+        }
+
+        public static async Task SaveState<TState>(TState state) where TState : CacheState
+        {
+            var (isChanged, data) = state.IsChanged();
+            if (isChanged)
+            {
+                var _state = BsonSerializer.Deserialize<TState>(data);
+                var filter = Builders<TState>.Filter.Eq(CacheState.UniqueId, state.Id);
+                var col = CurDB.GetCollection<TState>();
+                var result = await col.ReplaceOneAsync(filter, _state, REPLACE_OPTIONS);
+                if (result.IsAcknowledged)
                 {
-                    //state = new TState { Id = id };
-                    state = (TState)BaseDBState.CreateStateWrapper<TState>();
-                    state.Id = id;
+                    state.AfterSaveToDB();
                 }
-                state.ClearChanges();
-                return state;
-            }
-            catch(Exception e)
-            {
-                LOGGER.Fatal(e.ToString());
-                //await Task.Delay(500);
-                //return await LoadState<TState>(id, defaultGetter);
-                return default;
             }
         }
 
-        public async Task<TState> LoadState<TState>(string id, Func<TState> defaultGetter = null) where TState : BaseDBState
-        {
-            try
-            {
-                //读数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
-                var col = CurDateBase.GetCollection<TState>(BaseDBState.WrapperFullName<TState>());
-                var state = await (await col.FindAsync(filter)).FirstOrDefaultAsync();
-                if (state == null && defaultGetter != null)
-                    state = defaultGetter();
-                if (state != null)
-                    state.ClearChanges();
-                return state;
-            }
-            catch (Exception e)
-            {
-                LOGGER.Fatal(e.ToString());
-                //await Task.Delay(500);
-                //return await LoadState<TState>(id, defaultGetter);
-                return default;
-            }
-        }
+        public static readonly ReplaceOptions REPLACE_OPTIONS = new() { IsUpsert = true };
 
-        public async Task SaveState<TState>(TState state) where TState : DBState
-        {
-            if (state.IsChangedComparedToDB())
-            {
-                state.ReadyToSaveToDB();
-                //保存数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, state.Id);
-                var col = CurDateBase.GetCollection<TState>(BaseDBState.WrapperFullName<TState>());
-                var ret = await col.ReplaceOneAsync(filter, state, new ReplaceOptions() { IsUpsert = true });
-                if (ret.IsAcknowledged)
-                    state.SavedToDB();
-            }
-        }
+        public static readonly BulkWriteOptions BULK_WRITE_OPTIONS = new() { IsOrdered = false };
 
-        public async Task SaveState<TState>(string id, TState state) where TState : BaseDBState
+        public static Task CreateIndex<TState>(string indexKey)
         {
-            if (state.IsChangedComparedToDB())
-            {
-                state.ReadyToSaveToDB();
-                //保存数据
-                var filter = Builders<TState>.Filter.Eq(MongoField.Id, id);
-                var col = CurDateBase.GetCollection<TState>(BaseDBState.WrapperFullName<TState>());
-                var ret = await col.ReplaceOneAsync(filter, state, new ReplaceOptions() { IsUpsert = true });
-                if (ret.IsAcknowledged)
-                    state.SavedToDB();
-            }
-        }
-
-        public Task IndexCollectoinMore<TState>(string indexKey) where TState : DBState
-        {
-            var col = CurDateBase.GetCollection<TState>(BaseDBState.WrapperFullName<TState>());
-            var key1 = Builders<TState>.IndexKeys.Ascending(indexKey);
-            var key2 = Builders<TState>.IndexKeys.Ascending(MongoField.Id);
-            var model1 = new CreateIndexModel<TState>(key1);
-            var model2 = new CreateIndexModel<TState>(key2);
-            return col.Indexes.CreateManyAsync(new List<CreateIndexModel<TState>>() { model1, model2 });
+            var col = CurDB.GetCollection<TState>();
+            var key = Builders<TState>.IndexKeys.Ascending(indexKey);
+            var model = new CreateIndexModel<TState>(key);
+            return col.Indexes.CreateOneAsync(model);
         }
     }
 }

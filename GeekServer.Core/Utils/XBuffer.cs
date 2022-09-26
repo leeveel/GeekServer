@@ -118,7 +118,7 @@ namespace Geek.Server
             //offset += value.Length;
             fixed (byte* ptr = buffer, valPtr = value)
             {
-                Buffer.MemoryCopy(valPtr, ptr+offset, value.Length, value.Length);
+                Buffer.MemoryCopy(valPtr, ptr + offset, value.Length, value.Length);
                 offset += value.Length;
             }
         }
@@ -166,7 +166,7 @@ namespace Geek.Server
             if (len > short.MaxValue)
                 throw new ArgumentException($"string length exceed short.MaxValue {len}, {short.MaxValue}");
 
-            //Ô¤ÅÐÒÑ¾­³¬³ö³¤¶ÈÁË£¬Ö±½Ó¼ÆËã³¤¶È¾ÍÐÐÁË
+            //Ô¤ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½Ö±ï¿½Ó¼ï¿½ï¿½ã³¤ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½
             if (offset + len + ShortSize > buffer.Length)
             {
                 throw new ArgumentException($"xbuffer write out of index {offset + len + ShortSize}, {buffer.Length}");
@@ -287,7 +287,7 @@ namespace Geek.Server
         public static unsafe byte[] ReadBytes(Span<byte> buffer, ref int offset)
         {
             var len = ReadInt(buffer, ref offset);
-            //Êý¾Ý²»¿ÉÐÅ
+            //ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½ï¿½
             if (len <= 0 || offset > buffer.Length + len * ByteSize)
                 return new byte[0];
 
@@ -314,7 +314,7 @@ namespace Geek.Server
         public static unsafe string ReadString(Span<byte> buffer, ref int offset)
         {
             var len = ReadShort(buffer, ref offset);
-            //Êý¾Ý²»¿ÉÐÅ
+            //ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½ï¿½
             if (len <= 0 || offset > buffer.Length + len * ByteSize)
                 return "";
             fixed (byte* ptr = buffer)
@@ -478,7 +478,7 @@ namespace Geek.Server
             if (len > short.MaxValue)
                 throw new ArgumentException($"string length exceed short.MaxValue {len}, {short.MaxValue}");
 
-            //Ô¤ÅÐÒÑ¾­³¬³ö³¤¶ÈÁË£¬Ö±½Ó¼ÆËã³¤¶È¾ÍÐÐÁË
+            //Ô¤ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë£ï¿½Ö±ï¿½Ó¼ï¿½ï¿½ã³¤ï¿½È¾ï¿½ï¿½ï¿½ï¿½ï¿½
             if (offset + len + ShortSize > buffer.Length)
             {
                 offset += len + ShortSize;
@@ -594,7 +594,7 @@ namespace Geek.Server
         public static unsafe byte[] ReadBytes(byte[] buffer, ref int offset)
         {
             var len = ReadInt(buffer, ref offset);
-            //Êý¾Ý²»¿ÉÐÅ
+            //ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½ï¿½
             if (len <= 0 || offset > buffer.Length + len * ByteSize)
                 return new byte[0];
 
@@ -622,7 +622,7 @@ namespace Geek.Server
             fixed (byte* ptr = buffer)
             {
                 var len = ReadShort(buffer, ref offset);
-                //Êý¾Ý²»¿ÉÐÅ
+                //ï¿½ï¿½ï¿½Ý²ï¿½ï¿½ï¿½ï¿½ï¿½
                 if (len <= 0 || offset > buffer.Length + len * ByteSize)
                     return "";
 

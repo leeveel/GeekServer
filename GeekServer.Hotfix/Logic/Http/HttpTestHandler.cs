@@ -1,13 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Geek.Server.Logic.Http
+using Geek.Server.Login;
+
+namespace Geek.Server.Http
 {
-
     public class HttpTestRes : HttpResult
     {
         public class Info
@@ -29,7 +24,7 @@ namespace Geek.Server.Logic.Http
         public override bool CheckSign => true;
 
         /// <summary>
-        /// http://192.168.0.163:20000/game/api?command=test
+        /// http://127.0.0.1:20000/game/api?command=test
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="url"></param>
@@ -47,6 +42,7 @@ namespace Geek.Server.Logic.Http
             res.TestInfo.Age = 18;
             res.TestInfo.Name = "leeveel";
             //var str = JsonConvert.SerializeObject(res);
+            GC.Collect();
             return Task.FromResult(res.ToString());
         }
     }

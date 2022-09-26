@@ -13,6 +13,10 @@ namespace Logic
         public static GameMain Singleton = null;
         public Text Txt;
 
+        public string serverIp = "127.0.0.1";
+        public int serverPort = 10000;
+        public string userName = "123456";
+
         private void Awake()
         {
             Singleton = this;
@@ -35,7 +39,7 @@ namespace Logic
         private async Task ConnectServer()
         {
             //这里填写你的本机的内网ip地址,不要使用127.0.0.1（有可能由于hosts设置连不上）
-            _ = GameClient.Singleton.Connect("192.168.0.163", 10000);
+            _ = GameClient.Singleton.Connect(serverIp, serverPort);
             await MsgWaiter.StartWait(GameClient.ConnectEvt);
         }
 
@@ -45,7 +49,7 @@ namespace Logic
             var req = new ReqLogin();
             req.SdkType = 0;
             req.SdkToken = "";
-            req.UserName = "123456";
+            req.UserName = userName;
             req.Device = SystemInfo.deviceUniqueIdentifier;
             if (Application.platform == RuntimePlatform.Android)
                 req.Platform = "android";

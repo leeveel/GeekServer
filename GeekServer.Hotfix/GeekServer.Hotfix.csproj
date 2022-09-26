@@ -1,36 +1,33 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>Geek.Server</RootNamespace>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<RootNamespace>Server.Logic</RootNamespace>
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>../app_debug</OutputPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<ApplicationIcon />
+		<StartupObject />
+	</PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>../app</OutputPath>
-  </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
+		<OutputPath>..\package_debug</OutputPath>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\GeekServer.App\GeekServer.App.csproj" />
-    <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
-    <ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
-    <ProjectReference Include="..\GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
+		<OutputPath>..\package</OutputPath>
+	</PropertyGroup>
 
-    <PropertyGroup>
-	    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-	    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
-    </PropertyGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\GeekServer.App\GeekServer.App.csproj" />
+		<ProjectReference Include="..\GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+	</ItemGroup>
 
-    <Target Name="CleanSourceGeneratedFiles" AfterTargets="Clean">
-	    <RemoveDir Directories="$(BaseIntermediateOutputPath)\GeneratedFiles" />
-    </Target>
+	<ItemGroup>
+	</ItemGroup>
 
 </Project>

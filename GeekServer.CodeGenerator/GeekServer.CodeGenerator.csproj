@@ -9,11 +9,11 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>../app_debug</OutputPath>
+		<OutputPath>../package_debug</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>../app</OutputPath>
+		<OutputPath>../package</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -36,7 +36,6 @@
 	<ItemGroup>
 		<EmbeddedResource Include="$(PKGScriban)\lib\netstandard2.0\Scriban.dll" Visible="false" />
 		<EmbeddedResource Include="$(ProjectPath)\..\Template\Agent.liquid" Visible="true" />
-		<EmbeddedResource Include="$(ProjectPath)\..\Template\State.liquid" Visible="true" />
 	</ItemGroup>
 
 </Project>

@@ -1,49 +1,341 @@
-﻿
-
-using Quartz;
+﻿using Quartz;
 using Quartz.Impl;
 using Quartz.Logging;
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace Geek.Server
 {
-    public sealed class QuartzTimer
+    public static class QuartzTimer
     {
-        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        static IScheduler scheduler;
 
-        const string ParamKey = "param";
-        const string ActorIdKey = "actorId";
-        const string HandlerTypeKey = "handlerType";
+        private static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
+
+        public static readonly StatisticsTool statisticsTool = new();
+
+        public static void Unschedule(long id)
+        {
+            if (id <= 0)
+                return;
+            scheduler.DeleteJob(JobKey.Create(id + ""));
+        }
+
+        public static void Unschedule(IEnumerable<long> set)
+        {
+            foreach (var id in set)
+            {
+                if (id > 0)
+                    scheduler.DeleteJob(JobKey.Create(id + ""));
+            }
+        }
+        #region 热更定时器
+        /// <summary>
+        /// 每隔一段时间执行一次
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="actorId"></param>
+        /// <param name="firstTime"></param>
+        /// <param name="interval"></param>
+        /// <param name="param"></param>
+        /// <param name="repeatCount"> -1 表示永远 </param>
+        /// <returns></returns>
+        public static long Schedule<T>(long actorId, TimeSpan delay, TimeSpan interval, Param param = null, int repeatCount = -1) where T : ITimerHandler
+        {
+            var id = NextId();
+            var firstTimeOffset = DateTimeOffset.Now.Add(delay);
+            TriggerBuilder builder;
+            if (repeatCount < 0)
+            {
+                builder = TriggerBuilder.Create().StartAt(firstTimeOffset).WithSimpleSchedule(x => x.WithInterval(interval).RepeatForever());
+            }
+            else
+            {
+                builder = TriggerBuilder.Create().StartAt(firstTimeOffset).WithSimpleSchedule(x => x.WithInterval(interval).WithRepeatCount(repeatCount));
+            }
+            scheduler.ScheduleJob(GetJobDetail<T>(id, actorId, param), builder.Build());
+            return id;
+        }
+
+        /// <summary>
+        /// 基于时间delay
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="actorId"></param>
+        /// <param name="executeTime"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static long Delay<T>(long actorId, TimeSpan delay, Param param = null) where T : ITimerHandler
+        {
+            var id = NextId();
+            var firstTimeOffset = DateTimeOffset.Now.Add(delay);
+            var trigger = TriggerBuilder.Create().StartAt(firstTimeOffset).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, actorId, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 基于cron表达式
+        /// </summary>
+        public static long WithCronExpression<T>(long actorId, string cronExpression, Param param = null) where T : ITimerHandler
+        {
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithCronSchedule(cronExpression).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, actorId, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 每日
+        /// </summary>
+        public static long Daily<T>(long actorId, int hour, int minute, Param param = null) where T : ITimerHandler
+        {
+            if (hour < 0 || hour >= 24 || minute < 0 || minute >= 60)
+            {
+                throw new ArgumentOutOfRangeException($"定时器参数错误 TimerHandler:{typeof(T).FullName} {nameof(hour)}:{hour} {nameof(minute)}:{minute}");
+            }
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(hour, minute)).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, actorId, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 每周某些天
+        /// </summary>
+        public static long WithDayOfWeeks<T>(long actorId, int hour, int minute, Param param, params DayOfWeek[] dayOfWeeks) where T : ITimerHandler
+        {
+            if (dayOfWeeks == null || dayOfWeeks.Length <= 0)
+            {
+                throw new ArgumentNullException($"定时每周执行 参数为空：{nameof(dayOfWeeks)} TimerHandler:{typeof(T).FullName} actorId:{actorId} actorType:{IdGenerator.GetActorType(actorId)}");
+            }
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.AtHourAndMinuteOnGivenDaysOfWeek(hour, minute, dayOfWeeks)).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, actorId, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 每周某天
+        /// </summary>
+        public static long Weekly<T>(long actorId, DayOfWeek dayOfWeek, int hour, int minute, Param param = null) where T : ITimerHandler
+        {
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(dayOfWeek, hour, minute)).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, actorId, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 每月某天
+        /// </summary>
+        public static long Monthly<T>(long actorId, int dayOfMonth, int hour, int minute, Param param = null) where T : ITimerHandler
+        {
+            if (dayOfMonth < 0 || dayOfMonth > 31)
+            {
+                throw new ArgumentException($"定时器参数错误 TimerHandler:{typeof(T).FullName} {nameof(dayOfMonth)}:{dayOfMonth} actorId:{actorId} actorType:{IdGenerator.GetActorType(actorId)}");
+            }
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.MonthlyOnDayAndHourAndMinute(dayOfMonth, hour, minute)).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, actorId, param), trigger);
+            return id;
+        }
+        #endregion
+
+        #region 非热更定时器
+        /// <summary>
+        /// 每隔一段时间执行一次
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="actorId"></param>
+        /// <param name="firstTime"></param>
+        /// <param name="interval"></param>
+        /// <param name="param"></param>
+        /// <param name="repeatCount"> -1 表示永远 </param>
+        /// <returns></returns>
+        public static long Schedule<T>(TimeSpan delay, TimeSpan interval, Param param = null, int repeatCount = -1) where T : NotHotfixTimerHandler
+        {
+            var id = NextId();
+            var firstTimeOffset = DateTimeOffset.Now.Add(delay);
+            TriggerBuilder builder;
+            if (repeatCount < 0)
+            {
+                builder = TriggerBuilder.Create().StartAt(firstTimeOffset).WithSimpleSchedule(x => x.WithInterval(interval).RepeatForever());
+            }
+            else
+            {
+                builder = TriggerBuilder.Create().StartAt(firstTimeOffset).WithSimpleSchedule(x => x.WithInterval(interval).WithRepeatCount(repeatCount));
+            }
+            scheduler.ScheduleJob(GetJobDetail<T>(id, param), builder.Build());
+            return id;
+        }
+
+        /// <summary>
+        /// 基于时间delay
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="actorId"></param>
+        /// <param name="executeTime"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        public static long Delay<T>(TimeSpan delay, Param param = null) where T : NotHotfixTimerHandler
+        {
+            var id = NextId();
+            var firstTimeOffset = DateTimeOffset.Now.Add(delay);
+            var trigger = TriggerBuilder.Create().StartAt(firstTimeOffset).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 基于cron表达式
+        /// </summary>
+        public static long WithCronExpression<T>(string cronExpression, Param param = null) where T : NotHotfixTimerHandler
+        {
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithCronSchedule(cronExpression).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 每日
+        /// </summary>
+        public static long Daily<T>(int hour, int minute, Param param = null) where T : NotHotfixTimerHandler
+        {
+            if (hour < 0 || hour >= 24 || minute < 0 || minute >= 60)
+            {
+                throw new ArgumentOutOfRangeException($"定时器参数错误 TimerHandler:{typeof(T).FullName} {nameof(hour)}:{hour} {nameof(minute)}:{minute}");
+            }
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(hour, minute)).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 每周某些天
+        /// </summary>
+        public static long WithDayOfWeeks<T>(int hour, int minute, Param param, params DayOfWeek[] dayOfWeeks) where T : NotHotfixTimerHandler
+        {
+            if (dayOfWeeks == null || dayOfWeeks.Length <= 0)
+            {
+                throw new ArgumentNullException($"定时每周执行 参数为空：{nameof(dayOfWeeks)} TimerHandler:{typeof(T).FullName}");
+            }
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.AtHourAndMinuteOnGivenDaysOfWeek(hour, minute, dayOfWeeks)).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 每周某天
+        /// </summary>
+        public static long Weekly<T>(DayOfWeek dayOfWeek, int hour, int minute, Param param = null) where T : NotHotfixTimerHandler
+        {
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.WeeklyOnDayAndHourAndMinute(dayOfWeek, hour, minute)).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, param), trigger);
+            return id;
+        }
+
+        /// <summary>
+        /// 每月某天
+        /// </summary>
+        public static long Monthly<T>(int dayOfMonth, int hour, int minute, Param param = null) where T : NotHotfixTimerHandler
+        {
+            if (dayOfMonth < 0 || dayOfMonth > 31)
+            {
+                throw new ArgumentException($"定时器参数错误 TimerHandler:{typeof(T).FullName} {nameof(dayOfMonth)}:{dayOfMonth}");
+            }
+            var id = NextId();
+            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.MonthlyOnDayAndHourAndMinute(dayOfMonth, hour, minute)).Build();
+            scheduler.ScheduleJob(GetJobDetail<T>(id, param), trigger);
+            return id;
+        }
+        #endregion
+
+        #region 调度
+        static IScheduler scheduler = null;
+
+        /// <summary>
+        /// 可防止反复初始化
+        /// </summary>
+        static QuartzTimer()
+        {
+            Init().Wait();
+        }
+
+        static async Task Init()
+        {
+            LogProvider.SetCurrentLogProvider(new ConsoleLogProvider());
+            var factory = new StdSchedulerFactory();
+            scheduler = await factory.GetScheduler();
+            await scheduler.Start();
+        }
+
+        public static Task Stop()
+        {
+            return scheduler.Shutdown();
+        }
+
+        private static long id = DateTime.Now.Ticks;
+        private static long NextId()
+        {
+            return Interlocked.Increment(ref id);
+        }
 
         class TimerJob : IJob
         {
             public async Task Execute(IJobExecutionContext context)
             {
-                var actorId = context.JobDetail.JobDataMap.GetLong(ActorIdKey);
-                var handlerType = context.JobDetail.JobDataMap.GetString(HandlerTypeKey);
+                var handlerType = context.JobDetail.JobDataMap.GetString(TIMER_KEY);
+                try
+                {
+                    var param = context.JobDetail.JobDataMap.Get(PARAM_KEY) as Param;
+                    var handler = HotfixMgr.GetInstance<ITimerHandler>(handlerType);
+                    if (handler != null)
+                    {
+                        var actorId = context.JobDetail.JobDataMap.GetLong(ACTOR_ID_KEY);
+                        var agentType = handler.GetType().BaseType.GenericTypeArguments[0];
+                        var comp = await ActorMgr.GetCompAgent(actorId, agentType);
+                        comp.Tell(() => handler.InnerHandleTimer(comp, param));
 
-                var param = context.JobDetail.JobDataMap.Get(ParamKey) as Param;
-                await triggerTimer(actorId, handlerType, param);
+                    }
+                    else
+                    {
+                        Log.Error($"错误的ITimer类型，回调失败 type:{handlerType}");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e.ToString());
+                }
             }
         }
 
-        static async Task triggerTimer(long actorId, string handlerType, Param param)
+        public const string PARAM_KEY = "param";
+        const string ACTOR_ID_KEY = "actor_id";
+        const string TIMER_KEY = "timer";
+
+        private static IJobDetail GetJobDetail<T>(long id, long actorId, Param param) where T : ITimerHandler
         {
-            try
+            var handlerType = typeof(T);
+            statisticsTool.Count(handlerType.FullName);
+            if (handlerType.Assembly != HotfixMgr.HotfixAssembly)
             {
-                var handler = HotfixMgr.GetInstance<ITimerHandler>(handlerType);
-                var agentType = handler.GetType().BaseType.GenericTypeArguments[0];
-                var comp = await EntityMgr.GetCompAgent(actorId, agentType);
-                _ = comp.Owner.Actor.SendAsync(() => handler.InnerHandleTimer(comp, param));
+                throw new Exception("定时器代码需要在热更项目里");
             }
-            catch (Exception e)
-            {
-                LOGGER.Error(e.ToString());
-            }
+            var job = JobBuilder.Create<TimerJob>().WithIdentity(id + "").Build();
+            job.JobDataMap.Add(PARAM_KEY, param);
+            job.JobDataMap.Add(ACTOR_ID_KEY, actorId);
+            job.JobDataMap.Add(TIMER_KEY, handlerType.FullName);
+            return job;
+        }
+
+        private static IJobDetail GetJobDetail<T>(long id, Param param) where T : NotHotfixTimerHandler
+        {
+            statisticsTool.Count(typeof(T).FullName);
+            var job = JobBuilder.Create<T>().WithIdentity(id + "").Build();
+            job.JobDataMap.Add(PARAM_KEY, param);
+            return job;
         }
 
         class ConsoleLogProvider : ILogProvider
@@ -52,14 +344,20 @@ namespace Geek.Server
             {
                 return (level, func, exception, parameters) =>
                 {
-                    if(func != null)
+                    if (func != null)
                     {
                         if (level < LogLevel.Warn)
-                        { }//LOGGER.Debug(func(), parameters);
+                        {
+
+                        }
                         else if (level == LogLevel.Warn)
-                            LOGGER.Warn(func(), parameters);
+                        {
+                            Log.Warn(func(), parameters);
+                        }
                         else if (level > LogLevel.Warn)
-                            LOGGER.Error(func(), parameters);
+                        {
+                            Log.Error(func(), parameters);
+                        }
                     }
                     return true;
                 };
@@ -75,122 +373,6 @@ namespace Geek.Server
                 throw new NotImplementedException();
             }
         }
-
-        static QuartzTimer()
-        {
-            initScheduler();
-        }
-
-        static async void initScheduler()
-        {
-            if (scheduler != null)
-                return;
-
-            //使用mongodb持久化参考文档[全量]
-            //https://www.cnblogs.com/huangxincheng/p/7078895.html
-
-            LogProvider.SetCurrentLogProvider(new ConsoleLogProvider());
-            var factory = new StdSchedulerFactory();
-            scheduler = await factory.GetScheduler();
-            await scheduler.Start();
-        }
-
-        static long idNow;
-        static long newID()
-        {
-            return Interlocked.Increment(ref idNow);
-        }
-
-        public static void Remove(long id)
-        {
-            scheduler.DeleteJob(JobKey.Create(id + ""));
-        }
-
-        static IJobDetail getJobDetail(long id, long actorId, string handlerType, Param param)
-        {
-            var job = JobBuilder.Create<TimerJob>().WithIdentity(id + "").Build();
-            job.JobDataMap.Add(ParamKey, param);
-            job.JobDataMap.Add(ActorIdKey, actorId);
-            job.JobDataMap.Add(HandlerTypeKey, handlerType);
-            return job;
-        }
-        
-        public static long AddDelay(long delay, long actorId, string handlerType, Param param)
-        {
-            long id = newID();
-            var delayTime = DateTimeOffset.Now.AddMilliseconds(delay);
-            var trigger = TriggerBuilder.Create().StartAt(delayTime).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
-            return id;
-        }
-
-        public static long AddTimer(long delay, long period, long actorId, string handlerType, Param param)
-        {
-            long id = newID();
-            var delayTime = DateTimeOffset.Now.AddMilliseconds(delay);
-            var trigger = TriggerBuilder.Create().StartAt(delayTime).WithSimpleSchedule(x=>x.WithInterval(TimeSpan.FromMilliseconds(period)).RepeatForever()).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
-            return id;
-        }
-
-        /// <summary>
-        /// 一次性
-        /// </summary>
-        public static long AddOnceSchedule(DateTime time, long actorId, string handlerType, Param param)
-        {
-            long id = newID();
-            var delta = time - DateTime.Now;
-            var delayTime = DateTimeOffset.Now.Add(delta);
-            var trigger = TriggerBuilder.Create().StartAt(delayTime).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
-            return id;
-        }
-
-        /// <summary>
-        /// 每天
-        /// </summary>
-        public static long AddDailySchedule(int hour, int minute, long actorId, string handlerType, Param param)
-        {
-            long id = newID();
-            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.DailyAtHourAndMinute(hour, minute)).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
-            return id;
-        }
-
-        /// <summary>
-        /// 每周
-        /// </summary>
-        public static long AddWeeklySchedule(DayOfWeek[] days, int hour, int minute, long actorId, string handlerType, Param param)
-        {
-            long id = newID();
-            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.AtHourAndMinuteOnGivenDaysOfWeek(hour, minute, days)).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
-            return id;
-        }
-
-        /// <summary>
-        /// 每月
-        /// </summary>
-        public static long AddMonthlySchedule(int dayOfMonth, int hour, int minute, long actorId, string handlerType, Param param)
-        {
-            long id = newID();
-            var trigger = TriggerBuilder.Create().StartNow().WithSchedule(CronScheduleBuilder.MonthlyOnDayAndHourAndMinute(dayOfMonth, hour, minute)).Build();
-            scheduler.ScheduleJob(getJobDetail(id, actorId, handlerType, param), trigger);
-            return id;
-        }
-
-        public static long Schedule<T>(DateTimeOffset startAt, TimeSpan interval) where T : IJob
-        {
-            long id = newID();
-            IJobDetail job = JobBuilder.Create<T>().WithIdentity(id + "").Build();
-            ITrigger _CronTrigger = TriggerBuilder.Create().StartAt(startAt).WithSimpleSchedule(x => x.WithInterval(interval).RepeatForever()).Build();
-            scheduler.ScheduleJob(job, _CronTrigger);
-            return id;
-        }
-
-        public static Task Stop()
-        {
-            return scheduler.Shutdown();
-        }
+        #endregion
     }
 }

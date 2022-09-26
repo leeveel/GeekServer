@@ -23,18 +23,18 @@ namespace Geek.Server
 
         public bool IsCompAgent(ClassDeclarationSyntax source)
         {
-            if(source.BaseList == null)
+            if (source.BaseList == null)
                 return false;
             IEnumerable<BaseTypeSyntax> baseTypes = source.BaseList.Types.Select(baseType => baseType);
-            var res = baseTypes.Any((baseType) => 
+            var res = baseTypes.Any((baseType) =>
             {
                 string baseName = baseType.ToString();
-                return baseName.Contains("StateComponentAgent") 
-                      || baseName.Contains("FuncComponentAgent") 
-                      || baseName.Contains("QueryComponentAgent");
+                return baseName.Contains("StateCompAgent")
+                      || baseName.Contains("FuncCompAgent")
+                      || baseName.Contains("QueryCompAgent")
+                      || baseName.Contains("BaseCompAgent");
             });
             return res;
         }
-
     }
 }

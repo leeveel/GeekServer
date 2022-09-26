@@ -12,7 +12,7 @@ namespace Geek.Server.Config
 
         public void LoadData(byte[] data, ref int offset)
         {
-			string useField = "t_" + Settings.Ins.Language;
+			string useField = "t_" + Settings.Language;
             {%- for field in Fields -%}
             {%- if field.Datatype == "int" -%}
             {{field.Name}} = XBuffer.ReadInt(data, ref offset);
