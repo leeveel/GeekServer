@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Generate", "Geek
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.CodeGenerator", "GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj", "{528732B9-F485-4E06-896C-736422563842}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bedrock.Framework", "Bedrock.Framework\Bedrock.Framework.csproj", "{6ADE9DA7-76B4-429A-A480-8AD13083AB27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bedrock.Framework", "Bedrock.Framework\Bedrock.Framework.csproj", "{528732B9-F485-4E06-896C-736422563842}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,6 @@ Global
 		{528732B9-F485-4E06-896C-736422563842}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{528732B9-F485-4E06-896C-736422563842}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{528732B9-F485-4E06-896C-736422563842}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6ADE9DA7-76B4-429A-A480-8AD13083AB27}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6ADE9DA7-76B4-429A-A480-8AD13083AB27}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6ADE9DA7-76B4-429A-A480-8AD13083AB27}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6ADE9DA7-76B4-429A-A480-8AD13083AB27}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
