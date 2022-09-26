@@ -1,6 +1,6 @@
 ﻿namespace Geek.Server.Common
 {
-    public class LogicSetting : BaseSetting
+    public class AppSetting : BaseSetting
     {
         public readonly List<int> Servers = new();
 

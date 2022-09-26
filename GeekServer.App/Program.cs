@@ -17,7 +17,7 @@ class Program
         {
             AppExitHandler.Init(HandleExit);
             Console.WriteLine($"init NLog config...");
-            Settings.Load<LogicSetting>("Configs/logic_config.json", ServerType.Game);
+            Settings.Load<AppSetting>("Configs/app_config.json", ServerType.Game);
             LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
             LogManager.Configuration = new XmlLoggingConfiguration("Configs/NLog.config");
             LogManager.AutoShutdown = false;
@@ -59,7 +59,7 @@ class Program
             Log.Info($"load hotfix module");
             await HotfixMgr.LoadHotfixModule();
 
-            if (!Settings.InsAs<LogicSetting>().AllowOpen)
+            if (!Settings.InsAs<AppSetting>().AllowOpen)
             {
                 Log.Error($"起服逻辑执行失败，不予启动");
                 return;
