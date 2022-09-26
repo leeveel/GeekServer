@@ -16,18 +16,18 @@ namespace {{space}}
 			{{~ if mth.isthreadsafe ~}}
 			_ = base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});
 			{{~ else ~}}
-			long callChainId = base.Actor.NewChainId();
-			_ = base.Actor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, callChainId, {{mth.executetime}});
+			long callChainId = base.Actor.WorkerActor.NewChainId();
+			_ = base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, callChainId, {{mth.executetime}});
 			{{~ end ~}}
 			return Task.CompletedTask;
 
 			{{~ else ~}}{{~#************************************************~}}
-			long callChainId = base.Actor.IsNeedEnqueue();
-			if (0 > callChainId)
+			(bool needEnqueue, long chainId)= base.Actor.WorkerActor.IsNeedEnqueue();
+			if (!needEnqueue)
 			{
 				return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});
 			}
-			return base.Actor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, callChainId, {{mth.executetime}});
+			return base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, chainId, {{mth.executetime}});
 			{{~ end ~}}{{~#************************************************~}}
 		}
 

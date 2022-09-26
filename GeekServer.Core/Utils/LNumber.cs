@@ -1,5 +1,4 @@
 using NLog;
-using System;
 
 public struct LNumber : IComparable<LNumber>, IEquatable<LNumber>
 {

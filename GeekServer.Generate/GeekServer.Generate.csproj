@@ -1,23 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
 	<PropertyGroup>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<ApplicationIcon />
+		<StartupObject />
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>../app_debug</OutputPath>
+		<DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
+		<OutputPath>..\package_debug</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>../app</OutputPath>
+		<DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
+		<OutputPath>..\package</OutputPath>
 	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Share\Rank\" />
+	</ItemGroup>
 
 </Project>

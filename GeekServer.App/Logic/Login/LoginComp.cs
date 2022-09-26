@@ -1,25 +1,25 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Options;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 
-namespace Geek.Server.Logic.Login
+namespace Geek.Server.Login
 {
-
-    public class PlayerInfoState : BaseDBState
+    public class PlayerInfo : InnerState
     {
         //player相对特殊，id不是long，所以不继承DBState，自定义mongoDB的id
-        public virtual string Id { get; set; }
-        public virtual int SdkType { get; set; }
-        public virtual string UserName { get; set; }
+        public string playerId;
+        public int SdkType;
+        public string UserName;
 
         //这里设定每个账号在1服只有能创建1个角色
         [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
-        public virtual StateMap<int, long> RoleMap { get; set; } = new StateMap<int, long>();
+        public Dictionary<int, long> RoleMap = new Dictionary<int, long>();
+
+        [BsonIgnore]
+        public bool IsChanged;
     }
 
-    public class LoginComp : QueryComponent
+    [Comp(ActorType.Logic)]
+    public class LoginComp : BaseComp
     {
-        //仅在内存中缓存
-        public Dictionary<string, PlayerInfoState> PlayerMap = new Dictionary<string, PlayerInfoState>();
+        public ConcurrentDictionary<string, PlayerInfo> PlayerMap = new();
     }
 }

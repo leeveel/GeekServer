@@ -1,208 +1,177 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
+﻿using NLog;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-
-
-
+using System.Reflection;
 
 namespace Geek.Server
 {
-    public class HotfixModule
+    internal class HotfixModule
     {
-        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+        static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        private DllLoader DllLoader = null;
+        readonly string DllPath;
 
-        DllLoader dllLoader;
-        internal Assembly HotfixAssembly { get; private set; }
-        public IHotfixBridge HotfixBridge { get; private set; }
+        internal IHotfixBridge HotfixBridge { get; private set; }
 
-        //actor-actorAgent, comp-compAgent
-        readonly Dictionary<Type, Type> agentTypeMap = new Dictionary<Type, Type>();
-        readonly ConcurrentDictionary<object, IComponentAgent> agentCacheMap = new ConcurrentDictionary<object, IComponentAgent>();
-        readonly ConcurrentDictionary<string, object> typeCacheMap = new ConcurrentDictionary<string, object>();
+        public ISessionMgr SessionMgr { get; private set; }
 
-        //actorAgentType-list[listenerType]
-        readonly ConcurrentDictionary<int, List<Type>> evtTypeMap = new ConcurrentDictionary<int, List<Type>>();
-        readonly ConcurrentDictionary<int, List<IEventListener>> evtCacheMap = new ConcurrentDictionary<int, List<IEventListener>>();
+        internal Assembly HotfixAssembly = null;
 
-        readonly Dictionary<int, Type> tcpHandlerMap = new Dictionary<int, Type>();
-        readonly Dictionary<string, Type> httpHandlerMap = new Dictionary<string, Type>();
+        /// <summary>
+        /// comp -> compAgent
+        /// </summary>
+        readonly Dictionary<Type, Type> agentCompMap = new();
 
-        public Task<bool> Load(string dllVersion, bool isReload)
+        readonly Dictionary<Type, Type> compAgentMap = new();
+
+        readonly Dictionary<Type, Type> agentAgentWrapperMap = new();
+
+        /// <summary>
+        /// cmd -> handler
+        /// </summary>
+        readonly Dictionary<string, BaseHttpHandler> httpHandlerMap = new();
+
+        /// <summary>
+        /// msgId -> handler
+        /// </summary>
+        readonly Dictionary<int, Type> tcpHandlerMap = new();
+
+        /// <summary>
+        /// actorType -> evtId -> listeners
+        /// </summary>
+        readonly Dictionary<ActorType, Dictionary<int, List<IEventListener>>> actorEvtListeners = new();
+
+        readonly bool useAgentWrapper = true;
+
+        internal HotfixModule(string dllPath)
+        {
+            DllPath = dllPath;
+        }
+
+        internal HotfixModule()
+        {
+            HotfixAssembly = Assembly.GetEntryAssembly();
+
+            ParseDll();
+        }
+
+        internal bool Init(bool reload)
         {
             bool success = false;
             try
             {
-                bool writeDllVersion = false;
-                string currentAssemblyDirectory = Environment.CurrentDirectory;
-                string dllPath = Path.Combine(currentAssemblyDirectory, "GeekServer.Hotfix.dll");
-                if (!string.IsNullOrEmpty(dllVersion))
+                DllLoader = new DllLoader(DllPath);
+                HotfixAssembly = DllLoader.HotfixDll;
+                if (!reload)
                 {
-                    var path = Path.Combine(currentAssemblyDirectory, dllVersion + "/GeekServer.Hotfix.dll");
-                    if (File.Exists(path))
-                    {
-                        dllPath = path;
-                        writeDllVersion = true;
-                    }
-                    else
-                    {
-                        dllVersion = "org";
-                    }
-                }
-                else
-                {
-                    dllVersion = "org";
-                    var txtPath = Path.Combine(currentAssemblyDirectory, "dllVersion.txt");
-                    if (File.Exists(txtPath))
-                    {
-                        var versionStr = File.ReadAllText(txtPath);
-                        var path = Path.Combine(currentAssemblyDirectory, versionStr + "/GeekServer.Hotfix.dll");
-                        if (File.Exists(path))
-                        {
-                            dllPath = path;
-                            dllVersion = versionStr;
-                        }
-                    }
-                }
-
-                dllLoader = new DllLoader(dllPath);
-                dllLoader.Load();
-                HotfixAssembly = dllLoader.HotfixDll;
-
-                if(!isReload)
-                {
-                    //依赖的dll
-                    var asbArr = AppDomain.CurrentDomain.GetAssemblies();
-                    var asbList = new List<string>();
-                    foreach (var asb in asbArr)
-                        asbList.Add(asb.GetName().Name);
-                    var refArr = HotfixAssembly.GetReferencedAssemblies();
-                    foreach(var asb in refArr)
-                    {
-                        if (asbList.Contains(asb.Name))
-                            continue;
-                        var refPath = Environment.CurrentDirectory + $"/{asb.Name}.dll";
-                        if (File.Exists(refPath))
-                            Assembly.LoadFrom(refPath);
-                    }
+                    // 启动服务器时加载关联的dll
+                    LoadRefAssemblies();
                 }
 
                 ParseDll();
 
-                if (writeDllVersion)
-                    File.WriteAllText(Path.Combine(currentAssemblyDirectory, "dllVersion.txt"), dllVersion);
-                LOGGER.Info("hotfix dll loaded:" + dllVersion);
+                File.WriteAllText(Path.Combine(Environment.CurrentDirectory, "dllPath.txt"), DllPath);
+
+                Log.Info($"hotfix dll init success: {DllPath}");
                 success = true;
             }
             catch (Exception e)
             {
-                if (!isReload)
+                Log.Error($"hotfix dll init failed...\n{e}");
+                if (!reload)
                     throw;
-                LOGGER.Info("hotfix dll init failed..." + e.ToString());
             }
-            return Task.FromResult(success);
+            return success;
         }
 
         public void Unload()
         {
-            if (dllLoader != null)
+            if (DllLoader != null)
             {
-                var weak = dllLoader.Unload();
-                if (Settings.Ins.IsDebug)
+                var weak = DllLoader.Unload();
+                if (Settings.IsDebug)
                 {
                     //检查hotfix dll是否已经释放
                     Task.Run(async () =>
                     {
-                        while (weak.IsAlive)
+                        int tryCount = 0;
+                        while (weak.IsAlive && tryCount++ < 10)
                         {
                             await Task.Delay(100);
                             GC.Collect();
                             GC.WaitForPendingFinalizers();
                         }
-                        LOGGER.Warn("hotfix dll unloaded");
+                        Log.Warn($"hotfix dll unloaded {(weak.IsAlive ? "failed" : "success")}");
                     });
                 }
             }
         }
 
-        /// <summary>
-        /// 解析DLL
-        /// </summary>
-        void ParseDll()
+        private void LoadRefAssemblies()
         {
-            var types = HotfixAssembly.GetTypes();
-            foreach (var type in types)
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var nameSet = new HashSet<string>(assemblies.Select(t => t.GetName().Name));
+            var hotfixRefAssemblies = HotfixAssembly.GetReferencedAssemblies();
+            foreach (var refAssembly in hotfixRefAssemblies)
             {
-                AddAgent(type);
-                AddEvent(type);
-                AddTcpHandler(type);
-                AddHttpHandler(type);
-                if (HotfixBridge == null && type.GetInterface(typeof(IHotfixBridge).FullName) != null)
+                if (nameSet.Contains(refAssembly.Name))
+                    continue;
+
+                var refPath = $"{Environment.CurrentDirectory}/{refAssembly.Name}.dll";
+                if (File.Exists(refPath))
+                    Assembly.LoadFrom(refPath);
+            }
+        }
+
+        private void ParseDll()
+        {
+            foreach (var type in HotfixAssembly.GetTypes())
+            {
+                if (!AddAgent(type)
+                    && !AddEvent(type)
+                    && !AddTcpHandler(type)
+                    && !AddHttpHandler(type))
                 {
-                    var bridge = (IHotfixBridge)Activator.CreateInstance(type);
-                    if (bridge.BridgeType == Settings.Ins.ServerType)
-                        HotfixBridge = bridge;
+                    if ((HotfixBridge == null && type.GetInterface(typeof(IHotfixBridge).FullName) != null))
+                    {
+                        var bridge = (IHotfixBridge)Activator.CreateInstance(type);
+                        if (bridge.BridgeType == Settings.ServerType)
+                            HotfixBridge = bridge;
+                    }
+
+                    if ((SessionMgr == null && type.GetInterface(typeof(ISessionMgr).FullName) != null))
+                    {
+                        SessionMgr = (ISessionMgr)Activator.CreateInstance(type);
+                    }
                 }
             }
         }
 
-        const string GenPreffix = "Wrapper.Agent.";
-
-        void AddAgent(Type type)
+        private bool AddHttpHandler(Type type)
         {
-            if (type.GetInterface(typeof(IComponentAgent).FullName) == null
-                || !type.FullName.StartsWith(GenPreffix))
-                return;
+            if (!type.IsSubclassOf(typeof(BaseHttpHandler)))
+                return false;
 
-            Type impType = type;
-            while (impType != null && !impType.IsGenericType)
-                impType = impType.BaseType;
-            if (impType == null || !impType.IsGenericType)
-                return;
-            var argTypes = impType.GetGenericArguments();
-            if (argTypes == null || argTypes.Length <= 0)
-                return;
-            agentTypeMap[argTypes[0]] = type;
-        }
-
-        void AddEvent(Type type)
-        {
-            if (type.GetInterface(typeof(IEventListener).FullName) == null)
-                return;
-
-            if (!type.BaseType.IsGenericType)
-                return;
-            var argTypes = type.BaseType.GenericTypeArguments;
-            if (argTypes.Length < 1)
-                return;
-
-            //comp agent
-            var agentType = argTypes[0];
-            if (!agentType.BaseType.IsGenericType)
-                return;
-            var agentArgTypes = agentType.BaseType.GenericTypeArguments;
-            if (agentArgTypes.Length < 0)
-                return;
-
-            var list = CompSetting.Singleton.GetEntityTypeList(agentArgTypes[0]);
-            if (list == null || list.Count <= 0)
-                return;
-            foreach(var entityType in list)
+            var attr = (HttpMsgMapping)type.GetCustomAttribute(typeof(HttpMsgMapping));
+            if (attr == null)
             {
-                if (!evtTypeMap.ContainsKey(entityType))
-                    evtTypeMap.TryAdd(entityType, new List<Type>());
-                evtTypeMap[entityType].Add(type);
+                // 不是最终实现类
+                return true;
             }
+
+            var handler = (BaseHttpHandler)Activator.CreateInstance(type);
+            if (!httpHandlerMap.TryAdd(attr.Cmd, handler))
+            {
+                throw new Exception($"http handler cmd重复注册，cmd:{attr.Cmd}");
+            }
+            return true;
         }
 
-        void AddTcpHandler(Type type)
+        private bool AddTcpHandler(Type type)
         {
             var attribute = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
-            if (attribute == null) return;
+            if (attribute == null) return false;
             var msgIdField = attribute.Msg.GetField(TcpHandlerFactory.KEY, BindingFlags.Static | BindingFlags.Public);
-            if (msgIdField == null) return;
+            if (msgIdField == null) return false;
             int msgId = (int)msgIdField.GetValue(null);
             if (!tcpHandlerMap.ContainsKey(msgId))
             {
@@ -210,161 +179,125 @@ namespace Geek.Server
             }
             else
             {
-                LOGGER.Error("重复注册消息tcp handler:[{}] msg:[{}]", msgId, type);
+                Log.Error("重复注册消息tcp handler:[{}] msg:[{}]", msgId, type);
             }
+            return true;
         }
 
-        void AddHttpHandler(Type type)
+        private bool AddEvent(Type type)
         {
-            var attribute = (HttpMsgMapping)type.GetCustomAttribute(typeof(HttpMsgMapping), true);
-            if (attribute == null) return;
-            var cmd = attribute.cmd;
-            if (httpHandlerMap.ContainsKey(cmd))
-                LOGGER.Warn($"http cmd handler 已存在：{cmd}，新的handler将覆盖老的handler");
-            httpHandlerMap[cmd] = type;
-        }
-
-        public T GetHandler<T>(int msgId)
-        {
-            if (!tcpHandlerMap.ContainsKey(msgId))
-            {
-                LOGGER.Error("未注册的 handler 消息ID:{}", msgId);
-                return default;
-            }
-
-            Type handlerType = tcpHandlerMap[msgId];
-            var handler = Activator.CreateInstance(handlerType);
-            if (handler == null)
-                LOGGER.Error("创建 handler失败:{} {}", msgId, handlerType.ToString());
-            return (T)handler;
-        }
-
-        public BaseHttpHandler GetHttpHandler(string cmd)
-        {
-            if (!httpHandlerMap.ContainsKey(cmd))
-            {
-                LOGGER.Error("未注册的http消息:{}", cmd);
-                return null;
-            }
-            Type msgType = httpHandlerMap[cmd];
-            var msg = Activator.CreateInstance(msgType) as BaseHttpHandler;
-            if (msg == null)
-                LOGGER.Error("http handler创建失败:{} {}", cmd, msgType.ToString());
-            return msg;
-        }
-
-        public bool IsTypeFromHotfix(Type type)
-        {
-            if (type == null)
+            if (!type.IsImplWithInterface(typeof(IEventListener)))
                 return false;
-            if (type.IsGenericType)
+
+            var compAgentType = type.BaseType.GetGenericArguments()[0];
+            var compType = compAgentType.BaseType.GetGenericArguments()[0];
+            var actorType = CompRegister.CompActorDic[compType];
+            var evtListenersDic = actorEvtListeners.GetOrAdd(actorType);
+
+            bool find = false;
+            foreach (var attr in type.GetCustomAttributes())
             {
-                var argTypes = type.GetGenericArguments();
-                foreach (var inType in argTypes)
+                if (attr is EventInfoAttribute evt)
                 {
-                    if (IsTypeFromHotfix(inType))
-                        return true;
+                    find = true;
+
+                    var evtId = evt.EventId;
+                    var listeners = evtListenersDic.GetOrAdd(evtId);
+                    listeners.Add((IEventListener)Activator.CreateInstance(type));
                 }
             }
-            if (type.BaseType != null)
-                return IsTypeFromHotfix(type.BaseType);
-            return type.Assembly == HotfixAssembly;
-        }
-
-        /// <summary>
-        /// 对应agent是不是对应接口
-        /// </summary>
-        public bool IsAgentInterface(Type refType, Type interfaceType)
-        {
-            if (!agentTypeMap.ContainsKey(refType))
-                return false;
-            var type = agentTypeMap[refType];
-            return type.GetInterface(interfaceType.FullName) != null;
-        }
-
-        /// <summary>
-        /// 获取热更代理实例
-        /// </summary>
-        public T GetAgent<T>(BaseComponent refOwner) where T : IComponentAgent
-        {
-            if (agentCacheMap.TryGetValue(refOwner, out var cache))
-                return (T)cache;
-
-            if (!agentTypeMap.ContainsKey(refOwner.GetType()))
-                return default;
-
-            lock (agentCacheMap)
+            if (!find)
             {
-                if (agentCacheMap.ContainsKey(refOwner))
-                    return (T)agentCacheMap[refOwner];
-
-                var agent = (T)Activator.CreateInstance(agentTypeMap[refOwner.GetType()]);
-                agent.Owner = refOwner;
-                agentCacheMap.TryAdd(refOwner, agent);
-                return agent;
+                throw new Exception($"IEventListener:{type.FullName}没有指定监听的事件");
             }
+            return true;
         }
 
-        public Type GetAgentType(Type ownerType)
+        private bool AddAgent(Type type)
         {
-            agentTypeMap.TryGetValue(ownerType, out var agentType);
+            if (!type.IsImplWithInterface(typeof(ICompAgent)))
+                return false;
+
+            if (type.FullName.StartsWith("Wrapper.Agent.") && type.FullName.EndsWith("Wrapper"))
+            {
+                agentAgentWrapperMap[type.BaseType] = type;
+                return true;
+            }
+            var compType = type.BaseType.GetGenericArguments()[0];
+            if (compAgentMap.ContainsKey(compType))
+            {
+                throw new Exception($"comp:{compType.FullName}有多个agent");
+            }
+
+            compAgentMap[compType] = type;
+            agentCompMap[type] = compType;
+            return true;
+        }
+
+        internal BaseTcpHandler GetTcpHandler(int msgId)
+        {
+            if (tcpHandlerMap.TryGetValue(msgId, out var handlerType))
+            {
+                var ins = Activator.CreateInstance(handlerType);
+                if (ins is BaseTcpHandler handler)
+                {
+                    return handler;
+                }
+                else
+                {
+                    throw new Exception($"错误的tcp handler类型，{ins.GetType().FullName}");
+                }
+            }
+            return null;
+            //throw new HandlerNotFoundException($"消息id：{msgId}");
+        }
+
+        internal BaseHttpHandler GetHttpHandler(string cmd)
+        {
+            if (httpHandlerMap.TryGetValue(cmd, out var handler))
+            {
+                return handler;
+            }
+            return null;
+            // throw new HttpHandlerNotFoundException($"未注册的http命令:{cmd}");
+        }
+
+        internal T GetAgent<T>(BaseComp comp) where T : ICompAgent
+        {
+            var agentType = compAgentMap[comp.GetType()];
+            var agent = (T)Activator.CreateInstance(useAgentWrapper ? agentAgentWrapperMap[agentType] : agentType);
+            agent.Owner = comp;
+            return agent;
+        }
+
+        internal List<IEventListener> FindListeners(ActorType actorType, int evtId)
+        {
+            if (actorEvtListeners.TryGetValue(actorType, out var evtListeners)
+                && evtListeners.TryGetValue(evtId, out var listeners))
+            {
+                return listeners;
+            }
+            return null;
+        }
+
+        readonly ConcurrentDictionary<string, object> typeCacheMap = new();
+
+        /// <summary>获取实例(主要用于获取Event,Timer, Schedule,的Handler实例)</summary>
+        internal T GetInstance<T>(string typeName)
+        {
+            return (T)typeCacheMap.GetOrAdd(typeName, k => HotfixAssembly.CreateInstance(k));
+        }
+
+        internal Type GetAgentType(Type compType)
+        {
+            compAgentMap.TryGetValue(compType, out var agentType);
             return agentType;
         }
 
-        /// <summary>
-        /// 移除cacheAgent
-        /// </summary>
-        public void RemoveAgentCache(object refOwner)
+        internal Type GetCompType(Type agentType)
         {
-            agentCacheMap.TryRemove(refOwner, out var _);
-        }
-
-        public List<IEventListener> GetEventListeners(int entityType)
-        {
-            evtCacheMap.TryGetValue(entityType, out var list);
-            if (list != null)
-                return list;
-
-            if (!evtTypeMap.ContainsKey(entityType))
-                return default;
-
-            lock (evtTypeMap[entityType])
-            {
-                evtCacheMap.TryGetValue(entityType, out list);
-                if (list != null)
-                    return list;
-
-                list = new List<IEventListener>();
-                foreach (var type in evtTypeMap[entityType])
-                {
-                    var listener = (IEventListener)Activator.CreateInstance(type);
-                    list.Add(listener);
-                }
-                evtCacheMap[entityType] = list;
-            }
-            return list;
-        }
-
-        /// <summary>获取实例(主要用于获取Event,Timer, Schedule,的Handler实例)</summary>
-        public T GetInstance<T>(string typeName)
-        {
-            typeCacheMap.TryGetValue(typeName, out var cacheObj);
-            if (cacheObj != null)
-                return (T)cacheObj;
-
-            var obj = CreateInstance<T>(typeName);
-            typeCacheMap.TryAdd(typeName, obj);
-            return obj;
-        }
-
-        public Type GetType(string typeName)
-        {
-            return HotfixAssembly.GetType(typeName);
-        }
-
-        public T CreateInstance<T>(string typeName)
-        {
-            return (T)HotfixAssembly.CreateInstance(typeName);
+            agentCompMap.TryGetValue(agentType, out var compType);
+            return compType;
         }
     }
 }

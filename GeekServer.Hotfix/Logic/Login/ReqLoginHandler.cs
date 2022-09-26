@@ -1,19 +1,17 @@
-﻿using Geek.Server.Proto;
-using System.Threading.Tasks;
-
-namespace Geek.Server.Logic.Login
+﻿
+using System.Diagnostics;
+namespace Geek.Server.Login
 {
 
     [MsgMapping(typeof(ReqLogin))]
-    public class ReqLoginHandler : FixedIdEntityHandler<LoginCompAgent>
+    internal class ReqLoginHandler : BaseTcpHandler
     {
-        public override EntityType EntityType => EntityType.Login;
-
+        private static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         public override async Task ActionAsync()
         {
-            var comp = await GetCompAgent();
-            var msg = await comp.Login(Channel, (ReqLogin)Msg);
-            WriteAndFlush(msg);
+            var agent = await ActorMgr.GetCompAgent<LoginCompAgent>();
+            var retMsg = await agent.OnLogin(Channel, Msg as ReqLogin);
+            this.WriteWithErrCode(retMsg);
         }
     }
 }

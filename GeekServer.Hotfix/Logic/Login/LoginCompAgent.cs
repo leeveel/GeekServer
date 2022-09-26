@@ -1,16 +1,70 @@
-﻿using Geek.Server.Logic.Role;
-using Geek.Server.Proto;
-using System;
-using System.Threading.Tasks;
+﻿using Geek.Server.Role;
+using Geek.Server.Login;
 
-namespace Geek.Server.Logic.Login
+namespace Geek.Server.Login
 {
-    public class LoginCompAgent : QueryComponentAgent<LoginComp>
+    public class LoginCompAgent : BaseCompAgent<LoginComp>
     {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        public override void Active()
+        {
+            base.Active();
+            Tell(Init);
+            StateComp.AddShutdownSaveFunc(SaveAll);
+        }
 
-        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+        private async Task Init()
+        {
+            var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
+            using var cursor = await col.FindAsync(Builders<PlayerInfo>.Filter.Empty);
+            await cursor.ForEachAsync(async t =>
+            {
+                Comp.PlayerMap[t.playerId] = t;
+                //Log.Info("加载数据:" + t.playerId);
+            });
+        }
 
-        public virtual async Task<MSG> Login(NetChannel channel, ReqLogin reqLogin)
+        private async Task SaveAll(bool shutdown)
+        {
+            if (shutdown)
+            {
+                await SaveLogic(shutdown);
+            }
+            else
+            {
+                Tell(() => SaveLogic(shutdown));
+            }
+        }
+
+        private async Task SaveLogic(bool shutdown)
+        {
+            var writeList = new List<ReplaceOneModel<PlayerInfo>>();
+            foreach (var registInfo in Comp.PlayerMap.Values)
+            {
+                if (registInfo.IsChanged)
+                {
+                    var filter = Builders<PlayerInfo>.Filter.Eq(nameof(PlayerInfo.playerId), registInfo.playerId);
+                    var model = new ReplaceOneModel<PlayerInfo>(filter, registInfo) { IsUpsert = true };
+                    writeList.Add(model);
+                }
+            }
+
+            if (writeList.Count > 0)
+            {
+                var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
+                var result = await col.BulkWriteAsync(writeList, new BulkWriteOptions { IsOrdered = false });
+                if (!shutdown && result.IsAcknowledged)
+                {
+                    foreach (var model in writeList)
+                    {
+                        model.Replacement.IsChanged = false;
+                    }
+                }
+            }
+        }
+
+
+        public virtual async Task<MSG> OnLogin(NetChannel channel, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {
@@ -23,23 +77,15 @@ namespace Geek.Server.Logic.Login
                 return MSG.Create(ErrCode.UnknownPlatform);
             }
 
-            if (reqLogin.SdkType > 0)
-            {
-                //TODO 通过sdktype验证sdktoken
-                //可以放到玩家actor
-            }
-
-            //验证通过
-
             //查询角色账号，这里设定每个服务器只能有一个角色
             var roleId = await GetRoleIdOfPlayer(reqLogin.UserName, reqLogin.SdkType);
             var isNewRole = roleId <= 0;
             if (isNewRole)
             {
                 //没有老角色，创建新号
-                roleId = EntityID.NewID(EntityType.Role);
+                roleId = IdGenerator.GetActorID(ActorType.Role);
                 await CreateRoleToPlayer(reqLogin.UserName, reqLogin.SdkType, roleId);
-                LOGGER.Info("创建新号:" + roleId);
+                Log.Info("创建新号:" + roleId);
             }
 
             //添加到session
@@ -50,11 +96,11 @@ namespace Geek.Server.Logic.Login
                 Channel = channel,
                 Sign = reqLogin.Device
             };
-            SessionManager.Add(session);
+            HotfixMgr.SessionMgr.Add(session);
 
             //登陆流程
-            var roleComp = await EntityMgr.GetCompAgent<RoleCompAgent>(roleId);
-            await roleComp.OnLogin(reqLogin, isNewRole, roleId);
+            var roleComp = await ActorMgr.GetCompAgent<RoleCompAgent>(roleId);
+            await roleComp.OnLogin(reqLogin, isNewRole);
             var resLogin = await roleComp.BuildLoginMsg();
             return MSG.Create(resLogin, reqLogin.UniId);
         }
@@ -64,41 +110,29 @@ namespace Geek.Server.Logic.Login
             var playerId = $"{sdkType}_{userName}";
             if (Comp.PlayerMap.TryGetValue(playerId, out var state))
             {
-                if (state.RoleMap.TryGetValue(Settings.Ins.ServerId, out var roleId))
+                if (state.RoleMap.TryGetValue(Settings.ServerId, out var roleId))
                     return roleId;
                 return 0;
             }
-            state = await Comp.LoadState(playerId, () =>
-            {
-                var playerState = (PlayerInfoState)BaseDBState.CreateStateWrapper<PlayerInfoState>();
-                playerState.Id = playerId;
-                playerState.UserName = userName;
-                playerState.SdkType = sdkType;
-                return playerState;
-            });
-
-            Comp.PlayerMap[playerId] = state;
-            if (state.RoleMap.TryGetValue(Settings.Ins.ServerId, out var roleId2))
-                return roleId2;
             return 0;
         }
 
         public virtual Task CreateRoleToPlayer(string userName, int sdkType, long roleId)
         {
             var playerId = $"{sdkType}_{userName}";
-            Comp.PlayerMap.TryGetValue(playerId, out var state);
-            if (state == null)
+
+            Comp.PlayerMap.TryGetValue(playerId, out var info);
+            if (info == null)
             {
-                state = new PlayerInfoState();
-                state.Id = playerId;
-                state.SdkType = sdkType;
-                state.UserName = userName;
-                Comp.PlayerMap[playerId] = state;
+                info = new PlayerInfo();
+                info.playerId = playerId;
+                info.SdkType = sdkType;
+                info.UserName = userName;
+                Comp.PlayerMap[playerId] = info;
             }
-            state.RoleMap[Settings.Ins.ServerId] = roleId;
-            return Comp.SaveState(playerId, state);
+            info.IsChanged = true;
+            info.RoleMap[Settings.ServerId] = roleId;
+            return Task.CompletedTask;
         }
-
-
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 namespace Geek.Server
 {
     public class Session
@@ -25,42 +23,30 @@ namespace Geek.Server
         /// </summary>
         public string Sign { get; set; }
 
-        Dictionary<string, object> dataMap = new Dictionary<string, object>();
-
-        public long GetLong(string key)
+        public void Write(NetChannel ctx, NMessage msg)
         {
-            if (dataMap.ContainsKey(key))
-                return (long)dataMap[key];
-            return default;
+            if (IsDisconnect(ctx))
+                return;
+            ctx.WriteAsync(msg);
         }
 
-        public int GetInt(string key)
+        public void Write(NetChannel ctx, Message msg)
         {
-            if (dataMap.ContainsKey(key))
-                return (int)dataMap[key];
-            return default;
+            if (IsDisconnect(ctx))
+                return;
+            NMessage smsg = new NMessage(msg);
+            ctx.WriteAsync(smsg);
         }
 
-        public string GetString(string key)
+        public bool IsDisconnect(NetChannel channel)
         {
-            if (dataMap.ContainsKey(key))
-                return (string)dataMap[key];
-            return default;
+            return channel == null || channel.Context == null;
         }
 
-        public void SetLong(string key, long value)
+        public void CloseChannel(NetChannel channel)
         {
-            dataMap[key] = value;
-        }
-
-        public void SetInt(string key, int value)
-        {
-            dataMap[key] = value;
-        }
-
-        public void SetString(string key, string value)
-        {
-            dataMap[key] = value;
+            if (channel != null)
+                channel.Abort();
         }
     }
 }

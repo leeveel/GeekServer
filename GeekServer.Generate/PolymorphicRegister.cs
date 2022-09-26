@@ -6,7 +6,6 @@ namespace Geek.Server.Proto
 {
     public partial class PolymorphicRegister
     {
-
         static bool serializerRegistered = false;
         private static PolymorphicMessagePackSettings settings;
         /// <summary>

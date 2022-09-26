@@ -33,7 +33,7 @@ namespace Geek.Client
         {
             if (waitDic.Count > 0)
             {
-                if(allTcs == null || allTcs.Task.IsCompleted)
+                if (allTcs == null || allTcs.Task.IsCompleted)
                     allTcs = new TaskCompletionSource<bool>();
                 await allTcs.Task;
             }
@@ -65,9 +65,9 @@ namespace Geek.Client
             return true;
         }
 
-        public static void EndWait(int uniId, bool result=true)
+        public static void EndWait(int uniId, bool result = true)
         {
-            if(!result) UnityEngine.Debug.LogError("await失败：" + uniId);
+            if (!result) UnityEngine.Debug.LogError("await失败：" + uniId);
             if (waitDic.ContainsKey(uniId))
             {
                 var waiter = waitDic[uniId];
@@ -84,7 +84,7 @@ namespace Geek.Client
             }
             else
             {
-                if(uniId > 0)
+                if (uniId > 0)
                     UnityEngine.Debug.LogError("找不到EndWait：" + uniId + ">size：" + waitDic.Count);
             }
         }

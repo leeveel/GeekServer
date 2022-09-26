@@ -5,10 +5,10 @@ namespace Geek.Server
     [AttributeUsage(AttributeTargets.Class)]
     public class HttpMsgMapping : Attribute
     {
-        public string cmd;
+        public string Cmd;
         public HttpMsgMapping(string cmd)
         {
-            this.cmd = cmd;
+            this.Cmd = cmd;
         }
     }
 }

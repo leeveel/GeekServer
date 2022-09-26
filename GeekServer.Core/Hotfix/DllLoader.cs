@@ -1,42 +1,35 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Runtime.Loader;
 
 namespace Geek.Server
 {
-    public class DllLoader
+    internal class DllLoader
     {
+        public DllLoader(string dllPath)
+        {
+            Context = new HostAssemblyLoadContext();
+            HotfixDll = Context.LoadFromAssemblyPath(dllPath);
+        }
+
+        public Assembly HotfixDll { get; }
+
+        private HostAssemblyLoadContext Context { get; }
+
+        public WeakReference Unload()
+        {
+            Context.Unload();
+            return new WeakReference(Context);
+        }
+
         class HostAssemblyLoadContext : AssemblyLoadContext
         {
-            public HostAssemblyLoadContext() : base(true)
-            {
-            }
+            public HostAssemblyLoadContext() : base(true) { }
 
-            protected override Assembly Load(AssemblyName name)
+            protected override Assembly Load(AssemblyName assemblyName)
             {
                 return null;
             }
         }
 
-        string dllPath;
-        HostAssemblyLoadContext context;
-        public Assembly HotfixDll { private set; get; }
-
-        public DllLoader(string dllPath)
-        {
-            this.dllPath = dllPath;
-            context = new HostAssemblyLoadContext();
-        }
-
-        public void Load()
-        {
-            HotfixDll = context.LoadFromAssemblyPath(dllPath);
-        }
-
-        public WeakReference Unload()
-        {
-            context.Unload();
-            return new WeakReference(context);
-        }
     }
 }
