@@ -14,7 +14,7 @@ namespace Logic
         public Text Txt;
 
         public string serverIp = "127.0.0.1";
-        public int serverPort = 10000;
+        public int serverPort = 8899;
         public string userName = "123456";
 
         private void Awake()
