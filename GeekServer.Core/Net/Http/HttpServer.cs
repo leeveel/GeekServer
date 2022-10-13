@@ -39,7 +39,7 @@ namespace Geek.Server
             .ConfigureLogging(logging =>
             {
                 if (Settings.IsDebug)
-                    logging.SetMinimumLevel(LogLevel.None);
+                    logging.SetMinimumLevel(LogLevel.Debug);
                 else
                     logging.SetMinimumLevel(LogLevel.Information);
             })
