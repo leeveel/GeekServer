@@ -58,7 +58,7 @@ namespace Geek.Server
         {
             if (WebApp != null)
             {
-                Log.Info("停止Tcp服务...");
+                Log.Info("停止http服务...");
                 var task = WebApp.StopAsync();
                 WebApp = null;
                 return task;
