@@ -30,10 +30,7 @@ namespace Geek.Server
             })
             .ConfigureLogging(logging =>
             {
-                if (Settings.IsDebug)
-                    logging.SetMinimumLevel(LogLevel.None);
-                else
-                    logging.SetMinimumLevel(LogLevel.Information);
+                logging.SetMinimumLevel(LogLevel.Error);
             })
             .UseNLog();
 

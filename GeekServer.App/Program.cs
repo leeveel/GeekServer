@@ -65,7 +65,8 @@ class Program
                 return;
             }
 
-            Log.Info($"进入游戏主循环...");
+            Log.Info("进入游戏主循环...");
+            Console.WriteLine("***进入游戏主循环***");
             Settings.LauchTime = DateTime.Now;
             Settings.AppRunning = true;
             TimeSpan delay = TimeSpan.FromSeconds(1);
