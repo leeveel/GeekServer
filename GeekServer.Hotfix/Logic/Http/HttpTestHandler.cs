@@ -1,6 +1,3 @@
-
-using Geek.Server.Login;
-
 namespace Geek.Server.Http
 {
     public class HttpTestRes : HttpResult
@@ -21,7 +18,10 @@ namespace Geek.Server.Http
     [HttpMsgMapping("test")]
     public class HttpTestHandler : BaseHttpHandler
     {
-        public override bool CheckSign => true;
+        /// <summary>
+        /// ***正式的HttpHandler请一定设置CheckSign为True***
+        /// </summary>
+        public override bool CheckSign => false;
 
         /// <summary>
         /// http://127.0.0.1:20000/game/api?command=test
@@ -32,7 +32,6 @@ namespace Geek.Server.Http
         /// <returns></returns>
         public override Task<string> Action(string ip, string url, Dictionary<string, string> parameters)
         {
-            //var res = new HttpResult(HttpResult.Stauts.Success, $"当前在线人数:{ServerCompAgent.OnlineNum}").ToString();
             var res = new HttpTestRes
             {
                 A = 100,
@@ -41,8 +40,6 @@ namespace Geek.Server.Http
             };
             res.TestInfo.Age = 18;
             res.TestInfo.Name = "leeveel";
-            //var str = JsonConvert.SerializeObject(res);
-            GC.Collect();
             return Task.FromResult(res.ToString());
         }
     }
