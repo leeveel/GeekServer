@@ -66,15 +66,15 @@ namespace Geek.Client
             Port = port;
             try
             {
-                var client = new ClientBuilder().UseSockets().Build();
-                var connection = await client.ConnectAsync(new IPEndPoint(IPAddress.Parse(Host), Port));
+                var connection = await ClientFactory.ConnectAsync(new IPEndPoint(IPAddress.Parse(Host), Port));
                 UnityEngine.Debug.Log($"Connected to {connection.LocalEndPoint}");
                 Channel = new ClientNetChannel(connection, new ClientLengthPrefixedProtocol());
                 OnConnected(NetCode.Success);
                 return Channel;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                UnityEngine.Debug.LogError(e.ToString());
                 OnConnected(NetCode.Failed);
                 throw;
             }
