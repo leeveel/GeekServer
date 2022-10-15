@@ -48,7 +48,7 @@ namespace Geek.Server
                 }
                 catch (Exception e)
                 {
-                    //LOGGER.Error($"{remoteInfo} channel.Reader.Advance Exception:{e.Message}");
+                    LOGGER.Error($"{remoteInfo} channel.Reader.Advance Exception:{e.Message}");
                     break;
                 }
             }

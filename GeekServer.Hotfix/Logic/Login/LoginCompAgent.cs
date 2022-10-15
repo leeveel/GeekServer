@@ -1,5 +1,4 @@
 ﻿using Geek.Server.Role;
-using Geek.Server.Login;
 
 namespace Geek.Server.Login
 {
@@ -17,7 +16,7 @@ namespace Geek.Server.Login
         {
             var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
             using var cursor = await col.FindAsync(Builders<PlayerInfo>.Filter.Empty);
-            await cursor.ForEachAsync(async t =>
+            await cursor.ForEachAsync(t =>
             {
                 Comp.PlayerMap[t.playerId] = t;
                 //Log.Info("加载数据:" + t.playerId);

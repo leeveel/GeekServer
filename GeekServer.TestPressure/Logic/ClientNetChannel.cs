@@ -36,9 +36,7 @@ namespace Test.Pressure
         {
             try
             {
-                var netClient = new ClientBuilder().UseSockets().Build();
-                var connection = await netClient.ConnectAsync(new IPEndPoint(IPAddress.Parse(host), port));
-
+                var connection = await ClientFactory.ConnectAsync(new IPEndPoint(IPAddress.Parse(host), port));
                 context = connection;
                 reader = context.CreateReader();
                 writer = context.CreateWriter();
@@ -47,8 +45,9 @@ namespace Test.Pressure
                 _ = Task.Run(NetLooping);
                 return NetCode.Success;
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                Log.Error(e.Message);
                 return NetCode.Failed;
             }
         }
