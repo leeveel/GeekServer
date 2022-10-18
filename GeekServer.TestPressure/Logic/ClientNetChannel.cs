@@ -47,7 +47,7 @@ namespace Test.Pressure
             }
             catch (Exception e)
             {
-                Log.Error(e.Message);
+            Log.Error(e.Message);
                 return NetCode.Failed;
             }
         }

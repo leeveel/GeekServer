@@ -58,11 +58,10 @@ namespace Geek.Server
             Writer = null;
         }
 
-        public ValueTask WriteAsync(NMessage msg, CancellationToken cancellationToken = default)
+        public void WriteAsync(NMessage msg)
         {
             if (Writer != null)
-                return Writer.WriteAsync(Protocol, msg, cancellationToken);
-            return ValueTask.CompletedTask;
+                _ = Writer.WriteAsync(Protocol, msg);
         }
     }
 }

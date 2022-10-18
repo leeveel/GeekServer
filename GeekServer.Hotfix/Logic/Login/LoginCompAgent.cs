@@ -63,17 +63,17 @@ namespace Geek.Server.Login
         }
 
 
-        public virtual async Task<MSG> OnLogin(NetChannel channel, ReqLogin reqLogin)
+        public virtual async Task<(StateCode, Message)> OnLogin(NetChannel channel, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {
-                return MSG.Create(ErrCode.AccountCannotBeNull);
+                return (StateCode.AccountCannotBeNull, null);
             }
 
             if (reqLogin.Platform != "android" && reqLogin.Platform != "ios" && reqLogin.Platform != "unity")
             {
                 //验证平台合法性
-                return MSG.Create(ErrCode.UnknownPlatform);
+                return (StateCode.UnknownPlatform, null);
             }
 
             //查询角色账号，这里设定每个服务器只能有一个角色
@@ -112,7 +112,7 @@ namespace Geek.Server.Login
             var roleComp = await ActorMgr.GetCompAgent<RoleCompAgent>(roleId);
             await roleComp.OnLogin(reqLogin, isNewRole);
             var resLogin = await roleComp.BuildLoginMsg();
-            return MSG.Create(resLogin, reqLogin.UniId);
+            return (StateCode.Success, resLogin);
         }
 
         public virtual async Task<long> GetRoleIdOfPlayer(string userName, int sdkType)

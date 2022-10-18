@@ -7,11 +7,11 @@ namespace Geek.Server.Login
     internal class ReqLoginHandler : BaseTcpHandler
     {
         private static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
-        public override async Task ActionAsync()
+        public override async Task ActionAsync(NetChannel channel, Message msg)
         {
             var agent = await ActorMgr.GetCompAgent<LoginCompAgent>();
-            var retMsg = await agent.OnLogin(Channel, Msg as ReqLogin);
-            this.WriteWithErrCode(retMsg);
+            var (state, retMsg) = await agent.OnLogin(channel, msg as ReqLogin);
+            channel.WriteAsync(retMsg, msg.UniId, state);
         }
     }
 }

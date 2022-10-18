@@ -22,5 +22,10 @@ namespace Geek.Server
         /// 连接标示，避免自己顶自己的号,客户端每次启动游戏生成一次/或者每个设备一个
         /// </summary>
         public string Sign { get; set; }
+
+        public void WriteAsync(Message msg)
+        {
+            Channel?.WriteAsync(new NMessage(msg));
+        }
     }
 }

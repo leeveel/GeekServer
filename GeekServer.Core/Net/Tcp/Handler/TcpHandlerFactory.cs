@@ -11,7 +11,7 @@ namespace Geek.Server
 
         public const string KEY = "MsgID";
         static readonly Dictionary<int, Type> msgMap = new Dictionary<int, Type>();
-        static readonly Dictionary<int, Type> handlerMap = new Dictionary<int, Type>();
+        static readonly Dictionary<int, BaseTcpHandler> handlerMap = new Dictionary<int, BaseTcpHandler>();
 
         static Func<int, Message> msgGetter;
         static Func<int, Type> msgTypeGetter;
@@ -56,7 +56,7 @@ namespace Geek.Server
                 int msgId = (int)msgIdField.GetValue(null);
                 if (!msgMap.ContainsKey(msgId))
                 {
-                    handlerMap.Add(msgId, type);
+                    handlerMap.Add(msgId, (BaseTcpHandler)Activator.CreateInstance(type));
                     msgMap.Add(msgId, att.Msg);
                 }
                 else
@@ -81,10 +81,7 @@ namespace Geek.Server
                 return null;
             }
 
-            Type handlerType = handlerMap[msgId];
-            var handler = Activator.CreateInstance(handlerType) as BaseTcpHandler;
-            if (handler == null)
-                LOGGER.Error("创建handler失败:{}", handlerType.ToString());
+            var handler = handlerMap[msgId];
             return handler;
         }
 

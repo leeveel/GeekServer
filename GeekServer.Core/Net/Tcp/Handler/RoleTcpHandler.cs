@@ -3,21 +3,9 @@ namespace Geek.Server
 {
     public abstract class RoleTcpHandler : BaseTcpHandler
     {
-        internal WeakReference<Actor> ActorRef;
-        protected Actor Actor
+        public virtual Task InnerAction(NetChannel Channel, Message Msg)
         {
-            get
-            {
-                if (ActorRef.TryGetTarget(out var actor))
-                {
-                    return actor;
-                }
-                return null;
-            }
-        }
-        public virtual Task InnerAction()
-        {
-            Actor?.Tell(ActionAsync);
+            GetActor(Channel)?.Tell(() => { ActionAsync(Channel, Msg); });
             return Task.CompletedTask;
         }
     }
