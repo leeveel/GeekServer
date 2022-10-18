@@ -83,16 +83,18 @@ namespace Geek.Server
             }
 
             long sessionId = channel.GetSessionId();
+
             handler.Time = DateTime.Now;
             handler.Channel = channel;
             handler.Msg = msg;
             if (handler is RoleTcpHandler actorHandler)
             {
-                //actor已经被释放，或者链接与actor连接已经断开
+                //被顶号，或者被关闭链接，不再处理消息
                 if (sessionId == 0)
                 {
-                    throw new ConnectionAbortedException();
+                    return;
                 }
+                //actor已经被释放，或者链接与actor连接已经断开 
                 actorHandler.ActorRef = new WeakReference<Actor>(ActorMgr.GetActor(sessionId));
                 await actorHandler.InnerAction();
             }
