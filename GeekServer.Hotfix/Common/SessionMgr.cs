@@ -39,10 +39,11 @@ namespace Geek.Server
             return session?.Channel;
         }
 
-        public void Add(Session session)
+        public Session Add(Session session)
         {
             lock (lockObj)
             {
+                Session old = null;
                 if (sessionMap.ContainsKey(session.Id))
                 {
                     var oldChanel = sessionMap[session.Id];
@@ -50,6 +51,7 @@ namespace Geek.Server
                     {
                         //顶号,老链接不断开，需要发送被顶号的消息
                         oldChanel.Channel.RemoveSessionId();
+                        old = oldChanel;
                     }
                     else if (!ReferenceEquals(oldChanel.Channel, session.Channel))
                     {
@@ -58,6 +60,7 @@ namespace Geek.Server
                 }
                 session.Channel.SetSessionId(session.Id);
                 sessionMap[session.Id] = session;
+                return old;
             }
         }
     }

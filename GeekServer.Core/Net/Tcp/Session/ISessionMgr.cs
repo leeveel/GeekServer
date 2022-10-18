@@ -9,6 +9,6 @@ namespace Geek.Server
 
         public NetChannel GetChannel(long id);
 
-        public void Add(Session session);
+        public Session Add(Session session);
     }
 }

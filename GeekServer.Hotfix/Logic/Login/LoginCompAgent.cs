@@ -95,8 +95,19 @@ namespace Geek.Server.Login
                 Channel = channel,
                 Sign = reqLogin.Device
             };
-            HotfixMgr.SessionMgr.Add(session);
+            var oldSession = HotfixMgr.SessionMgr.Add(session);
 
+            if (oldSession != null)
+            {
+                //通知老链接下线
+                _ = Task.Run(async () =>
+                {
+                    //send msg...
+                    //oldSession.Channel.WriteAsync();
+                    await Task.Delay(100);
+                    oldSession.Channel?.Abort();
+                });
+            }
             //登陆流程
             var roleComp = await ActorMgr.GetCompAgent<RoleCompAgent>(roleId);
             await roleComp.OnLogin(reqLogin, isNewRole);
