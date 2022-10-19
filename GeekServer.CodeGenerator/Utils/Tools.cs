@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Geek.Server
 {
@@ -17,6 +15,10 @@ namespace Geek.Server
             return fullName.Substring(0, i);
         }
 
+        public static string RemoveWhitespace(this string str)
+        {
+            return string.Join("", str.Split(default(string[]), StringSplitOptions.RemoveEmptyEntries));
+        }
 
     }
 }

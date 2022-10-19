@@ -75,27 +75,15 @@ namespace Geek.Server
 
             //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
             var handler = TcpHandlerFactory.GetHandler(msg.MsgId);
-
             if (handler == null)
             {
                 LOGGER.Error($"找不到[{msg.MsgId}][{msg.GetType()}]对应的handler");
                 return;
             }
-
-            if (handler is RoleTcpHandler actorHandler)
-            {
-                //被顶号，或者被关闭链接，不再处理消息
-                long sessionId = channel.GetSessionId();
-                if (sessionId == 0)
-                {
-                    return;
-                }
-                await actorHandler.InnerAction(channel, msg);
-            }
-            else
-            {
-                await handler.ActionAsync(channel, msg);
-            }
+            handler.Msg = msg;
+            handler.Channel = channel;
+            await handler.Init();
+            await handler.InnerAction();
         }
     }
 }

@@ -27,7 +27,8 @@
 		<ProjectReference Include="..\GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
-	<ItemGroup>
-	</ItemGroup>
+	<Target Name="CleanSourceGeneratedFiles" AfterTargets="Clean">
+		<RemoveDir Directories="$(BaseIntermediateOutputPath)\GeneratedFiles" />
+	</Target>
 
 </Project>

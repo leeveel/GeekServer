@@ -1,15 +1,11 @@
-﻿
-namespace Geek.Server.Role
+﻿namespace Geek.Server.Role
 {
     [MsgMapping(typeof(ReqBagInfo))]
-    public class ReqBagInfoHandler : RoleTcpHandler
+    public class ReqBagInfoHandler : RoleCompHandler<BagCompAgent>
     {
-        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public override async Task ActionAsync(NetChannel channel, Message msg)
+        public override async Task ActionAsync()
         {
-            var agent = await GetActor(channel).GetCompAgent<BagCompAgent>();
-            var ret = await agent.BuildInfoMsg();
-            channel.WriteAsync(ret, msg.UniId);
+            await Comp.GetBagInfo(Channel, Msg as ReqBagInfo);
         }
     }
 }

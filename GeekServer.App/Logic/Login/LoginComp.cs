@@ -17,7 +17,7 @@ namespace Geek.Server.Login
         public bool IsChanged;
     }
 
-    [Comp(ActorType.Logic)]
+    [Comp(ActorType.Server)]
     public class LoginComp : BaseComp
     {
         public ConcurrentDictionary<string, PlayerInfo> PlayerMap = new();

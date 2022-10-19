@@ -11,7 +11,7 @@ namespace {{space}}
 		
 		{{mth.declare}}
 		{
-			{{~ if mth.isnotawait ~}}{{~#************************************************~}}
+			{{~ if !mth.isawait ~}}{{~#************************************************~}}
 
 			{{~ if mth.isthreadsafe ~}}
 			_ = base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});

@@ -69,47 +69,48 @@ namespace Geek.Server
                             //遍历注解
                             foreach (var a in method.AttributeLists)
                             {
-                                if (a.ToString().Contains(MthInfo.NotAwait))
+                                var attStr = a.ToString().RemoveWhitespace();
+                                if (attStr.Contains(MthInfo.AsyncApi))
                                 {
-                                    mth.Isnotawait = true;
-                                }
-                                else if (a.ToString().Contains(MthInfo.ExecuteTime))
-                                {
-                                    mth.Executetime = int.Parse(a.Attributes[0].ArgumentList.Arguments[0].ToString());
-                                }
-                                else if (a.ToString().Contains(MthInfo.ThreadSafe))
-                                {
-                                    mth.Isthreadsafe = true;
-                                }
-                                else if (a.ToString().Contains(MthInfo.CanBeCalledBySameComp))
-                                {
-                                    mth.IsCanBeCalledBySameComp = true;
+                                    mth.IsAsyncApi = true;
+                                    if (a.Attributes[0].ArgumentList == null)
+                                        continue;
+                                    foreach (var arg in a.Attributes[0].ArgumentList.Arguments)
+                                    {
+                                        var argStr = arg.ToString();
+                                        if (argStr.Contains(MthInfo.NotAwait))
+                                        {
+                                            mth.Isawait = argStr.Contains("true");
+                                        }
+                                        else if (argStr.Contains(MthInfo.ThreadSafe))
+                                        {
+                                            mth.Isthreadsafe = argStr.Contains("true");
+                                        }
+                                        else if (argStr.Contains(MthInfo.ExecuteTime))
+                                        {
+                                            mth.Executetime = int.Parse(argStr.Split(':')[1]);
+                                        }
+                                    }
                                 }
                             }
 
-                            if (!mth.IsPublic)
-                            {
-                                if (mth.IsCanBeCalledBySameComp)
-                                    context.LogError($"{fullName}.{method.Identifier.Text}添加了CanBeCalledBySameComp注解的函数必须为public");
-                                else
-                                    continue;
-                            }
-                            if (mth.Isthreadsafe && !mth.Isnotawait)
-                            {
+                            if (mth.Isthreadsafe && !mth.Isawait)
                                 continue;
-                            }
-                            if (mth.IsPublic && !mth.IsVirtual)
-                            {
-                                context.LogError($"{fullName}.{method.Identifier.Text}申明为public的函数必须为virtual");
-                            }
+
+                            if (!mth.IsAsyncApi)
+                                continue;
+
+                            if (mth.IsAsyncApi && !(mth.IsPublic && mth.IsVirtual))
+                                context.LogError($"{fullName}.{method.Identifier.Text}标记为【AsyncApi】的函数必须申明为public virtual");
+
                             if (mth.IsPublic && mth.IsVirtual)
                             {
                                 info.Methods.Add(mth);
                                 mth.Name = method.Identifier.Text;
                                 mth.ParamDeclare = method.ParameterList.ToString();  //(int a, List<int> list)
                                 mth.Returntype = method.ReturnType.ToString();   //Task<T>
-                                if (mth.Isnotawait && !mth.Returntype.Equals("Task"))
-                                    context.LogError($"{fullName}.{method.Identifier.Text}只有返回值为Task类型才能添加[{MthInfo.NotAwait}]注解");
+                                if (!mth.Isawait && !mth.Returntype.Equals("Task"))
+                                    context.LogError($"{fullName}.{method.Identifier.Text}只有返回值为Task类型才能设置isAwait=false");
                                 mth.Constraint = method.ConstraintClauses.ToString(); //where T : class, new() where K : BagState
                                 mth.Typeparams = method.TypeParameterList?.ToString(); //"<T, K>"	
                                 foreach (var p in method.ParameterList.Parameters)

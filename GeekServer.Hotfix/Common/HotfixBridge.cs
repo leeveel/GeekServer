@@ -43,8 +43,6 @@ namespace Geek.Server
             GlobalTimer.Start();
 
             await CompRegister.ActiveGlobalComps();
-            // var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
-            // await serverComp.CheckCrossDay();
             return true;
         }
 

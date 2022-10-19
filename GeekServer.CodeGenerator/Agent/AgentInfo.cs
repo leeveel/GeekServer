@@ -7,10 +7,12 @@ namespace Geek.Server
     public class MthInfo
     {
 
-        public const string NotAwait = "MethodOption.NotAwait";
-        public const string ThreadSafe = "MethodOption.ThreadSafe";
-        public const string ExecuteTime = "MethodOption.ExecuteTime";
-        public const string CanBeCalledBySameComp = "MethodOption.CanBeCalledBySameComp";
+        public const string NotAwait = "isAwait";
+        public const string ThreadSafe = "threadsafe";
+        public const string ExecuteTime = "timeout";
+
+        public const string Api = "[Api";
+        public const string AsyncApi = "[AsyncApi";
 
         public string Name { get; set; }
 
@@ -33,6 +35,11 @@ namespace Geek.Server
             }
         }
 
+
+        //public bool IsApi { get; set; }
+
+        public bool IsAsyncApi { get; set; }
+
         public bool IsPublic { get; set; }
 
         public bool IsStatic { get; set; }
@@ -43,13 +50,11 @@ namespace Geek.Server
 
         public List<string> AttributeList { get; private set; } = new List<string>();
 
-        public bool Isnotawait { get; set; }
+        public bool Isawait { get; set; } = true;
 
-        public bool Isthreadsafe { get; set; }
+        public bool Isthreadsafe { get; set; } = false;
 
-        public bool IsCanBeCalledBySameComp { get; set; }
-
-        public int Executetime { get; set; } = 12000;
+        public int Executetime { get; set; } = int.MaxValue;
 
         /// <summary>
         /// 约束

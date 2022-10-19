@@ -14,12 +14,21 @@ namespace Geek.Server.Role
             }
         }
 
-        public virtual Task<ResBagInfo> BuildInfoMsg()
+        private ResBagInfo BuildInfoMsg()
         {
             var res = new ResBagInfo();
             foreach (var kv in State.ItemMap)
                 res.ItemDic[kv.Key] = kv.Value;
-            return Task.FromResult(res);
+            return res;
         }
+
+        [AsyncApi]
+        public virtual Task GetBagInfo(NetChannel Channel, ReqBagInfo msg)
+        {
+            var ret = BuildInfoMsg();
+            Channel.WriteAsync(ret, msg.UniId);
+            return Task.CompletedTask;
+        }
+
     }
 }

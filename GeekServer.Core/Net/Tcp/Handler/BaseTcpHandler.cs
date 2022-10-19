@@ -3,13 +3,21 @@ namespace Geek.Server
 {
     public abstract class BaseTcpHandler
     {
-        public Actor GetActor(NetChannel Channel)
+        public NetChannel Channel { get; set; }
+
+        public Message Msg { get; set; }
+
+        public virtual Task Init()
         {
-            var actorId = Channel.GetSessionId();
-            if (actorId > 0)
-                return ActorMgr.GetActor(actorId);
-            return null;
+            return Task.CompletedTask;
         }
-        public abstract Task ActionAsync(NetChannel Channel, Message Msg);
+
+        public abstract Task ActionAsync();
+
+        public virtual Task InnerAction()
+        {
+            return ActionAsync();
+        }
+
     }
 }

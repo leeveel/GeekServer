@@ -46,7 +46,7 @@ namespace Test.Pressure
             {
                 return;
             }
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 1; i++)
             {
                 await ReqBagInfo();
                 await Task.Delay(1000);

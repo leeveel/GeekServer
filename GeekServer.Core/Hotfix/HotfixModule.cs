@@ -33,7 +33,7 @@ namespace Geek.Server
         /// <summary>
         /// msgId -> handler
         /// </summary>
-        readonly Dictionary<int, BaseTcpHandler> tcpHandlerMap = new();
+        readonly Dictionary<int, Type> tcpHandlerMap = new();
 
         /// <summary>
         /// actorType -> evtId -> listeners
@@ -175,7 +175,7 @@ namespace Geek.Server
             int msgId = (int)msgIdField.GetValue(null);
             if (!tcpHandlerMap.ContainsKey(msgId))
             {
-                tcpHandlerMap.Add(msgId, (BaseTcpHandler)Activator.CreateInstance(type));
+                tcpHandlerMap.Add(msgId, type);
             }
             else
             {
@@ -236,15 +236,16 @@ namespace Geek.Server
 
         internal BaseTcpHandler GetTcpHandler(int msgId)
         {
-            if (tcpHandlerMap.TryGetValue(msgId, out var handler))
+            if (tcpHandlerMap.TryGetValue(msgId, out var handlerType))
             {
-                if (handler is BaseTcpHandler)
+                var ins = Activator.CreateInstance(handlerType);
+                if (ins is BaseTcpHandler handler)
                 {
                     return handler;
                 }
                 else
                 {
-                    throw new Exception($"错误的tcp handler类型，{handler.GetType().FullName}");
+                    throw new Exception($"错误的tcp handler类型，{ins.GetType().FullName}");
                 }
             }
             return null;

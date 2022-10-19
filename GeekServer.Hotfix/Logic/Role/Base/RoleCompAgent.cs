@@ -5,7 +5,7 @@ namespace Geek.Server.Role
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public async virtual Task OnLogin(ReqLogin reqLogin, bool isNewRole)
+        public async Task<ResLogin> OnLogin(ReqLogin reqLogin, bool isNewRole)
         {
             SetAutoRecycle(false);
             if (isNewRole)
@@ -17,6 +17,7 @@ namespace Geek.Server.Role
                 var bagComp = await GetCompAgent<BagCompAgent>();
             }
             State.LoginTime = DateTime.Now;
+            return BuildLoginMsg();
         }
 
         public virtual Task OnLogout()
@@ -26,8 +27,7 @@ namespace Geek.Server.Role
             return Task.CompletedTask;
         }
 
-        [MethodOption.ThreadSafe]
-        public virtual Task<ResLogin> BuildLoginMsg()
+        private ResLogin BuildLoginMsg()
         {
             var res = new ResLogin()
             {
@@ -41,7 +41,7 @@ namespace Geek.Server.Role
                     VipLevel = State.VipLevel
                 }
             };
-            return Task.FromResult(res);
+            return res;
         }
 
         Task ICrossDay.OnCrossDay(int openServerDay)
