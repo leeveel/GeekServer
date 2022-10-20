@@ -44,11 +44,9 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 
 # 代码片段
 ```c#
-//注册Actor组件
-RegistServerComp<ServerComp>(EntityType.Server); //server
-RegistServerComp<LoginComp>(EntityType.Login);  
-RegistRoleComp<RoleComp>(); //role
-RegistRoleComp<BagComp>();
+//采用注解注册Actor组件
+[Comp(ActorType.Role)]
+public class BagComp : StateComp<BagState>{}
 
 //调用Actor组件函数(就像调用普通函数一样,无需关心多线程或入队)
 var serverComp = await EntityMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
@@ -69,28 +67,28 @@ public class RoleCompAgent : StateComponentAgent<RoleComp, RoleState>{}
 # 最佳实践
 GeekServer有严格的书写规范检查，如不符合规范编译直接报错  
 1.CompAgent不能被二次继承，Agent继承的需求理论上很少，如果有请采用组合模式  
-2.CompAgent中的所有方法必须以Task为返回值（理由：全面异步，防止出现async void导致异常无法捕捉，致使程序崩溃，详见微软AsyncGuidance.md）  
+2.CompAgent中被【AsyncApi】注解标记的方法必须以Task/Task<T>为返回值（理由：全面异步，防止出现async void导致异常无法捕捉，致使程序崩溃，详见微软AsyncGuidance.md）  
 3.CompAgent中不能书写构造函数（实际上也没有这样的需求）  
-4.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上[NotAwait]注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。  同时[Source Generator](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)在编译期间对标记了[NotAwait]的函数做了处理，内部直接返回了Task.CompletedTask，所以外部使用**_**丢弃或是用await都是等价的，为了规范统一，可以全部使用await
+4.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上【AsyncApi(isawait:false)】注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。  同时[Source Generator](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)在编译期间对标记了[AsyncApi(isawait:false)]的函数做了处理，内部直接返回了Task.CompletedTask，所以外部使用**_**丢弃或是用await都是等价的，为了规范统一，可以全部使用await
 ```c#
 public Task NotifyAllClient()
 {
    for(int i=0; i<clients.count; i++)
    {
      //_ = NotifyOneClient(clients[i].roleId);
-	 //对于标记了[NotAwait]的函数，等价于上面一行代码
+	 //对于标记了[AsyncApi(isawait:false)]的函数，等价于上面一行代码
 	 await NotifyOneClient(clients[i].roleId);
    }
 }
 
-[NotAwait]
+[AsyncApi(isawait:false)]
 public virtual Task NotifyOneClient(long roleId)
 {
    //...
    //...
 }
 ```
-5.CompAgent中不需要提供给外部访问方法，请尽量声明为非public类型，这样会少一次入队判断，效率会更高 
+5.CompAgent中不需要提供给外部访问方法，不要去标记[AsyncApi(isawait:false)]注解，这样会少一次入队判断，效率会更高 
 ```c#
 public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
 {
@@ -105,7 +103,8 @@ public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoSta
 	    return Task.CompletedTask;
 	}
         //外部接口public
-	public async Task OnLogin(ReqLogin reqLogin, bool isNewRole, long roleId)
+	[AsyncApi]
+	public virtual async Task OnLogin(ReqLogin reqLogin, bool isNewRole, long roleId)
 	{
 	    if (isNewRole)
 	    {
@@ -119,8 +118,8 @@ public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoSta
 ```c#
 public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
 {
-	[ThreadSafe] //我是线程安全的函数
-	public Task<ResLogin> BuildLoginMsg()
+	[AsyncApi(isawait:false, threadsafe=true)] //我是线程安全的函数
+	public virtual Task<ResLogin> BuildLoginMsg()
         {
             var res = new ResLogin()
             {
