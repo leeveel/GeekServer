@@ -5,7 +5,7 @@
     {
         public override async Task ActionAsync()
         {
-            await Comp.GetBagInfo(Channel, Msg as ReqBagInfo);
+            await Comp.GetBagInfo(Msg as ReqBagInfo);
         }
     }
 }

@@ -1,6 +1,20 @@
 ﻿
 namespace Geek.Server.Role
 {
+
+    public static class RoleCompAgentExt
+    {
+        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
+        public static async Task NotifyClient(this ICompAgent agent, Message msg, int uniId = 0, StateCode code = StateCode.Success)
+        {
+            var roleComp = await agent.GetCompAgent<RoleCompAgent>();
+            if (roleComp != null)
+                roleComp.NotifyClient(msg, uniId, code);
+            else
+                LOGGER.Warn($"{agent.OwnerType}未注册RoleComp组件");
+        }
+    }
+
     public class RoleCompAgent : StateCompAgent<RoleComp, RoleState>, ICrossDay
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -48,5 +62,15 @@ namespace Geek.Server.Role
         {
             return Task.CompletedTask;
         }
+
+        public void NotifyClient(Message msg, int uniId=0, StateCode code = StateCode.Success)
+        {
+            var channel = HotfixMgr.SessionMgr.GetChannel(ActorId);
+            if (channel != null && !channel.IsClose())
+            {
+                channel.WriteAsync(msg, uniId, code);
+            }
+        }
+
     }
 }

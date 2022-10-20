@@ -23,11 +23,10 @@ namespace Geek.Server.Role
         }
 
         [AsyncApi]
-        public virtual Task GetBagInfo(NetChannel Channel, ReqBagInfo msg)
+        public virtual async Task GetBagInfo(ReqBagInfo msg)
         {
             var ret = BuildInfoMsg();
-            Channel.WriteAsync(ret, msg.UniId);
-            return Task.CompletedTask;
+            await this.NotifyClient(ret, msg.UniId);
         }
 
     }
