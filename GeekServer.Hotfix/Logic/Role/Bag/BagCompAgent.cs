@@ -22,7 +22,6 @@ namespace Geek.Server.Role
             return res;
         }
 
-        [AsyncApi]
         public virtual async Task GetBagInfo(ReqBagInfo msg)
         {
             var ret = BuildInfoMsg();

@@ -15,10 +15,7 @@ namespace Geek.Server
                 return true;
             }
 
-            //TcpHandlerFactory.SetHandlerGetter(Geek.Server.Proto.MsgFactory.GetType, msgId => HotfixMgr.GetTcpHandler(msgId));
-            //HttpHandlerFactory.SetHandlerGetter(HotfixMgr.GetHttpHandler);
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
-
             await TcpServer.Start(Settings.TcpPort);
             Log.Info("tcp 服务启动完成...");
             await HttpServer.Start(Settings.HttpPort);
