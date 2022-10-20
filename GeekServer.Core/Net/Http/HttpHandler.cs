@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using NLog;
-using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Geek.Server
 {
@@ -88,7 +85,7 @@ namespace Geek.Server
                     return;
                 }
 
-                var handler = HttpHandlerFactory.GetHandler(cmd, paramMap);
+                var handler = HotfixMgr.GetHttpHandler(cmd);
                 if (handler == null)
                 {
                     LOGGER.Warn($"http cmd handler 不存在：{cmd}");

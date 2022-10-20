@@ -74,7 +74,7 @@ namespace Geek.Server
                 return;
 
             //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
-            var handler = TcpHandlerFactory.GetHandler(msg.MsgId);
+            var handler = HotfixMgr.GetTcpHandler(msg.MsgId);
             if (handler == null)
             {
                 LOGGER.Error($"找不到[{msg.MsgId}][{msg.GetType()}]对应的handler");

@@ -166,11 +166,12 @@ namespace Geek.Server
             return true;
         }
 
+        public const string KEY = "MsgID";
         private bool AddTcpHandler(Type type)
         {
             var attribute = (MsgMapping)type.GetCustomAttribute(typeof(MsgMapping), true);
             if (attribute == null) return false;
-            var msgIdField = attribute.Msg.GetField(TcpHandlerFactory.KEY, BindingFlags.Static | BindingFlags.Public);
+            var msgIdField = attribute.Msg.GetField(KEY, BindingFlags.Static | BindingFlags.Public);
             if (msgIdField == null) return false;
             int msgId = (int)msgIdField.GetValue(null);
             if (!tcpHandlerMap.ContainsKey(msgId))

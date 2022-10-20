@@ -98,6 +98,17 @@ namespace Geek.Server
             return module.GetHttpHandler(cmd);
         }
 
+        static Func<int, Type> msgGetter;
+        public static void SetMsgGetter(Func<int, Type> msgGetter)
+        {
+            HotfixMgr.msgGetter = msgGetter;
+        }
+
+        public static Type GetMsgType(int msgId)
+        {
+            return msgGetter(msgId);
+        }
+
         public static List<IEventListener> FindListeners(ActorType actorType, int evtId)
         {
             return module.FindListeners(actorType, evtId) ?? EMPTY_LISTENER_LIST;

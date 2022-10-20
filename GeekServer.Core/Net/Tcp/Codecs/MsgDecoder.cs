@@ -28,7 +28,7 @@ namespace Geek.Server
             //消息id
             reader.TryReadBigEndian(out int msgId);
 
-            var msgType = TcpHandlerFactory.GetMsgType(msgId);
+            var msgType = HotfixMgr.GetMsgType(msgId);
             if (msgType == null)
             {
                 LOGGER.Error("消息ID:{} 找不到对应的Msg.", msgId);
@@ -70,7 +70,7 @@ namespace Geek.Server
 
             reader.TryReadBigEndian(out int msgId);  //4
 
-            var msgType = TcpHandlerFactory.GetMsgType(msgId);
+            var msgType = HotfixMgr.GetMsgType(msgId);
             if (msgType == null)
             {
                 LOGGER.Error("消息ID:{} 找不到对应的Msg.", msgId);
