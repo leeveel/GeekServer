@@ -13,12 +13,8 @@ namespace {{space}}
 		{
 			{{~ if !mth.isawait ~}}{{~#************************************************~}}
 
-			{{~ if mth.isthreadsafe ~}}
-			_ = base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});
-			{{~ else ~}}
 			long callChainId = base.Actor.WorkerActor.NewChainId();
 			_ = base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, callChainId, {{mth.executetime}});
-			{{~ end ~}}
 			return Task.CompletedTask;
 
 			{{~ else ~}}{{~#************************************************~}}

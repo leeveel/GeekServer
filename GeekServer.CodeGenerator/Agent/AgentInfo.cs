@@ -52,8 +52,6 @@ namespace Geek.Server
 
         public bool Isawait { get; set; } = true;
 
-        public bool Isthreadsafe { get; set; } = false;
-
         public int Executetime { get; set; } = int.MaxValue;
 
         /// <summary>

@@ -27,6 +27,12 @@
 		<ProjectReference Include="..\GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
+	<!--如需磁盘上生成文件打开以下注释-->
+	<!--<PropertyGroup>
+		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
+	</PropertyGroup>-->
+
 	<Target Name="CleanSourceGeneratedFiles" AfterTargets="Clean">
 		<RemoveDir Directories="$(BaseIntermediateOutputPath)\GeneratedFiles" />
 	</Target>

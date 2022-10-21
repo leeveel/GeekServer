@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
-using System.Diagnostics;
 using Tools.Utils;
 
 namespace Geek.Server
@@ -82,10 +81,6 @@ namespace Geek.Server
                                         {
                                             mth.Isawait = argStr.Contains("true");
                                         }
-                                        else if (argStr.Contains(MthInfo.ThreadSafe))
-                                        {
-                                            mth.Isthreadsafe = argStr.Contains("true");
-                                        }
                                         else if (argStr.Contains(MthInfo.ExecuteTime))
                                         {
                                             mth.Executetime = int.Parse(argStr.Split(':')[1]);
@@ -93,9 +88,6 @@ namespace Geek.Server
                                     }
                                 }
                             }
-
-                            if (mth.Isthreadsafe && !mth.Isawait)
-                                continue;
 
                             if (!mth.IsAsyncApi)
                                 continue;
