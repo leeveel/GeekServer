@@ -68,8 +68,8 @@ public class RoleCompAgent : StateComponentAgent<RoleComp, RoleState>{}
 # 最佳实践
 GeekServer有严格的书写规范检查，如不符合规范编译直接报错  
 1.CompAgent不能被二次继承，Agent继承的需求理论上很少，如果有请采用组合模式  
-2.为CompAgent中需要被外部提供服务的接口，添加【AsyncApi】注解
-3.CompAgent中被【AsyncApi】注解标记的方法必须以Task/Task<T>为返回值  
+2.为CompAgent中需要被外部提供服务的接口，添加【AsyncApi】注解  
+3.CompAgent中被【AsyncApi】注解标记的方法必须以Task/Task<T>为返回值    
 4.CompAgent中不能书写构造函数（实际上也没有这样的需求）  
 5.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上【AsyncApi(isawait:false)】注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。  同时[Source Generator](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)在编译期间对标记了[AsyncApi(isawait:false)]的函数做了处理，内部直接返回了Task.CompletedTask，所以外部使用**_**丢弃或是用await都是等价的，为了规范统一，可以全部使用await
 ```c#
