@@ -90,53 +90,26 @@ public virtual Task NotifyOneClient(long roleId)
    //...
 }
 ```
-5.CompAgent中不需要提供给外部访问方法，不要去标记[AsyncApi(isawait:false)]注解，这样会少一次入队判断，效率会更高 
+5.CompAgent中为需要提供给外部访问接口，标记[AsyncApi(isawait:false)]注解，如果不加外部又有访问，**则会有线程安全问题**，除非此接口本身就是线程安全的。 
 ```c#
-public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
+public class ServerCompAgent : StateCompAgent<ServerComp, ServerState>
 {
-	//agent内部调用，非public
-	private Task OnCreate(ReqLogin reqLogin, long roleId)
-	{
-	    State.CreateTime = DateTime.Now;
-	    State.Level = 1;
-	    State.VipLevel = 1;
-	    State.RoleId = roleId;
-	    State.RoleName = new System.Random().Next(1000, 10000).ToString();//随机给一个
-	    return Task.CompletedTask;
-	}
-        //外部接口public
-	[AsyncApi]
-	public virtual async Task OnLogin(ReqLogin reqLogin, bool isNewRole, long roleId)
-	{
-	    if (isNewRole)
-	    {
-		await OnCreate(reqLogin, roleId);
-	    }
-	    State.LoginTime = DateTime.Now;
-	}
-}
-```
-6.为明确知道为线程安全的函数加上[ThreadSafe]注解，同样可以减少入队判断提高效率。（这个是非必须的操作，不加也不会有问题，如果你不知道什么线程安全忽略此项） 
-```c#
-public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoState>
-{
-	[AsyncApi(isawait:false, threadsafe=true)] //我是线程安全的函数
-	public virtual Task<ResLogin> BuildLoginMsg()
-        {
-            var res = new ResLogin()
-            {
-                code = 0,
-                userInfo = new UserInfo()
-                {
-                    createTime = State.CreateTime.Ticks,
-                    level = State.Level,
-                    roleId = State.RoleId,
-                    roleName = State.RoleName,
-                    vipLevel = State.VipLevel
-                }
-            };
-            return Task.FromResult(res);
-        }
+    private Task TestScheduleTimer()
+    {
+        LOGGER.Debug("ServerCompAgent.TestSchedueTimer.延时1秒执行.每隔3秒执行");
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// 由于此接口会提供给其他Actor访问，所以需要标记为[AsyncApi]
+    /// </summary>
+    /// <returns></returns>
+    [AsyncApi]
+    public virtual Task<int> GetWorldLevel()
+    {
+        return Task.FromResult(State.WorldLevel);
+    }
+
 }
 ```
 更多异步书写规范请参考微软官方文档[AsyncGuidance.md](https://github.com/davidfowl/AspNetCoreDiagnosticScenarios/blob/master/AsyncGuidance.md)  
