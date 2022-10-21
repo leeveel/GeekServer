@@ -8,8 +8,4 @@
 		<PackageReference Include="MessagePack" Version="2.4.35" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
-	</ItemGroup>
-
 </Project>
