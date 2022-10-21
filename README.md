@@ -40,7 +40,8 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 7. 启动GeekServer.Test (一个1000人登录的demo)
 
 # 文档&例子&Demo
-[文档](https://github.com/leeveel/GeekServer/tree/master/Docs)  
+[十分钟上手教程](https://github.com/leeveel/GeekServer/blob/main/Docs/%E5%8D%81%E5%88%86%E9%92%9F.md)  
+[了解更多](https://github.com/leeveel/GeekServer/tree/master/Docs) 
 
 # 代码片段
 ```c#
@@ -140,7 +141,5 @@ public class RoleLoginCompAgent : StateComponentAgent<RoleLoginComp, RoleInfoSta
 ```
 更多异步书写规范请参考微软官方文档[AsyncGuidance.md](https://github.com/davidfowl/AspNetCoreDiagnosticScenarios/blob/master/AsyncGuidance.md)  
 
-# 推荐项目  
-[xbuffer](https://github.com/CodeZeg/xbuffer) 一种简化版本的 flatbuffer 序列化库  
+# 推荐项目   
 [GeekConfig](https://github.com/leeveel/GeekConfig) 一键从Excel中导出模板代码和二进制数据  
-[GeekProto](https://github.com/leeveel/GeekProto) Super Fast Binary Serialization Library  
