@@ -28,12 +28,8 @@ namespace Logic
             DemoService.Singleton.RegisterEventListener();
             await ConnectServer();
             await Login();
-
-            for (int i = 0; i < 1; i++)
-            {
-                await ReqBagInfo();
-                await Task.Delay(1000);
-            }
+            await ReqBagInfo();
+            await ReqComposePet();
         }
 
         private async Task ConnectServer()
@@ -63,6 +59,13 @@ namespace Logic
         private Task ReqBagInfo()
         {
             ReqBagInfo req = new ReqBagInfo();
+            return DemoService.Singleton.SendMsg(req);
+        }
+
+        private Task ReqComposePet()
+        {
+            ReqComposePet req = new ReqComposePet();
+            req.FragmentId = 1000;
             return DemoService.Singleton.SendMsg(req);
         }
 

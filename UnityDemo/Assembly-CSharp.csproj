@@ -107,10 +107,12 @@
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.B.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.HearBeat.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqBagInfo.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqComposePet.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqLogin.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqSellItem.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqUseItem.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResBagInfo.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResComposePet.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResErrorCode.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResItemChange.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResLevelUp.cs" />
@@ -122,10 +124,12 @@
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_BFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_HearBeatFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqBagInfoFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqComposePetFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqLoginFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqSellItemFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqUseItemFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResBagInfoFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResComposePetFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResErrorCodeFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResItemChangeFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResLevelUpFormatter.cs" />

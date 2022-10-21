@@ -62,8 +62,7 @@ namespace Geek.Server.Login
             }
         }
 
-        [AsyncApi]
-        public virtual async Task OnLogin(NetChannel channel, ReqLogin reqLogin)
+        public async Task OnLogin(NetChannel channel, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {

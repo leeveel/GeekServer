@@ -47,7 +47,7 @@ namespace MessagePack.Resolvers
 
         static GeneratedResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<global::System.Type, int>(16)
+            lookup = new global::System.Collections.Generic.Dictionary<global::System.Type, int>(18)
             {
                 { typeof(global::System.Collections.Generic.Dictionary<int, long>), 0 },
                 { typeof(global::Geek.Server.Proto.TestEnum), 1 },
@@ -55,16 +55,18 @@ namespace MessagePack.Resolvers
                 { typeof(global::Geek.Server.Proto.B), 3 },
                 { typeof(global::Geek.Server.Proto.HearBeat), 4 },
                 { typeof(global::Geek.Server.Proto.ReqBagInfo), 5 },
-                { typeof(global::Geek.Server.Proto.ReqLogin), 6 },
-                { typeof(global::Geek.Server.Proto.ReqSellItem), 7 },
-                { typeof(global::Geek.Server.Proto.ReqUseItem), 8 },
-                { typeof(global::Geek.Server.Proto.ResBagInfo), 9 },
-                { typeof(global::Geek.Server.Proto.ResErrorCode), 10 },
-                { typeof(global::Geek.Server.Proto.ResItemChange), 11 },
-                { typeof(global::Geek.Server.Proto.ResLevelUp), 12 },
-                { typeof(global::Geek.Server.Proto.ResLogin), 13 },
-                { typeof(global::Geek.Server.Proto.TestStruct), 14 },
-                { typeof(global::Geek.Server.Proto.UserInfo), 15 },
+                { typeof(global::Geek.Server.Proto.ReqComposePet), 6 },
+                { typeof(global::Geek.Server.Proto.ReqLogin), 7 },
+                { typeof(global::Geek.Server.Proto.ReqSellItem), 8 },
+                { typeof(global::Geek.Server.Proto.ReqUseItem), 9 },
+                { typeof(global::Geek.Server.Proto.ResBagInfo), 10 },
+                { typeof(global::Geek.Server.Proto.ResComposePet), 11 },
+                { typeof(global::Geek.Server.Proto.ResErrorCode), 12 },
+                { typeof(global::Geek.Server.Proto.ResItemChange), 13 },
+                { typeof(global::Geek.Server.Proto.ResLevelUp), 14 },
+                { typeof(global::Geek.Server.Proto.ResLogin), 15 },
+                { typeof(global::Geek.Server.Proto.TestStruct), 16 },
+                { typeof(global::Geek.Server.Proto.UserInfo), 17 },
             };
         }
 
@@ -84,16 +86,18 @@ namespace MessagePack.Resolvers
                 case 3: return new MessagePack.Formatters.Geek.Server.Proto.BFormatter();
                 case 4: return new MessagePack.Formatters.Geek.Server.Proto.HearBeatFormatter();
                 case 5: return new MessagePack.Formatters.Geek.Server.Proto.ReqBagInfoFormatter();
-                case 6: return new MessagePack.Formatters.Geek.Server.Proto.ReqLoginFormatter();
-                case 7: return new MessagePack.Formatters.Geek.Server.Proto.ReqSellItemFormatter();
-                case 8: return new MessagePack.Formatters.Geek.Server.Proto.ReqUseItemFormatter();
-                case 9: return new MessagePack.Formatters.Geek.Server.Proto.ResBagInfoFormatter();
-                case 10: return new MessagePack.Formatters.Geek.Server.Proto.ResErrorCodeFormatter();
-                case 11: return new MessagePack.Formatters.Geek.Server.Proto.ResItemChangeFormatter();
-                case 12: return new MessagePack.Formatters.Geek.Server.Proto.ResLevelUpFormatter();
-                case 13: return new MessagePack.Formatters.Geek.Server.Proto.ResLoginFormatter();
-                case 14: return new MessagePack.Formatters.Geek.Server.Proto.TestStructFormatter();
-                case 15: return new MessagePack.Formatters.Geek.Server.Proto.UserInfoFormatter();
+                case 6: return new MessagePack.Formatters.Geek.Server.Proto.ReqComposePetFormatter();
+                case 7: return new MessagePack.Formatters.Geek.Server.Proto.ReqLoginFormatter();
+                case 8: return new MessagePack.Formatters.Geek.Server.Proto.ReqSellItemFormatter();
+                case 9: return new MessagePack.Formatters.Geek.Server.Proto.ReqUseItemFormatter();
+                case 10: return new MessagePack.Formatters.Geek.Server.Proto.ResBagInfoFormatter();
+                case 11: return new MessagePack.Formatters.Geek.Server.Proto.ResComposePetFormatter();
+                case 12: return new MessagePack.Formatters.Geek.Server.Proto.ResErrorCodeFormatter();
+                case 13: return new MessagePack.Formatters.Geek.Server.Proto.ResItemChangeFormatter();
+                case 14: return new MessagePack.Formatters.Geek.Server.Proto.ResLevelUpFormatter();
+                case 15: return new MessagePack.Formatters.Geek.Server.Proto.ResLoginFormatter();
+                case 16: return new MessagePack.Formatters.Geek.Server.Proto.TestStructFormatter();
+                case 17: return new MessagePack.Formatters.Geek.Server.Proto.UserInfoFormatter();
                 default: return null;
             }
         }

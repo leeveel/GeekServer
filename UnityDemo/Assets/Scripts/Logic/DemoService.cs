@@ -73,6 +73,7 @@ namespace Logic
             AddListener(GameClient.DisconnectEvt, OnDisconnectServer);
             AddListener(ResLogin.MsgID, OnResLogin); 
             AddListener(ResBagInfo.MsgID, OnResBagInfo);
+            AddListener(ResComposePet.MsgID, OnResComposePet);
             AddListener(ResErrorCode.MsgID, OnResErrorCode);
         }
 
@@ -137,6 +138,14 @@ namespace Logic
             }
             UnityEngine.Debug.Log(str);
             GameMain.Singleton.AppendLog(str.ToString());
+        }
+
+        private void OnResComposePet(Event e)
+        {
+            var msg = GetCurMsg<ResComposePet>(e.EventId);
+            var str = $"合成宠物成功{msg.PetId}";
+            UnityEngine.Debug.Log(str);
+            GameMain.Singleton.AppendLog(str);
         }
 
     }

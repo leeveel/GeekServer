@@ -51,6 +51,7 @@ namespace Test.Pressure
                 await ReqBagInfo();
                 await Task.Delay(1000);
             }
+            await ReqComposePet();
         }
 
         private Task<bool> ReqLogin()
@@ -68,6 +69,11 @@ namespace Test.Pressure
         private Task ReqBagInfo()
         {
             return SendMsgAndWaitBack(new ReqBagInfo());
+        }
+
+        private Task ReqComposePet()
+        {
+            return SendMsgAndWaitBack(new ReqComposePet() { FragmentId=1000 });
         }
 
         void SendMsg(Message msg)

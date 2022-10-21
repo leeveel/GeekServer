@@ -13,6 +13,8 @@ namespace Geek.Server.Proto
         {
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqBagInfo>(-1612046553);
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResBagInfo>(-1516249246);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqComposePet>(-395133604);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResComposePet>(1826631905);
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqUseItem>(-693612441);
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqSellItem>(-1914477348);
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResItemChange>(-202674947);

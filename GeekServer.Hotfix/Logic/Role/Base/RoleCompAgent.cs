@@ -28,7 +28,8 @@ namespace Geek.Server.Role
                 State.Level = 1;
                 State.VipLevel = 1;
                 State.RoleName = new System.Random().Next(1000, 10000).ToString();//随机给一个
-                var bagComp = await GetCompAgent<BagCompAgent>();
+                //激活背包组件
+                await GetCompAgent<BagCompAgent>();
             }
             State.LoginTime = DateTime.Now;
             return BuildLoginMsg();
