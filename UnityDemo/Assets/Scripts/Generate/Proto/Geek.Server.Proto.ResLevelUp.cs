@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class ResLevelUp : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -1820231335;
+		public const int Sid = 1405557910;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

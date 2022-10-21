@@ -9,7 +9,7 @@ namespace Geek.Server.Proto
 	public class ResItemChange : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -202674947;
+		public const int Sid = 1593491631;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

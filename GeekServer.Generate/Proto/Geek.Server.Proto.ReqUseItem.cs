@@ -9,7 +9,7 @@ namespace Geek.Server.Proto
 	public class ReqUseItem : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -693612441;
+		public const int Sid = 1478385002;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

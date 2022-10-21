@@ -11,22 +11,22 @@ namespace Geek.Server.Proto
         {
             lookup = new System.Collections.Generic.Dictionary<int, Type>(16)
             {
-			    { -1612046553, typeof(Geek.Server.Proto.ReqBagInfo) },
-			    { -1516249246, typeof(Geek.Server.Proto.ResBagInfo) },
-			    { -395133604, typeof(Geek.Server.Proto.ReqComposePet) },
-			    { 1826631905, typeof(Geek.Server.Proto.ResComposePet) },
-			    { -693612441, typeof(Geek.Server.Proto.ReqUseItem) },
-			    { -1914477348, typeof(Geek.Server.Proto.ReqSellItem) },
-			    { -202674947, typeof(Geek.Server.Proto.ResItemChange) },
-			    { -1657659890, typeof(Geek.Server.Proto.TestStruct) },
-			    { 1544071388, typeof(Geek.Server.Proto.A) },
-			    { 1070961112, typeof(Geek.Server.Proto.B) },
-			    { 2003858448, typeof(Geek.Server.Proto.UserInfo) },
-			    { 205475772, typeof(Geek.Server.Proto.ReqLogin) },
-			    { 2039746454, typeof(Geek.Server.Proto.ResLogin) },
-			    { -1820231335, typeof(Geek.Server.Proto.ResLevelUp) },
-			    { -1620014636, typeof(Geek.Server.Proto.HearBeat) },
-			    { -488702425, typeof(Geek.Server.Proto.ResErrorCode) },
+			    { -399658839, typeof(Geek.Server.Proto.ReqBagInfo) },
+			    { -768070425, typeof(Geek.Server.Proto.ResBagInfo) },
+			    { -1888378530, typeof(Geek.Server.Proto.ReqComposePet) },
+			    { -1498495527, typeof(Geek.Server.Proto.ResComposePet) },
+			    { 1478385002, typeof(Geek.Server.Proto.ReqUseItem) },
+			    { -1236539504, typeof(Geek.Server.Proto.ReqSellItem) },
+			    { 1593491631, typeof(Geek.Server.Proto.ResItemChange) },
+			    { -248186732, typeof(Geek.Server.Proto.TestStruct) },
+			    { -1878353591, typeof(Geek.Server.Proto.A) },
+			    { 14791156, typeof(Geek.Server.Proto.B) },
+			    { 724520320, typeof(Geek.Server.Proto.UserInfo) },
+			    { 932720150, typeof(Geek.Server.Proto.ReqLogin) },
+			    { 2003930237, typeof(Geek.Server.Proto.ResLogin) },
+			    { 1405557910, typeof(Geek.Server.Proto.ResLevelUp) },
+			    { 1771311297, typeof(Geek.Server.Proto.HearBeat) },
+			    { -138811813, typeof(Geek.Server.Proto.ResErrorCode) },
             };
         }
 
