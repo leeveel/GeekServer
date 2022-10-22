@@ -41,15 +41,51 @@ namespace Server.Logic.Logic
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// 由于此接口会提供给其他Actor访问，所以需要标记为[AsyncApi]
-        /// </summary>
-        /// <returns></returns>
-        [AsyncApi]
+        [Api]
+        [ThreadSafe]
         public virtual Task<int> GetWorldLevel()
         {
             return Task.FromResult(State.WorldLevel);
         }
+
+        [Api]
+        [TimeOut(12000)]
+        public virtual Task<bool> IsOnline(long roleId)
+        {
+            foreach (var id in State.OnlineList)
+            {
+                if (id == roleId)
+                    return Task.FromResult(true);
+            }
+            return Task.FromResult(false);
+        }
+
+        /*******************演示代码**************************/
+        [Api]
+        [ThreadSafe]
+        public virtual int DoSomething0()
+        {
+            return State.WorldLevel;
+        }
+
+        [Discard]
+        [ThreadSafe]
+        protected virtual Task DoSomething1()
+        {
+            return Task.CompletedTask;
+        }
+
+        [ThreadSafe]
+        protected void DoSomething2()
+        {
+        }
+
+        [Discard]
+        protected virtual Task DoSomething3()
+        {
+            return Task.CompletedTask;
+        }
+        /*******************演示代码**************************/
 
     }
 }

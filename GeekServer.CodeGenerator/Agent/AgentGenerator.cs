@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
+using System.Diagnostics;
 using Tools.Utils;
 
 namespace Geek.Server
@@ -54,10 +55,17 @@ namespace Geek.Server
                             //修饰符
                             foreach (var m in method.Modifiers)
                             {
+                                if (m.Text.Equals("virtual"))
+                                {
+                                    mth.IsVirtual = true;
+                                    mth.Modify += "override ";
+                                }
+                                else
+                                {
+                                    mth.Modify = m.Text + " ";
+                                }
                                 if (m.Text.Equals("public"))
                                     mth.IsPublic = true;
-                                if (m.Text.Equals("virtual"))
-                                    mth.IsVirtual = true;
                                 if (m.Text.Equals("static"))
                                     mth.IsStatic = true;
                             }
@@ -65,44 +73,65 @@ namespace Geek.Server
                             if (mth.IsStatic)
                                 continue;
 
+                            mth.Returntype = method.ReturnType?.ToString();   //Task<T>
+                            if (mth.Returntype == null)
+                                mth.Returntype = "void";
+
                             //遍历注解
                             foreach (var a in method.AttributeLists)
                             {
                                 var attStr = a.ToString().RemoveWhitespace();
-                                if (attStr.Contains(MthInfo.AsyncApi))
+                                if (attStr.Contains("[Api]"))
                                 {
-                                    mth.IsAsyncApi = true;
-                                    if (a.Attributes[0].ArgumentList == null)
-                                        continue;
-                                    foreach (var arg in a.Attributes[0].ArgumentList.Arguments)
-                                    {
-                                        var argStr = arg.ToString();
-                                        if (argStr.Contains(MthInfo.NotAwait))
-                                        {
-                                            mth.Isawait = argStr.Contains("true");
-                                        }
-                                        else if (argStr.Contains(MthInfo.ExecuteTime))
-                                        {
-                                            mth.Executetime = int.Parse(argStr.Split(':')[1]);
-                                        }
-                                    }
+                                    mth.IsApi = true;
+                                }
+                                else if (attStr.Contains("[Discard]"))
+                                {
+                                    mth.Discard = true;
+                                }
+                                else if (attStr.Contains("TimeOut"))
+                                {
+                                    mth.HasTimeout = true;
+                                    var argStr = a.Attributes[0].ArgumentList.Arguments[0].ToString();
+                                    if (argStr.Contains("timeout"))
+                                        mth.Timeout = int.Parse(argStr.Split(':')[1]);
+                                    else
+                                        mth.Timeout = int.Parse(a.Attributes[0].ArgumentList.Arguments[0].ToString());
+                                }
+                                else if (attStr.Contains("[ThreadSafe]"))
+                                {
+                                    mth.Threadsafe = true;
                                 }
                             }
 
-                            if (!mth.IsAsyncApi)
+                            if (mth.Threadsafe && mth.HasTimeout)
+                                context.LogError($"{fullName}.{method.Identifier.Text}无法为标记【Threadsafe】的函数指定超时时间");
+
+                            if (!mth.IsApi && !mth.Discard && mth.HasTimeout)
+                                context.LogError($"{fullName}.{method.Identifier.Text}【Timeout】注解只能配合【Api】或【Discard】使用");
+
+                            //跳过没有标记任何注解的函数
+                            if (!mth.IsApi && !mth.Discard && !mth.Threadsafe)
                                 continue;
 
-                            if (mth.IsAsyncApi && !(mth.IsPublic && mth.IsVirtual))
-                                context.LogError($"{fullName}.{method.Identifier.Text}标记为【AsyncApi】的函数必须申明为public virtual");
+                            //线程安全且没有丢弃直接跳过
+                            if (mth.Threadsafe && !mth.Discard)
+                                continue;
 
-                            if (mth.IsPublic && mth.IsVirtual)
+                            if (mth.IsApi && !mth.Threadsafe && !mth.Returntype.Contains("Task"))
+                                context.LogError($"{fullName}.{method.Identifier.Text}, 非【Threadsafe】的【Api】接口只能是异步函数"); 
+
+                            if ((mth.IsApi || mth.Discard || mth.Threadsafe) && !mth.IsVirtual)
+                                context.LogError($"{fullName}.{method.Identifier.Text}标记了【AsyncApi】【Threadsafe】【Discard】注解的函数必须申明为virtual");
+
+                            if (mth.IsVirtual)
                             {
                                 info.Methods.Add(mth);
                                 mth.Name = method.Identifier.Text;
                                 mth.ParamDeclare = method.ParameterList.ToString();  //(int a, List<int> list)
-                                mth.Returntype = method.ReturnType.ToString();   //Task<T>
-                                if (!mth.Isawait && !mth.Returntype.Equals("Task"))
-                                    context.LogError($"{fullName}.{method.Identifier.Text}只有返回值为Task类型才能设置isAwait=false");
+                                //mth.Returntype = method.ReturnType.ToString();   //Task<T>
+                                if (mth.Discard && !mth.Returntype.Equals("Task"))
+                                    context.LogError($"{fullName}.{method.Identifier.Text}只有返回值为Task类型才能添加【Discard】注解");
                                 mth.Constraint = method.ConstraintClauses.ToString(); //where T : class, new() where K : BagState
                                 mth.Typeparams = method.TypeParameterList?.ToString(); //"<T, K>"	
                                 foreach (var p in method.ParameterList.Parameters)

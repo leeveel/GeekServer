@@ -26,6 +26,7 @@ namespace Geek.Server.Role
         private async Task OnGotNewPet(OneParam<int> param)
         {
             var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
+            //var level = await serverComp.SendAsync(() => serverComp.GetWorldLevel()); //手动入队的写法
             var level = await serverComp.GetWorldLevel();
             LOGGER.Debug($"PetCompAgent.OnGotNewPet监听到了获得宠物的事件,宠物ID:{param.value}当前世界等级:{level}");
         }

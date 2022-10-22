@@ -11,10 +11,14 @@ namespace {{space}}
 		
 		{{mth.declare}}
 		{
-			{{~ if !mth.isawait ~}}{{~#************************************************~}}
+			{{~ if mth.discard ~}}{{~#************************************************~}}
 
-			long callChainId = base.Actor.WorkerActor.NewChainId();
-			_ = base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, callChainId, {{mth.executetime}});
+			{{~ if mth.threadsafe ~}}
+			_ = base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});
+			{{~ else ~}}
+			long callChainId = Geek.Server.WorkerActor.NextChainId();
+			_ = base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, callChainId, {{mth.timeout}});
+			{{~ end ~}}
 			return Task.CompletedTask;
 
 			{{~ else ~}}{{~#************************************************~}}
@@ -23,7 +27,7 @@ namespace {{space}}
 			{
 				return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});
 			}
-			return base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, chainId, {{mth.executetime}});
+			return base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, chainId, {{mth.timeout}});
 			{{~ end ~}}{{~#************************************************~}}
 		}
 

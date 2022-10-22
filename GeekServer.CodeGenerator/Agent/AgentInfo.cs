@@ -6,14 +6,6 @@ namespace Geek.Server
 
     public class MthInfo
     {
-
-        public const string NotAwait = "isAwait";
-        public const string ThreadSafe = "threadsafe";
-        public const string ExecuteTime = "timeout";
-
-        public const string Api = "[Api";
-        public const string AsyncApi = "[AsyncApi";
-
         public string Name { get; set; }
 
         public string Returntype { get; set; }
@@ -23,7 +15,7 @@ namespace Geek.Server
             get
             {
                 StringBuilder sb = new StringBuilder();
-                sb.Append("public override ");
+                sb.Append(Modify);
                 sb.Append(Returntype);
                 sb.Append(" ");
                 sb.Append(Name);
@@ -38,7 +30,9 @@ namespace Geek.Server
 
         //public bool IsApi { get; set; }
 
-        public bool IsAsyncApi { get; set; }
+        public bool IsApi { get; set; }
+
+        public string Modify { get; set; }
 
         public bool IsPublic { get; set; }
 
@@ -50,9 +44,12 @@ namespace Geek.Server
 
         public List<string> AttributeList { get; private set; } = new List<string>();
 
-        public bool Isawait { get; set; } = true;
+        public bool Discard { get; set; }
 
-        public int Executetime { get; set; } = int.MaxValue;
+        public bool HasTimeout { get; set; }
+        public int Timeout { get; set; } = int.MaxValue;
+
+        public bool Threadsafe { get; set; }
 
         /// <summary>
         /// 约束

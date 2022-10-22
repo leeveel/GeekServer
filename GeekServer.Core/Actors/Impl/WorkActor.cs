@@ -211,7 +211,7 @@ namespace Geek.Server
         /// <summary>
         /// 调用链生成
         /// </summary>
-        private static long NextChainId()
+        public static long NextChainId()
         {
             var id = Interlocked.Increment(ref chainId);
             if (id == 0)
