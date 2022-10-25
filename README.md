@@ -70,7 +70,7 @@ GeekServer有严格的书写规范检查，如不符合规范编译直接报错
 2.为CompAgent中需要被外部提供服务的接口，添加【Api】注解  
 3.CompAgent中非【Threadsafe】的【Api】接口只能是异步函数    
 4.CompAgent中不能书写构造函数（实际上也没有这样的需求）  
-5.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上【Discard】注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。  同时[Source Generator](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)在编译期间对标记了【Discard】的函数做了处理，内部直接返回了Task.CompletedTask，所以外部使用下划线丢弃或是用await都是等价的，为了规范统一，可以全部使用await。这样有个好处，就是可以在编译期间检查所有Agent中的代码，如有发现使用了弃元运算符(_ = DoSomething())则提示代码编写不符合规范。
+5.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上【Discard】注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。  同时[Source Generator](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)在编译期间对标记了【Discard】的函数做了处理，内部直接返回了Task.CompletedTask，所以外部使用下划线丢弃或是用await都是等价的，为了规范统一，可以全部使用await。**这样有个好处，就是可以在编译期间检查所有Agent中的代码，如有发现使用了弃元运算符(_ = DoSomething())则提示代码编写不符合规范。**
 ```c#
 public Task NotifyAllClient()
 {
