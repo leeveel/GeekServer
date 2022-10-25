@@ -9,23 +9,8 @@ namespace Geek.Server
     {
         //单服/玩家不同即可
         Pet = 1001,
-        Voyage = 1002,
-        Rune = 1003,
-        Robot = 1004,
-        FightLog = 1005,
-        EMail = 1006,
-        EMailCMD = 1007,
-        GodEquip = 1008,
-        Delegate = 1009,
-        Equip = 1010,
-        Replay = 1011,
-        ChargeOrder = 1012,
-
-        //所有服不能相同的统一用serverID
-        //所有服不同，但是由一个服分配
-        IslandBattle = 2001,
-
-        //日志id
+        Equip = 1002,
+        //Actor id
         WorkerActor = 3002
     }
 
