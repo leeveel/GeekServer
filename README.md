@@ -37,7 +37,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 4. 运行Tools/ExcelGen/ExcelToCode.exe 点击[服务器-ALL]导出配置表
 5. 用VisualStudio2022打开GeekServer.sln 启动GeekServer.App
 6. 启动GeekServer.Test (一个1000人登录的demo)
-7. 打开UnityDemo工程，打开SampleScene，运行查看日志(**检查Main Camera上是否有脚本丢失，如果有请挂在GameMain.cs**)
+7. 打开UnityDemo工程，打开SampleScene，运行查看日志(**检查Main Camera上是否有脚本丢失，如果有请挂载GameMain.cs**)
 
 # 文档&例子&Demo
 [十分钟上手教程](https://github.com/leeveel/GeekServer/blob/main/Docs/%E5%8D%81%E5%88%86%E9%92%9F.md)  
