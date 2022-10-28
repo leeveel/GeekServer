@@ -34,7 +34,6 @@ namespace Logic
 
         private async Task ConnectServer()
         {
-            //这里填写你的本机的内网ip地址,不要使用127.0.0.1（有可能由于hosts设置连不上）
             _ = GameClient.Singleton.Connect(serverIp, serverPort);
             await MsgWaiter.StartWait(GameClient.ConnectEvt);
         }
