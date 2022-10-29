@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Buffers;
 using System.Formats.Asn1;
+using System.Reflection.PortableExecutable;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Connections;
 
-namespace GeekServer.Gateaway.Net
+namespace GeekServer.Gateaway.Net.Tcp
 {
-    public class TcpConnectionHandler : ConnectionHandler
+    internal class TcpConnectionHandler : ConnectionHandler
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
@@ -13,78 +15,69 @@ namespace GeekServer.Gateaway.Net
 
         public override async Task OnConnectedAsync(ConnectionContext connection)
         {
-            //OnConnection(connection);
-            //var channel = new NetChannel(connection, new LengthPrefixedProtocol());
-            //var remoteInfo = channel.Context.RemoteEndPoint;
-            //while (!channel.IsClose())
-            //{
-            //    try
-            //    {
-            //        var result = await channel.Reader.ReadAsync(channel.Protocol);
-            //        var message = result.Message;
+            OnConnection(connection);
+            var channel = new Channel(connection, new MessageProtocol());
+            //ChannelMgr.Add(IdGenerator.GenUniqueId(), channel);
+            var remoteInfo = channel.Context.RemoteEndPoint;
+            while (!channel.IsClose())
+            {
+                try
+                {
+                    var result = await channel.Reader.ReadAsync(channel.Protocol);
+                    var message = result.Message;
 
-            //        if (result.IsCompleted)
-            //            break;
+                    if (result.IsCompleted)
+                        break;
 
-            //        _ = Dispatcher(channel, MsgDecoder.Decode(connection, message));
-            //    }
-            //    catch (ConnectionResetException)
-            //    {
-            //        LOGGER.Info($"{remoteInfo} ConnectionReset...");
-            //        break;
-            //    }
-            //    catch (ConnectionAbortedException)
-            //    {
-            //        LOGGER.Info($"{remoteInfo} ConnectionAborted...");
-            //        break;
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        LOGGER.Error($"{remoteInfo} Exception:{e.Message}");
-            //    }
+                    MsgDecoder.Decode(connection, ref message);
+                    Dispatcher(channel, message);
+                }
+                catch (ConnectionResetException)
+                {
+                    LOGGER.Info($"{remoteInfo} ConnectionReset...");
+                    break;
+                }
+                catch (ConnectionAbortedException)
+                {
+                    LOGGER.Info($"{remoteInfo} ConnectionAborted...");
+                    break;
+                }
+                catch (Exception e)
+                {
+                    LOGGER.Error($"{remoteInfo} Exception:{e.Message}");
+                }
 
-            //    try
-            //    {
-            //        channel.Reader.Advance();
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        LOGGER.Error($"{remoteInfo} channel.Reader.Advance Exception:{e.Message}");
-            //        break;
-            //    }
-            //}
-            //OnDisconnection(channel);
+                try
+                {
+                    channel.Reader.Advance();
+                }
+                catch (Exception e)
+                {
+                    LOGGER.Error($"{remoteInfo} channel.Reader.Advance Exception:{e.Message}");
+                    break;
+                }
+            }
+            OnDisconnection(channel);
         }
 
-        //protected void OnConnection(ConnectionContext connection)
-        //{
-        //    LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
-        //}
+        protected void OnConnection(ConnectionContext connection)
+        {
+            LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
+        }
 
-        //protected void OnDisconnection(NetChannel channel)
-        //{
-        //    LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-        //    var sessionId = channel.GetSessionId();
-        //    if (sessionId > 0)
-        //        HotfixMgr.SessionMgr.Remove(sessionId);
-        //}
+        protected void OnDisconnection(Channel channel)
+        {
+            LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
+            var sessionId = channel.GetSessionId();
+            ChannelMgr.Remove(sessionId);
+        }
 
-        //protected async Task Dispatcher(NetChannel channel, Message msg)
-        //{
-        //    if (msg == null)
-        //        return;
 
-        //    //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
-        //    var handler = HotfixMgr.GetTcpHandler(msg.MsgId);
-        //    if (handler == null)
-        //    {
-        //        LOGGER.Error($"找不到[{msg.MsgId}][{msg.GetType()}]对应的handler");
-        //        return;
-        //    }
-        //    handler.Msg = msg;
-        //    handler.Channel = channel;
-        //    await handler.Init();
-        //    await handler.InnerAction();
-        //}
+        protected void Dispatcher(Channel channel, NetMessage msg)
+        {
+            //根据消息id判断路由
+
+
+        }
     }
 }

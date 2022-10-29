@@ -1,4 +1,4 @@
-﻿using GeekServer.Gateawa.Net;
+﻿using GeekServer.Gateaway.Net;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-namespace GeekServer.Gateaway.Net
+namespace GeekServer.Gateaway.Net.Rpc
 {
     public class RpcServer
     {

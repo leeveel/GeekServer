@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekServer.Gateawa.Net
+namespace GeekServer.Gateaway.Net.Rpc
 {
     public class RpcStartup
     {
