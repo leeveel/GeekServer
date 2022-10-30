@@ -8,7 +8,7 @@ namespace GeekServer.Gateaway.Net.Router
 {
     public class MsgRouter
     {
-        public static void To(INetNode fromNode, long targetUid, int msgId, byte[] data)
+        public static void To(INetNode fromNode, long defaultTargetUid, int msgId, byte[] data)
         {
 
         }

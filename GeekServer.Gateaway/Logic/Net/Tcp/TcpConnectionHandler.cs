@@ -64,14 +64,14 @@ namespace GeekServer.Gateaway.Net.Tcp
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
             var channel = new Channel(connection, new MessageProtocol(), IdGenerator.GenUniqueId());
-            ChannelMgr.Add(channel);
+            NetNodeMgr.Add(channel.uid, channel);
             return channel;
         }
 
         protected void OnDisconnection(Channel channel)
         {
             LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-            ChannelMgr.Remove(channel);
+            NetNodeMgr.Remove(channel.uid);
         }
 
 
