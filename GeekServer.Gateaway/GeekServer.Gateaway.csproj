@@ -26,6 +26,7 @@
   <ItemGroup>
     <Folder Include="Logic\Net\Http\" />
     <Folder Include="Logic\Utils\" />
+    <Folder Include="Logic\GateMessageHandler\" />
   </ItemGroup>
 
   <ItemGroup>

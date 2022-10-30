@@ -12,6 +12,11 @@ namespace GeekServer.Gateaway.Net.Tcp
         internal static readonly ConcurrentDictionary<long, Channel> ChannelMap = new();
         public static void Remove(long id)
         {
+        }
+
+        public static void Remove(Channel channel)
+        {
+            Remove(channel.uid);
 
         }
 
@@ -25,9 +30,8 @@ namespace GeekServer.Gateaway.Net.Tcp
             return null;
         }
 
-        public static void Add(long id, Channel channel)
+        public static void Add(Channel channel)
         {
-            channel.SetSessionId(id);
         }
     }
 }

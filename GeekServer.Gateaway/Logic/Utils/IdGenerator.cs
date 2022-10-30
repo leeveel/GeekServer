@@ -14,6 +14,7 @@ namespace GeekServer.Gateaway.Util
         readonly static DateTime utcTimeStart = new DateTime(2022, 10, 1, 0, 0, 0, DateTimeKind.Utc);
         static readonly object lockObj = new object();
 
+
         public static long GenUniqueId(int moduleId = 0)
         {
             long second = (long)(DateTime.UtcNow - utcTimeStart).TotalSeconds;

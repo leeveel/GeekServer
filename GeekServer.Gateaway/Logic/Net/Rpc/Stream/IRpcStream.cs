@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekServer.Gateaway.Net
+namespace GeekServer.Gateaway.Net.Rpc
 {
     //gate ->other
     public interface IRpcStreamClient

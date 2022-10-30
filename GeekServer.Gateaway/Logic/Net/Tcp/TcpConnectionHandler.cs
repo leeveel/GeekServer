@@ -2,7 +2,9 @@
 using System.Buffers;
 using System.Formats.Asn1;
 using System.Reflection.PortableExecutable;
+using System.Threading.Channels;
 using System.Threading.Tasks;
+using GeekServer.Gateaway.Net.Router;
 using Microsoft.AspNetCore.Connections;
 
 namespace GeekServer.Gateaway.Net.Tcp
@@ -15,9 +17,7 @@ namespace GeekServer.Gateaway.Net.Tcp
 
         public override async Task OnConnectedAsync(ConnectionContext connection)
         {
-            OnConnection(connection);
-            var channel = new Channel(connection, new MessageProtocol());
-            //ChannelMgr.Add(IdGenerator.GenUniqueId(), channel);
+            var channel = OnConnection(connection);
             var remoteInfo = channel.Context.RemoteEndPoint;
             while (!channel.IsClose())
             {
@@ -60,24 +60,24 @@ namespace GeekServer.Gateaway.Net.Tcp
             OnDisconnection(channel);
         }
 
-        protected void OnConnection(ConnectionContext connection)
+        protected Channel OnConnection(ConnectionContext connection)
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
+            var channel = new Channel(connection, new MessageProtocol(), IdGenerator.GenUniqueId());
+            ChannelMgr.Add(channel);
+            return channel;
         }
 
         protected void OnDisconnection(Channel channel)
         {
             LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-            var sessionId = channel.GetSessionId();
-            ChannelMgr.Remove(sessionId);
+            ChannelMgr.Remove(channel);
         }
 
 
         protected void Dispatcher(Channel channel, NetMessage msg)
         {
-            //根据消息id判断路由
-
-
+            MsgRouter.To(channel, channel.defaultTargetUid, msg.MsgId, msg.MsgRaw);
         }
     }
 }
