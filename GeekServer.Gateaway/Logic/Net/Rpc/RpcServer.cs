@@ -17,9 +17,9 @@ namespace GeekServer.Gateaway.Net.Rpc
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public async void Start(int rpcPort)
+        public static Task Start(int rpcPort)
         {
-            await Host.CreateDefaultBuilder()
+            return Host.CreateDefaultBuilder()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder

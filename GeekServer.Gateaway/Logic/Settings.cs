@@ -7,6 +7,7 @@ namespace GeekServer.Gateaway
         public static Settings Ins;
         public bool AppRunning = false;
         public int TcpPort;
+        public int RpcPort;
         public static void Load(string path)
         {
             var configJson = File.ReadAllText(path);

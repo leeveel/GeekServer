@@ -1,4 +1,7 @@
 ﻿
+using Geek.Server.Proto;
+using GeekServer.Gateaway.MessageHandler;
+using GeekServer.Gateaway.Net.Rpc;
 using GeekServer.Gateaway.Net.Tcp;
 using NLog;
 using NLog.Fluent;
@@ -7,12 +10,6 @@ using System.Diagnostics;
 
 namespace GeekServer.Gateaway
 {
-    //处理各种协议的接入，同时支持TCP和UDP(KCP协议)，进行双栈通信。
-    //连接管理，会话建立，数据包加解密(DH+RC4)。
-    //透传解密后的原始数据流到后端（通过gRPC streaming)。
-    //复用多路用户连接，到一条通往game的物理连接。
-    //不断开连接切换后端业务。
-    //唯一入口，安全隔离核心服务。
     class Program
     {
         static volatile bool ExitCalled = false;
@@ -23,8 +20,11 @@ namespace GeekServer.Gateaway
             LogManager.Configuration = new XmlLoggingConfiguration("Configs/gate_NLog.config");
             Settings.Load("Configs/gate_config.json");
 
+            PolymorphicRegister.Load();
+            MsgHanderFactory.Init();
             AddExitHandler();
 
+            await RpcServer.Start(Settings.Ins.RpcPort);
             await TcpServer.Start(Settings.Ins.TcpPort);
 
             if (ShutDownTask != null)

@@ -26,7 +26,6 @@
   <ItemGroup>
     <Folder Include="Logic\Net\Http\" />
     <Folder Include="Logic\Utils\" />
-    <Folder Include="Logic\GateMessageHandler\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +46,10 @@
 
     <PackageReference Include="MagicOnion.Abstractions" Version="4.5.2" />
     <PackageReference Include="MagicOnion.Server" Version="4.5.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
   </ItemGroup>
 
 </Project>
