@@ -52,9 +52,9 @@ namespace GeekServer.Gateaway.Net.Rpc
             return Task.FromResult(uid);
         }
 
-        public void Write(long fromId, byte[] data)
+        public void Write(long fromId, int msgId, byte[] data)
         {
-            BroadcastToSelf(group).Revice(fromId, data);
+            BroadcastToSelf(group).Revice(fromId, msgId, data);
         }
 
         //请求路由消息

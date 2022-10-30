@@ -11,7 +11,7 @@ namespace GeekServer.Gateaway.Net.Rpc
     //gate ->other (里面接口由客户端实现，服务器调用)
     public interface IStreamClient
     {
-        public void Revice(long fromUid, byte[] data)
+        public void Revice(long fromUid, int msgId, byte[] data)
         {
 
         }

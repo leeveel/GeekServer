@@ -19,7 +19,7 @@ namespace GeekServer.Gateaway.Net
         long uid { get; }
         long defaultTargetUid { get; }
         NodeType type { get; }
-        void Write(long fromId, byte[] data)
+        void Write(long fromId, int msgId, byte[] data)
         {
 
         }

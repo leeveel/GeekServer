@@ -14,19 +14,16 @@ namespace GeekServer.Gateaway.Net
 
         public static void Remove(long id)
         {
-            nodeMap.TryRemove(id, out var _);
+            nodeMap.TryRemove(id, out var node);
         }
 
-        public static void RemoveAll()
-        {
-            nodeMap.Clear();
-        }
 
         public static INetNode Get(long id)
         {
             nodeMap.TryGetValue(id, out var v);
             return v;
         }
+
 
         public static INetNode Add(long id, INetNode node)
         {
