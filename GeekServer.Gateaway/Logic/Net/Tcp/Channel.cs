@@ -18,8 +18,11 @@ namespace GeekServer.Gateaway.Net.Tcp
         public NodeType type { get => NodeType.Client; }
         public long defaultTargetUid { get => serverId; set => serverId = value; }
 
+        public string remoteUrl;
+
         public Channel(ConnectionContext context, IProtocal<NetMessage> protocal, long uid)
         {
+            remoteUrl = context.RemoteEndPoint.ToString();
             this._uid = uid;
             Context = context;
             Reader = context.CreateReader();

@@ -70,7 +70,7 @@ namespace GeekServer.Gateaway.Net.Tcp
 
         protected void OnDisconnection(Channel channel)
         {
-            LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
+            LOGGER.Debug($"{channel.remoteUrl} 断开链接");
             NetNodeMgr.Remove(channel);
             MsgRouter.NodeDisconnect(channel);
         }
