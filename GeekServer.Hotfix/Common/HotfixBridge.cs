@@ -16,8 +16,8 @@ namespace Geek.Server
             }
 
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
-            //await TcpServer.Start(Settings.TcpPort);
-            await new StreamClient().Connect(Settings.GateUrl, Settings.ServerId, 3);
+
+            await new StreamClient(Settings.GateUrl, Settings.ServerId, 3).Connect();
             //Log.Info("tcp 服务启动完成...");
             await HttpServer.Start(Settings.HttpPort);
             MongoDBConnection.Init(Settings.MongoUrl, Settings.DbName);

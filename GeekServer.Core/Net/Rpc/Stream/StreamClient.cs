@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,13 +20,40 @@ namespace Geek.Server
 
         internal static readonly ConcurrentDictionary<long, Session> sessionMap = new();
 
-        //重连需要清理sessionMap
-        public async Task Connect(string url, int selfServerId, int selfServerType)
+        GrpcChannel channel;
+        int selfServerId;
+        int selfServerType;
+        public StreamClient(string url, int selfServerId, int selfServerType)
         {
             this.url = url;
-            var channel = GrpcChannel.ForAddress(url);
+            this.selfServerId = selfServerId;
+            this.selfServerType = selfServerType;
+            channel = GrpcChannel.ForAddress(url);
+        }
+
+        public async Task Connect()
+        {
             serverAgent = await StreamingHubClient.ConnectAsync<IStreamServer, IStreamClient>(channel, this);
             await serverAgent.SetInfo(selfServerId, selfServerType);
+            RegisterDisconnectEvent();
+        }
+
+        private async void RegisterDisconnectEvent()
+        {
+            try
+            {
+                await serverAgent.WaitForDisconnect();
+            }
+            catch (Exception e)
+            {
+
+            }
+            finally
+            {
+                LOGGER.Info("disconnected from the server.");
+                await Task.Delay(2000);
+                await Connect();
+            }
         }
 
         public async void Revice(long fromUid, int msgId, byte[] data)
