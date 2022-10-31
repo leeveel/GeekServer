@@ -16,7 +16,7 @@ namespace GeekServer.Gateaway.Net.Tcp
         long serverId;
         public long uid { get => _uid; }
         public NodeType type { get => NodeType.Client; }
-        public long defaultTargetUid => serverId;
+        public long defaultTargetUid { get => serverId; set => serverId = value; }
 
         public Channel(ConnectionContext context, IProtocal<NetMessage> protocal, long uid)
         {
@@ -52,10 +52,16 @@ namespace GeekServer.Gateaway.Net.Tcp
             Context = null;
         }
 
-        //public void WriteAsync(NetMessage msg)
-        //{
-        //    if (Writer != null)
-        //        _ = Writer.WriteAsync(Protocol, msg);
-        //}
+        public void Write(long fromId, int msgId, byte[] data)
+        {
+            if (Writer != null)
+                _ = Writer.WriteAsync(Protocol, new NetMessage(msgId, data));
+        }
+
+        public async void OnTargetNotExist()
+        {
+            await Task.Delay(500);
+            Abort();
+        }
     }
 }

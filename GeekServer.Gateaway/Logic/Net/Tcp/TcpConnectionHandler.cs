@@ -63,15 +63,16 @@ namespace GeekServer.Gateaway.Net.Tcp
         protected Channel OnConnection(ConnectionContext connection)
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
-            var channel = new Channel(connection, new MessageProtocol(), IdGenerator.GenUniqueId());
-            NetNodeMgr.Add(channel.uid, channel);
+            var channel = new Channel(connection, new MessageProtocol(), IdGenerator.GetActorID(ActorType.Role, GateSettings.Ins.ServerId));
+            NetNodeMgr.Add(channel);
             return channel;
         }
 
         protected void OnDisconnection(Channel channel)
         {
             LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-            NetNodeMgr.Remove(channel.uid);
+            NetNodeMgr.Remove(channel);
+            MsgRouter.NodeDisconnect(channel);
         }
 
 

@@ -1,6 +1,10 @@
 ﻿
+using Bedrock.Framework.Protocols;
+using Consul;
 using GeekServer.Gateaway.Net.Router;
+using GeekServer.Gateaway.Net.Tcp;
 using MagicOnion.Server.Hubs;
+using SharpCompress.Writers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +12,7 @@ using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace GeekServer.Gateaway.Net.Rpc
+namespace Geek.Server
 {
     //一个客户端连接对应一个server实例
     public class StreamServer : StreamingHubBase<IStreamServer, IStreamClient>, IStreamServer, INetNode
@@ -24,7 +28,7 @@ namespace GeekServer.Gateaway.Net.Rpc
 
         public long uid => serverId;
         public NodeType type => serverType;
-        public long defaultTargetUid => 0;
+        public long defaultTargetUid { get => 0; set { } }
 
         protected override async ValueTask OnConnecting()
         {
@@ -42,14 +46,9 @@ namespace GeekServer.Gateaway.Net.Rpc
             group = null;
             return ValueTask.CompletedTask;
         }
-
-        public Task<long> SetInfo(long serverId, int type)
+        public IStreamClient GetStreamClientAgent()
         {
-            this.serverId = serverId;
-            this.serverType = (NodeType)type;
-            //生成uid
-
-            return Task.FromResult(uid);
+            return BroadcastToSelf(group);
         }
 
         public void Write(long fromId, int msgId, byte[] data)
@@ -57,10 +56,30 @@ namespace GeekServer.Gateaway.Net.Rpc
             BroadcastToSelf(group).Revice(fromId, msgId, data);
         }
 
+        public Task<long> SetInfo(int serverId, int type)
+        {
+            this.serverId = serverId;
+            this.serverType = (NodeType)type;
+            NetNodeMgr.Add(this);
+            return Task.FromResult(uid);
+        }
+
+        //服务器主动要求断开客户端连接
+        public Task DisconnectNode(long targetUid)
+        {
+            var node = NetNodeMgr.Remove(targetUid);
+            if (node != null)
+            {
+                node.Abort();
+            }
+            return Task.CompletedTask;
+        }
+
         //请求路由消息
-        public void Router(long targetUid, int msgId, byte[] data)
+        public Task Router(long targetUid, int msgId, byte[] data)
         {
             MsgRouter.To(this, targetUid, msgId, data);
+            return Task.CompletedTask;
         }
     }
 }

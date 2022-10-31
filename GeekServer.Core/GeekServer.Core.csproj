@@ -1,41 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 
-	<PropertyGroup>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<ApplicationIcon />
-		<StartupObject />
-	</PropertyGroup>
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <ApplicationIcon />
+    <StartupObject />
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
-		<OutputPath>..\package_debug</OutputPath>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
+    <OutputPath>..\package_debug</OutputPath>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
-		<OutputPath>..\package</OutputPath>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
+    <OutputPath>..\package</OutputPath>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Consul" Version="1.6.10.5" />
-		<PackageReference Include="MessagePack" Version="2.4.35" />
-		<PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="6.0.9" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
-		<PackageReference Include="MongoDB.Driver" Version="2.15.0" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="NLog" Version="5.0.0" />
-		<PackageReference Include="Quartz" Version="3.4.0" />
-		<PackageReference Include="SharpZipLib" Version="1.3.3" />
-		<PackageReference Include="StackExchange.Redis" Version="2.5.61" />
+  <ItemGroup>
+    <PackageReference Include="Consul" Version="1.6.10.5" />
+    <PackageReference Include="MessagePack" Version="2.4.35" />
+    <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="6.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
+    <PackageReference Include="MongoDB.Driver" Version="2.15.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="NLog" Version="5.0.0" />
+    <PackageReference Include="Quartz" Version="3.4.0" />
+    <PackageReference Include="SharpZipLib" Version="1.3.3" />
+    <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
 
-		<PackageReference Include="Grpc.AspNetCore.Server" Version="2.32.0" />
-		<PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
-	</ItemGroup>
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
+
+    <PackageReference Include="MagicOnion.Abstractions" Version="4.5.2" />
+    <PackageReference Include="MagicOnion.Server" Version="4.5.2" />
+    <PackageReference Include="MagicOnion.Client" Version="4.5.2" />
+  </ItemGroup>
 
 </Project>

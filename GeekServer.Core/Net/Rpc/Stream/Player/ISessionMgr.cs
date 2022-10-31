@@ -1,5 +1,4 @@
-﻿
-namespace Geek.Server
+﻿namespace Geek.Server
 {
     public interface ISessionMgr
     {
@@ -7,7 +6,7 @@ namespace Geek.Server
 
         public Task RemoveAll();
 
-        public NetChannel GetChannel(long id);
+        public Session Get(long id);
 
         public Session Add(Session session);
     }

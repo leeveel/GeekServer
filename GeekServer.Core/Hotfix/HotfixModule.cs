@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿
+using NLog;
 using System.Collections.Concurrent;
 using System.Reflection;
 

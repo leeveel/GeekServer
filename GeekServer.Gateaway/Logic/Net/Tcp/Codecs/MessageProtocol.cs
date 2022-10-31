@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Buffers;
 using Bedrock.Framework.Protocols;
-using GeekServer.Gateaway.Util;
 using Microsoft.AspNetCore.Connections;
 
 namespace GeekServer.Gateaway.Net.Tcp

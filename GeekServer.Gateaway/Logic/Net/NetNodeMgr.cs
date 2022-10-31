@@ -1,4 +1,5 @@
 ﻿
+using NLog.Fluent;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -10,13 +11,20 @@ namespace GeekServer.Gateaway.Net
 {
     public class NetNodeMgr
     {
+        static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
+        //服务器节点的id 为自身的serverid
         internal static readonly ConcurrentDictionary<long, INetNode> nodeMap = new();
 
-        public static void Remove(long id)
+        public static INetNode Remove(long id)
         {
             nodeMap.TryRemove(id, out var node);
+            return node;
         }
 
+        public static void Remove(INetNode node)
+        {
+            nodeMap.TryRemove(node.uid, out var _);
+        }
 
         public static INetNode Get(long id)
         {
@@ -24,10 +32,10 @@ namespace GeekServer.Gateaway.Net
             return v;
         }
 
-
-        public static INetNode Add(long id, INetNode node)
+        public static INetNode Add(INetNode node)
         {
-            var old = nodeMap.GetOrAdd(id, node);
+            Log.Debug($"新的网络节点:{node.uid} {node.type}");
+            var old = nodeMap.GetOrAdd(node.uid, node);
             return old != node ? old : null;
         }
     }

@@ -1,12 +1,12 @@
 
-public static class NetChannelExtensions
+public static class SessionExtensions
 {
-    public static void WriteAsync(this NetChannel channel, Message msg, int uniId, StateCode code = StateCode.Success, string desc = "")
+    public static void WriteAsync(this Session session, Message msg, int uniId, StateCode code = StateCode.Success, string desc = "")
     {
         if (msg != null)
         {
             msg.UniId = uniId;
-            channel.WriteAsync(new NMessage(msg));
+            session.WriteAsync(msg);
         }
         if (uniId > 0)
         {
@@ -16,7 +16,7 @@ public static class NetChannelExtensions
                 ErrCode = (int)code,
                 Desc = desc
             };
-            channel.WriteAsync(new NMessage(res));
+            session.WriteAsync(res);
         }
     }
 }

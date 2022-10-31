@@ -62,17 +62,17 @@ namespace Geek.Server.Login
             }
         }
 
-        public async Task OnLogin(NetChannel channel, ReqLogin reqLogin)
+        public async Task OnLogin(Session session, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {
-                channel.WriteAsync(null, reqLogin.UniId, StateCode.AccountCannotBeNull);
+                session.WriteAsync(null, reqLogin.UniId, StateCode.AccountCannotBeNull);
             }
 
             if (reqLogin.Platform != "android" && reqLogin.Platform != "ios" && reqLogin.Platform != "unity")
             {
                 //验证平台合法性
-                channel.WriteAsync(null, reqLogin.UniId, StateCode.UnknownPlatform);
+                session.WriteAsync(null, reqLogin.UniId, StateCode.UnknownPlatform);
             }
 
             //查询角色账号，这里设定每个服务器只能有一个角色
@@ -86,14 +86,9 @@ namespace Geek.Server.Login
                 Log.Info("创建新号:" + roleId);
             }
 
-            //添加到session
-            var session = new Session
-            {
-                Id = roleId,
-                Time = DateTime.Now,
-                Channel = channel,
-                Sign = reqLogin.Device
-            };
+            //添加到session 
+            session.Id = roleId;
+            session.Sign = reqLogin.Device;
             var oldSession = HotfixMgr.SessionMgr.Add(session);
 
             if (oldSession != null)
@@ -103,14 +98,14 @@ namespace Geek.Server.Login
                 {
                     //send msg...
                     await Task.Delay(100);
-                    oldSession.Channel?.Abort();
+                    oldSession?.Abort();
                 });
             }
             //登陆流程
             var roleComp = await ActorMgr.GetCompAgent<RoleCompAgent>(roleId);
             //从登录线程-->调用Role线程 所以需要入队
             var resLogin = await roleComp.SendAsync(() => roleComp.OnLogin(reqLogin, isNewRole));
-            channel.WriteAsync(resLogin, reqLogin.UniId, StateCode.Success);
+            session.WriteAsync(resLogin, reqLogin.UniId, StateCode.Success);
         }
 
         private long GetRoleIdOfPlayer(string userName, int sdkType)

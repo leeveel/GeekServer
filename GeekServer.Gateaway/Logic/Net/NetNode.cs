@@ -17,11 +17,20 @@ namespace GeekServer.Gateaway.Net
     public interface INetNode
     {
         long uid { get; }
-        long defaultTargetUid { get; }
+        long defaultTargetUid { get; set; }
         NodeType type { get; }
         void Write(long fromId, int msgId, byte[] data)
         {
 
+        }
+
+        void OnTargetNotExist()
+        {
+
+        }
+
+        void Abort()
+        {
         }
     }
 }

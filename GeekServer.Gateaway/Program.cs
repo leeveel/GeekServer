@@ -1,12 +1,9 @@
 ﻿
 using Geek.Server.Proto;
 using GeekServer.Gateaway.MessageHandler;
-using GeekServer.Gateaway.Net.Rpc;
-using GeekServer.Gateaway.Net.Tcp;
-using NLog;
-using NLog.Fluent;
 using System.Collections;
 using System.Diagnostics;
+using TcpServer = GeekServer.Gateaway.Net.Tcp.TcpServer;
 
 namespace GeekServer.Gateaway
 {
@@ -15,20 +12,36 @@ namespace GeekServer.Gateaway
         static volatile bool ExitCalled = false;
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static volatile Task ShutDownTask = null;
+        private static volatile Task MainLoopTask = null;
+
         public static async Task Main(string[] args)
         {
             LogManager.Configuration = new XmlLoggingConfiguration("Configs/gate_NLog.config");
-            Settings.Load("Configs/gate_config.json");
+            GateSettings.Load("Configs/gate_config.json");
 
             PolymorphicRegister.Load();
             MsgHanderFactory.Init();
             AddExitHandler();
 
-            await RpcServer.Start(Settings.Ins.RpcPort);
-            await TcpServer.Start(Settings.Ins.TcpPort);
+            MainLoopTask = Start();
+            await MainLoopTask;
 
             if (ShutDownTask != null)
                 await ShutDownTask;
+        }
+
+        static async Task Start()
+        {
+            await RpcServer.Start(GateSettings.Ins.RpcPort);
+            await TcpServer.Start(GateSettings.Ins.TcpPort);
+            GateSettings.Ins.AppRunning = true;
+            TimeSpan delay = TimeSpan.FromSeconds(1);
+            while (GateSettings.Ins.AppRunning)
+            {
+                await Task.Delay(delay);
+            }
+            await RpcServer.Stop();
+            await TcpServer.Stop();
         }
 
 
@@ -50,7 +63,8 @@ namespace GeekServer.Gateaway
             Log.Info($"监听到退出程序消息");
             ShutDownTask = Task.Run(() =>
             {
-                Settings.Ins.AppRunning = false;
+                GateSettings.Ins.AppRunning = false;
+                MainLoopTask?.Wait();
                 LogManager.Shutdown();
                 Console.WriteLine($"退出程序");
                 Process.GetCurrentProcess().Kill();

@@ -16,8 +16,9 @@ namespace Geek.Server
             }
 
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
-            await TcpServer.Start(Settings.TcpPort);
-            Log.Info("tcp 服务启动完成...");
+            //await TcpServer.Start(Settings.TcpPort);
+            await new StreamClient().Connect(Settings.GateUrl, Settings.ServerId, 3);
+            //Log.Info("tcp 服务启动完成...");
             await HttpServer.Start(Settings.HttpPort);
             MongoDBConnection.Init(Settings.MongoUrl, Settings.DbName);
             Log.Info("check restore data from file");
@@ -54,7 +55,7 @@ namespace Geek.Server
             await ActorMgr.AllFinish();
             // 关闭网络服务
             await HttpServer.Stop();
-            await TcpServer.Stop();
+            //await TcpServer.Stop();
             // 存储所有数据
             await GlobalTimer.Stop();
             await ActorMgr.RemoveAll();
