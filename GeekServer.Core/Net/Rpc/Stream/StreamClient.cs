@@ -33,9 +33,27 @@ namespace Geek.Server
 
         public async Task Connect()
         {
-            serverAgent = await StreamingHubClient.ConnectAsync<IStreamServer, IStreamClient>(channel, this);
-            await serverAgent.SetInfo(selfServerId, selfServerType);
-            RegisterDisconnectEvent();
+            try
+            {
+                //清理老session
+                var keys = sessionMap.Keys.ToArray();
+                sessionMap.Clear();
+                foreach (var k in keys)
+                    await HotfixMgr.SessionMgr.Remove(k);
+
+                serverAgent = await StreamingHubClient.ConnectAsync<IStreamServer, IStreamClient>(channel, this);
+                await serverAgent.SetInfo(selfServerId, selfServerType);
+                RegisterDisconnectEvent();
+                //请求gate清理老的连接 
+                await serverAgent.DisconnectAllNode();
+            }
+            catch (Exception e)
+            {
+                LOGGER.Error($"rpc异常:{e.Message}");
+                //临时处理，后续多个网关，通过服务发现制定重连策略
+                await Task.Delay(2000);
+                _ = Connect();
+            }
         }
 
         private async void RegisterDisconnectEvent()
@@ -50,6 +68,7 @@ namespace Geek.Server
             }
             finally
             {
+                //TODO 清理所有session，连上后通知网关清理老客户端
                 LOGGER.Info("disconnected from the server.");
                 await Task.Delay(2000);
                 await Connect();
@@ -90,6 +109,7 @@ namespace Geek.Server
 
             LOGGER.Debug($"新的客户端连接:{uid}");
         }
+
         public void PlayerDisconnect(long uid)
         {
             LOGGER.Debug($"移除客户端连接:{uid}");

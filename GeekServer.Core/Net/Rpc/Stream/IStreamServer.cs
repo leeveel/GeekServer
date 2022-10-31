@@ -38,6 +38,10 @@ namespace Geek.Server
         {
             return Task.CompletedTask;
         }
+        public Task DisconnectAllNode()
+        {
+            return Task.CompletedTask;
+        }
         //请求路由消息
         public Task Router(long targetUid, int msgId, byte[] data)
         {

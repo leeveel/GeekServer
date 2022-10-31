@@ -31,6 +31,12 @@ namespace GeekServer.Gateaway.Net
             nodeMap.TryGetValue(id, out var v);
             return v;
         }
+        public static List<long> GetKeys()
+        {
+            var list = new List<long>();
+            list.AddRange(nodeMap.Keys.ToArray());
+            return list;
+        }
 
         public static INetNode Add(INetNode node)
         {

@@ -4,6 +4,7 @@ using Consul;
 using GeekServer.Gateaway.Net.Router;
 using GeekServer.Gateaway.Net.Tcp;
 using MagicOnion.Server.Hubs;
+using NLog.Fluent;
 using SharpCompress.Writers;
 using System;
 using System.Collections.Generic;
@@ -71,6 +72,21 @@ namespace Geek.Server
             if (node != null)
             {
                 node.Abort();
+            }
+            return Task.CompletedTask;
+        }
+
+        public Task DisconnectAllNode()
+        {
+            var ids = NetNodeMgr.GetKeys();
+            foreach (var id in ids)
+            {
+                var node = NetNodeMgr.Get(id);
+                if (node != null && node.defaultTargetUid == serverId)
+                {
+                    LOGGER.Info($"断开连接:{node.uid} {node.type}");
+                    node.Abort();
+                }
             }
             return Task.CompletedTask;
         }
