@@ -3,7 +3,7 @@ using System.Buffers;
 using Bedrock.Framework.Protocols;
 using Microsoft.AspNetCore.Connections;
 
-namespace GeekServer.Gateaway.Net.Tcp
+namespace Geek.Server.Gateaway.Net.Tcp
 {
     public class MessageProtocol : IProtocal<NetMessage>
     {

@@ -1,5 +1,6 @@
 {
   "ServerId": 123,
   "TcpPort": 8899,
-  "RpcPort": 8900
+  "RpcPort": 8900,
+  "HttpPort": 8901
 }

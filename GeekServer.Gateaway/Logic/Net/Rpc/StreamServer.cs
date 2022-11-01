@@ -1,8 +1,8 @@
 ﻿
 using Bedrock.Framework.Protocols;
 using Consul;
-using GeekServer.Gateaway.Net.Router;
-using GeekServer.Gateaway.Net.Tcp;
+using Geek.Server.Gateaway.Net.Router;
+using Geek.Server.Gateaway.Net.Tcp;
 using MagicOnion.Server.Hubs;
 using NLog.Fluent;
 using SharpCompress.Writers;

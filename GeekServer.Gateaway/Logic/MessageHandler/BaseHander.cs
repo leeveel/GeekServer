@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekServer.Gateaway.MessageHandler
+namespace Geek.Server.Gateaway.MessageHandler
 {
     public abstract class BaseHander
     {
@@ -27,7 +27,7 @@ namespace GeekServer.Gateaway.MessageHandler
                     ErrCode = 0,
                     Desc = ""
                 };
-                node.Write(GateSettings.Ins.ServerId, res.MsgId, MessagePack.MessagePackSerializer.Serialize(res));
+                node.Write(Settings.ServerId, res.MsgId, MessagePack.MessagePackSerializer.Serialize(res));
             }
         }
     }

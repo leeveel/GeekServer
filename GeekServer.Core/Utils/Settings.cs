@@ -9,6 +9,8 @@ public enum ServerType
     Center,
     ///<summary>充值服</summary>
     Recharge,
+    ///<summary>网关服</summary>
+    Gate,
 }
 
 public static class Settings

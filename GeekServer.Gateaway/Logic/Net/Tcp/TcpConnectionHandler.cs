@@ -4,10 +4,10 @@ using System.Formats.Asn1;
 using System.Reflection.PortableExecutable;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using GeekServer.Gateaway.Net.Router;
+using Geek.Server.Gateaway.Net.Router;
 using Microsoft.AspNetCore.Connections;
 
-namespace GeekServer.Gateaway.Net.Tcp
+namespace Geek.Server.Gateaway.Net.Tcp
 {
     internal class TcpConnectionHandler : ConnectionHandler
     {
@@ -63,7 +63,7 @@ namespace GeekServer.Gateaway.Net.Tcp
         protected Channel OnConnection(ConnectionContext connection)
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
-            var channel = new Channel(connection, new MessageProtocol(), IdGenerator.GetActorID(ActorType.Role, GateSettings.Ins.ServerId));
+            var channel = new Channel(connection, new MessageProtocol(), IdGenerator.GetActorID(ActorType.Role, Settings.ServerId));
             NetNodeMgr.Add(channel);
             return channel;
         }

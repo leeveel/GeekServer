@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekServer.Gateaway.MessageHandler
+namespace Geek.Server.Gateaway.MessageHandler
 {
     public class MsgHanderFactory
     {
@@ -28,7 +28,7 @@ namespace GeekServer.Gateaway.MessageHandler
                 var msgIdField = mapatt.Msg.GetField("MsgID", BindingFlags.Static | BindingFlags.Public);
                 if (msgIdField == null) continue;
                 int msgId = (int)msgIdField.GetValue(null);
-                Log.Info($"添加tcp message hander:{msgId} {handlerType.FullName}");
+                Log.Info($"添加tcp message handler:{msgId} {handlerType.FullName}");
                 handerMap.Add(msgId, Activator.CreateInstance(handlerType) as BaseHander);
             }
         }

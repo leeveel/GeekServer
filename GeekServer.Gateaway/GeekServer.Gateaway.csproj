@@ -24,10 +24,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Logic\Net\Http\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Configs\gate_config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

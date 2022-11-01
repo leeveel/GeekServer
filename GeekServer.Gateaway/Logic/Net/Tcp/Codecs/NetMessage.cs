@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekServer.Gateaway.Net.Tcp
+namespace Geek.Server.Gateaway.Net.Tcp
 {
     public class NetMessage
     {

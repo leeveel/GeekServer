@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekServer.Gateaway.Net
+namespace Geek.Server.Gateaway.Net
 {
     public enum NodeType
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekServer.Gateaway.Net
+namespace Geek.Server.Gateaway.Net
 {
     public class NetNodeMgr
     {
@@ -36,6 +36,11 @@ namespace GeekServer.Gateaway.Net
             var list = new List<long>();
             list.AddRange(nodeMap.Keys.ToArray());
             return list;
+        }
+
+        public static int GetNodeCount()
+        {
+            return nodeMap.Count;
         }
 
         public static INetNode Add(INetNode node)

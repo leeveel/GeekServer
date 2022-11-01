@@ -1,3 +1,4 @@
+using Consul;
 using Newtonsoft.Json;
 
 namespace Test.Pressure
@@ -93,7 +94,7 @@ namespace Test.Pressure
 
         public void OnDisConnected()
         {
-
+            Log.Info($"客户端[{id}]断开");
         }
 
         public void OnConnected(NetCode code)

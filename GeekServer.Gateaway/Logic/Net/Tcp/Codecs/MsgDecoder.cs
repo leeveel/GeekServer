@@ -4,7 +4,7 @@ using System;
 using System.Buffers;
 using System.IO;
 
-namespace GeekServer.Gateaway.Net.Tcp
+namespace Geek.Server.Gateaway.Net.Tcp
 {
     public static class MsgDecoder
     {

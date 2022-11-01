@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Connections;
 using System.Diagnostics.Metrics;
 
-namespace GeekServer.Gateaway.Net.Tcp
+namespace Geek.Server.Gateaway.Net.Tcp
 {
     public class Channel : INetNode
     {

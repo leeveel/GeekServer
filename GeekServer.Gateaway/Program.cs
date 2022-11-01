@@ -1,11 +1,11 @@
 ﻿
 using Geek.Server.Proto;
-using GeekServer.Gateaway.MessageHandler;
+using Geek.Server.Gateaway.MessageHandler;
 using System.Collections;
 using System.Diagnostics;
-using TcpServer = GeekServer.Gateaway.Net.Tcp.TcpServer;
+using TcpServer = Geek.Server.Gateaway.Net.Tcp.TcpServer;
 
-namespace GeekServer.Gateaway
+namespace Geek.Server.Gateaway
 {
     class Program
     {
@@ -17,10 +17,12 @@ namespace GeekServer.Gateaway
         public static async Task Main(string[] args)
         {
             LogManager.Configuration = new XmlLoggingConfiguration("Configs/gate_NLog.config");
-            GateSettings.Load("Configs/gate_config.json");
+
+            Settings.Load<GateSettings>("Configs/gate_config.json", ServerType.Gate);
 
             PolymorphicRegister.Load();
             MsgHanderFactory.Init();
+            HttpHanderFactory.Init();
             AddExitHandler();
 
             MainLoopTask = Start();
@@ -32,11 +34,12 @@ namespace GeekServer.Gateaway
 
         static async Task Start()
         {
-            await RpcServer.Start(GateSettings.Ins.RpcPort);
-            await TcpServer.Start(GateSettings.Ins.TcpPort);
-            GateSettings.Ins.AppRunning = true;
+            await RpcServer.Start(Settings.InsAs<GateSettings>().RpcPort);
+            await TcpServer.Start(Settings.TcpPort);
+            await HttpServer.Start(Settings.HttpPort);
+            Settings.AppRunning = true;
             TimeSpan delay = TimeSpan.FromSeconds(1);
-            while (GateSettings.Ins.AppRunning)
+            while (Settings.AppRunning)
             {
                 await Task.Delay(delay);
             }
@@ -63,7 +66,7 @@ namespace GeekServer.Gateaway
             Log.Info($"监听到退出程序消息");
             ShutDownTask = Task.Run(() =>
             {
-                GateSettings.Ins.AppRunning = false;
+                Settings.AppRunning = false;
                 MainLoopTask?.Wait();
                 LogManager.Shutdown();
                 Console.WriteLine($"退出程序");

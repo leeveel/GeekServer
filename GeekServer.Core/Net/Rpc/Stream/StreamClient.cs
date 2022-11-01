@@ -43,12 +43,22 @@ namespace Geek.Server
 
                 serverAgent = await StreamingHubClient.ConnectAsync<IStreamServer, IStreamClient>(channel, this);
                 await serverAgent.SetInfo(selfServerId, selfServerType);
-                RegisterDisconnectEvent();
                 //请求gate清理老的连接 
                 await serverAgent.DisconnectAllNode();
+                RegisterDisconnectEvent();
             }
             catch (Exception e)
             {
+                try
+                {
+                    if (serverAgent != null)
+                        await serverAgent.DisposeAsync();
+                }
+                catch (Exception)
+                {
+
+                }
+                serverAgent = null;
                 LOGGER.Error($"rpc异常:{e.Message}");
                 //临时处理，后续多个网关，通过服务发现制定重连策略
                 await Task.Delay(2000);
