@@ -5,11 +5,10 @@ namespace Geek.Client
 {
     public abstract class WorkWrapper
     {
-        public int TimeOut;
+        public int TimeOut = -1;
         public abstract Task DoTask();
         public abstract string GetTrace();
         public abstract void ForceSetResult();
-
     }
 
     public class ActionWrapper : WorkWrapper
