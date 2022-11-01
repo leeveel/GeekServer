@@ -1,6 +1,6 @@
 ﻿using Bedrock.Framework.Protocols;
+using Geek.Server.Proto;
 using Microsoft.AspNetCore.Connections;
-using System.Diagnostics.Metrics;
 
 namespace Geek.Server.Gateaway.Net.Tcp
 {
@@ -64,7 +64,13 @@ namespace Geek.Server.Gateaway.Net.Tcp
         public async void OnTargetNotExist()
         {
             await Task.Delay(500);
-            Abort();
+            //Abort();
+            //通知客户端服务节点没有连接
+            var res = new ServerNotConnect
+            {
+                serverUid = this.serverId
+            };
+            Write(Settings.ServerId, res.MsgId, MessagePack.MessagePackSerializer.Serialize(res));
         }
     }
 }

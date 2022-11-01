@@ -20,7 +20,7 @@ namespace Geek.Server.Proto
 			    { 1593491631, typeof(Geek.Server.Proto.ResItemChange) },
 			    { -520770015, typeof(Geek.Server.Proto.ReqRouterMsg) },
 			    { 1063387717, typeof(Geek.Server.Proto.ResRouterMsg) },
-			    { 1739680047, typeof(Geek.Server.Proto.ReqDisconnectClient) },
+			    { -37174277, typeof(Geek.Server.Proto.ServerNotConnect) },
 			    { -248186732, typeof(Geek.Server.Proto.TestStruct) },
 			    { -1878353591, typeof(Geek.Server.Proto.A) },
 			    { 14791156, typeof(Geek.Server.Proto.B) },

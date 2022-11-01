@@ -21,11 +21,11 @@ namespace Geek.Server.Proto
     }
 
     /// <summary>
-    /// 请求断开客户端连接
+    /// 通知客户端服务节点没有连接
     /// </summary>
     [MessagePackObject(true)]
-    public class ReqDisconnectClient : Message
+    public class ServerNotConnect : Message
     {
-        public long TargetUid { get; set; }
+        public long serverUid { get; set; }
     }
 }
