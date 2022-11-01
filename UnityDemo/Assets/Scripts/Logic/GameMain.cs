@@ -13,8 +13,9 @@ namespace Logic
         public static GameMain Singleton = null;
         public Text Txt;
 
-        public string serverIp = "127.0.0.1";
-        public int serverPort = 8899;
+        public string gateIp = "127.0.0.1";
+        public int gatePort = 8899;
+        public int serverId;
         public string userName = "123456";
 
         private void Awake()
@@ -27,6 +28,7 @@ namespace Logic
             GameClient.Singleton.Init();
             DemoService.Singleton.RegisterEventListener();
             await ConnectServer();
+            await ReqRouter();
             await Login();
             await ReqBagInfo();
             await ReqComposePet();
@@ -35,8 +37,15 @@ namespace Logic
         private async Task ConnectServer()
         {
             //这里填写你的本机的内网ip地址,不要使用127.0.0.1（有可能由于hosts设置连不上）
-            _ = GameClient.Singleton.Connect(serverIp, serverPort);
+            _ = GameClient.Singleton.Connect(gateIp, gatePort);
             await MsgWaiter.StartWait(GameClient.ConnectEvt);
+        }
+
+        private Task ReqRouter()
+        {
+            var req = new ReqRouterMsg();
+            req.TargetUid = serverId;
+            return DemoService.Singleton.SendMsg(req);
         }
 
         private Task Login()
