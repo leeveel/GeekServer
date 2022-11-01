@@ -6,13 +6,10 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Connections.Features;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace Bedrock.Framework
 {
-    internal class SocketConnection : ConnectionContext, IConnectionInherentKeepAliveFeature
+    internal class SocketConnection : ConnectionContext
     {
         private readonly Socket _socket;
         private volatile bool _aborted;
@@ -25,28 +22,18 @@ namespace Bedrock.Framework
 
         public SocketConnection(EndPoint endPoint)
         {
-            _socket = new Socket(endPoint.AddressFamily, SocketType.Stream, DetermineProtocolType(endPoint));
+            _socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _endPoint = endPoint;
 
             _sender = new SocketSender(_socket, PipeScheduler.ThreadPool);
             _receiver = new SocketReceiver(_socket, PipeScheduler.ThreadPool);
 
-            // Add IConnectionInherentKeepAliveFeature to the tcp connection impl since Kestrel doesn't implement
-            // the IConnectionHeartbeatFeature
-            Features.Set<IConnectionInherentKeepAliveFeature>(this);
-
             ConnectionClosed = _connectionClosedTokenSource.Token;
         }
 
         public override IDuplexPipe Transport { get; set; }
-
-        public override IFeatureCollection Features { get; } = new FeatureCollection();
         public override string ConnectionId { get; set; } = Guid.NewGuid().ToString();
         public override IDictionary<object, object> Items { get; set; } = new ConnectionItems();
-
-        // We claim to have inherent keep-alive so the client doesn't kill the connection when it hasn't seen ping frames.
-        public bool HasInherentKeepAlive { get; } = true;
-
         public override async ValueTask DisposeAsync()
         {
             if (Transport != null)
@@ -296,15 +283,5 @@ namespace Bedrock.Framework
             }
         }
 
-        private static ProtocolType DetermineProtocolType(EndPoint endPoint)
-        {
-            switch (endPoint)
-            {
-                //case UnixDomainSocketEndPoint _:
-                    //return ProtocolType.Unspecified;
-                default:
-                    return ProtocolType.Tcp;
-            }
-        }
     }
 }

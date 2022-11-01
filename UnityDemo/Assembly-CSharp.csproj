@@ -56,7 +56,6 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Framework\Actor\LimitedConcurrencyLevelTaskScheduler.cs" />
     <Compile Include="Assets\Scripts\Framework\Actor\UniActor.cs" />
     <Compile Include="Assets\Scripts\Framework\Actor\WorkWrapper.cs" />
     <Compile Include="Assets\Scripts\Framework\Bedrock\BufferExtensions.cs" />
@@ -72,6 +71,10 @@
     <Compile Include="Assets\Scripts\Framework\Bedrock\Protocal\ProtocolReadResult.cs" />
     <Compile Include="Assets\Scripts\Framework\Bedrock\Protocal\ProtocolReader.cs" />
     <Compile Include="Assets\Scripts\Framework\Bedrock\Protocal\ProtocolWriter.cs" />
+    <Compile Include="Assets\Scripts\Framework\Bedrock\Socket\ConnectionAbortedException.cs" />
+    <Compile Include="Assets\Scripts\Framework\Bedrock\Socket\ConnectionContext.cs" />
+    <Compile Include="Assets\Scripts\Framework\Bedrock\Socket\ConnectionItems.cs" />
+    <Compile Include="Assets\Scripts\Framework\Bedrock\Socket\ConnectionResetException.cs" />
     <Compile Include="Assets\Scripts\Framework\Bedrock\Socket\SocketAwaitable.cs" />
     <Compile Include="Assets\Scripts\Framework\Bedrock\Socket\SocketConnection.cs" />
     <Compile Include="Assets\Scripts\Framework\Bedrock\Socket\SocketReceiver.cs" />
@@ -337,12 +340,6 @@
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>Assets\Plugins\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.AspNetCore.Connections.Abstractions">
-      <HintPath>Assets\Plugins\Microsoft.AspNetCore.Connections.Abstractions.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Bcl.AsyncInterfaces">
-      <HintPath>Assets\Plugins\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Extensions.Features">
       <HintPath>Assets\Plugins\Microsoft.Extensions.Features.dll</HintPath>
     </Reference>
@@ -363,9 +360,6 @@
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>Assets\Plugins\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Threading.Tasks.Dataflow">
-      <HintPath>Assets\Plugins\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
     <Reference Include="System.Threading.Tasks.Extensions">
       <HintPath>Assets\Plugins\System.Threading.Tasks.Extensions.dll</HintPath>

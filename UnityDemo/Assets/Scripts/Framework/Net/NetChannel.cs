@@ -1,6 +1,5 @@
-﻿using Bedrock.Framework.Protocols;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Connections.Features;
+﻿using Bedrock.Framework;
+using Bedrock.Framework.Protocols;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,7 +48,6 @@ namespace Geek.Client
         public void Abort()
         {
             Context.Abort();
-            Context.DisposeAsync();
         }
 
         public ValueTask WriteAsync(NMessage msg, CancellationToken cancellationToken = default)
