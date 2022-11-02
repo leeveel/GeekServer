@@ -1,13 +1,13 @@
 ﻿using Geek.Server.Proto;
-using Geek.Server.Gateaway.MessageHandler;
-using Geek.Server.Gateaway.Net.Router;
+using Geek.Server.Gateway.MessageHandler;
+using Geek.Server.Gateway.Net.Router;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Geek.Server.Gateaway.MessageHandler
+namespace Geek.Server.Gateway.MessageHandler
 {
     [MsgMapping(typeof(ReqRouterMsg))]
     public class ReqRouterMsgHandler : BaseHander

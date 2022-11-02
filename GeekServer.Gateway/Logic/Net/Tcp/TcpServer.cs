@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Connections;
 using NLog.Web;
 
-namespace Geek.Server.Gateaway.Net.Tcp
+namespace Geek.Server.Gateway.Net.Tcp
 {
     /// <summary>
     /// TCP server

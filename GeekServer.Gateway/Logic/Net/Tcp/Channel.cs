@@ -2,7 +2,7 @@
 using Geek.Server.Proto;
 using Microsoft.AspNetCore.Connections;
 
-namespace Geek.Server.Gateaway.Net.Tcp
+namespace Geek.Server.Gateway.Net.Tcp
 {
     public class Channel : INetNode
     {

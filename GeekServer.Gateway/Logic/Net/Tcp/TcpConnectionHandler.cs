@@ -4,10 +4,10 @@ using System.Formats.Asn1;
 using System.Reflection.PortableExecutable;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using Geek.Server.Gateaway.Net.Router;
+using Geek.Server.Gateway.Net.Router;
 using Microsoft.AspNetCore.Connections;
 
-namespace Geek.Server.Gateaway.Net.Tcp
+namespace Geek.Server.Gateway.Net.Tcp
 {
     internal class TcpConnectionHandler : ConnectionHandler
     {

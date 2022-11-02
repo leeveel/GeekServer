@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Geek.Server.Gateaway.MessageHandler
+namespace Geek.Server.Gateway.MessageHandler
 {
     public abstract class BaseHander
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Geek.Server.Gateaway.Net
+namespace Geek.Server.Gateway.Net
 {
     public class NetNodeMgr
     {

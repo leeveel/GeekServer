@@ -10,7 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Geek.Server.Gateaway.MessageHandler
+namespace Geek.Server.Gateway.MessageHandler
 {
     public class MsgHanderFactory
     {

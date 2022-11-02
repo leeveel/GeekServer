@@ -1,4 +1,4 @@
-﻿using Geek.Server.Gateaway.MessageHandler;
+﻿using Geek.Server.Gateway.MessageHandler;
 using NLog.Fluent;
 using System;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Geek.Server.Gateaway.Net.Router
+namespace Geek.Server.Gateway.Net.Router
 {
     public class MsgRouter
     {

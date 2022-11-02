@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Geek.Server.Gateaway
+namespace Geek.Server.Gateway
 {
     public class GateSettings : BaseSetting
     {

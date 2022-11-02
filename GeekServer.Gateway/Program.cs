@@ -1,11 +1,11 @@
 ﻿
 using Geek.Server.Proto;
-using Geek.Server.Gateaway.MessageHandler;
+using Geek.Server.Gateway.MessageHandler;
 using System.Collections;
 using System.Diagnostics;
-using TcpServer = Geek.Server.Gateaway.Net.Tcp.TcpServer;
+using TcpServer = Geek.Server.Gateway.Net.Tcp.TcpServer;
 
-namespace Geek.Server.Gateaway
+namespace Geek.Server.Gateway
 {
     class Program
     {
