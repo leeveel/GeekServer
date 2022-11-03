@@ -36,6 +36,7 @@
 
 		<PackageReference Include="Grpc.AspNetCore.Server" Version="2.32.0" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
+		<PackageReference Include="RocksDB" Version="7.6.0.33206" />
 	</ItemGroup>
 
 </Project>

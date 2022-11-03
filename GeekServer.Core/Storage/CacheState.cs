@@ -1,17 +1,19 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+﻿using MessagePack;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using NLog;
 
 namespace Geek.Server
 {
     [BsonIgnoreExtraElements(true, Inherited = true)]// 兼容state的字段修改
+    [MessagePackObject(true)]
     public abstract class InnerState
     {
 
     }
 
     [BsonIgnoreExtraElements(true, Inherited = true)]// 兼容state的字段修改
+    [MessagePackObject(true)]
     public abstract class CacheState
     {
         public const string UniqueId = nameof(Id);
@@ -30,6 +32,12 @@ namespace Geek.Server
         public (bool isChanged, byte[] data) IsChanged()
         {
             return StateMD5.IsChanged();
+        }
+
+        public (bool isChanged, long stateId, byte[] data) IsChangedWithStateId()
+        {
+            var res = StateMD5.IsChanged();
+            return (res.Item1, Id, res.Item2);
         }
 
         public void AfterSaveToDB()
@@ -80,7 +88,8 @@ namespace Geek.Server
 
         private static (string md5, byte[] data) GetMD5AndData(CacheState state)
         {
-            var data = state.ToBson();
+            //var data = state.ToBson();
+            var data = Serializer.Serialize(state);
             var md5str = CryptographyUtils.Md5(data);
             return (md5str, data);
         }

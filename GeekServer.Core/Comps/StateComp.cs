@@ -94,95 +94,78 @@ namespace Geek.Server
 
         public async Task ReadStateAsync()
         {
-            State = await MongoDBConnection.LoadState<TState>(ActorId);
+            //State = await MongoDBConnection.LoadState<TState>(ActorId);
+            State = await RocksDBConnection.Singleton.LoadState<TState>(ActorId);
             stateDic.TryRemove(State.Id, out _);
             stateDic.TryAdd(State.Id, State);
         }
 
-        public Task WriteStateAsync()
+        public async Task WriteStateAsync()
         {
-            return MongoDBConnection.SaveState(State);
+            //return MongoDBConnection.SaveState(State);
+            await RocksDBConnection.Singleton.SaveState(State);
         }
 
         const int ONCE_SAVE_COUNT = 500;
-
         public static async Task SaveAll(bool shutdown)
         {
-            var writeList = new List<ReplaceOneModel<TState>>();
-            var tasks = new List<Task<(bool, byte[])>>();
+            var changeDataId = new List<long>();
+            var changeData = new List<byte[]>();
+            var tasks = new List<Task<(bool, long, byte[])>>();
             foreach (var state in stateDic.Values)
             {
                 var actor = ActorMgr.GetActor(state.Id);
-                bool isChanged;
-                byte[] data;
                 if (actor != null)
                 {
-                    tasks.Add(actor.SendAsync(() => state.IsChanged()));
+                    tasks.Add(actor.SendAsync(() => state.IsChangedWithStateId()));
                 }
                 else
                 {
-                    (isChanged, data) = state.IsChanged();
-                    CheckChangeAndAddReplaceModel(writeList, isChanged, data);
+                    var (isChanged, stateId, data) = state.IsChangedWithStateId();
+                    if (isChanged)
+                        changeData.Add(data);    
                 }
             }
 
             var results = await Task.WhenAll(tasks);
-            foreach (var (isChanged, data) in results)
+            foreach (var (isChanged, stateId, data) in results)
             {
-                CheckChangeAndAddReplaceModel(writeList, isChanged, data);
+                if (isChanged)
+                {
+                    changeDataId.Add(stateId);
+                    changeData.Add(data);
+                }
             }
 
-            if (!writeList.IsNullOrEmpty())
+            if (!changeData.IsNullOrEmpty())
             {
                 var stateName = typeof(TState).FullName;
-                StateComp.statisticsTool.Count(stateName, writeList.Count);
-                Log.Debug($"状态回存 {stateName} count:{writeList.Count}");
-                var db = MongoDBConnection.CurDB;
-                var col = db.GetCollection<TState>();
-                for (int idx = 0; idx < writeList.Count; idx += ONCE_SAVE_COUNT)
+                StateComp.statisticsTool.Count(stateName, changeData.Count);
+                Log.Debug($"状态回存 {stateName} count:{changeData.Count}");
+                var db = RocksDBConnection.Singleton.CurDataBase;
+                var dbTable = db.GetTable<TState>();
+                for (int idx = 0; idx < changeData.Count; idx += ONCE_SAVE_COUNT)
                 {
-                    var list = writeList.GetRange(idx, Math.Min(ONCE_SAVE_COUNT, writeList.Count - idx));
-
-                    bool save = false;
+                    var ids = changeDataId.GetRange(idx, Math.Min(ONCE_SAVE_COUNT, changeDataId.Count - idx));
+                    var datas = changeData.GetRange(idx, Math.Min(ONCE_SAVE_COUNT, changeData.Count - idx));
                     try
                     {
-                        var result = await col.BulkWriteAsync(list, MongoDBConnection.BULK_WRITE_OPTIONS);
-                        if (result.IsAcknowledged)
+                        dbTable.SetRawBatch(ids, datas);
+                        foreach (var id in ids)
                         {
-                            list.ForEach(model =>
-                            {
-                                if (stateDic.TryGetValue(model.Replacement.Id, out var st))
-                                {
-                                    st.AfterSaveToDB();
-                                }
-                            });
-                            save = true;
-                        }
-                        else
-                        {
-                            Log.Error($"保存数据失败，类型:{typeof(TState).FullName}");
+                            stateDic.TryGetValue(id, out var state);
+                            if (state == null)
+                                continue;
+                            state.AfterSaveToDB();
                         }
                     }
                     catch (Exception ex)
                     {
                         Log.Error($"保存数据异常，类型:{typeof(TState).FullName}，{ex}");
                     }
-                    if (!save && shutdown)
-                    {
-                        await FileBackup.SaveToFile(list);
-                    }
                 }
             }
-
-            static void CheckChangeAndAddReplaceModel(List<ReplaceOneModel<TState>> writeList, bool isChanged, byte[] data)
-            {
-                if (isChanged)
-                {
-                    var _state = BsonSerializer.Deserialize<TState>(data);
-                    var filter = Builders<TState>.Filter.Eq(CacheState.UniqueId, _state.Id);
-                    writeList.Add(new ReplaceOneModel<TState>(filter, _state) { IsUpsert = true });
-                }
-            }
+        
         }
     }
 }

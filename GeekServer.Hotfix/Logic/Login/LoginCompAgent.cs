@@ -12,15 +12,21 @@ namespace Geek.Server.Login
             StateComp.AddShutdownSaveFunc(SaveAll);
         }
 
-        private async Task Init()
+        private void Init()
         {
-            var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
-            using var cursor = await col.FindAsync(Builders<PlayerInfo>.Filter.Empty);
-            await cursor.ForEachAsync(t =>
+            var db = RocksDBConnection.Singleton.CurDataBase;
+            var table = db.GetTable<PlayerInfo>();
+            foreach (var item in table)
             {
-                Comp.PlayerMap[t.playerId] = t;
-                //Log.Info("加载数据:" + t.playerId);
-            });
+                Comp.PlayerMap[item.playerId] = item;
+            }
+            //var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
+            //using var cursor = await col.FindAsync(Builders<PlayerInfo>.Filter.Empty);
+            //await cursor.ForEachAsync(t =>
+            //{
+            //    Comp.PlayerMap[t.playerId] = t;
+            //    //Log.Info("加载数据:" + t.playerId);
+            //});
         }
 
         private async Task SaveAll(bool shutdown)
@@ -35,31 +41,27 @@ namespace Geek.Server.Login
             }
         }
 
-        private async Task SaveLogic(bool shutdown)
+
+        private ValueTask SaveLogic(bool shutdown)
         {
-            var writeList = new List<ReplaceOneModel<PlayerInfo>>();
+            var changeDataId = new List<string>();
+            var changeData = new List<PlayerInfo>();
             foreach (var registInfo in Comp.PlayerMap.Values)
             {
                 if (registInfo.IsChanged)
                 {
-                    var filter = Builders<PlayerInfo>.Filter.Eq(nameof(PlayerInfo.playerId), registInfo.playerId);
-                    var model = new ReplaceOneModel<PlayerInfo>(filter, registInfo) { IsUpsert = true };
-                    writeList.Add(model);
+                    changeDataId.Add(registInfo.playerId);
+                    changeData.Add(registInfo);
                 }
             }
 
-            if (writeList.Count > 0)
+            if (changeData.Count > 0)
             {
-                var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
-                var result = await col.BulkWriteAsync(writeList, new BulkWriteOptions { IsOrdered = false });
-                if (!shutdown && result.IsAcknowledged)
-                {
-                    foreach (var model in writeList)
-                    {
-                        model.Replacement.IsChanged = false;
-                    }
-                }
+                var db = RocksDBConnection.Singleton.CurDataBase;
+                var table = db.GetTable<PlayerInfo>();
+                table.SetBatch(changeDataId, changeData);
             }
+            return ValueTask.CompletedTask;
         }
 
         public async Task OnLogin(NetChannel channel, ReqLogin reqLogin)

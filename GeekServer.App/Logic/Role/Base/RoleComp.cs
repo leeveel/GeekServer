@@ -1,4 +1,6 @@
 ﻿
+using MessagePack;
+
 namespace Geek.Server.Role
 {
 
@@ -8,6 +10,7 @@ namespace Geek.Server.Role
 
     }
 
+    [MessagePackObject(true)]
     public class RoleState : CacheState
     {
         public long RoleId => Id;

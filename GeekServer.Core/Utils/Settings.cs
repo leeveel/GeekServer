@@ -110,6 +110,8 @@ public class BaseSetting
 
     public string DbName { get; init; }
 
+    public string EmbeddedDB { get; init; }
+
     public string Language { get; init; }
 
     public string DataCenter { get; init; }
