@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class ResLogin : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 2003930237;
+		public const int Sid = 785960738;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

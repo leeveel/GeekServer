@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public struct TestStruct 
 	{
 		[IgnoreMember]
-		public const int Sid = -248186732;
+		public const int Sid = 299119425;
 
 
         public int Age { get; set; }

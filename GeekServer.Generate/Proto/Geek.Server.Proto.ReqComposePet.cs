@@ -9,7 +9,7 @@ namespace Geek.Server.Proto
 	public class ReqComposePet : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -1888378530;
+		public const int Sid = 225320501;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
