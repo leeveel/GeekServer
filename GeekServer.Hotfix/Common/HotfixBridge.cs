@@ -19,7 +19,7 @@ namespace Geek.Server
             await TcpServer.Start(Settings.TcpPort);
             Log.Info("tcp 服务启动完成...");
             await HttpServer.Start(Settings.HttpPort);
-            MongoDBConnection.Init(Settings.MongoUrl, Settings.DbName);
+            //MongoDBConnection.Init(Settings.MongoUrl, Settings.DbName);
             Log.Info("check restore data from file");
             FileBackupStatus fileBackupFlag = FileBackup.CheckRestoreFromFile();
             switch (fileBackupFlag)

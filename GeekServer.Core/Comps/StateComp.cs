@@ -94,7 +94,6 @@ namespace Geek.Server
 
         public async Task ReadStateAsync()
         {
-            //State = await MongoDBConnection.LoadState<TState>(ActorId);
             State = await RocksDBConnection.Singleton.LoadState<TState>(ActorId);
             stateDic.TryRemove(State.Id, out _);
             stateDic.TryAdd(State.Id, State);
@@ -102,7 +101,6 @@ namespace Geek.Server
 
         public async Task WriteStateAsync()
         {
-            //return MongoDBConnection.SaveState(State);
             await RocksDBConnection.Singleton.SaveState(State);
         }
 
