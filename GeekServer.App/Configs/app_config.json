@@ -9,7 +9,7 @@
   "GrpcPort": 30000,
   "MongoUrl": "mongodb://127.0.0.1:27017/?authSource=admin",
   "DbName": "geek_server",
-  "EmbeddedDB": "../gamedb/",
+  "EmbeddedDB": "./gamedb/",
   "Language": "chinese",
   "SDKType": 0
 }

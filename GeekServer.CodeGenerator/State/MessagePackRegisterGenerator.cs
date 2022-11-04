@@ -1,7 +1,6 @@
 ﻿
 using Microsoft.CodeAnalysis;
 using Scriban;
-using System;
 using System.Collections.Generic;
 using Tools.Utils;
 

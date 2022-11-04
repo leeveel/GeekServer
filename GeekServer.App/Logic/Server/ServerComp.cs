@@ -1,10 +1,5 @@
-﻿
-using MessagePack;
-
-namespace Geek.Server.Server
+﻿namespace Geek.Server.Server
 {
-
-    [MessagePackObject(true)]
     public class ServerState : CacheState
     {
         /// <summary>

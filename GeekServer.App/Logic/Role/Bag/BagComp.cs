@@ -6,7 +6,6 @@ using ServerLink;
 namespace Geek.Server.Role
 {
 
-    [MessagePackObject(true)]
     public class BagState : CacheState
     {
         [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]

@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 namespace Geek.Server.Login
 {
 
-    [MessagePackObject(true)]
     public class PlayerInfo : InnerState
     {
         //player相对特殊，id不是long，所以不继承DBState，自定义mongoDB的id

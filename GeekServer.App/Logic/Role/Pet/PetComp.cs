@@ -3,7 +3,6 @@
 namespace Geek.Server.Role
 {
 
-    [MessagePackObject(true)]
     public class PetState : CacheState
     {
 
