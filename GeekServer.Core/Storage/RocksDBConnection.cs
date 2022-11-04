@@ -10,16 +10,16 @@
             CurDataBase = new EmbeddedDB(db);
         }
 
-        public void Close()
+        public Task Close()
         {
-            CurDataBase.Close();
+            return CurDataBase.Close();
         }
 
         public ValueTask<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
         {
             try
             {
-                bool isNew=false;
+                bool isNew = false;
                 //读数据
                 var state = CurDataBase.GetTable<TState>().Get(id);
                 isNew = state == null;

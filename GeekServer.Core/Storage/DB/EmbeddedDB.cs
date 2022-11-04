@@ -15,6 +15,7 @@ namespace Geek.Server
         public string SecondPath { get; private set; } = "";
         public bool ReadOnly { get; private set; } = false;
         protected IRemoteBackup _remoteBackup;
+        protected FlushOptions flushOption;
         protected ConcurrentDictionary<string, ColumnFamilyHandle> columnFamilie = new ConcurrentDictionary<string, ColumnFamilyHandle>();
 
         public IRemoteBackup remoteBackup
@@ -51,6 +52,8 @@ namespace Geek.Server
             {
                 InnerDB = RocksDb.Open(option, DbPath, cfs);
             }
+
+            flushOption = new FlushOptions();
         }
 
         ColumnFamilyHandle GetOrCreateColumnFamilyHandle(string name)
@@ -113,13 +116,12 @@ namespace Geek.Server
         {
             if (!ReadOnly)
             {
-                var option = new FlushOptions();
-                option.SetWaitForFlush(true);
+                flushOption.SetWaitForFlush(true);
                 foreach (var c in columnFamilie)
                 {
                     if (c.Value != null)
                     {
-                        Native.Instance.rocksdb_flush_cf(InnerDB.Handle, option.Handle, c.Value.Handle, out var err);
+                        Native.Instance.rocksdb_flush_cf(InnerDB.Handle, flushOption.Handle, c.Value.Handle, out var err);
                         if (err != IntPtr.Zero)
                         {
                             var errStr = Marshal.PtrToStringAnsi(err);
@@ -128,14 +130,15 @@ namespace Geek.Server
                         }
                     }
                 }
-                Native.Instance.rocksdb_free(option.Handle);
                 remoteBackup.Flush();
             }
         }
 
-        public void Close()
+        public async Task Close()
         {
             Flush();
+            await Task.Delay(5000);
+            Native.Instance.rocksdb_free(flushOption.Handle);
             InnerDB.Dispose();
         }
     }

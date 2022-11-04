@@ -70,7 +70,7 @@ namespace Geek.Server
             working = false;
             await LoopTask;
             await StateComp.SaveAll();
-            RocksDBConnection.Singleton.Close();
+            await RocksDBConnection.Singleton.Close();
             Log.Info($"停止全局定时完成");
         }
     }
