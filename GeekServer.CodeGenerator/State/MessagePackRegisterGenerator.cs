@@ -49,6 +49,8 @@ namespace Geek.Server
                     AddGetAllSubClass(arr, receiver.classFullNamePair, inheritDBBaseMap, v.Key, v.Key);
                 }
 
+                RemoveFinalClass(arr, inheritDBBaseMap, receiver.classFullNamePair);
+
                 var source = agentTemplate.Render(arr);
                 //File.WriteAllText($"PolymorphicDBStateRegister.cs", source);
                 context.AddSource($"{arr.prefix}PolymorphicDBStateRegister.g.cs", source);
@@ -121,6 +123,30 @@ namespace Geek.Server
             //if (baseName != subName)
             arr.infos.Add(new PolymorphicInfo { basename = baseName, subname = subName, subsid = ((int)MurmurHash3.Hash(baseName, 27)).ToString() });
             //arr.infos.Add(new PolymorphicInfo { basename = baseName, subname = subName, subsid = ((int)xxHash32.ComputeHash(nameBytes, 0, nameBytes.Length, 27)).ToString() });
+        }
+
+        void RemoveFinalClass(PolymorphicInfoArray arr, Dictionary<string, string> inheritDBBaseMap, Dictionary<string, string> classFullNamePair)
+        {
+            var all = arr.infos.ToArray();
+            foreach (var c in all)
+            {
+                if (c.basename == c.subname)
+                {
+                    bool needRemove = true;
+                    foreach (var kv in inheritDBBaseMap)
+                    {
+                        if (c.basename == GetFullName(classFullNamePair, kv.Value))
+                        {
+                            needRemove = false;
+                            break;
+                        }
+                    }
+                    if (needRemove)
+                    {
+                        arr.infos.Remove(c);
+                    }
+                }
+            }
         }
     }
 
