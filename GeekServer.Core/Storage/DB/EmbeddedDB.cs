@@ -112,11 +112,11 @@ namespace Geek.Server
             InnerDB.Write(batch);
         }
 
-        public void Flush()
+        public void Flush(bool wait)
         {
             if (!ReadOnly)
             {
-                flushOption.SetWaitForFlush(true);
+                flushOption.SetWaitForFlush(wait);
                 foreach (var c in columnFamilie)
                 {
                     if (c.Value != null)
@@ -134,10 +134,10 @@ namespace Geek.Server
             }
         }
 
-        public async Task Close()
+        public void Close()
         {
-            Flush();
-            await Task.Delay(5000);
+            Flush(true);
+            Native.Instance.rocksdb_cancel_all_background_work(InnerDB.Handle, true);
             Native.Instance.rocksdb_free(flushOption.Handle);
             InnerDB.Dispose();
         }

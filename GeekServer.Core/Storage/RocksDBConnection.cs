@@ -10,9 +10,9 @@
             CurDataBase = new EmbeddedDB(db);
         }
 
-        public Task Close()
+        public void Close()
         {
-            return CurDataBase.Close();
+            CurDataBase.Close();
         }
 
         public ValueTask<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
