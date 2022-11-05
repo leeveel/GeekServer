@@ -141,7 +141,7 @@ namespace Geek.Server
 
         public class Enumerator : IEnumerator<T>
         {
-            private Snapshot snapshot;
+            //private Snapshot snapshot;
             private Iterator dbIterator;
             private T _current = default(T);
             private Table<T> table;
@@ -149,8 +149,9 @@ namespace Geek.Server
             internal Enumerator(Table<T> table)
             {
                 this.table = table;
-                snapshot = table.db.InnerDB.CreateSnapshot();
-                var option = new ReadOptions().SetSnapshot(snapshot);
+                //snapshot = table.db.InnerDB.CreateSnapshot();
+                //var option = new ReadOptions().SetSnapshot(snapshot); 
+                var option = new ReadOptions();
                 dbIterator = table.db.InnerDB.NewIterator(table.cfHandle, option);
                 dbIterator.SeekToFirst();
             }
@@ -170,7 +171,7 @@ namespace Geek.Server
                     if (dbIterator != null)
                     {
                         dbIterator.Dispose();
-                        snapshot.Dispose();
+                        //snapshot.Dispose();
                     }
                 }
                 isDisposed = true;
