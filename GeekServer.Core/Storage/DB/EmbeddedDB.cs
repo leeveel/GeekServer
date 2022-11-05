@@ -97,9 +97,9 @@ namespace Geek.Server
             return new Table<T>(this, name, GetOrCreateColumnFamilyHandle(name));
         }
 
-        public Table<byte[]> GetTable(string fullName)
+        public Table<byte[]> GetRawTable(string fullName)
         {
-            return new Table<byte[]>(this, fullName, GetOrCreateColumnFamilyHandle(fullName));
+            return new Table<byte[]>(this, fullName, GetOrCreateColumnFamilyHandle(fullName), true);
         }
 
         public Transaction NewTransaction()
