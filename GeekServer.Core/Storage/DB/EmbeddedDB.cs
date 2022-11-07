@@ -16,6 +16,7 @@ namespace Geek.Server
         public string SecondPath { get; private set; } = "";
         public bool ReadOnly { get; private set; } = false;
         protected IRemoteBackup _remoteBackup;
+        protected FlushOptions flushOption;
         protected ConcurrentDictionary<string, ColumnFamilyHandle> columnFamilie = new ConcurrentDictionary<string, ColumnFamilyHandle>();
 
         public IRemoteBackup remoteBackup
@@ -52,6 +53,8 @@ namespace Geek.Server
             {
                 InnerDB = RocksDb.Open(option, DbPath, cfs);
             }
+
+            flushOption = new FlushOptions();
         }
 
         ColumnFamilyHandle GetOrCreateColumnFamilyHandle(string name)
@@ -95,9 +98,9 @@ namespace Geek.Server
             return new Table<T>(this, name, GetOrCreateColumnFamilyHandle(name));
         }
 
-        public Table<byte[]> GetTable(string fullName)
+        public Table<byte[]> GetRawTable(string fullName)
         {
-            return new Table<byte[]>(this, fullName, GetOrCreateColumnFamilyHandle(fullName));
+            return new Table<byte[]>(this, fullName, GetOrCreateColumnFamilyHandle(fullName), true);
         }
 
         public Transaction NewTransaction()
@@ -110,17 +113,16 @@ namespace Geek.Server
             InnerDB.Write(batch);
         }
 
-        public void Flush()
+        public void Flush(bool wait)
         {
             if (!ReadOnly)
             {
-                var option = new FlushOptions();
-                option.SetWaitForFlush(true);
+                flushOption.SetWaitForFlush(wait);
                 foreach (var c in columnFamilie)
                 {
                     if (c.Value != null)
                     {
-                        Native.Instance.rocksdb_flush_cf(InnerDB.Handle, option.Handle, c.Value.Handle, out var err);
+                        Native.Instance.rocksdb_flush_cf(InnerDB.Handle, flushOption.Handle, c.Value.Handle, out var err);
                         if (err != IntPtr.Zero)
                         {
                             var errStr = Marshal.PtrToStringAnsi(err);
@@ -129,14 +131,15 @@ namespace Geek.Server
                         }
                     }
                 }
-                Native.Instance.rocksdb_free(option.Handle);
                 remoteBackup.Flush();
             }
         }
 
         public void Close()
         {
-            Flush();
+            Flush(true);
+            Native.Instance.rocksdb_cancel_all_background_work(InnerDB.Handle, true);
+            Native.Instance.rocksdb_free(flushOption.Handle);
             InnerDB.Dispose();
         }
     }

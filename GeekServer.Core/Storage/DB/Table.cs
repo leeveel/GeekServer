@@ -11,11 +11,13 @@ namespace Geek.Server
         protected EmbeddedDB db;
         ColumnFamilyHandle cfHandle;
         string tableName;
+        bool isRawTable;
 
-        internal Table(EmbeddedDB db, string name, ColumnFamilyHandle cfHandle)
+        internal Table(EmbeddedDB db, string name, ColumnFamilyHandle cfHandle, bool isRawTable = false)
         {
             this.db = db;
             this.cfHandle = cfHandle;
+            this.isRawTable = isRawTable;
             tableName = name;
             if (!db.InnerDB.TryGetColumnFamily(tableName, out cfHandle))
             {
@@ -139,14 +141,17 @@ namespace Geek.Server
 
         public class Enumerator : IEnumerator<T>
         {
-            private Snapshot snapshot;
+            //private Snapshot snapshot;
             private Iterator dbIterator;
-            private T? _current = null;
+            private T _current = default(T);
+            private Table<T> table;
 
             internal Enumerator(Table<T> table)
             {
-                snapshot = table.db.InnerDB.CreateSnapshot();
-                var option = new ReadOptions().SetSnapshot(snapshot);
+                this.table = table;
+                //snapshot = table.db.InnerDB.CreateSnapshot();
+                //var option = new ReadOptions().SetSnapshot(snapshot); 
+                var option = new ReadOptions();
                 dbIterator = table.db.InnerDB.NewIterator(table.cfHandle, option);
                 dbIterator.SeekToFirst();
             }
@@ -166,7 +171,7 @@ namespace Geek.Server
                     if (dbIterator != null)
                     {
                         dbIterator.Dispose();
-                        snapshot.Dispose();
+                        //snapshot.Dispose();
                     }
                 }
                 isDisposed = true;
@@ -181,7 +186,10 @@ namespace Geek.Server
             {
                 if (dbIterator.Valid())
                 {
-                    _current = Serializer.Deserialize<T>(dbIterator.Value());
+                    if (table.isRawTable)
+                        _current = dbIterator.Value() as T;
+                    else
+                        _current = Serializer.Deserialize<T>(dbIterator.Value());
                     dbIterator.Next();
                     return true;
                 }
@@ -189,9 +197,9 @@ namespace Geek.Server
             }
 
 
-            public T Current => _current!;
+            public T Current => _current;
 
-            object? IEnumerator.Current
+            object IEnumerator.Current
             {
                 get
                 {

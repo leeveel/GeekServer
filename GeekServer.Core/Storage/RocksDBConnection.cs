@@ -19,7 +19,7 @@
         {
             try
             {
-                bool isNew=false;
+                bool isNew = false;
                 //读数据
                 var state = CurDataBase.GetTable<TState>().Get(id);
                 isNew = state == null;
