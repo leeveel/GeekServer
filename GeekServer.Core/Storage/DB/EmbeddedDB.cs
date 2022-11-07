@@ -10,6 +10,7 @@ namespace Geek.Server
     /// </summary>
     public class EmbeddedDB
     {
+        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public RocksDb InnerDB { get; private set; }
         public string DbPath { get; private set; } = "";
         public string SecondPath { get; private set; } = "";
@@ -124,7 +125,7 @@ namespace Geek.Server
                         {
                             var errStr = Marshal.PtrToStringAnsi(err);
                             Native.Instance.rocksdb_free(err);
-                            Console.WriteLine($"rocksdb flush 错误:{errStr}");
+                            LOGGER.Fatal($"rocksdb flush 错误:{errStr}");
                         }
                     }
                 }

@@ -1,6 +1,4 @@
-﻿using MongoDB.Bson.Serialization;
-using MongoDB.Driver;
-using NLog;
+﻿using NLog;
 using System.Collections.Concurrent;
 
 namespace Geek.Server
@@ -90,80 +88,47 @@ namespace Geek.Server
             return base.Deactive();
         }
 
-        internal override bool ReadyToDeactive => State == null || !State.IsChanged().isChanged;
-
-        public async Task ReadStateAsync()
+        internal override bool ReadyToDeactive
         {
-            State = await RocksDBConnection.Singleton.LoadState<TState>(ActorId);
-            stateDic.TryRemove(State.Id, out _);
-            stateDic.TryAdd(State.Id, State);
+            get 
+            {
+                RocksDBConnection.Singleton.SaveState(State);
+                return true;
+            }
         }
 
-        public async Task WriteStateAsync()
+        public Task ReadStateAsync()
         {
-            await RocksDBConnection.Singleton.SaveState(State);
+            State = RocksDBConnection.Singleton.LoadState<TState>(ActorId);
+            stateDic.TryRemove(State.Id, out _);
+            stateDic.TryAdd(State.Id, State);
+            return Task.CompletedTask;
+        }
+
+        public Task WriteStateAsync()
+        {
+            RocksDBConnection.Singleton.SaveState(State);
+            return Task.CompletedTask;
         }
 
         const int ONCE_SAVE_COUNT = 500;
         public static async Task SaveAll(bool shutdown)
         {
-            var changeDataId = new List<long>();
-            var changeData = new List<byte[]>();
-            var tasks = new List<Task<(bool, long, byte[])>>();
+            var taskList = new List<Task>();
             foreach (var state in stateDic.Values)
             {
                 var actor = ActorMgr.GetActor(state.Id);
                 if (actor != null)
                 {
-                    tasks.Add(actor.SendAsync(() => state.IsChangedWithStateId()));
+                    taskList.Add(actor.SendAsync(() => { RocksDBConnection.Singleton.SaveState(state); }, int.MaxValue));
                 }
                 else
                 {
-                    var (isChanged, stateId, data) = state.IsChangedWithStateId();
-                    if (isChanged)
-                        changeData.Add(data);    
+                    RocksDBConnection.Singleton.SaveState(state);
                 }
             }
-
-            var results = await Task.WhenAll(tasks);
-            foreach (var (isChanged, stateId, data) in results)
-            {
-                if (isChanged)
-                {
-                    changeDataId.Add(stateId);
-                    changeData.Add(data);
-                }
-            }
-
-            if (!changeData.IsNullOrEmpty())
-            {
-                var stateName = typeof(TState).FullName;
-                StateComp.statisticsTool.Count(stateName, changeData.Count);
-                Log.Debug($"状态回存 {stateName} count:{changeData.Count}");
-                var db = RocksDBConnection.Singleton.CurDataBase;
-                var dbTable = db.GetTable<TState>();
-                for (int idx = 0; idx < changeData.Count; idx += ONCE_SAVE_COUNT)
-                {
-                    var ids = changeDataId.GetRange(idx, Math.Min(ONCE_SAVE_COUNT, changeDataId.Count - idx));
-                    var datas = changeData.GetRange(idx, Math.Min(ONCE_SAVE_COUNT, changeData.Count - idx));
-                    try
-                    {
-                        dbTable.SetRawBatch(ids, datas);
-                        foreach (var id in ids)
-                        {
-                            stateDic.TryGetValue(id, out var state);
-                            if (state == null)
-                                continue;
-                            state.AfterSaveToDB();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error($"保存数据异常，类型:{typeof(TState).FullName}，{ex}");
-                    }
-                }
-            }
-        
+            await Task.WhenAll(taskList.ToArray()); 
         }
+
     }
 }

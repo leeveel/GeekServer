@@ -15,7 +15,7 @@
             CurDataBase.Close();
         }
 
-        public ValueTask<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
+        public TState LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
         {
             try
             {
@@ -27,8 +27,7 @@
                     state = defaultGetter?.Invoke();
                 if (state == null)
                     state = new TState { Id = id };
-                state.AfterLoadFromDB(isNew);
-                return new ValueTask<TState>(state);
+                return state;
             }
             catch (Exception e)
             {
@@ -37,16 +36,14 @@
             }
         }
 
-        public ValueTask SaveState<TState>(TState state) where TState : CacheState
+        /// <summary>
+        /// 确保在自己线程里面调用
+        /// </summary>
+        /// <typeparam name="TState"></typeparam>
+        /// <param name="state"></param>
+        public void SaveState<TState>(TState state) where TState : CacheState
         {
-            var (isChanged, data) = state.IsChanged();
-            if (isChanged)
-            {
-                var _state = Serializer.Deserialize<TState>(data);
-                CurDataBase.GetTable<TState>().Set(_state.Id, _state);
-                state.AfterSaveToDB();
-            }
-            return ValueTask.CompletedTask;
+            CurDataBase.GetTable<TState>().Set(state.Id, state);
         }
 
     }

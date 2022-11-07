@@ -21,19 +21,19 @@ namespace Geek.Server
             await HttpServer.Start(Settings.HttpPort);
             //MongoDBConnection.Init(Settings.MongoUrl, Settings.DbName);
             Log.Info("check restore data from file");
-            FileBackupStatus fileBackupFlag = FileBackup.CheckRestoreFromFile();
-            switch (fileBackupFlag)
-            {
-                case FileBackupStatus.StoreToDbFailed:
-                    throw new Exception($"上次停服回存数据失败，本次存入数据库失败");
-                case FileBackupStatus.StoreToDbSuccess:
-                    Log.Warn($"上次停服回存数据失败，本次存入数据库成功");
-                    break;
-                case FileBackupStatus.NoFile:
-                default:
-                    Log.Info($"上次停服回存数据没有异常，不用从磁盘中恢复数据");
-                    break;
-            }
+            //FileBackupStatus fileBackupFlag = FileBackup.CheckRestoreFromFile();
+            //switch (fileBackupFlag)
+            //{
+            //    case FileBackupStatus.StoreToDbFailed:
+            //        throw new Exception($"上次停服回存数据失败，本次存入数据库失败");
+            //    case FileBackupStatus.StoreToDbSuccess:
+            //        Log.Warn($"上次停服回存数据失败，本次存入数据库成功");
+            //        break;
+            //    case FileBackupStatus.NoFile:
+            //    default:
+            //        Log.Info($"上次停服回存数据没有异常，不用从磁盘中恢复数据");
+            //        break;
+            //}
             (bool success, string msg) = GameDataManager.ReloadAll();
             if (!success)
                 throw new Exception($"载入配置表失败... {msg}");
