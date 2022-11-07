@@ -22,28 +22,81 @@ namespace Geek.Server
             return $"{base.ToString()}[Id={Id}]";
         }
 
-        #region md5
+        #region hash
         [BsonIgnore]
-        private StateMd5 StateMD5 { get; set; }
+        private StateHash stateHash { get; set; }
 
         public void AfterLoadFromDB(bool isNew)
         {
-            StateMD5 = new StateMd5(this, isNew);
+            stateHash = new StateHash(this, isNew);
         }
 
         public (bool isChanged, byte[] data) IsChanged()
         {
-            return StateMD5.IsChanged();
+            return stateHash.IsChanged();
         }
 
         public void AfterSaveToDB()
         {
-            StateMD5.AfterSaveToDB();
+            stateHash.AfterSaveToDB();
         }
         #endregion
-
     }
 
+
+    #region xxhash
+    public static class xxHashExt
+    {
+        public static bool IsDefault(this Standart.Hash.xxHash.uint128 self)
+        {
+            return (self.high64 == 0) && (self.low64 == 0);
+        }
+    }
+    class StateHash
+    {
+
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+        private CacheState State { get; }
+
+        public StateHash(CacheState state, bool isNew)
+        {
+            State = state;
+            if (!isNew)
+                CacheHash = GetHashAndData(state).md5;
+        }
+
+        private Standart.Hash.xxHash.uint128 CacheHash { get; set; }
+
+        private Standart.Hash.xxHash.uint128 ToSaveHash { get; set; }
+
+        public (bool, byte[]) IsChanged()
+        {
+            var (toSaveHash, data) = GetHashAndData(State);
+            ToSaveHash = toSaveHash;
+            return (CacheHash.IsDefault() || !toSaveHash.Equals(CacheHash), data);
+        }
+
+        public void AfterSaveToDB()
+        {
+            if (CacheHash.Equals(ToSaveHash))
+            {
+                Log.Error($"调用AfterSaveToDB前CacheHash已经等于ToSaveHash {State}");
+            }
+            CacheHash = ToSaveHash;
+        }
+
+        private static (Standart.Hash.xxHash.uint128 md5, byte[] data) GetHashAndData(CacheState state)
+        {
+            var data = Serializer.Serialize(state);
+            var md5str = Standart.Hash.xxHash.xxHash128.ComputeHash(data, data.Length);
+            return (md5str, data);
+        }
+    }
+    #endregion
+
+
+    #region md5
     class StateMd5
     {
 
@@ -84,7 +137,7 @@ namespace Geek.Server
             var md5str = CryptographyUtils.Md5(data);
             return (md5str, data);
         }
-
     }
+    #endregion
 
 }
