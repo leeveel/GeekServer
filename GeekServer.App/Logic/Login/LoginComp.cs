@@ -1,5 +1,4 @@
-﻿using MessagePack;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 
 namespace Geek.Server.Login
 {
@@ -19,9 +18,16 @@ namespace Geek.Server.Login
         public bool IsChanged;
     }
 
-    [Comp(ActorType.Server)]
-    public class LoginComp : BaseComp
+    public class LoginState : CacheState
     {
         public ConcurrentDictionary<string, PlayerInfo> PlayerMap = new();
     }
+
+
+    [Comp(ActorType.Server)]
+    public class LoginComp : StateComp<LoginState>
+    {
+
+    }
+
 }

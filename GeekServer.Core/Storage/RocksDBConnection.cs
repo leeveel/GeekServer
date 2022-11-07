@@ -27,6 +27,8 @@
                     state = defaultGetter?.Invoke();
                 if (state == null)
                     state = new TState { Id = id };
+
+                state.AfterLoadFromDB(isNew);
                 return state;
             }
             catch (Exception e)
@@ -36,6 +38,7 @@
             }
         }
 
+
         /// <summary>
         /// 确保在自己线程里面调用
         /// </summary>
@@ -43,7 +46,12 @@
         /// <param name="state"></param>
         public void SaveState<TState>(TState state) where TState : CacheState
         {
-            CurDataBase.GetTable<TState>().Set(state.Id, state);
+            var (isChanged, data) = state.IsChanged();
+            if (isChanged)
+            {
+                CurDataBase.GetTable<TState>().SetRaw(state.Id, data);
+                state.AfterSaveToDB();
+            }
         }
 
     }

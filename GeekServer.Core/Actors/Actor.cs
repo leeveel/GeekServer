@@ -81,7 +81,7 @@ namespace Geek.Server
             }
         }
 
-        internal bool ReadyToDeactive => compDic.Values.All(item => item.ReadyToDeactive);
+        internal bool SaveAllState() => compDic.Values.All(item => item.SaveState());
 
         public async Task Deactive()
         {

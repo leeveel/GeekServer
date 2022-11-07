@@ -2,67 +2,9 @@
 
 namespace Geek.Server.Login
 {
-    public class LoginCompAgent : BaseCompAgent<LoginComp>
+    public class LoginCompAgent : StateCompAgent<LoginComp, LoginState>
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        public override void Active()
-        {
-            base.Active();
-            Tell(Init);
-            StateComp.AddShutdownSaveFunc(SaveAll);
-        }
-
-        private void Init()
-        {
-            var db = RocksDBConnection.Singleton.CurDataBase;
-            var table = db.GetTable<PlayerInfo>();
-            foreach (var item in table)
-            {
-                Comp.PlayerMap[item.playerId] = item;
-            }
-            //var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
-            //using var cursor = await col.FindAsync(Builders<PlayerInfo>.Filter.Empty);
-            //await cursor.ForEachAsync(t =>
-            //{
-            //    Comp.PlayerMap[t.playerId] = t;
-            //    //Log.Info("加载数据:" + t.playerId);
-            //});
-        }
-
-        private async Task SaveAll(bool shutdown)
-        {
-            if (shutdown)
-            {
-                await SaveLogic(shutdown);
-            }
-            else
-            {
-                Tell(() => SaveLogic(shutdown));
-            }
-        }
-
-
-        private ValueTask SaveLogic(bool shutdown)
-        {
-            var changeDataId = new List<string>();
-            var changeData = new List<PlayerInfo>();
-            foreach (var registInfo in Comp.PlayerMap.Values)
-            {
-                if (registInfo.IsChanged)
-                {
-                    changeDataId.Add(registInfo.playerId);
-                    changeData.Add(registInfo);
-                }
-            }
-
-            if (changeData.Count > 0)
-            {
-                var db = RocksDBConnection.Singleton.CurDataBase;
-                var table = db.GetTable<PlayerInfo>();
-                table.SetBatch(changeDataId, changeData);
-            }
-            return ValueTask.CompletedTask;
-        }
 
         public async Task OnLogin(NetChannel channel, ReqLogin reqLogin)
         {
@@ -118,7 +60,7 @@ namespace Geek.Server.Login
         private long GetRoleIdOfPlayer(string userName, int sdkType)
         {
             var playerId = $"{sdkType}_{userName}";
-            if (Comp.PlayerMap.TryGetValue(playerId, out var state))
+            if (State.PlayerMap.TryGetValue(playerId, out var state))
             {
                 if (state.RoleMap.TryGetValue(Settings.ServerId, out var roleId))
                     return roleId;
@@ -130,14 +72,14 @@ namespace Geek.Server.Login
         private void CreateRoleToPlayer(string userName, int sdkType, long roleId)
         {
             var playerId = $"{sdkType}_{userName}";
-            Comp.PlayerMap.TryGetValue(playerId, out var info);
+            State.PlayerMap.TryGetValue(playerId, out var info);
             if (info == null)
             {
                 info = new PlayerInfo();
                 info.playerId = playerId;
                 info.SdkType = sdkType;
                 info.UserName = userName;
-                Comp.PlayerMap[playerId] = info;
+                State.PlayerMap[playerId] = info;
             }
             info.IsChanged = true;
             info.RoleMap[Settings.ServerId] = roleId;
