@@ -50,7 +50,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 public class BagComp : StateComp<BagState>{}
 
 //调用Actor组件函数(就像调用普通函数一样,无需关心多线程或入队)
-var serverComp = await EntityMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
+var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>(ActorType.Server);
 await serverComp.CheckCrossDay();
 
 //定义状态(数据)
