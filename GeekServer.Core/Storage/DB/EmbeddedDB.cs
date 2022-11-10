@@ -31,6 +31,9 @@ namespace Geek.Server
 
         public EmbeddedDB(string path, bool readOnlay = false)
         {
+            var dir = Path.GetDirectoryName(path);
+            if(!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
             DbPath = path;
             var option = new DbOptions();
             RocksDb.TryListColumnFamilies(option, DbPath, out var cfList);
