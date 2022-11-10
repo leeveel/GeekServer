@@ -32,6 +32,7 @@ namespace Geek.Server
 
         public EmbeddedDB(string path, bool readOnlay = false, string readonlyPath=null)
         {
+            this.ReadOnly = readOnlay;
             var dir = Path.GetDirectoryName(path);
             if(!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
