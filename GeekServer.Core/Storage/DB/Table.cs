@@ -116,6 +116,10 @@ namespace Geek.Server
             {
                 return default;
             }
+            if (isRawTable)
+            {
+                return (T)(object)data;
+            }
             return Serializer.Deserialize<T>(data);
         }
 
