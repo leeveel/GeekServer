@@ -49,6 +49,8 @@
             var (isChanged, data) = state.IsChanged();
             if (isChanged)
             {
+                //首先写入版本号，供远程备份进程使用
+                state.BeforeSaveToDB();
                 CurDataBase.GetTable<TState>().SetRaw(state.Id, data);
                 state.AfterSaveToDB();
             }

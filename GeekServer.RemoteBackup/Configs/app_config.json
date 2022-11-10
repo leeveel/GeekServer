@@ -7,7 +7,10 @@
   "HttpCode": "inner_httpcode",
   "HttpPort": 20000,
   "GrpcPort": 30000,
+  "MongoUrl": "mongodb://127.0.0.1:27017/?authSource=admin",
+  "DbName": "backupdb",
+  "DBRootPath": "../../database/game/",
+  "BackupDBPath": "../../database/backup/",
   "LocalDBPrefix": "gamedb_",
-  "LocalDBPath": "../../database/game/",
   "SDKType": 0
 }

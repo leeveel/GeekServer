@@ -9,6 +9,8 @@ public enum ServerType
     Center,
     ///<summary>充值服</summary>
     Recharge,
+    ///<summary>远程备份</summary>
+    Backup
 }
 
 public static class Settings
@@ -65,6 +67,10 @@ public static class Settings
 
     public static string DbName => Ins.DbName;
 
+    public static string LocalDBPrefix => Ins.LocalDBPrefix;
+
+    public static string LocalDBPath => Ins.LocalDBPath;
+
     public static string Language => Ins.Language;
 
     public static string DataCenter => Ins.DataCenter;
@@ -110,7 +116,9 @@ public class BaseSetting
 
     public string DbName { get; init; }
 
-    public string EmbeddedDB { get; init; }
+    public string LocalDBPrefix { get; init; }
+
+    public string LocalDBPath { get; init; }
 
     public string Language { get; init; }
 

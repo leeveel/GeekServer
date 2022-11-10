@@ -4,6 +4,26 @@ using NLog;
 
 namespace Geek.Server
 {
+
+    /// <summary>
+    /// 回存时间戳
+    /// </summary>
+    [MessagePackObject(true)]
+    public class SaveTimestamp
+    {
+        /// <summary>
+        /// State.FullName_State.Id
+        /// </summary>
+        public string Key { get { return StateName + "_" + StateId; } }
+        public string StateName { set; get; }
+        public string StateId { set; get; }
+
+        /// <summary>
+        /// 回存时间戳
+        /// </summary>
+        public long Timestamp { get; set; }
+    }
+
     [MessagePackObject(true)]
     public abstract class InnerState
     {
@@ -34,6 +54,20 @@ namespace Geek.Server
         public (bool isChanged, byte[] data) IsChanged()
         {
             return stateHash.IsChanged();
+        }
+
+        public void BeforeSaveToDB()
+        {
+            var db = RocksDBConnection.Singleton.CurDataBase;
+            var table = db.GetTable<SaveTimestamp>();
+            var saveState = new SaveTimestamp
+            {
+                //此处使用UTC时间
+                Timestamp = TimeUtils.CurrentTimeMillisUTC(),
+                StateName = GetType().FullName,
+                StateId = Id.ToString(),
+            };
+            table.Set(saveState.Key, saveState);
         }
 
         public void AfterSaveToDB()

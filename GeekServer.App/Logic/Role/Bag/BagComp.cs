@@ -1,9 +1,4 @@
-﻿
-using MessagePack;
-using Newtonsoft.Json;
-using ServerLink;
-
-namespace Geek.Server.Role
+﻿namespace Geek.Server.Role
 {
 
     public class BagState : CacheState

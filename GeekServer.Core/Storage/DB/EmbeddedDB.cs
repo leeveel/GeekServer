@@ -30,7 +30,7 @@ namespace Geek.Server
             }
         }
 
-        public EmbeddedDB(string path, bool readOnlay = false)
+        public EmbeddedDB(string path, bool readOnlay = false, string readonlyPath=null)
         {
             var dir = Path.GetDirectoryName(path);
             if(!Directory.Exists(dir))
@@ -49,7 +49,10 @@ namespace Geek.Server
             if (readOnlay)
             {
                 option.SetMaxOpenFiles(-1);
-                SecondPath = DbPath + "_second";
+                if (string.IsNullOrEmpty(readonlyPath))
+                    SecondPath = DbPath + "_$$$";
+                else
+                    SecondPath = readonlyPath;
                 InnerDB = RocksDb.OpenAsSecondary(option, DbPath, SecondPath, cfs);
             }
             else

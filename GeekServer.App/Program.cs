@@ -57,7 +57,7 @@ class Program
         try
         {
             Log.Info($"launch embedded db...");
-            RocksDBConnection.Singleton.Connect(Settings.InsAs<AppSetting>().EmbeddedDB); 
+            RocksDBConnection.Singleton.Connect(Settings.LocalDBPath + Settings.LocalDBPrefix + Settings.ServerId);
             Log.Info($"regist comps...");
             await CompRegister.Init();
             Log.Info($"load hotfix module");
