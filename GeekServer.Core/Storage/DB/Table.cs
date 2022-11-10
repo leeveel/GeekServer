@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace Geek.Server
 {
-    public class Table<T> : IEnumerable<T> where T : class
+    public class Table<T> : IEnumerable<T>
     {
         protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
         protected EmbeddedDB db;
@@ -167,7 +167,7 @@ namespace Geek.Server
             {
                 if (!isDisposed)
                 {
-                    _current = null;
+                    _current = default(T);
                     if (dbIterator != null)
                     {
                         dbIterator.Dispose();
@@ -187,7 +187,7 @@ namespace Geek.Server
                 if (dbIterator.Valid())
                 {
                     if (table.isRawTable)
-                        _current = dbIterator.Value() as T;
+                        _current = (T)(object)dbIterator.Value();
                     else
                         _current = Serializer.Deserialize<T>(dbIterator.Value());
                     dbIterator.Next();

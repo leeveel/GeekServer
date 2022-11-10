@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using RocksDbSharp;
+using static Geek.Server.RedisKeys.Guild;
 
 namespace Geek.Server
 {
@@ -45,7 +46,6 @@ namespace Geek.Server
                 columnFamilie[cf] = null;
             }
 
-            option.SetCreateIfMissing(true).SetCreateMissingColumnFamilies(true);
             if (readOnlay)
             {
                 option.SetMaxOpenFiles(-1);
@@ -54,6 +54,7 @@ namespace Geek.Server
             }
             else
             {
+                option.SetCreateIfMissing(true).SetCreateMissingColumnFamilies(true);
                 InnerDB = RocksDb.Open(option, DbPath, cfs);
             }
 
@@ -72,7 +73,7 @@ namespace Geek.Server
                     columnFamilie[name] = handle;
                     return handle;
                 }
-                else
+                else if (!ReadOnly)
                 {
                     var option = new ColumnFamilyOptions();
                     handle = InnerDB.CreateColumnFamily(option, name);
@@ -80,6 +81,7 @@ namespace Geek.Server
                     return handle;
                 }
             }
+            return null;
         }
 
         public void TryCatchUpWithPrimary()
@@ -98,12 +100,18 @@ namespace Geek.Server
         public Table<T> GetTable<T>() where T : class
         {
             var name = typeof(T).FullName;
-            return new Table<T>(this, name, GetOrCreateColumnFamilyHandle(name));
+            var handle = GetOrCreateColumnFamilyHandle(name);
+            if (handle == null)
+                return null;
+            return new Table<T>(this, name, handle);
         }
 
         public Table<byte[]> GetRawTable(string fullName)
         {
-            return new Table<byte[]>(this, fullName, GetOrCreateColumnFamilyHandle(fullName), true);
+            var handle = GetOrCreateColumnFamilyHandle(fullName);
+            if (handle == null)
+                return null;
+            return new Table<byte[]>(this, fullName, handle, true);
         }
 
         public Transaction NewTransaction()
