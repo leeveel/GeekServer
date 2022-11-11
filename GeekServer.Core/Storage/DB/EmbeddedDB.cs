@@ -15,24 +15,13 @@ namespace Geek.Server
         public RocksDb InnerDB { get; private set; }
         public string DbPath { get; private set; } = "";
         public string SecondPath { get; private set; } = "";
-        public bool ReadOnly { get; private set; } = false;
-        protected IRemoteBackup _remoteBackup;
+        public bool ReadOnly { get; private set; } = false; 
         protected FlushOptions flushOption;
         protected ConcurrentDictionary<string, ColumnFamilyHandle> columnFamilie = new ConcurrentDictionary<string, ColumnFamilyHandle>();
-
-        public IRemoteBackup remoteBackup
+  
+        public EmbeddedDB(string path, bool readOnly = false, string readonlyPath=null)
         {
-            get
-            {
-                if (_remoteBackup == null)
-                    _remoteBackup = new IRemoteBackup();
-                return _remoteBackup;
-            }
-        }
-
-        public EmbeddedDB(string path, bool readOnlay = false, string readonlyPath=null)
-        {
-            this.ReadOnly = readOnlay;
+            this.ReadOnly = readOnly;
             var dir = Path.GetDirectoryName(path);
             if(!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
@@ -47,7 +36,7 @@ namespace Geek.Server
                 columnFamilie[cf] = null;
             }
 
-            if (readOnlay)
+            if (readOnly)
             {
                 option.SetMaxOpenFiles(-1);
                 if (string.IsNullOrEmpty(readonlyPath))
@@ -95,12 +84,7 @@ namespace Geek.Server
                 InnerDB.TryCatchUpWithPrimary();
             }
         }
-
-        public void SetRemoteBackup(IRemoteBackup remote)
-        {
-            _remoteBackup = remote;
-        }
-
+ 
         public Table<T> GetTable<T>() where T : class
         {
             var name = typeof(T).FullName;
@@ -145,8 +129,7 @@ namespace Geek.Server
                             LOGGER.Fatal($"rocksdb flush 错误:{errStr}");
                         }
                     }
-                }
-                remoteBackup.Flush();
+                } 
             }
         }
 

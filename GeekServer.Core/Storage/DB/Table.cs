@@ -42,7 +42,6 @@ namespace Geek.Server
             else
             {
                 db.InnerDB.Put(Encoding.UTF8.GetBytes(mainId), data, cfHandle);
-                db.remoteBackup.Set(tableName, mainId, data);
             }
         }
 
@@ -90,7 +89,6 @@ namespace Geek.Server
             if (trans == null)
             {
                 db.InnerDB.Write(batch);
-                db.remoteBackup.SetBatch(tableName, keyList, values);
             }
         }
 
@@ -105,7 +103,6 @@ namespace Geek.Server
             else
             {
                 db.InnerDB.Remove(Encoding.UTF8.GetBytes(mainId), cfHandle);
-                db.remoteBackup.Delete(tableName, mainId);
             }
         }
 

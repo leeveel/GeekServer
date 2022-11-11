@@ -6,32 +6,27 @@ namespace Geek.Server
     public class Transaction
     {
         EmbeddedDB db;
-        WriteBatch batch;
-        IRemoteTransaction remoteTrans;
+        WriteBatch batch; 
         public Transaction(EmbeddedDB db)
         {
             this.db = db;
-            batch = new WriteBatch();
-            remoteTrans = db.remoteBackup.StartTransaction();
+            batch = new WriteBatch(); 
         }
 
         public void Set(string table, string key, byte[] value, ColumnFamilyHandle cfHandle)
         {
-            batch.Put(Encoding.UTF8.GetBytes(key), value, cfHandle);
-            remoteTrans.Set(table, key, value);
+            batch.Put(Encoding.UTF8.GetBytes(key), value, cfHandle); 
         }
 
         public void Delete(string table, string key, ColumnFamilyHandle cfHandle)
         {
-            batch.Delete(Encoding.UTF8.GetBytes(key), cfHandle);
-            remoteTrans.Delete(table, key);
+            batch.Delete(Encoding.UTF8.GetBytes(key), cfHandle); 
         }
 
         public void Commit()
         {
             db.InnerDB.Write(batch);
-            batch.Dispose();
-            remoteTrans.Commit();
+            batch.Dispose(); 
         }
     }
 }
