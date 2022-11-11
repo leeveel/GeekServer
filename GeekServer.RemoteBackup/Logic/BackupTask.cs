@@ -87,7 +87,7 @@
         {
             //如果是刚启动进程，等待10秒之后再开始备份
             if (cost < 0)
-                return DateTime.Now.AddSeconds(3);
+                return DateTime.Now.AddSeconds(10);
 
             if (cost < MIN_SAVE_INTERVAL_IN_MilliSECONDS)
                 return DateTime.Now.AddMilliseconds(MIN_SAVE_INTERVAL_IN_MilliSECONDS - cost);
