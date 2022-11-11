@@ -113,9 +113,9 @@ namespace Geek.Server.RemoteBackup.Logic
             {
                 if(writeList.IsNullOrEmpty())
                     return true;
-                var db = RemoteDB.GetDB(gamedbName);
+                var remotedb = RemoteDB.GetDB(gamedbName);
                 Log.Debug($"状态回存 {stateName} count:{writeList.Count}");
-                var col = db.GetCollection<MongoState>(stateName);
+                var col = remotedb.GetCollection<MongoState>(stateName);
                 bool flag = true;
                 for (int idx = 0; idx < writeList.Count; idx += ONCE_SAVE_COUNT)
                 {

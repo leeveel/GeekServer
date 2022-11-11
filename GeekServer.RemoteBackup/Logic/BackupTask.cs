@@ -56,6 +56,10 @@
                     await Task.Delay(3000);
                 }
             }
+            catch (System.OperationCanceledException)
+            {
+                Log.Error("监听到关闭进程事件，取消正在执行的回存操作");
+            }
             catch (Exception e)
             {
                 Log.Error($"StartNewTurn Throw Exception:{e}");
