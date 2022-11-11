@@ -3,7 +3,7 @@
 namespace Geek.Server
 {
     //[MessagePackObject(true)]
-    public class Message
+    public abstract class Message
     {
         /// <summary>
         /// 消息唯一id

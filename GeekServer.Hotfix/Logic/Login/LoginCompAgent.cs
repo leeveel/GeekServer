@@ -109,7 +109,7 @@ namespace Geek.Server.Login
             //登陆流程
             var roleComp = await ActorMgr.GetCompAgent<RoleCompAgent>(roleId);
             //从登录线程-->调用Role线程 所以需要入队
-            var resLogin = await roleComp.SendAsync(() => roleComp.OnLogin(reqLogin, isNewRole));
+            var resLogin = await roleComp.OnLogin(reqLogin, isNewRole);
             channel.WriteAsync(resLogin, reqLogin.UniId, StateCode.Success);
         }
 
