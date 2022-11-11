@@ -109,7 +109,7 @@ namespace Geek.Server
                     info.size = Native.Instance.rocksdb_backup_engine_info_size(infosPtr, i);
                     info.fileNumber = Native.Instance.rocksdb_backup_engine_info_number_files(infosPtr, i);
                     var timestamp = Native.Instance.rocksdb_backup_engine_info_timestamp(infosPtr, i);
-                    System.DateTime startTime = TimeZone.CurrentTimeZone.ToLocalTime(new System.DateTime(1970, 1, 1)); // 当地时区
+                    System.DateTime startTime = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local); // 当地时区
                     info.time = startTime.AddSeconds(timestamp);
                 }
                 Native.Instance.rocksdb_backup_engine_info_destroy(infosPtr);
