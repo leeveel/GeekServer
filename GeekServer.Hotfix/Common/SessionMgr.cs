@@ -33,10 +33,10 @@ namespace Geek.Server
             sessionMap.Clear();
         }
 
-        public Session Get(long id)
+        public NetChannel GetChannel(long id)
         {
             sessionMap.TryGetValue(id, out Session session);
-            return session;
+            return session?.Channel;
         }
 
         public Session Add(Session session)
@@ -46,18 +46,19 @@ namespace Geek.Server
                 Session old = null;
                 if (sessionMap.ContainsKey(session.Id))
                 {
-                    var oldSession = sessionMap[session.Id];
-                    if (oldSession.Sign != session.Sign)
+                    var oldChanel = sessionMap[session.Id];
+                    if (oldChanel.Sign != session.Sign)
                     {
                         //顶号,老链接不断开，需要发送被顶号的消息
-                        oldSession.Id = 0;
-                        old = oldSession;
+                        oldChanel.Channel.RemoveSessionId();
+                        old = oldChanel;
                     }
-                    else if (oldSession.netId != session.netId)
+                    else if (!ReferenceEquals(oldChanel.Channel, session.Channel))
                     {
-                        oldSession.Abort();
+                        oldChanel.Channel.Abort();
                     }
                 }
+                session.Channel.SetSessionId(session.Id);
                 sessionMap[session.Id] = session;
                 return old;
             }

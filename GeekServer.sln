@@ -18,7 +18,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.CodeGenerator", "GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj", "{3C43CD22-AF8C-432D-A601-EB657D625A86}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeekServer.RemoteBackup", "GeekServer.RemoteBackup\GeekServer.RemoteBackup.csproj", "{D78F3E4F-104A-429D-B595-6A149A40241A}"
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Gateway", "GeekServer.Gateway\GeekServer.Gateway.csproj", "{F428B275-9A19-4B2B-B378-DF9BF1784558}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -58,10 +57,6 @@ Global
 		{D78F3E4F-104A-429D-B595-6A149A40241A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D78F3E4F-104A-429D-B595-6A149A40241A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D78F3E4F-104A-429D-B595-6A149A40241A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F428B275-9A19-4B2B-B378-DF9BF1784558}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F428B275-9A19-4B2B-B378-DF9BF1784558}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F428B275-9A19-4B2B-B378-DF9BF1784558}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F428B275-9A19-4B2B-B378-DF9BF1784558}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

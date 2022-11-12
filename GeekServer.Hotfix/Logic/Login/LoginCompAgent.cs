@@ -6,17 +6,17 @@ namespace Geek.Server.Login
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public async Task OnLogin(Session session, ReqLogin reqLogin)
+        public async Task OnLogin(NetChannel channel, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {
-                session.WriteAsync(null, reqLogin.UniId, StateCode.AccountCannotBeNull);
+                channel.WriteAsync(null, reqLogin.UniId, StateCode.AccountCannotBeNull);
             }
 
             if (reqLogin.Platform != "android" && reqLogin.Platform != "ios" && reqLogin.Platform != "unity")
             {
                 //验证平台合法性
-                session.WriteAsync(null, reqLogin.UniId, StateCode.UnknownPlatform);
+                channel.WriteAsync(null, reqLogin.UniId, StateCode.UnknownPlatform);
             }
 
             //查询角色账号，这里设定每个服务器只能有一个角色
@@ -30,9 +30,14 @@ namespace Geek.Server.Login
                 Log.Info("创建新号:" + roleId);
             }
 
-            //添加到session 
-            session.Id = roleId;
-            session.Sign = reqLogin.Device;
+            //添加到session
+            var session = new Session
+            {
+                Id = roleId,
+                Time = DateTime.Now,
+                Channel = channel,
+                Sign = reqLogin.Device
+            };
             var oldSession = HotfixMgr.SessionMgr.Add(session);
 
             if (oldSession != null)
@@ -42,7 +47,7 @@ namespace Geek.Server.Login
                 {
                     //send msg...
                     await Task.Delay(100);
-                    oldSession?.Abort();
+                    oldSession.Channel?.Abort();
                 });
             }
             //登陆流程

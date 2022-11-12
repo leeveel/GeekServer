@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Connections;
 using NLog.Web;
 
-namespace Geek.Server.Gateway.Net.Tcp
+namespace Geek.Server
 {
     /// <summary>
     /// TCP server
@@ -30,7 +30,7 @@ namespace Geek.Server.Gateway.Net.Tcp
             })
             .ConfigureLogging(logging =>
             {
-                logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Error);
+                logging.SetMinimumLevel(LogLevel.Error);
             })
             .UseNLog();
 

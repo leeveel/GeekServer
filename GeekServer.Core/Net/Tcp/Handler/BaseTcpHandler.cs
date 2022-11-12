@@ -1,10 +1,9 @@
 ﻿
-
 namespace Geek.Server
 {
     public abstract class BaseTcpHandler
     {
-        public Session Session { get; set; }
+        public NetChannel Channel { get; set; }
 
         public Message Msg { get; set; }
 

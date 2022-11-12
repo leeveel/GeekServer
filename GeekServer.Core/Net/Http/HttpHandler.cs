@@ -5,17 +5,10 @@ using System.Text.Json;
 
 namespace Geek.Server
 {
-    public class HttpHandler
+    internal class HttpHandler
     {
 
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
-
-        static Func<string, BaseHttpHandler> handlerGetter = null;
-
-        public static void SetHandlerGetter(Func<string, BaseHttpHandler> getter)
-        {
-            handlerGetter = getter;
-        }
 
         public static async Task HandleRequest(HttpContext context)
         {
@@ -92,7 +85,7 @@ namespace Geek.Server
                     return;
                 }
 
-                var handler = handlerGetter != null ? handlerGetter(cmd) : HotfixMgr.GetHttpHandler(cmd);
+                var handler = HotfixMgr.GetHttpHandler(cmd);
                 if (handler == null)
                 {
                     LOGGER.Warn($"http cmd handler 不存在：{cmd}");

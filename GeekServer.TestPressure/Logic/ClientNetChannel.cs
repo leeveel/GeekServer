@@ -47,7 +47,7 @@ namespace Test.Pressure
             }
             catch (Exception e)
             {
-                Log.Error(e.Message);
+            Log.Error(e.Message);
                 return NetCode.Failed;
             }
         }
@@ -85,16 +85,11 @@ namespace Test.Pressure
                     Log.Info($"{context.ConnectionId} disconnected");
                     break;
                 }
-                catch (Exception e)
-                {
-                    Log.Info($"{context.ConnectionId} exception: {e.Message}");
-                }
                 finally
                 {
                     reader.Advance();
                 }
             }
-            ConnectionClosed();
         }
 
 

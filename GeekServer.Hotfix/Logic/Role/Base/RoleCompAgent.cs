@@ -64,12 +64,12 @@ namespace Geek.Server.Role
             return Task.CompletedTask;
         }
 
-        public void NotifyClient(Message msg, int uniId = 0, StateCode code = StateCode.Success)
+        public void NotifyClient(Message msg, int uniId=0, StateCode code = StateCode.Success)
         {
-            var session = HotfixMgr.SessionMgr.Get(ActorId);
-            if (session != null)
+            var channel = HotfixMgr.SessionMgr.GetChannel(ActorId);
+            if (channel != null && !channel.IsClose())
             {
-                session.WriteAsync(msg, uniId, code);
+                channel.WriteAsync(msg, uniId, code);
             }
         }
 

@@ -18,9 +18,6 @@ namespace Geek.Server.Proto
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqUseItem>(1478385002);
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqSellItem>(-1236539504);
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResItemChange>(1593491631);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqRouterMsg>(-520770015);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResRouterMsg>(1063387717);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ServerNotConnect>(-37174277);
 			settings.RegisterType<Geek.Server.Proto.A, Geek.Server.Proto.A>(-1878353591);
 			settings.RegisterType<Geek.Server.Proto.A, Geek.Server.Proto.B>(14791156);
 			settings.RegisterType<Geek.Server.Proto.UserInfo, Geek.Server.Proto.UserInfo>(724520320);

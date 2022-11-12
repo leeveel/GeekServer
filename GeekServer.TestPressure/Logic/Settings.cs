@@ -6,8 +6,8 @@ namespace Test.Pressure
     {
         public static TestSettings Ins;
         public int serverId;
-        public string gateIp;
-        public int gatePort;
+        public string serverIp;
+        public int serverPort;
         public int clientCount;
         public static void Load(string path)
         {

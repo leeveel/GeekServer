@@ -1,4 +1,3 @@
-using Consul;
 using Newtonsoft.Json;
 
 namespace Test.Pressure
@@ -31,30 +30,22 @@ namespace Test.Pressure
         public async void Start()
         {
             netChannel = new ClientNetChannel(this);
-            var connCode = await netChannel.Connect(TestSettings.Ins.gateIp, TestSettings.Ins.gatePort);
+            var connCode = await netChannel.Connect(TestSettings.Ins.serverIp, TestSettings.Ins.serverPort);
             Log.Info($"客户端[{id}]链接:{connCode}");
             if (connCode == NetCode.Success)
             {
-                await ReqRouter();
+                await ReqLogin();
             }
             else
             {
                 return;
             }
-            await ReqLogin();
             for (int i = 0; i < 1; i++)
             {
                 await ReqBagInfo();
                 await Task.Delay(1000);
             }
             await ReqComposePet();
-        }
-
-        private Task<bool> ReqRouter()
-        {
-            var req = new ReqRouterMsg();
-            req.TargetUid = TestSettings.Ins.serverId;
-            return SendMsgAndWaitBack(req);
         }
 
         private Task<bool> ReqLogin()
@@ -76,7 +67,7 @@ namespace Test.Pressure
 
         private Task ReqComposePet()
         {
-            return SendMsgAndWaitBack(new ReqComposePet() { FragmentId = 1000 });
+            return SendMsgAndWaitBack(new ReqComposePet() { FragmentId=1000 });
         }
 
         void SendMsg(Message msg)
@@ -94,7 +85,7 @@ namespace Test.Pressure
 
         public void OnDisConnected()
         {
-            Log.Info($"客户端[{id}]断开");
+
         }
 
         public void OnConnected(NetCode code)
@@ -128,9 +119,8 @@ namespace Test.Pressure
             else
             {
 
-
+                Log.Info($"{id} 收到消息:{JsonConvert.SerializeObject(msg)}");
             }
-            Log.Info($"{id} 收到消息:{JsonConvert.SerializeObject(msg)}");
         }
     }
 }

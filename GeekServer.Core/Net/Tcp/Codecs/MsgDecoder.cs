@@ -1,10 +1,10 @@
-﻿
+﻿using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.AspNetCore.Connections;
 using System;
 using System.Buffers;
 using System.IO;
 
-namespace Geek.Server.Gateway.Net.Tcp
+namespace Geek.Server
 {
     public static class MsgDecoder
     {
@@ -16,7 +16,34 @@ namespace Geek.Server.Gateway.Net.Tcp
 
         /// 从客户端接收的包大小最大值（单位：字节 1M）
         const int MAX_RECV_SIZE = 1024 * 1024;
-        public static void Decode(ConnectionContext context, ref NetMessage msg)
+
+        public static Message ClientDecode(NMessage message)
+        {
+            var reader = new SequenceReader<byte>(message.Payload);
+
+            //数据包长度+消息ID=两个int=8位
+            if (message.Payload.Length < 4)
+                return null;
+
+            //消息id
+            reader.TryReadBigEndian(out int msgId);
+
+            var msgType = HotfixMgr.GetMsgType(msgId);
+            if (msgType == null)
+            {
+                LOGGER.Error("消息ID:{} 找不到对应的Msg.", msgId);
+                return null;
+            }
+            var msg = MessagePack.MessagePackSerializer.Deserialize<Message>(reader.UnreadSequence);
+            if (msg.MsgId != msgId)
+            {
+                LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", msg.MsgId, msgId);
+                return null;
+            }
+            return msg;
+        }
+
+        public static Message Decode(ConnectionContext context, NMessage msg)
         {
             var reader = new SequenceReader<byte>(msg.Payload);
 
@@ -24,28 +51,39 @@ namespace Geek.Server.Gateway.Net.Tcp
             if (!CheckMsgLen(msgLen))
             {
                 context.Abort();
-                return;
+                return null;
             }
 
             reader.TryReadBigEndian(out long time); //8
             if (!CheckTime(context, time))
             {
                 context.Abort();
-                return;
+                return null;
             }
 
             reader.TryReadBigEndian(out int order);  //4
             if (!CheckMagicNumber(context, order, msgLen))
             {
                 context.Abort();
-                return;
+                return null;
             }
 
             reader.TryReadBigEndian(out int msgId);  //4
-            msg.MsgId = msgId;
 
-            msg.MsgRaw = reader.UnreadSequence.ToArray();
-            return;
+            var msgType = HotfixMgr.GetMsgType(msgId);
+            if (msgType == null)
+            {
+                LOGGER.Error("消息ID:{} 找不到对应的Msg.", msgId);
+                return null;
+            }
+
+            var protoMsg = MessagePack.MessagePackSerializer.Deserialize<Message>(reader.UnreadSequence);
+            if (protoMsg.MsgId != msgId)
+            {
+                LOGGER.Error("后台解析消息失败，注册消息id和消息无法对应.real:{0}, register:{1}", protoMsg.MsgId, msgId);
+                return null;
+            }
+            return protoMsg;
         }
 
 

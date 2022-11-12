@@ -11,8 +11,6 @@ public enum ServerType
     Recharge,
     ///<summary>远程备份</summary>
     Backup
-    ///<summary>网关服</summary>
-    Gate,
 }
 
 public static class Settings
@@ -63,6 +61,8 @@ public static class Settings
 
     public static int TcpPort => Ins.TcpPort;
 
+    public static int GrpcPort => Ins.GrpcPort;
+
     public static string MongoUrl => Ins.MongoUrl;
 
     public static string DbName => Ins.DbName;
@@ -78,8 +78,6 @@ public static class Settings
     public static string CenterUrl => Ins.CenterUrl;
 
     public static int SDKType => Ins.SDKType;
-
-    public static string GateUrl => Ins.GateUrl;
 }
 
 public class BaseSetting
@@ -112,6 +110,8 @@ public class BaseSetting
 
     public int TcpPort { get; init; }
 
+    public int GrpcPort { get; init; }
+
     public string MongoUrl { get; init; }
 
     public string DbName { get; init; }
@@ -127,6 +127,5 @@ public class BaseSetting
     public string CenterUrl { get; init; }
 
     public int SDKType { get; set; }
-    public string GateUrl { get; set; }
     #endregion
 }
