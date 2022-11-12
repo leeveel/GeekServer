@@ -8,18 +8,14 @@
 
 	<PropertyGroup>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<ApplicationIcon />
-		<StartupObject />
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
-		<OutputPath>..\package_debug</OutputPath>
+		<OutputPath>..\bin\app_debug\hotfix</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DefineConstants>$(DefineConstants)TRACE;SERVER</DefineConstants>
-		<OutputPath>..\package</OutputPath>
+		<OutputPath>..\bin\app\hotfix</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
