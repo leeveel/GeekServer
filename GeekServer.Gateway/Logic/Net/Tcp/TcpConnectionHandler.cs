@@ -1,10 +1,15 @@
 ﻿using System;
+using System.Buffers;
+using System.Formats.Asn1;
+using System.Reflection.PortableExecutable;
+using System.Threading.Channels;
 using System.Threading.Tasks;
+using Geek.Server.Gateway.Net.Router;
 using Microsoft.AspNetCore.Connections;
 
-namespace Geek.Server
+namespace Geek.Server.Gateway.Net.Tcp
 {
-    public class TcpConnectionHandler : ConnectionHandler
+    internal class TcpConnectionHandler : ConnectionHandler
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
@@ -12,8 +17,7 @@ namespace Geek.Server
 
         public override async Task OnConnectedAsync(ConnectionContext connection)
         {
-            OnConnection(connection);
-            var channel = new NetChannel(connection, new LengthPrefixedProtocol());
+            var channel = OnConnection(connection);
             var remoteInfo = channel.Context.RemoteEndPoint;
             while (!channel.IsClose())
             {
@@ -25,7 +29,8 @@ namespace Geek.Server
                     if (result.IsCompleted)
                         break;
 
-                    _ = Dispatcher(channel, MsgDecoder.Decode(connection, message));
+                    MsgDecoder.Decode(connection, ref message);
+                    Dispatcher(channel, message);
                 }
                 catch (ConnectionResetException)
                 {
@@ -55,35 +60,25 @@ namespace Geek.Server
             OnDisconnection(channel);
         }
 
-        protected void OnConnection(ConnectionContext connection)
+        protected Channel OnConnection(ConnectionContext connection)
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
+            var channel = new Channel(connection, new MessageProtocol(), IdGenerator.GetActorID(ActorType.Role, Settings.ServerId));
+            NetNodeMgr.Add(channel);
+            return channel;
         }
 
-        protected void OnDisconnection(NetChannel channel)
+        protected void OnDisconnection(Channel channel)
         {
-            LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-            var sessionId = channel.GetSessionId();
-            if (sessionId > 0)
-                HotfixMgr.SessionMgr.Remove(sessionId);
+            LOGGER.Debug($"{channel.remoteUrl} 断开链接");
+            NetNodeMgr.Remove(channel);
+            MsgRouter.NodeDisconnect(channel);
         }
 
-        protected async Task Dispatcher(NetChannel channel, Message msg)
-        {
-            if (msg == null)
-                return;
 
-            //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
-            var handler = HotfixMgr.GetTcpHandler(msg.MsgId);
-            if (handler == null)
-            {
-                LOGGER.Error($"找不到[{msg.MsgId}][{msg.GetType()}]对应的handler");
-                return;
-            }
-            handler.Msg = msg;
-            handler.Channel = channel;
-            await handler.Init();
-            await handler.InnerAction();
+        protected void Dispatcher(Channel channel, NetMessage msg)
+        {
+            MsgRouter.To(channel, channel.defaultTargetUid, msg.MsgId, msg.MsgRaw);
         }
     }
 }

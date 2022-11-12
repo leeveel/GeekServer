@@ -36,7 +36,7 @@ namespace Geek.Server
         protected override Task InitActor()
         {
             if (ActorId <= 0)
-                ActorId = Channel.GetSessionId();
+                ActorId = Session.Id;
             return Task.CompletedTask;
         }
     }
