@@ -13,11 +13,11 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>..\bin\app_debug</OutputPath>
+		<OutputPath>..\bin\app_debug\hotfix</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>..\bin\app</OutputPath>
+		<OutputPath>..\bin\app\hotfix</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
