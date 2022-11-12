@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class ResRouterMsg : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 1063387717;
+		public const int Sid = 1803439793;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

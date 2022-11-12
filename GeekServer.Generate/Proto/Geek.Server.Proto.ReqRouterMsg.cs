@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class ReqRouterMsg : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -520770015;
+		public const int Sid = 1731973794;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

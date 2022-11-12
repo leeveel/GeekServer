@@ -23,6 +23,8 @@ class Program
             LogManager.AutoShutdown = false;
 
             PolymorphicRegister.Load();
+            GeekServerAppPolymorphicDBStateRegister.Load();
+
             GameLoopTask = EnterGameLoop();
             await GameLoopTask;
             if (ShutDownTask != null)
@@ -54,6 +56,8 @@ class Program
     {
         try
         {
+            Log.Info($"launch embedded db...");
+            RocksDBConnection.Singleton.Connect(Settings.LocalDBPath + Settings.LocalDBPrefix + Settings.ServerId);
             Log.Info($"regist comps...");
             await CompRegister.Init();
             Log.Info($"load hotfix module");

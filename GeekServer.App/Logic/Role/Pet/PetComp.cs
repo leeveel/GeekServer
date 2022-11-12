@@ -1,4 +1,6 @@
-﻿namespace Geek.Server.Role
+﻿using MessagePack;
+
+namespace Geek.Server.Role
 {
 
     public class PetState : CacheState

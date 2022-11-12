@@ -1,7 +1,6 @@
 ﻿using System.Buffers;
 using System.IO.Pipelines;
 using System.Threading;
-using Microsoft.AspNetCore.Connections;
 
 namespace Bedrock.Framework.Protocols
 {

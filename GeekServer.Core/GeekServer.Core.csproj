@@ -30,7 +30,9 @@
     <PackageReference Include="SharpZipLib" Version="1.3.3" />
     <PackageReference Include="StackExchange.Redis" Version="2.5.61" />
 
-    <PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
+		<PackageReference Include="RocksDB" Version="7.7.3.33461" />
+		<PackageReference Include="Standart.Hash.xxHash" Version="4.0.5" />
 
     <PackageReference Include="MagicOnion.Abstractions" Version="4.5.2" />
     <PackageReference Include="MagicOnion.Server" Version="4.5.2" />

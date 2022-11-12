@@ -6,9 +6,8 @@
   "TcpPort": 8899,
   "HttpCode": "inner_httpcode",
   "HttpPort": 20000,
-  "MongoUrl": "mongodb://127.0.0.1:27017/?authSource=admin",
-  "DbName": "geek_server",
-  "Language": "chinese",
+  "LocalDBPrefix": "gamedb_",
+  "LocalDBPath": "../../database/game/",
   "SDKType": 0,
   "GateUrl": "http://127.0.0.1:8900"
 }

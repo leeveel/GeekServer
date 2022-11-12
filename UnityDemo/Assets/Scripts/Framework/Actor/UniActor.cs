@@ -1,43 +1,44 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Dataflow;
 
 namespace Geek.Client
 {
+    /// <summary>
+    /// 强烈推荐使用UniTask
+    /// </summary>
     public class UniActor
     {
 
-        private ActionBlock<WorkWrapper> actionBlock = null;
-
+        private readonly TaskFactory taskFactory;
         public UniActor()
         {
-            actionBlock = new ActionBlock<WorkWrapper>(
-                DoTask,
-                new ExecutionDataflowBlockOptions()
-                {
-                    MaxDegreeOfParallelism = 1,
-                    //指定为Unity的Context
-                    //https://docs.microsoft.com/zh-cn/dotnet/standard/parallel-programming/how-to-specify-a-task-scheduler-in-a-dataflow-block
-                    TaskScheduler = TaskScheduler.FromCurrentSynchronizationContext()
-                }); ;
+            var scheduler = TaskScheduler.FromCurrentSynchronizationContext();
+            taskFactory = new TaskFactory(scheduler); 
         }
 
-        const int TIME_OUT = 10000;
-        static async Task DoTask(WorkWrapper wrapper)
+        const int TIME_OUT = -1;
+        static async Task DoTask(object arg)
         {
-            var task = wrapper.DoTask();
-            var tokenSource = new CancellationTokenSource();
-            var completedTask = await Task.WhenAny(task, Task.Delay(wrapper.TimeOut, tokenSource.Token));
-            if (completedTask == task)
+            var wrapper = (WorkWrapper)arg;
+            if (wrapper == null)
             {
-                tokenSource.Cancel();
-                await task;
+                UnityEngine.Debug.LogError("UniActor.DoTask参数不是WorkWrapper类型");
+                return;
+            }
+            if (wrapper.TimeOut == -1)
+            {
+                await wrapper.DoTask();
             }
             else
             {
-                UnityEngine.Debug.LogError("actor 执行超时 强制结束:" + wrapper.GetTrace());
-                wrapper.ForceSetResult();
+                var task = wrapper.DoTask();
+                var res = await task.WaitAsync(TimeSpan.FromMilliseconds(wrapper.TimeOut));
+                if (res)
+                {
+                    UnityEngine.Debug.LogError("wrapper执行超时:" + wrapper.GetTrace());
+                    //强制设状态-取消该操作
+                    wrapper.ForceSetResult();
+                }
             }
         }
 
@@ -45,7 +46,7 @@ namespace Geek.Client
         {
             var wrapper = new ActionWrapper(work);
             wrapper.TimeOut = timeOut;
-            actionBlock.SendAsync(wrapper);
+            taskFactory.StartNew(DoTask, wrapper);
             return wrapper.Tcs.Task;
         }
 
@@ -53,7 +54,7 @@ namespace Geek.Client
         {
             var wrapper = new FuncWrapper<T>(work);
             wrapper.TimeOut = timeOut;
-            actionBlock.SendAsync(wrapper);
+            taskFactory.StartNew(DoTask, wrapper);
             return wrapper.Tcs.Task;
         }
 
@@ -61,7 +62,7 @@ namespace Geek.Client
         {
             var wrapper = new ActionAsyncWrapper(work);
             wrapper.TimeOut = timeOut;
-            actionBlock.SendAsync(wrapper);
+            taskFactory.StartNew(DoTask, wrapper);
             return wrapper.Tcs.Task;
         }
 
@@ -69,9 +70,10 @@ namespace Geek.Client
         {
             var wrapper = new FuncAsyncWrapper<T>(work);
             wrapper.TimeOut = timeOut;
-            actionBlock.SendAsync(wrapper);
+            taskFactory.StartNew(DoTask, wrapper);
             return wrapper.Tcs.Task;
         }
+
     }
 }
 

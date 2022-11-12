@@ -28,7 +28,7 @@ namespace Geek.Server
                 if (!working)
                     break;
                 var startTime = DateTime.Now;
-                await StateComp.TimerSave();
+                await ActorMgr.TimerSave();
                 var cost = (DateTime.Now - startTime).TotalMilliseconds;
                 Log.Info($"定时回存完成 耗时: {cost:f4}ms");
 
@@ -69,7 +69,8 @@ namespace Geek.Server
         {
             working = false;
             await LoopTask;
-            await StateComp.SaveAll();
+            await ActorMgr.SaveAll();
+            RocksDBConnection.Singleton.Close();
             Log.Info($"停止全局定时完成");
         }
     }

@@ -10,7 +10,9 @@ public enum ServerType
     ///<summary>充值服</summary>
     Recharge,
     ///<summary>网关服</summary>
+    ///<summary>远程备份</summary>
     Gate,
+    Backup
 }
 
 public static class Settings
@@ -65,6 +67,10 @@ public static class Settings
 
     public static string DbName => Ins.DbName;
 
+    public static string LocalDBPrefix => Ins.LocalDBPrefix;
+
+    public static string LocalDBPath => Ins.LocalDBPath;
+
     public static string Language => Ins.Language;
 
     public static string DataCenter => Ins.DataCenter;
@@ -109,6 +115,10 @@ public class BaseSetting
     public string MongoUrl { get; init; }
 
     public string DbName { get; init; }
+
+    public string LocalDBPrefix { get; init; }
+
+    public string LocalDBPath { get; init; }
 
     public string Language { get; init; }
 

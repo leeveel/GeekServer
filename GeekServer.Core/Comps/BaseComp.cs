@@ -43,6 +43,6 @@
                 await agent.Deactive();
         }
 
-        internal virtual bool ReadyToDeactive => true;
+        internal virtual bool SaveState() { return true; }
     }
 }

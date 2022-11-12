@@ -1,7 +1,5 @@
-﻿
-namespace Geek.Server.Server
+﻿namespace Geek.Server.Server
 {
-
     public class ServerState : CacheState
     {
         /// <summary>
@@ -11,6 +9,7 @@ namespace Geek.Server.Server
 
         public List<long> OnlineList { get; set; } = new List<long>();
     }
+
 
     [Comp(ActorType.Server)]
     public class ServerComp : StateComp<ServerState>

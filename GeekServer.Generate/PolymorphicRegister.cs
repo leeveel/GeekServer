@@ -7,7 +7,7 @@ namespace Geek.Server.Proto
     public partial class PolymorphicRegister
     {
         static bool serializerRegistered = false;
-        private static PolymorphicMessagePackSettings settings;
+        public static PolymorphicMessagePackSettings settings;
         /// <summary>
         /// 为True时需要把Geek.MsgPackTool配置中的gen-first打开
         /// 建议使用 GeneratedFirst = false

@@ -390,7 +390,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u4FEE\u6539GameMain/ConnectServer\u51FD\u6570\u4E2Dip\uFF0C\u4E3A\u4F60\u7684\u5185\u7F51ip\u5730\u5740\uFF0C\u8FD0\u884C\u67E5\u770B\u65E5\u5FD7"
+  m_Text: "\u9996\u5148\u542F\u52A8GeekServer\uFF0C\u518D\u8FD0\u884C\u67E5\u770B\u65E5\u5FD7:"
 --- !u!222 &1931498147
 CanvasRenderer:
   m_ObjectHideFlags: 0

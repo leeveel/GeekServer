@@ -1,4 +1,6 @@
 ﻿
+using MessagePack;
+
 namespace Geek.Server.Role
 {
 
