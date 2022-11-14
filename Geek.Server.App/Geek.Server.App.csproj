@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<OutputType>Exe</OutputType>
 		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<RootNamespace>Server.Logic</RootNamespace>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -11,23 +11,35 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>..\bin\app_debug\hotfix</OutputPath>
+		<OutputPath>..\bin\app_debug</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>..\bin\app\hotfix</OutputPath>
+		<OutputPath>..\bin\app</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\GeekServer.App\GeekServer.App.csproj" />
-		<ProjectReference Include="..\GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+		<None Update="Configs\NLog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Configs\NLog.xsd">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="Configs\app_config.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Geek.Server.Generate\Geek.Server.Generate.csproj" />
+		<ProjectReference Include="..\Geek.Server.CodeGenerator\Geek.Server.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 	<!--如需磁盘上生成文件打开以下注释-->
-	<!--<PropertyGroup>
+	<PropertyGroup>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 		<CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\GeneratedFiles</CompilerGeneratedFilesOutputPath>
-	</PropertyGroup>-->
+	</PropertyGroup>
 
 	<Target Name="CleanSourceGeneratedFiles" AfterTargets="Clean">
 		<RemoveDir Directories="$(BaseIntermediateOutputPath)\GeneratedFiles" />

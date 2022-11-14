@@ -11,7 +11,7 @@ namespace Tools.Utils
         public static string LoadTemplate(string resourceName)
         {
             string[] resourceNames = Assembly.GetExecutingAssembly().GetManifestResourceNames();
-            resourceName = $"GeekServer.CodeGenerator.Template.{resourceName}";
+            resourceName = $"Geek.Server.CodeGenerator.Template.{resourceName}";
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
             {
                 if (stream != null)
@@ -35,7 +35,7 @@ namespace Tools.Utils
                     return loadedAssembly;
                 }
 
-                string resourceName = $"GeekServer.CodeGenerator.{name.Name}.dll";
+                string resourceName = $"Geek.Server.CodeGenerator.{name.Name}.dll";
                 using (Stream resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
                 {
                     if (resourceStream == null)

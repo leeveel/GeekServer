@@ -3,21 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.App", "GeekServer.App\GeekServer.App.csproj", "{835335CB-D99B-4CB9-99D3-A7883306E723}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.App", "Geek.Server.App\Geek.Server.App.csproj", "{835335CB-D99B-4CB9-99D3-A7883306E723}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Core", "GeekServer.Core\GeekServer.Core.csproj", "{E3C7010E-B262-473C-9EC1-69396C5D85A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Core", "Geek.Server.Core\Geek.Server.Core.csproj", "{E3C7010E-B262-473C-9EC1-69396C5D85A7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Hotfix", "GeekServer.Hotfix\GeekServer.Hotfix.csproj", "{E47F7B43-E435-4B9E-AD10-1FE0D19F45CF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Hotfix", "Geek.Server.Hotfix\Geek.Server.Hotfix.csproj", "{E47F7B43-E435-4B9E-AD10-1FE0D19F45CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.TestPressure", "GeekServer.TestPressure\GeekServer.TestPressure.csproj", "{BF726B95-BC72-471C-891B-516920E14C1F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.TestPressure", "Geek.Server.TestPressure\Geek.Server.TestPressure.csproj", "{BF726B95-BC72-471C-891B-516920E14C1F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Generate", "GeekServer.Generate\GeekServer.Generate.csproj", "{E664BD69-1FCC-45D9-925D-B1268370E076}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Generate", "Geek.Server.Generate\Geek.Server.Generate.csproj", "{E664BD69-1FCC-45D9-925D-B1268370E076}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Proto", "GeekServer.Proto\GeekServer.Proto.csproj", "{6AA51872-036F-492B-BD7F-40F11DB9BB8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Proto", "Geek.Server.Proto\Geek.Server.Proto.csproj", "{6AA51872-036F-492B-BD7F-40F11DB9BB8F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.CodeGenerator", "GeekServer.CodeGenerator\GeekServer.CodeGenerator.csproj", "{3C43CD22-AF8C-432D-A601-EB657D625A86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.CodeGenerator", "Geek.Server.CodeGenerator\Geek.Server.CodeGenerator.csproj", "{3C43CD22-AF8C-432D-A601-EB657D625A86}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeekServer.Gateway", "GeekServer.Gateway\GeekServer.Gateway.csproj", "{F428B275-9A19-4B2B-B378-DF9BF1784558}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Gateway", "Geek.Server.Gateway\Geek.Server.Gateway.csproj", "{F428B275-9A19-4B2B-B378-DF9BF1784558}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
+    <ProjectReference Include="..\Geek.Server.Generate\Geek.Server.Generate.csproj" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties configs_4gate_3config_1json__JsonSchema="https://datahubproject.io/schemas/datahub_ingestion_schema.json" /></VisualStudio></ProjectExtensions>

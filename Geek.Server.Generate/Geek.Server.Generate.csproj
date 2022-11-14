@@ -24,7 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
+		<ProjectReference Include="..\Geek.Server.Core\Geek.Server.Core.csproj" />
 	</ItemGroup>
 
 </Project>
