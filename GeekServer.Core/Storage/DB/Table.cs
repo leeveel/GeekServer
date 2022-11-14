@@ -144,14 +144,12 @@ namespace Geek.Server
         {
             //private Snapshot snapshot;
             private Iterator dbIterator;
-            private T _current = default(T);
+            private T currValue = default(T);
             private Table<T> table;
 
             internal Enumerator(Table<T> table)
             {
                 this.table = table;
-                //snapshot = table.db.InnerDB.CreateSnapshot();
-                //var option = new ReadOptions().SetSnapshot(snapshot); 
                 var option = new ReadOptions();
                 dbIterator = table.db.InnerDB.NewIterator(table.cfHandle, option);
                 dbIterator.SeekToFirst();
@@ -168,11 +166,11 @@ namespace Geek.Server
             {
                 if (!isDisposed)
                 {
-                    _current = default(T);
+                    currValue = default(T);
                     if (dbIterator != null)
                     {
                         dbIterator.Dispose();
-                        //snapshot.Dispose();
+                        dbIterator = null;
                     }
                 }
                 isDisposed = true;
@@ -188,9 +186,9 @@ namespace Geek.Server
                 if (dbIterator.Valid())
                 {
                     if (table.isRawTable)
-                        _current = (T)(object)dbIterator.Value();
+                        currValue = (T)(object)dbIterator.Value();
                     else
-                        _current = Serializer.Deserialize<T>(dbIterator.Value());
+                        currValue = Serializer.Deserialize<T>(dbIterator.Value());
                     dbIterator.Next();
                     return true;
                 }
@@ -198,13 +196,13 @@ namespace Geek.Server
             }
 
 
-            public T Current => _current;
+            public T Current => currValue;
 
             object IEnumerator.Current
             {
                 get
                 {
-                    return _current;
+                    return currValue;
                 }
             }
 
