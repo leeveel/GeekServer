@@ -1,3 +1,4 @@
+using Geek.Server.Gateway.Logic.Net;
 
 namespace Geek.Server
 {
@@ -11,7 +12,7 @@ namespace Geek.Server
         /// </summary> 
         public override Task<string> Action(string ip, string url, Dictionary<string, string> parameters)
         {
-            var res = new HttpResult(HttpResult.Stauts.Success, $"当前在线节点数量:{NetNodeMgr.GetNodeCount()}").ToString();
+            var res = new HttpResult(HttpResult.Stauts.Success, $"当前在线节点数量:{GateNetHelper.GetNodeCount()}").ToString();
             return Task.FromResult(res);
         }
     }

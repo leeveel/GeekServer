@@ -9,5 +9,6 @@
   "LocalDBPrefix": "gamedb_",
   "LocalDBPath": "../../database/game/",
   "SDKType": 0,
-  "GateUrl": "http://127.0.0.1:8900"
+  "GateUrl": "http://127.0.0.1:8900",
+  "CenterUrl": "http://127.0.0.1:8900"
 }

@@ -40,7 +40,7 @@ namespace Test.Pressure
                 context = connection;
                 reader = context.CreateReader();
                 writer = context.CreateWriter();
-                protocol = new ClientLengthPrefixedProtocol();
+                protocol = new ClientProtocol();
                 isConnection = true;
                 _ = Task.Run(NetLooping);
                 return NetCode.Success;

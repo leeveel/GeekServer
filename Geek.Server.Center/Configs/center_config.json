@@ -1,0 +1,12 @@
+﻿{
+  "IsDebug": true,
+  "ServerId": 10001,
+  "ServerName": "geek_server",
+  "LocalIp": "127.0.0.1",
+  "TcpPort": 8899,
+  "RpcPort": 8900,
+  "HttpCode": "inner_httpcode",
+  "HttpPort": 30000,
+  "LocalDBPrefix": "gamedb_",
+  "LocalDBPath": "../../database/game/"
+}

@@ -9,7 +9,7 @@ namespace Geek.Server.Proto
 
         static MsgFactory()
         {
-            lookup = new System.Collections.Generic.Dictionary<int, Type>(19)
+            lookup = new System.Collections.Generic.Dictionary<int, Type>(23)
             {
 			    { 1435193915, typeof(Geek.Server.Proto.ReqBagInfo) },
 			    { -1872884227, typeof(Geek.Server.Proto.ResBagInfo) },
@@ -18,9 +18,12 @@ namespace Geek.Server.Proto
 			    { 1686846581, typeof(Geek.Server.Proto.ReqUseItem) },
 			    { -1395845865, typeof(Geek.Server.Proto.ReqSellItem) },
 			    { 901279609, typeof(Geek.Server.Proto.ResItemChange) },
-			    { 1731973794, typeof(Geek.Server.Proto.ReqRouterMsg) },
-			    { 1803439793, typeof(Geek.Server.Proto.ResRouterMsg) },
 			    { 445665195, typeof(Geek.Server.Proto.ServerNotConnect) },
+			    { -679570763, typeof(Geek.Server.Proto.ReqConnectGate) },
+			    { 2096149334, typeof(Geek.Server.Proto.ResConnectGate) },
+			    { -498188700, typeof(Geek.Server.Proto.NodeNotFound) },
+			    { -1857713043, typeof(Geek.Server.Proto.ReqInnerConnectGate) },
+			    { 1306001561, typeof(Geek.Server.Proto.ResInnerConnectGate) },
 			    { 299119425, typeof(Geek.Server.Proto.TestStruct) },
 			    { 1250601847, typeof(Geek.Server.Proto.A) },
 			    { -899515946, typeof(Geek.Server.Proto.B) },
@@ -30,6 +33,7 @@ namespace Geek.Server.Proto
 			    { 1587576546, typeof(Geek.Server.Proto.ResLevelUp) },
 			    { 1575482382, typeof(Geek.Server.Proto.HearBeat) },
 			    { 1179199001, typeof(Geek.Server.Proto.ResErrorCode) },
+			    { 537499886, typeof(Geek.Server.Proto.ResPrompt) },
             };
         }
 

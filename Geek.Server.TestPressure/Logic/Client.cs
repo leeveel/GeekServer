@@ -42,18 +42,15 @@ namespace Test.Pressure
                 return;
             }
             await ReqLogin();
-            for (int i = 0; i < 1; i++)
-            {
-                await ReqBagInfo();
-                await Task.Delay(1000);
-            }
+            await ReqBagInfo();
+            await Task.Delay(1000);
             await ReqComposePet();
         }
 
         private Task<bool> ReqRouter()
         {
-            var req = new ReqRouterMsg();
-            req.TargetUid = TestSettings.Ins.serverId;
+            var req = new ReqConnectGate();
+            req.ServerId = TestSettings.Ins.serverId;
             return SendMsgAndWaitBack(req);
         }
 

@@ -1,14 +1,4 @@
-﻿using Geek.Server;
-using NLog;
-using NLog.Fluent;
-using Quartz.Util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Reflection;
 
 namespace Geek.Server.Gateway.MessageHandler
 {
@@ -40,7 +30,8 @@ namespace Geek.Server.Gateway.MessageHandler
 
         public static BaseHander GetHander(int msgId)
         {
-            return handerMap[msgId];
+            handerMap.TryGetValue(msgId, out BaseHander hander);
+            return hander;
         }
     }
 }

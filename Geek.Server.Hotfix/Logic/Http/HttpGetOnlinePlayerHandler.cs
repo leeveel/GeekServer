@@ -17,7 +17,7 @@ namespace Geek.Server.Http
         public override Task<string> Action(string ip, string url, Dictionary<string, string> parameters)
         {
 
-            var res = new HttpResult(HttpResult.Stauts.Success, $"当前在线人数:{SessionMgr.sessionMap.Count}").ToString();
+            var res = new HttpResult(HttpResult.Stauts.Success, $"当前在线人数:{SessionManager.Count()}").ToString();
             return Task.FromResult(res);
         }
     }

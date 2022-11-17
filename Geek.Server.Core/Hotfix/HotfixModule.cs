@@ -13,8 +13,6 @@ namespace Geek.Server
 
         internal IHotfixBridge HotfixBridge { get; private set; }
 
-        public ISessionMgr SessionMgr { get; private set; }
-
         internal Assembly HotfixAssembly = null;
 
         /// <summary>
@@ -137,11 +135,6 @@ namespace Geek.Server
                         var bridge = (IHotfixBridge)Activator.CreateInstance(type);
                         if (bridge.BridgeType == Settings.ServerType)
                             HotfixBridge = bridge;
-                    }
-
-                    if ((SessionMgr == null && type.GetInterface(typeof(ISessionMgr).FullName) != null))
-                    {
-                        SessionMgr = (ISessionMgr)Activator.CreateInstance(type);
                     }
                 }
             }

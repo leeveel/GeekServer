@@ -1,61 +1,42 @@
-﻿
-using Geek.Server.Proto;
-using Geek.Server.Gateway.MessageHandler;
-using System.Collections;
-using System.Diagnostics;
-using TcpServer = Geek.Server.Gateway.Net.Tcp.TcpServer;
+﻿using System.Diagnostics;
+using System.Text;
+using Geek.Server.Gateway.Logic;
 
 namespace Geek.Server.Gateway
 {
     class Program
     {
-        static volatile bool ExitCalled = false;
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+        private static volatile bool ExitCalled = false;
+        private static volatile Task GameLoopTask = null;
         private static volatile Task ShutDownTask = null;
-        private static volatile Task MainLoopTask = null;
 
-        public static async Task Main(string[] args)
+        static async Task Main(string[] args)
         {
-            LogManager.Configuration = new XmlLoggingConfiguration("Configs/gate_NLog.config");
-
-            Settings.Load<GateSettings>("Configs/gate_config.json", ServerType.Gate);
-
-            PolymorphicRegister.Load();
-            MsgHanderFactory.Init();
-            HttpHanderFactory.Init();
-            AddExitHandler();
-
-            MainLoopTask = Start();
-            await MainLoopTask;
-
-            if (ShutDownTask != null)
-                await ShutDownTask;
-        }
-
-        static async Task Start()
-        {
-            await RpcServer.Start(Settings.InsAs<GateSettings>().RpcPort);
-            await TcpServer.Start(Settings.TcpPort);
-            await HttpServer.Start(Settings.HttpPort);
-            Settings.AppRunning = true;
-            TimeSpan delay = TimeSpan.FromSeconds(1);
-            while (Settings.AppRunning)
+            try
             {
-                await Task.Delay(delay);
+                AppExitHandler.Init(HandleExit);
+                GameLoopTask = GateStartUp.Enter();
+                await GameLoopTask;
+                if (ShutDownTask != null)
+                    await ShutDownTask;
             }
-            await RpcServer.Stop();
-            await TcpServer.Stop();
-        }
-
-
-        public static void AddExitHandler()
-        {
-            //退出监听
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => { HandleExit(); };
-            //Fetal异常监听
-            AppDomain.CurrentDomain.UnhandledException += (s, e) => { HandleFetalException(e.ExceptionObject); };
-            //ctrl+c
-            Console.CancelKeyPress += (s, e) => { HandleExit(); };
+            catch (Exception e)
+            {
+                string error;
+                if (Settings.AppRunning)
+                {
+                    error = $"服务器运行时异常 e:{e}";
+                    Console.WriteLine(error);
+                }
+                else
+                {
+                    error = $"启动服务器失败 e:{e}";
+                    Console.WriteLine(error);
+                }
+                File.WriteAllText("server_error.txt", $"{error}", Encoding.UTF8);
+            }
         }
 
         private static void HandleExit()
@@ -67,27 +48,12 @@ namespace Geek.Server.Gateway
             ShutDownTask = Task.Run(() =>
             {
                 Settings.AppRunning = false;
-                MainLoopTask?.Wait();
+                GameLoopTask?.Wait();
                 LogManager.Shutdown();
                 Console.WriteLine($"退出程序");
                 Process.GetCurrentProcess().Kill();
             });
             ShutDownTask.Wait();
-        }
-
-        private static void HandleFetalException(object e)
-        {
-            //这里可以发送短信或者钉钉消息通知到运维
-            Log.Error("get unhandled exception");
-            if (e is IEnumerable arr)
-            {
-                foreach (var ex in arr)
-                    Log.Error($"Unhandled Exception:{ex}");
-            }
-            else
-            {
-                Log.Error($"Unhandled Exception:{e}");
-            }
         }
     }
 }

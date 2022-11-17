@@ -32,20 +32,9 @@ namespace Geek.Server.Login
 
             //添加到session 
             session.Id = roleId;
-            session.Sign = reqLogin.Device;
+            session.Token = reqLogin.Device;
+            SessionManager.Add(session);
 
-            var oldSession = HotfixMgr.SessionMgr.Add(session);
-
-            if (oldSession != null)
-            {
-                //通知老链接下线
-                _ = Task.Run(async () =>
-                {
-                    //send msg...
-                    await Task.Delay(100);
-                    oldSession?.Abort();
-                });
-            }
             //登陆流程
             var roleComp = await ActorMgr.GetCompAgent<RoleCompAgent>(roleId);
             //从登录线程-->调用Role线程 所以需要入队

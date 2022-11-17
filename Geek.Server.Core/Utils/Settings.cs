@@ -10,8 +10,8 @@ public enum ServerType
     ///<summary>充值服</summary>
     Recharge,
     ///<summary>网关服</summary>
-    ///<summary>远程备份</summary>
     Gate,
+    ///<summary>远程备份</summary>
     Backup
 }
 

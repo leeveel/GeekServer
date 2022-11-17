@@ -1,6 +1,9 @@
 {
   "ServerId": 123,
+  "InnerTcpPort": 8898,
   "TcpPort": 8899,
   "RpcPort": 8900,
-  "HttpPort": 8901
+  "HttpPort": 8901,
+  "LocalIp": "127.0.0.1",
+  "CenterUrl": "http://127.0.0.1:8900"
 }

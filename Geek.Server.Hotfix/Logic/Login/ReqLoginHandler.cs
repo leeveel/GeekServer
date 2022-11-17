@@ -6,7 +6,12 @@ namespace Geek.Server.Login
     {
         public override async Task ActionAsync()
         {
-            await Comp.OnLogin(Session, Msg as ReqLogin);
+            var session = new Session
+            {
+                TargetId = TargetId,
+                NodeId = NodeId
+            };
+            await Comp.OnLogin(session, Msg as ReqLogin);
         }
     }
 }

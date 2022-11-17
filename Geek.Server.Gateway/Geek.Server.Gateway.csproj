@@ -22,7 +22,7 @@
     <None Update="Configs\gate_config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Configs\gate_NLog.config">
+    <None Update="Configs\gate_log.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -39,6 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Geek.Server.Core\Geek.Server.Core.csproj" />
     <ProjectReference Include="..\Geek.Server.Generate\Geek.Server.Generate.csproj" />
   </ItemGroup>
 

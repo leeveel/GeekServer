@@ -15,11 +15,23 @@ namespace Geek.Server
             Payload = payload;
         }
 
+
+        public NMessage(int msgId, byte[] msgData)
+        {
+            this.MsgId = msgId;
+            MsgRaw = msgData;
+        }
+
+        public int MsgId = 0;
+        public byte[] MsgRaw = null;
+        public long TargetId = 0;
+
         public Message Msg { get; } = null;
 
         public NMessage(Message msg)
         {
             Msg = msg;
+            MsgId = msg.MsgId;
         }
 
         public void Serialize(IBufferWriter<byte> writer)

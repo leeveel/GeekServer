@@ -1,4 +1,7 @@
 ﻿
+using Geek.Server.App.Common;
+using Geek.Server.Core.Center;
+
 namespace Geek.Server
 {
     internal class HotfixBridge : IHotfixBridge
@@ -17,13 +20,26 @@ namespace Geek.Server
 
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
 
-            await new StreamClient(Settings.GateUrl, Settings.ServerId, 3).Connect();
-            //Log.Info("tcp 服务启动完成...");
             await HttpServer.Start(Settings.HttpPort);
             Log.Info("load config data");
             (bool success, string msg) = GameDataManager.ReloadAll();
             if (!success)
                 throw new Exception($"载入配置表失败... {msg}");
+
+            //连接中心rpc
+            await NetHelper.ConnectCenter();
+            //上报注册中心
+            var node = new NetNode
+            {
+                NodeId = Settings.ServerId,
+                Ip = Settings.LocalIp,
+                TcpPort = Settings.TcpPort,
+                HttpPort = Settings.HttpPort,
+                Type = NodeType.Game
+            };
+            bool flag = await NetHelper.CenterRpcClient.ServerAgent.Register(node);
+            //到中心服拉取通用配置
+            await NetHelper.GetCommonConfig();
 
             GlobalTimer.Start();
             await CompRegister.ActiveGlobalComps();
@@ -33,7 +49,7 @@ namespace Geek.Server
         public async Task Stop()
         {
             // 断开所有连接
-            await (HotfixMgr.SessionMgr?.RemoveAll() ?? Task.CompletedTask);
+            await SessionManager.RemoveAll();
             // 取消所有未执行定时器
             await QuartzTimer.Stop();
             // 保证actor之前的任务都执行完毕

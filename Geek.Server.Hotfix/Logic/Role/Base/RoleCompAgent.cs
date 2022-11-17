@@ -21,6 +21,7 @@ namespace Geek.Server.Role
 
         public async Task<ResLogin> OnLogin(ReqLogin reqLogin, bool isNewRole)
         {
+            //玩家在线不进行回收
             SetAutoRecycle(false);
             if (isNewRole)
             {
@@ -37,6 +38,7 @@ namespace Geek.Server.Role
 
         public virtual Task OnLogout()
         {
+            //下线后会被自动回收
             SetAutoRecycle(true);
             QuartzTimer.Unschedule(ScheduleIdSet);
             return Task.CompletedTask;
@@ -66,7 +68,7 @@ namespace Geek.Server.Role
 
         public void NotifyClient(Message msg, int uniId = 0, StateCode code = StateCode.Success)
         {
-            var session = HotfixMgr.SessionMgr.Get(ActorId);
+            var session = SessionManager.Get(ActorId);
             if (session != null)
             {
                 session.WriteAsync(msg, uniId, code);

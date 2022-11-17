@@ -25,8 +25,8 @@ namespace Server.Logic.Logic
 
         public override void Active()
         {
-            Delay<DelayTimer>(TimeSpan.FromSeconds(3));
-            Schedule<ScheduleTimer>(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3));
+            //Delay<DelayTimer>(TimeSpan.FromSeconds(3));
+            //Schedule<ScheduleTimer>(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3));
         }
 
         private Task TestDelayTimer()
