@@ -10,7 +10,7 @@ public static class SessionExtensions
         }
         if (uniId > 0)
         {
-            ResErrorCode res = new ResErrorCode
+            var res = new ResErrorCode
             {
                 UniId = uniId,
                 ErrCode = (int)code,

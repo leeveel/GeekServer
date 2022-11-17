@@ -50,8 +50,7 @@ namespace Geek.Server.Core.Center
             ServiceManager.NamingService.Remove(CurNodeId);
             if (group != null)
                 group.RemoveAsync(Context);
-            group = null;
-
+            //group = null;
             NodesChanged();
             return ValueTask.CompletedTask;
         }

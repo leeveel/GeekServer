@@ -1,4 +1,5 @@
 {
+  "isDebug": true,
   "ServerId": 123,
   "InnerTcpPort": 8898,
   "TcpPort": 8899,
