@@ -15,15 +15,15 @@ namespace Geek.Server
         public RocksDb InnerDB { get; private set; }
         public string DbPath { get; private set; } = "";
         public string SecondPath { get; private set; } = "";
-        public bool ReadOnly { get; private set; } = false; 
+        public bool ReadOnly { get; private set; } = false;
         protected FlushOptions flushOption;
         protected ConcurrentDictionary<string, ColumnFamilyHandle> columnFamilie = new ConcurrentDictionary<string, ColumnFamilyHandle>();
-  
-        public EmbeddedDB(string path, bool readOnly = false, string readonlyPath=null)
+
+        public EmbeddedDB(string path, bool readOnly = false, string readonlyPath = null)
         {
             this.ReadOnly = readOnly;
             var dir = Path.GetDirectoryName(path);
-            if(!Directory.Exists(dir))
+            if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             DbPath = path;
             var option = new DbOptions();
@@ -47,11 +47,11 @@ namespace Geek.Server
             }
             else
             {
+                flushOption = new FlushOptions();
                 option.SetCreateIfMissing(true).SetCreateMissingColumnFamilies(true);
                 InnerDB = RocksDb.Open(option, DbPath, cfs);
             }
 
-            flushOption = new FlushOptions();
         }
 
         ColumnFamilyHandle GetOrCreateColumnFamilyHandle(string name)
@@ -84,7 +84,7 @@ namespace Geek.Server
                 InnerDB.TryCatchUpWithPrimary();
             }
         }
- 
+
         public Table<T> GetTable<T>() where T : class
         {
             var name = typeof(T).FullName;
@@ -129,7 +129,7 @@ namespace Geek.Server
                             LOGGER.Fatal($"rocksdb flush 错误:{errStr}");
                         }
                     }
-                } 
+                }
             }
         }
 
@@ -137,7 +137,7 @@ namespace Geek.Server
         {
             Flush(true);
             Native.Instance.rocksdb_cancel_all_background_work(InnerDB.Handle, true);
-            Native.Instance.rocksdb_free(flushOption.Handle);
+            //Native.Instance.rocksdb_free(flushOption.Handle);
             InnerDB.Dispose();
         }
     }
