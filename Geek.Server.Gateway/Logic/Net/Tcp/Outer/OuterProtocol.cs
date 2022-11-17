@@ -25,9 +25,7 @@ namespace Geek.Server.Gateway.Logic.Net.Tcp.Outer
 
         public void WriteMessage(NMessage nmsg, IBufferWriter<byte> output)
         {
-            byte[] bytes = nmsg.MsgRaw;
-            if(bytes == null)
-                bytes = nmsg.Serialize();
+            byte[] bytes = nmsg.GetBytes();
             int len = 8 + bytes.Length;
             var span = output.GetSpan(len);
             int offset = 0;

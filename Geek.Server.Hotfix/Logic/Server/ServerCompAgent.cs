@@ -1,4 +1,5 @@
 ﻿
+using Geek.Server.Role;
 using Geek.Server.Server;
 
 namespace Server.Logic.Logic
@@ -27,6 +28,20 @@ namespace Server.Logic.Logic
         {
             //Delay<DelayTimer>(TimeSpan.FromSeconds(3));
             //Schedule<ScheduleTimer>(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3));
+        }
+
+
+        public static async Task OnlineRoleForeach(Action<RoleCompAgent> func)
+        {
+            var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
+            serverComp.Tell(async () =>
+            {
+                foreach (var roleId in serverComp.Comp.OnlineSet)
+                {
+                    var roleComp = await ActorMgr.GetCompAgent<RoleCompAgent>(roleId);
+                    roleComp.Tell(() => func(roleComp));
+                }
+            });
         }
 
         private Task TestDelayTimer()

@@ -26,9 +26,7 @@ namespace Geek.Server
 
         public void WriteMessage(NMessage nmsg, IBufferWriter<byte> output)
         {
-            byte[] bytes = nmsg.MsgRaw;
-            if (bytes == null)
-                bytes = nmsg.Serialize();
+            byte[] bytes = nmsg.GetBytes();
             int len = 16 + bytes.Length; //len(4) + targetId(8) + msgid(4)
             var span = output.GetSpan(len);
             int offset = 0;

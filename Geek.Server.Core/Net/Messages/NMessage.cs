@@ -7,6 +7,7 @@ namespace Geek.Server
     /// </summary>
     public struct NMessage
     {
+        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
         public ReadOnlySequence<byte> Payload { get; } = default;
 
@@ -15,18 +16,18 @@ namespace Geek.Server
             Payload = payload;
         }
 
+        public int MsgId = 0;
+
+        public byte[] MsgRaw = null;
+
+        public long TargetId = 0;
+        public Message Msg { get; } = null;
 
         public NMessage(int msgId, byte[] msgData)
         {
             this.MsgId = msgId;
             MsgRaw = msgData;
         }
-
-        public int MsgId = 0;
-        public byte[] MsgRaw = null;
-        public long TargetId = 0;
-
-        public Message Msg { get; } = null;
 
         public NMessage(Message msg)
         {
@@ -45,10 +46,21 @@ namespace Geek.Server
             {
                 return MessagePack.MessagePackSerializer.Serialize(Msg);
             }
-            catch (System.Exception)
+            catch (System.Exception e)
             {
-                throw;
+                LOGGER.Fatal($"序列化失败:{Msg.GetType().FullName},{e}");
+                return null;
             }
+        }
+
+        public byte[] GetBytes()
+        {
+            var bytes = MsgRaw;
+            if (bytes == null)
+            {
+                bytes = Serialize();
+            }
+            return bytes;
         }
 
     }

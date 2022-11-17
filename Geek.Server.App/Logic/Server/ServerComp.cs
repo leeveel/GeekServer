@@ -14,7 +14,10 @@
     [Comp(ActorType.Server)]
     public class ServerComp : StateComp<ServerState>
     {
-
+        /// <summary>
+        /// 存放在此处的数据不会回存到数据库
+        /// </summary>
+        public HashSet<long> OnlineSet = new();
     }
 
 }
