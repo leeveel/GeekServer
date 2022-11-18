@@ -7,10 +7,6 @@ namespace Geek.Server.Core.Center
 
     public interface ICenterRpcClient
     {
-        public void Connected(long id);
-
-        public void Disconnected(long id);
-
         public void ConfigChanged(byte[] data);
 
         public void NodesChanged(List<NetNode> nodes);

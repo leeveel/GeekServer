@@ -1,5 +1,5 @@
-﻿using Geek.Server.App.Common.Session;
-using Geek.Server.App.Login;
+﻿using Geek.Server.App.Login;
+using Geek.Server.App.Net.Session;
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Utils;

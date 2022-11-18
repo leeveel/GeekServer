@@ -1,5 +1,5 @@
 ﻿using Geek.Server.App.Common.Handler;
-using Geek.Server.App.Common.Session;
+using Geek.Server.App.Net.Session;
 using Geek.Server.Core.Net.Tcp.Handler;
 
 namespace Geek.Server.Hotfix.Login

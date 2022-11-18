@@ -1,15 +1,14 @@
 ﻿using Geek.Server.Core.Center;
-using Geek.Server.Core.Net.Messages;
 using Geek.Server.Core.Net.Tcp.Inner;
 using Geek.Server.Proto;
 using System.Collections.Concurrent;
 
-namespace Geek.Server.App.Common
+namespace Geek.Server.App.Net
 {
     public class AppNetMgr
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public static CenterRpcClient CenterRpcClient { get; set; }
+        public static AppCenterRpcClient CenterRpcClient { get; set; }
         /// <summary>
         /// gateway.nodeid --- InnerTcpClient
         /// </summary>
@@ -17,13 +16,13 @@ namespace Geek.Server.App.Common
 
         public static async Task ConnectCenter()
         {
-            CenterRpcClient = new CenterRpcClient();
+            CenterRpcClient = new AppCenterRpcClient();
             await CenterRpcClient.Connect(Settings.CenterUrl);
         }
 
         public static async Task ConnectGateway(NetNode node)
         {
-            if(node == null || node.Type != NodeType.Gateway)
+            if (node == null || node.Type != NodeType.Gateway)
                 return;
             if (!tcpClientDic.TryGetValue(node.NodeId, out InnerTcpClient tcpClient))
             {
@@ -52,7 +51,7 @@ namespace Geek.Server.App.Common
         {
             //通用配置
             var bytes = await CenterRpcClient.ServerAgent.GetConfig("global");
-            
+
         }
 
         /// <summary>

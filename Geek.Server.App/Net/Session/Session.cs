@@ -1,8 +1,7 @@
-﻿using Geek.Server.App.Common;
-using Geek.Server.Core.Net.Messages;
+﻿using Geek.Server.Core.Net.Messages;
 using Geek.Server.Core.Net.Tcp;
 
-namespace Geek.Server.App.Common.Session
+namespace Geek.Server.App.Net.Session
 {
     public class Session
     {

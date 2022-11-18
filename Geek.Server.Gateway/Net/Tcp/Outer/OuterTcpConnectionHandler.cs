@@ -27,6 +27,7 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
         {
             LOGGER.Debug($"{conn.Channel.Context.RemoteEndPoint?.ToString()} 断开链接");
             GateNetMgr.ClientConns.Remove(conn);
+            //TODO:通知游戏服客户端掉线
         }
 
         protected override void Dispatcher(Connection conn, NetMessage nmsg)

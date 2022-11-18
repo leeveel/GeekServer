@@ -13,11 +13,11 @@ namespace Geek.Server.Gateway.Net
 
         public static Connections ServerConns { get; private set; } = new Connections();
 
-        public static CenterRpcClient CenterRpcClient { get; set; }
+        public static GateCenterRpcClient CenterRpcClient { get; set; }
 
         public static async Task ConnectCenter()
         {
-            CenterRpcClient = new CenterRpcClient();
+            CenterRpcClient = new GateCenterRpcClient();
             await CenterRpcClient.Connect(Settings.CenterUrl);
         }
 

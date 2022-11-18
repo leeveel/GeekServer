@@ -1,4 +1,4 @@
-using Geek.Server.App.Common.Session;
+using Geek.Server.App.Net.Session;
 using Geek.Server.Core.Net.Http;
 
 namespace Geek.Server.Hotfix.Http
