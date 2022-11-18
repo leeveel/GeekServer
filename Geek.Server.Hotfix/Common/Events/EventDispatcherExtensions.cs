@@ -1,7 +1,8 @@
-﻿
+﻿using Server.Logic.Logic;
+
 namespace Geek.Server
 {
-    public static class EventDispatcher
+    public static class EventDispatcherExtensions
     {
 
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
@@ -20,9 +21,9 @@ namespace Geek.Server
             if ((EventID)evtId > EventID.RoleSeparator && agent.OwnerType > ActorType.Separator)
             {
                 // 全局非玩家事件，抛给所有玩家
-                // agent.Tell(()
-                //     => ServerCompAgent.OnlineRoleForeach(role
-                //     => role.Dispatch(evtId, args)));
+                agent.Tell(()
+                    => ServerCompAgent.OnlineRoleForeach(role
+                    => role.Dispatch(evtId, args)));
             }
 
             static void SelfHandle(ICompAgent agent, int evtId, Event evt)

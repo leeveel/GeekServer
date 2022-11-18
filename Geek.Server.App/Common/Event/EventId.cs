@@ -4,6 +4,7 @@
     {
         #region role event
         //玩家事件
+        SessionRemove = 1000,
         RoleLevelUp = 1001, //玩家等级提升
         RoleVipChange, //玩家vip改变
         OnRoleOnline, //玩家上线
