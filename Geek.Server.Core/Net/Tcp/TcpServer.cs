@@ -1,36 +1,29 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Connections;
 using NLog.Web;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace Geek.Server.Gateway.Logic.Net
 {
     /// <summary>
     /// TCP server
     /// </summary>
-    public static class InnerTcpServer
+    public class TcpServer
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
-        public static WebApplication WebApp { get; set; }
+        public WebApplication WebApp { get; set; }
 
-        /// <summary>
-        /// 启动
-        /// </summary>
-        /// <param name="port"></param>
-        public static Task Start(int port)
+        public Task Start(int port, Action<ListenOptions> configure)
         {
             var builder = WebApplication.CreateBuilder();
             builder.WebHost.UseKestrel(options =>
             {
-                options.ListenAnyIP(port, builder =>
-                {
-                    builder.UseConnectionHandler<InnerTcpConnectionHandler>();
-                });
+                options.ListenAnyIP(port, configure);
             })
             .ConfigureLogging(logging =>
             {
-                logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Error);
+                logging.SetMinimumLevel(LogLevel.Error);
             })
             .UseNLog();
 
@@ -38,10 +31,7 @@ namespace Geek.Server.Gateway.Logic.Net
             return app.StartAsync();
         }
 
-        /// <summary>
-        /// 停止
-        /// </summary>
-        public static Task Stop()
+        public Task Stop()
         {
             if (WebApp != null)
             {
@@ -52,5 +42,6 @@ namespace Geek.Server.Gateway.Logic.Net
             }
             return Task.CompletedTask;
         }
+
     }
 }

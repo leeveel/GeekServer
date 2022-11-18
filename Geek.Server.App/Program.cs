@@ -1,11 +1,7 @@
-﻿using Geek.Server;
-using Geek.Server.Proto;
+﻿using Geek.Server.App.Logic;
 using NLog;
-using NLog.Config;
-using NLog.LayoutRenderers;
 using System.Diagnostics;
 using System.Text;
-using Geek.Server.Common;
 
 namespace Geek.Server.App
 {
@@ -13,21 +9,16 @@ namespace Geek.Server.App
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
+        private static volatile bool ExitCalled = false;
+        private static volatile Task GameLoopTask = null;
+        private static volatile Task ShutDownTask = null;
+
         static async Task Main(string[] args)
         {
             try
             {
                 AppExitHandler.Init(HandleExit);
-                Console.WriteLine($"init NLog config...");
-                Settings.Load<AppSetting>("Configs/app_config.json", ServerType.Game);
-                LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
-                LogManager.Configuration = new XmlLoggingConfiguration("Configs/NLog.config");
-                LogManager.AutoShutdown = false;
-
-                PolymorphicRegister.Load();
-                GeekServerAppPolymorphicDBStateRegister.Load();
-
-                GameLoopTask = EnterGameLoop();
+                GameLoopTask = AppStartUp.Enter();
                 await GameLoopTask;
                 if (ShutDownTask != null)
                     await ShutDownTask;
@@ -45,51 +36,8 @@ namespace Geek.Server.App
                     error = $"启动服务器失败 e:{e}";
                     Console.WriteLine(error);
                 }
-
                 File.WriteAllText("server_error.txt", $"{error}", Encoding.UTF8);
             }
-        }
-
-        private static volatile bool ExitCalled = false;
-        private static volatile Task GameLoopTask = null;
-        private static volatile Task ShutDownTask = null;
-
-        private static async Task EnterGameLoop()
-        {
-            try
-            {
-                Log.Info($"launch embedded db...");
-                RocksDBConnection.Singleton.Connect(Settings.LocalDBPath + Settings.LocalDBPrefix + Settings.ServerId);
-                Log.Info($"regist comps...");
-                await CompRegister.Init();
-                Log.Info($"load hotfix module");
-                await HotfixMgr.LoadHotfixModule();
-
-                if (!Settings.InsAs<AppSetting>().AllowOpen)
-                {
-                    Log.Error($"起服逻辑执行失败，不予启动");
-                    return;
-                }
-
-                Log.Info("进入游戏主循环...");
-                Console.WriteLine("***进入游戏主循环***");
-                Settings.LauchTime = DateTime.Now;
-                Settings.AppRunning = true;
-                TimeSpan delay = TimeSpan.FromSeconds(1);
-                while (Settings.AppRunning)
-                {
-                    await Task.Delay(delay);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"服务器执行异常，e:{e}");
-                Log.Fatal(e);
-            }
-
-            Console.WriteLine($"退出服务器开始");
-            await HotfixMgr.Stop();
-            Console.WriteLine($"退出服务器成功");
         }
 
         private static void HandleExit()

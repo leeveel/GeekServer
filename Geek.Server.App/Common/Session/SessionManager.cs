@@ -10,9 +10,6 @@ namespace Geek.Server
     public static class SessionManager
     {
         internal static ConcurrentDictionary<long, Session> sessionMap = new();
-        public static readonly object lockObj = new();
-
-
         public static int Count()
         {
             return sessionMap.Count;
@@ -64,31 +61,27 @@ namespace Geek.Server
             return null;
         }
 
-        public static Session Add(Session session)
+        public static void Add(Session session)
         {
-            lock (lockObj)
+            if (sessionMap.TryGetValue(session.Id, out Session old))
             {
-                if (sessionMap.TryGetValue(session.Id, out Session old))
+                if (old.Token != session.Token)
                 {
-                    if (old.Token != session.Token)
+                    //顶号
+                    var msg = new ResPrompt
                     {
-                        //顶号
-                        var msg = new ResPrompt
-                        {
-                            Type = 5,
-                            Content = "你的账号已在其他设备上登陆"
-                        };
-                        //old.WriteAsync(msg);
-                    }
-                    else if (old.NodeId != session.NodeId)
-                    {
-                        //do nothing
-                        //同一个设备从不同的网络服重连上来
-                    }
+                        Type = 5,
+                        Content = "你的账号已在其他设备上登陆"
+                    };
+                    //old.WriteAsync(msg);
                 }
-                sessionMap[session.Id] = session;
-                return old;
+                else if (old.NodeId != session.NodeId)
+                {
+                    //do nothing
+                    //同一个设备从不同的网络服重连上来
+                }
             }
+            sessionMap[session.Id] = session;
         }
     }
 }

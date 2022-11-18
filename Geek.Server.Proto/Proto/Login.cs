@@ -128,10 +128,6 @@ namespace Geek.Server.Proto
         public string Desc { get; set; }
     }
 
-
-    /// <summary>
-    /// 双向心跳/收到恢复同样的消息
-    /// </summary>
     [MessagePackObject(true)]
     public class ResPrompt : Message
     {

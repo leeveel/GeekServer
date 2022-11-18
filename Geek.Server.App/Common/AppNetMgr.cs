@@ -4,10 +4,9 @@ using System.Collections.Concurrent;
 
 namespace Geek.Server.App.Common
 {
-    public class NetHelper
+    public class AppNetMgr
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-
         public static CenterRpcClient CenterRpcClient { get; set; }
         /// <summary>
         /// gateway.nodeid --- InnerTcpClient

@@ -11,7 +11,7 @@ namespace Geek.Server.Gateway.MessageHandler
             var req = msg as ReqInnerConnectGate;
             //conn.TargetId = req.NodeId;
             conn.Id = req.NodeId;
-            GateNetHelper.ServerConns.Add(conn);
+            GateNetMgr.ServerConns.Add(conn);
             var res = new ResInnerConnectGate
             {
                 IsSuccess = true

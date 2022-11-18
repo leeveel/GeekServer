@@ -42,7 +42,7 @@ namespace Geek.Server
 
         public NetChannel GetNetChannel()
         {
-            var session = NetHelper.GetClientByNodeId(NodeId);
+            var session = AppNetMgr.GetClientByNodeId(NodeId);
             return session?.Channel;
         }
 

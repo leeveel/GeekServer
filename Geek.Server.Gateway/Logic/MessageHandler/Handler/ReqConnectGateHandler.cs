@@ -11,7 +11,7 @@ namespace Geek.Server.Gateway.MessageHandler
         {
             var req = msg as ReqConnectGate;
             //分配网络节点(选择一个负载较小的节点)
-            var nodeId = GateNetHelper.SelectAHealthNode(req.ServerId);
+            var nodeId = GateNetMgr.SelectAHealthNode(req.ServerId);
             if (nodeId > 0)
             {
                 //设置client connection的targetid

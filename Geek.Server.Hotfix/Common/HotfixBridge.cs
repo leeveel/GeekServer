@@ -27,7 +27,7 @@ namespace Geek.Server
                 throw new Exception($"载入配置表失败... {msg}");
 
             //连接中心rpc
-            await NetHelper.ConnectCenter();
+            await AppNetMgr.ConnectCenter();
             //上报注册中心
             var node = new NetNode
             {
@@ -37,9 +37,9 @@ namespace Geek.Server
                 HttpPort = Settings.HttpPort,
                 Type = NodeType.Game
             };
-            bool flag = await NetHelper.CenterRpcClient.ServerAgent.Register(node);
+            bool flag = await AppNetMgr.CenterRpcClient.ServerAgent.Register(node);
             //到中心服拉取通用配置
-            await NetHelper.GetCommonConfig();
+            await AppNetMgr.GetCommonConfig();
 
             GlobalTimer.Start();
             await CompRegister.ActiveGlobalComps();

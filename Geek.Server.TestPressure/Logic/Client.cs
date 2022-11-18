@@ -1,4 +1,3 @@
-using Consul;
 using Newtonsoft.Json;
 
 namespace Test.Pressure
@@ -18,9 +17,9 @@ namespace Test.Pressure
     public class Client
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        long id;
+        readonly long id;
         ClientNetChannel netChannel;
-        MsgWaiter msgWaiter = new();
+        readonly MsgWaiter msgWaiter = new();
         int msgUniId = 200;
 
         public Client(long id)
@@ -28,41 +27,42 @@ namespace Test.Pressure
             this.id = id;
         }
 
-        public async void Start()
+        public async Task Start()
         {
             netChannel = new ClientNetChannel(this);
             var connCode = await netChannel.Connect(TestSettings.Ins.gateIp, TestSettings.Ins.gatePort);
             Log.Info($"客户端[{id}]链接:{connCode}");
             if (connCode == NetCode.Success)
-            {
                 await ReqRouter();
-            }
             else
-            {
                 return;
-            }
             await ReqLogin();
+            await Task.Delay(100);
             await ReqBagInfo();
-            await Task.Delay(1000);
+            await Task.Delay(100);
             await ReqComposePet();
         }
 
         private Task<bool> ReqRouter()
         {
-            var req = new ReqConnectGate();
-            req.ServerId = TestSettings.Ins.serverId;
+            var req = new ReqConnectGate
+            {
+                ServerId = TestSettings.Ins.serverId
+            };
             return SendMsgAndWaitBack(req);
         }
 
         private Task<bool> ReqLogin()
         {
             //登陆
-            var req = new ReqLogin();
-            req.SdkType = 0;
-            req.SdkToken = "555";
-            req.UserName = "name" + id;
-            req.Device = new Random().NextInt64().ToString();
-            req.Platform = "android";
+            var req = new ReqLogin
+            {
+                SdkType = 0,
+                SdkToken = "555",
+                UserName = "name" + id,
+                Device = new Random().NextInt64().ToString(),
+                Platform = "android"
+            };
             return SendMsgAndWaitBack(req);
         }
 
@@ -79,7 +79,7 @@ namespace Test.Pressure
         void SendMsg(Message msg)
         {
             msg.UniId = msgUniId++;
-            Log.Info($"{id} 发送消息:{JsonConvert.SerializeObject(msg)}");
+            Log.Info($"{id} 发送消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
             netChannel.Write(new NMessage(msg));
         }
 
@@ -102,7 +102,6 @@ namespace Test.Pressure
         public void OnRevice(Message msg)
         {
             //Log.Error($"收到消息:{msg.MsgId} {MsgFactory.GetType(msg.MsgId)}");
-
             if (msg.MsgId == ResErrorCode.MsgID)
             {
                 ResErrorCode errMsg = (ResErrorCode)msg;
@@ -122,12 +121,7 @@ namespace Test.Pressure
                 if (!string.IsNullOrEmpty(errMsg.Desc))
                     Log.Info("服务器提示:" + errMsg.Desc);
             }
-            else
-            {
-
-
-            }
-            Log.Info($"{id} 收到消息:{JsonConvert.SerializeObject(msg)}");
+            Log.Info($"{id} 收到消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
         }
     }
 }

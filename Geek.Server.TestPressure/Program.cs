@@ -12,7 +12,7 @@ namespace Test.Pressure
             var maxCount = TestSettings.Ins.clientCount;
             for (int i = 0; i < maxCount; i++)
             {
-                new Client(CreateRoleId(i)).Start();
+                _ = new Client(CreateRoleId(i)).Start();
                 await Task.Delay(5);
             }
             Console.ReadLine();

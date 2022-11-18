@@ -1,17 +1,16 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Geek.Server.Gateway.Logic.Net
+namespace Geek.Server
 {
 
     public class Connection
     {
         public long Id { get; set; }
         public long TargetId { get; set; }
-
         public NetChannel Channel { get; set; }
     }
 
-    internal class Connections
+    public class Connections
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid

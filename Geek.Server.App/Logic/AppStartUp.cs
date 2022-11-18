@@ -1,12 +1,12 @@
-﻿using Geek.Server.Core.Center;
-using Geek.Server.Gateway.Logic.Net;
-using Geek.Server.Gateway.MessageHandler;
+﻿using Geek.Server.Common;
 using Geek.Server.Proto;
+using NLog;
+using NLog.Config;
 using NLog.LayoutRenderers;
 
-namespace Geek.Server.Gateway.Logic
+namespace Geek.Server.App.Logic
 {
-    internal class GateStartUp
+    internal class AppStartUp
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         public static async Task Enter()
@@ -16,30 +16,23 @@ namespace Geek.Server.Gateway.Logic
                 var flag = Start();
                 if (!flag) return; //启动服务器失败
 
+                Log.Info($"launch embedded db...");
+                RocksDBConnection.Singleton.Connect(Settings.LocalDBPath + Settings.LocalDBPrefix + Settings.ServerId);
+                Log.Info($"regist comps...");
+                await CompRegister.Init();
+                Log.Info($"load hotfix module");
+                await HotfixMgr.LoadHotfixModule();
+
+                if (!Settings.InsAs<AppSetting>().AllowOpen)
+                {
+                    Log.Error($"起服逻辑执行失败，不予启动");
+                    return;
+                }
+
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");
-                PolymorphicRegister.Load();
-                MsgHanderFactory.Init();
-                HttpHanderFactory.Init();
-                await HttpServer.Start(Settings.HttpPort);
-                await GateNetMgr.StartTcpServer();
                 Settings.LauchTime = DateTime.Now;
                 Settings.AppRunning = true;
-
-                //连接中心rpc
-                await GateNetMgr.ConnectCenter();
-                //上报注册中心
-                var node = new NetNode
-                {
-                    NodeId = Settings.ServerId,
-                    Ip = Settings.LocalIp,
-                    TcpPort = Settings.TcpPort,
-                    InnerTcpPort = Settings.InsAs<GateSettings>().InnerTcpPort,
-                    HttpPort = Settings.HttpPort,
-                    Type = NodeType.Gateway
-                };
-                await GateNetMgr.CenterRpcClient.ServerAgent.Register(node);
-
                 TimeSpan delay = TimeSpan.FromSeconds(1);
                 while (Settings.AppRunning)
                 {
@@ -53,8 +46,7 @@ namespace Geek.Server.Gateway.Logic
             }
 
             Console.WriteLine($"退出服务器开始");
-            await HttpServer.Stop();
-            await GateNetMgr.StopTcpServer();
+            await HotfixMgr.Stop();
             Console.WriteLine($"退出服务器成功");
         }
 
@@ -62,11 +54,15 @@ namespace Geek.Server.Gateway.Logic
         {
             try
             {
-                Settings.Load<GateSettings>("Configs/gate_config.json", ServerType.Gate);
+                Settings.Load<AppSetting>("Configs/app_config.json", ServerType.Game);
                 Console.WriteLine("init NLog config...");
                 LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
-                LogManager.Configuration = new XmlLoggingConfiguration("Configs/gate_log.config");
+                LogManager.Configuration = new XmlLoggingConfiguration("Configs/app_log.config");
                 LogManager.AutoShutdown = false;
+
+                PolymorphicRegister.Load();
+                GeekServerAppPolymorphicDBStateRegister.Load();
+
                 return true;
             }
             catch (Exception e)

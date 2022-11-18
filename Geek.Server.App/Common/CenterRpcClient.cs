@@ -80,7 +80,7 @@ namespace Geek.Server.App.Common
                 Console.WriteLine("NodesChanged:" + node.NodeId);
                 if (node.Type == NodeType.Gateway)
                 {
-                    _ = NetHelper.ConnectGateway(node);
+                    _ = AppNetMgr.ConnectGateway(node);
                 }
             }
             Console.WriteLine("---------------------------------");
