@@ -11,16 +11,16 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>..\bin\testpressure_debug</OutputPath>
+		<OutputPath>..\bin\app_debug</OutputPath>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>..\bin\testpressure</OutputPath>
+		<OutputPath>..\bin\app</OutputPath>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\GeekServer.Core\GeekServer.Core.csproj" />
-		<ProjectReference Include="..\GeekServer.Generate\GeekServer.Generate.csproj" />
+		<ProjectReference Include="..\Geek.Server.Core\Geek.Server.Core.csproj" />
+		<ProjectReference Include="..\Geek.Server.Generate\Geek.Server.Generate.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
