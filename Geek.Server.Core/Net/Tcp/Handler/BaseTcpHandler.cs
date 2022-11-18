@@ -1,9 +1,9 @@
-﻿
-namespace Geek.Server
+﻿using Geek.Server.Core.Net.Messages;
+
+namespace Geek.Server.Core.Net.Tcp.Handler
 {
     public abstract class BaseTcpHandler
     {
-
         public int GateNodeId { get; set; }
 
         /// <summary>

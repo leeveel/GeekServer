@@ -1,8 +1,12 @@
-﻿using Quartz;
+﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Timer.Handler;
+using Geek.Server.Core.Utils;
+using Quartz;
 using Quartz.Impl;
 using Quartz.Logging;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Timer
 {
     public static class QuartzTimer
     {

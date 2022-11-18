@@ -2,9 +2,8 @@
 using System.Collections.Concurrent;
 using System.Runtime.InteropServices;
 using RocksDbSharp;
-using static Geek.Server.RedisKeys.Guild;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Storage.DB
 {
     /// <summary>
     /// 内嵌数据库-基于RocksDB
@@ -21,7 +20,7 @@ namespace Geek.Server
 
         public EmbeddedDB(string path, bool readOnly = false, string readonlyPath = null)
         {
-            this.ReadOnly = readOnly;
+            ReadOnly = readOnly;
             var dir = Path.GetDirectoryName(path);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);

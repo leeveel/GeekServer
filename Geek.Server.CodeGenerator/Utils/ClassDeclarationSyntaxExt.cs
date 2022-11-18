@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Text;
 
-namespace Tools.Utils
+namespace Geek.Server.CodeGenerator.Utils
 {
     public static class ClassDeclarationSyntaxExt
     {

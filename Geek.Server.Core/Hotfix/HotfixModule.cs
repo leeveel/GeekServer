@@ -1,9 +1,14 @@
-﻿
+﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Events;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.Http;
+using Geek.Server.Core.Net.Tcp.Handler;
 using NLog;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Hotfix
 {
     internal class HotfixModule
     {
@@ -130,7 +135,7 @@ namespace Geek.Server
                     && !AddTcpHandler(type)
                     && !AddHttpHandler(type))
                 {
-                    if ((HotfixBridge == null && type.GetInterface(typeof(IHotfixBridge).FullName) != null))
+                    if (HotfixBridge == null && type.GetInterface(typeof(IHotfixBridge).FullName) != null)
                     {
                         var bridge = (IHotfixBridge)Activator.CreateInstance(type);
                         if (bridge.BridgeType == Settings.ServerType)

@@ -1,5 +1,4 @@
-﻿
-namespace Geek.Server
+﻿namespace Geek.Server.Core.Hotfix
 {
     public interface IHotfixBridge
     {

@@ -1,7 +1,8 @@
-﻿
-using Geek.Server.App.Common;
+﻿using Geek.Server.App.Common;
+using Geek.Server.Core.Net.Messages;
+using Geek.Server.Core.Net.Tcp;
 
-namespace Geek.Server
+namespace Geek.Server.App.Common.Session
 {
     public class Session
     {
@@ -33,7 +34,7 @@ namespace Geek.Server
         public void WriteAsync(Message msg)
         {
             var channel = GetNetChannel();
-            var nmsg = new NMessage(msg)
+            var nmsg = new NetMessage(msg)
             {
                 ClientConnId = ClientConnId
             };

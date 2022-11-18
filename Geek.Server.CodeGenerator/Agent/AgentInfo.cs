@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace Geek.Server
+namespace Geek.Server.CodeGenerator.Agent
 {
 
     public class MthInfo
@@ -66,9 +66,9 @@ namespace Geek.Server
         /// </summary>
         public string ParamDeclare { get; set; }
 
-        public string Paramstr 
-        { 
-            get 
+        public string Paramstr
+        {
+            get
             {
                 if (Params.Count > 0)
                 {
@@ -76,7 +76,7 @@ namespace Geek.Server
                     for (int i = 0; i < Params.Count; i++)
                     {
                         sb.Append(Params[i]);
-                        if(i != Params.Count-1)
+                        if (i != Params.Count - 1)
                             sb.Append(",");
                     }
                     return sb.ToString();

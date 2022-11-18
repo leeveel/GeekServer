@@ -8,7 +8,7 @@ namespace Geek.Server.RemoteBackup.Logic
 {
     public class BackupSetting : BaseSetting
     {
-        
+
         public bool AllowOpen { get; set; } = true;
 
         public string DBRootPath { get; set; }

@@ -1,0 +1,18 @@
+﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Storage;
+
+namespace Geek.Server.App.Role.Bag
+{
+    public class BagState : CacheState
+    {
+        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
+        public Dictionary<int, long> ItemMap = new Dictionary<int, long>();
+    }
+
+    [Comp(ActorType.Role)]
+    public class BagComp : StateComp<BagState>
+    {
+
+    }
+}

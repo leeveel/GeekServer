@@ -1,5 +1,4 @@
-﻿using System.IO;
-
+﻿
 public static class StringExtension
 {
     public static bool IsNullOrEmpty(this string str)

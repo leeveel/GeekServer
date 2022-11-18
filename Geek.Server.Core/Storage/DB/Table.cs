@@ -2,8 +2,9 @@ using System.Text;
 using RocksDbSharp;
 using NLog;
 using System.Collections;
+using Geek.Server.Core.Serialize;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Storage.DB
 {
     public class Table<T> : IEnumerable<T>
     {
@@ -28,7 +29,7 @@ namespace Geek.Server
 
         public void Set<IDType>(IDType id, T value, Transaction trans = null)
         {
-            var data = Serializer.Serialize<T>(value);
+            var data = Serializer.Serialize(value);
             SetRaw(id, data);
         }
 
@@ -55,7 +56,7 @@ namespace Geek.Server
                 {
                     throw new NotFindKeyException($"no KeyAttribute find in {tableName}");
                 }
-                valueList.Add(Serializer.Serialize<T>(value));
+                valueList.Add(Serializer.Serialize(value));
             }
             SetRawBatch(ids, valueList, trans);
         }
@@ -144,7 +145,7 @@ namespace Geek.Server
         {
             //private Snapshot snapshot;
             private Iterator dbIterator;
-            private T currValue = default(T);
+            private T currValue = default;
             private Table<T> table;
 
             internal Enumerator(Table<T> table)
@@ -166,7 +167,7 @@ namespace Geek.Server
             {
                 if (!isDisposed)
                 {
-                    currValue = default(T);
+                    currValue = default;
                     if (dbIterator != null)
                     {
                         dbIterator.Dispose();

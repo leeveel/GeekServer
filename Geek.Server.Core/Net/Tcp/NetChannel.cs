@@ -1,7 +1,8 @@
 ﻿using Bedrock.Framework.Protocols;
+using Geek.Server.Core.Net.Messages;
 using Microsoft.AspNetCore.Connections;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Tcp
 {
     public class NetChannel
     {
@@ -10,9 +11,9 @@ namespace Geek.Server
         public ProtocolReader Reader { get; protected set; }
         protected ProtocolWriter Writer { get; set; }
 
-        public IProtocal<NMessage> Protocol { get; protected set; }
+        public IProtocal<NetMessage> Protocol { get; protected set; }
 
-        public NetChannel(ConnectionContext context, IProtocal<NMessage> protocal)
+        public NetChannel(ConnectionContext context, IProtocal<NetMessage> protocal)
         {
             Context = context;
             Reader = context.CreateReader();
@@ -56,7 +57,7 @@ namespace Geek.Server
             Writer = null;
         }
 
-        public void WriteAsync(NMessage msg)
+        public void WriteAsync(NetMessage msg)
         {
             if (Writer != null)
                 _ = Task.Run(async () => await Writer.WriteAsync(Protocol, msg));
@@ -64,7 +65,7 @@ namespace Geek.Server
 
         public void WriteAsync(Message msg)
         {
-            WriteAsync(new NMessage(msg));
+            WriteAsync(new NetMessage(msg));
         }
 
     }

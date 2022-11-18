@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using NLog.Web;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
-namespace Geek.Server.Gateway.Logic.Net
+namespace Geek.Server.Core.Net.Tcp
 {
     /// <summary>
     /// TCP server

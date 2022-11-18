@@ -1,5 +1,4 @@
-﻿using Geek.Server;
-using NLog;
+﻿using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
 
@@ -8,7 +7,7 @@ namespace Geek.Server.RemoteBackup.Logic
     public class StartUp
     {
 
-        static NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
+        static Logger Log = LogManager.GetCurrentClassLogger();
         public static async Task Enter()
         {
             try

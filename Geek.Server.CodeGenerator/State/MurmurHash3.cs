@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Geek.Server
+namespace Geek.Server.CodeGenerator.State
 {
     public class MurmurHash3
     {
@@ -80,7 +80,7 @@ namespace Geek.Server
 
         static uint rotl32(uint x, byte r)
         {
-            return (x << r) | (x >> (32 - r));
+            return x << r | x >> 32 - r;
         }
     }
 }

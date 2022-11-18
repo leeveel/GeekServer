@@ -1,6 +1,7 @@
-﻿using System.Buffers;
+﻿using Geek.Server.Core.Net.Messages;
+using System.Buffers;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Tcp.Inner
 {
     public static class InnerMsgDecoder
     {
@@ -11,7 +12,7 @@ namespace Geek.Server
         /// </summary>
         const int MAX_RECV_SIZE = 1024 * 1024;
 
-        public static void Decode(ref NMessage msg)
+        public static void Decode(ref NetMessage msg)
         {
             var reader = new SequenceReader<byte>(msg.Payload);
 

@@ -1,11 +1,8 @@
 ﻿using NLog;
-using System;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Http
 {
     public abstract class BaseHttpHandler
     {

@@ -1,12 +1,13 @@
 //auto generated, do not modify it
 
+using Geek.Server.Core.Net.Messages;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
-	[MessagePackObject(true)]
-	public class NodeNotFound : Geek.Server.Message
-	{
+    [MessagePackObject(true)]
+	public class NodeNotFound : Message
+    {
 		[IgnoreMember]
 		public const int Sid = -498188700;
 

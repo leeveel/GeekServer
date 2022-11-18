@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Connections;
 using NLog.Web;
-using Microsoft.AspNetCore.Http;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Http
 {
     public static class HttpServer
     {
@@ -43,8 +41,8 @@ namespace Geek.Server
             .UseNLog();
 
             var app = builder.Build();
-            app.MapGet("/game/{text}", (HttpContext context) => HttpHandler.HandleRequest(context));
-            app.MapPost("/game/{text}", (HttpContext context) => HttpHandler.HandleRequest(context));
+            app.MapGet("/game/{text}", (context) => HttpHandler.HandleRequest(context));
+            app.MapPost("/game/{text}", (context) => HttpHandler.HandleRequest(context));
             return app.StartAsync();
         }
 

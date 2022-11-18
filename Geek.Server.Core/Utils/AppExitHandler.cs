@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Utils
 {
     public static class AppExitHandler
     {

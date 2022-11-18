@@ -1,4 +1,8 @@
-﻿namespace Geek.Server
+﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Hotfix.Agent;
+
+namespace Geek.Server.Core.Comps
 {
     public abstract class BaseComp
     {

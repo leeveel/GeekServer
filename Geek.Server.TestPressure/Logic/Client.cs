@@ -1,3 +1,4 @@
+using Geek.Server.Core.Net.Messages;
 using Newtonsoft.Json;
 
 namespace Test.Pressure
@@ -80,7 +81,7 @@ namespace Test.Pressure
         {
             msg.UniId = msgUniId++;
             Log.Info($"{id} 发送消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
-            netChannel.Write(new NMessage(msg));
+            netChannel.Write(new NetMessage(msg));
         }
 
         Task<bool> SendMsgAndWaitBack(Message msg)

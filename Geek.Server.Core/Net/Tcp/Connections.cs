@@ -1,6 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using Geek.Server.Core.Net.Messages;
+using System.Collections.Concurrent;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Tcp
 {
 
     public class Connection
@@ -9,7 +10,7 @@ namespace Geek.Server
         public long NodeId { get; set; }
         public NetChannel Channel { get; set; }
 
-        public void WriteAsync(NMessage msg)
+        public void WriteAsync(NetMessage msg)
         {
             Channel?.WriteAsync(msg);
         }
@@ -39,7 +40,7 @@ namespace Geek.Server
 
         public void Remove(Connection node)
         {
-            if(connMap.TryRemove(node.Id, out var _))
+            if (connMap.TryRemove(node.Id, out var _))
                 nodeIdMap.TryRemove(node.NodeId, out _);
         }
 

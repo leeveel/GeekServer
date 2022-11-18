@@ -1,4 +1,5 @@
-﻿using Geek.Server;
+﻿using Geek.Server.Core.Storage;
+using Geek.Server.Core.Storage.DB;
 using MongoDB.Driver;
 
 namespace Geek.Server.RemoteBackup.Logic
@@ -35,12 +36,12 @@ namespace Geek.Server.RemoteBackup.Logic
         {
             //以只读形式打开
             var readonlyPath = Settings.InsAs<BackupSetting>().BackupDBPath
-                                       + Path.DirectorySeparatorChar 
+                                       + Path.DirectorySeparatorChar
                                        + gamedbName + "_$$$";
             var gamedb = new EmbeddedDB(gamedbPath, true, readonlyPath);
             var table = gamedb.GetTable<SaveTimestamp>();
             //gamedb有可能还没进行过回存，所以不存在这个Table (直接跳过,下一轮再存)
-            if(table == null)
+            if (table == null)
                 return;
             foreach (var item in table)
             {
@@ -111,7 +112,7 @@ namespace Geek.Server.RemoteBackup.Logic
         {
             try
             {
-                if(writeList.IsNullOrEmpty())
+                if (writeList.IsNullOrEmpty())
                     return true;
                 var remotedb = RemoteDB.GetDB(gamedbName);
                 Log.Debug($"状态回存 {stateName} count:{writeList.Count}");

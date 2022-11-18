@@ -1,4 +1,4 @@
-﻿namespace Geek.Server
+﻿namespace Geek.Server.Core.Hotfix
 {
     internal class MultiAgentImpExpcetion : Exception
     {

@@ -1,4 +1,6 @@
 ﻿using Geek.Server.Core.Center;
+using Geek.Server.Core.Net.Messages;
+using Geek.Server.Core.Net.Tcp.Inner;
 using Geek.Server.Proto;
 using System.Collections.Concurrent;
 
@@ -32,7 +34,7 @@ namespace Geek.Server.App.Common
                     tcpClientDic[node.NodeId] = tcpClient;
                     var req = new ReqInnerConnectGate();
                     req.NodeId = Settings.ServerId;
-                    tcpClient.Write(new NMessage(req));
+                    tcpClient.Write(req);
                 }
                 else
                 {

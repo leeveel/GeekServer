@@ -1,7 +1,7 @@
-﻿
-using NLog;
+﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Hotfix;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Events
 {
     public static class EventDispatcher
     {

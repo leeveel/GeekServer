@@ -1,4 +1,6 @@
-﻿namespace Geek.Server
+﻿using Geek.Server.Core.Storage.DB;
+
+namespace Geek.Server.Core.Storage
 {
     public class RocksDBConnection
     {

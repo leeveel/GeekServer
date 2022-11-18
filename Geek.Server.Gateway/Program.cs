@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Geek.Server.Gateway.Logic;
+using Geek.Server.Core.Utils;
+using Geek.Server.Gateway.Common;
 
 namespace Geek.Server.Gateway
 {

@@ -1,11 +1,14 @@
-﻿using Server.Logic.Logic;
+﻿using Geek.Server.App.Common.Event;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Events;
+using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Hotfix.Server;
 
-namespace Geek.Server
+namespace Geek.Server.Hotfix.Common.Events
 {
     public static class EventDispatcherExtensions
     {
-
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
         public static void Dispatch(this ICompAgent agent, int evtId, Param args = null)
         {
@@ -48,7 +51,7 @@ namespace Geek.Server
 
         public static void Dispatch(this ICompAgent agent, EventID evtId, Param args = null)
         {
-            Dispatch(agent, (int)evtId, args);
+            agent.Dispatch((int)evtId, args);
         }
     }
 }

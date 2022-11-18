@@ -1,6 +1,4 @@
-using System;
-
-namespace Geek.Server
+namespace Geek.Server.Core.Utils
 {
     public class XBuffer
     {
@@ -449,7 +447,7 @@ namespace Geek.Server
             }
 
             WriteInt(value.Length, buffer, ref offset);
-            System.Array.Copy(value, 0, buffer, offset, value.Length);
+            Array.Copy(value, 0, buffer, offset, value.Length);
             offset += value.Length;
         }
 
@@ -599,7 +597,7 @@ namespace Geek.Server
                 return new byte[0];
 
             var data = new byte[len];
-            System.Array.Copy(buffer, offset, data, 0, len);
+            Array.Copy(buffer, offset, data, 0, len);
             offset += len;
             return data;
         }

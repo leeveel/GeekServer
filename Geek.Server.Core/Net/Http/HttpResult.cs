@@ -1,13 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Text.Encodings.Web;
+﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Unicode;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Http
 {
-
-
-
     public class HttpResult
     {
         public enum Stauts

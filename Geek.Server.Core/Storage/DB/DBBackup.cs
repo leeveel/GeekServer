@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using NLog;
 using RocksDbSharp;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Storage.DB
 {
     public class BackupInfo
     {
@@ -15,7 +15,7 @@ namespace Geek.Server
     public static class DBBackup
     {
         static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        public static String Backup(EmbeddedDB db, string path, uint backupsKeepNum = 12)
+        public static string Backup(EmbeddedDB db, string path, uint backupsKeepNum = 12)
         {
             string err = null;
             using (var pathSafe = new RocksSafePath(path))
@@ -109,7 +109,7 @@ namespace Geek.Server
                     info.size = Native.Instance.rocksdb_backup_engine_info_size(infosPtr, i);
                     info.fileNumber = Native.Instance.rocksdb_backup_engine_info_number_files(infosPtr, i);
                     var timestamp = Native.Instance.rocksdb_backup_engine_info_timestamp(infosPtr, i);
-                    System.DateTime startTime = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local); // 当地时区
+                    DateTime startTime = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local); // 当地时区
                     info.time = startTime.AddSeconds(timestamp);
                 }
                 Native.Instance.rocksdb_backup_engine_info_destroy(infosPtr);

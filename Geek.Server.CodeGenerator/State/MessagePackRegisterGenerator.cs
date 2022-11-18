@@ -1,10 +1,9 @@
-﻿
+﻿using Geek.Server.CodeGenerator.Utils;
 using Microsoft.CodeAnalysis;
 using Scriban;
 using System.Collections.Generic;
-using Tools.Utils;
 
-namespace Geek.Server
+namespace Geek.Server.CodeGenerator.State
 {
     [Generator]
     public class MessagePackRegisterGenerator : ISourceGenerator
@@ -86,11 +85,11 @@ namespace Geek.Server
             }
             if (name == baseDBStateName)
             {
-                return "Geek.Server.InnerState";
+                return "Geek.Server.Core.Storage.InnerState";
             }
             if (name == dBStateName)
             {
-                return "Geek.Server.CacheState";
+                return "Geek.Server.Core.Storage.CacheState";
             }
             return "";
         }

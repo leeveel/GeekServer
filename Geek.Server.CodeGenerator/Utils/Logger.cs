@@ -1,9 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace Tools.Utils
+namespace Geek.Server.CodeGenerator.Utils
 {
     public static class Logger
     {

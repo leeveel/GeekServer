@@ -16,7 +16,7 @@ namespace {{space}}
 			{{~ if mth.threadsafe ~}}
 			_ = base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});
 			{{~ else ~}}
-			long callChainId = Geek.Server.WorkerActor.NextChainId();
+			long callChainId = Geek.Server.Core.Actors.Impl.WorkerActor.NextChainId();
 			_ = base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, callChainId, {{mth.timeout}});
 			{{~ end ~}}
 			return Task.CompletedTask;

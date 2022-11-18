@@ -1,5 +1,7 @@
-﻿
-namespace Geek.Server
+﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+
+namespace Geek.Server.Core.Hotfix.Agent
 {
     public interface ICompAgent
     {

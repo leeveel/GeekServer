@@ -1,4 +1,8 @@
-﻿namespace Geek.Server
+﻿using Geek.Server.App.Common.Session;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.Tcp.Handler;
+
+namespace Geek.Server.App.Common.Handler
 {
     public abstract class BaseRoleCompHandler : BaseCompHandler
     {

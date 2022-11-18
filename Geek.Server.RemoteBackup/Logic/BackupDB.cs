@@ -1,4 +1,6 @@
-﻿using NLog;
+﻿using Geek.Server.Core.Storage;
+using Geek.Server.Core.Storage.DB;
+using NLog;
 
 namespace Geek.Server.RemoteBackup.Logic
 {

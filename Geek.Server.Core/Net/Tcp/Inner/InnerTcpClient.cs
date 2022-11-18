@@ -3,8 +3,10 @@ using System.Net;
 using Bedrock.Framework;
 using NLog;
 using Geek.Server.Core.Center;
+using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Net.Messages;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Tcp.Inner
 {
     public enum NetCode
     {
@@ -42,10 +44,15 @@ namespace Geek.Server
             }
         }
 
-        public void Write(NMessage msg)
+        public void Write(NetMessage msg)
         {
             if (Channel != null && !Channel.IsClose())
                 Channel.WriteAsync(msg);
+        }
+
+        public void Write(Message msg)
+        {
+            Write(new NetMessage(msg));
         }
 
         protected void OnConnection(ConnectionContext connection)
@@ -100,7 +107,7 @@ namespace Geek.Server
         }
 
 
-        async Task Dispatcher(NMessage msg)
+        async Task Dispatcher(NetMessage msg)
         {
             //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
             var handler = HotfixMgr.GetTcpHandler(msg.MsgId);

@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Actors.Impl
 {
     internal class RuntimeContext
     {

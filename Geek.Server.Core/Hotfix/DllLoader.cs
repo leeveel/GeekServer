@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Hotfix
 {
     internal class DllLoader
     {

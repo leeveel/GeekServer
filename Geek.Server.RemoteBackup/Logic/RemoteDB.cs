@@ -1,7 +1,7 @@
 ﻿using MongoDB.Driver;
 using NLog;
 
-namespace Geek.Server
+namespace Geek.Server.RemoteBackup.Logic
 {
     public static class RemoteDB
     {

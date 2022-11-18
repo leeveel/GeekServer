@@ -1,8 +1,6 @@
-
 using MessagePack;
-using MessagePack.Resolvers;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Serialize
 {
     public class Serializer
     {

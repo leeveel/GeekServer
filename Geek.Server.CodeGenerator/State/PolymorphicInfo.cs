@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Geek.Server
+namespace Geek.Server.CodeGenerator.State
 {
     public class PolymorphicInfo
     {

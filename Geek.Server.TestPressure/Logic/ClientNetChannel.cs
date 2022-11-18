@@ -3,6 +3,7 @@ using MessagePack;
 using Microsoft.AspNetCore.Connections;
 using System.Net;
 using System.Buffers;
+using Geek.Server.Core.Net.Messages;
 
 namespace Test.Pressure
 {
@@ -20,7 +21,7 @@ namespace Test.Pressure
         ConnectionContext context;
         ProtocolReader reader;
         ProtocolWriter writer;
-        IProtocal<NMessage> protocol;
+        IProtocal<NetMessage> protocol;
 
         public ClientNetChannel(Client client)
         {
@@ -47,7 +48,7 @@ namespace Test.Pressure
             }
         }
 
-        public void Write(NMessage msg)
+        public void Write(NetMessage msg)
         {
             if (writer != null)
                 Task.Run(async () => await writer.WriteAsync(protocol, msg));
@@ -93,7 +94,7 @@ namespace Test.Pressure
         }
 
 
-        void Dispatcher(NMessage message)
+        void Dispatcher(NetMessage message)
         {
             var sReader = new SequenceReader<byte>(message.Payload);
 

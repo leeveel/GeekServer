@@ -1,7 +1,8 @@
-﻿using NLog;
+﻿using Geek.Server.Core.Storage;
+using NLog;
 using System.Collections.Concurrent;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Comps
 {
 
     public sealed class StateComp
@@ -44,7 +45,7 @@ namespace Geek.Server
                 Log.Fatal($"StateComp.SaveState.Failed.StateId:{State.Id},{e}");
                 return false;
             }
-            
+
         }
 
         public Task ReadStateAsync()

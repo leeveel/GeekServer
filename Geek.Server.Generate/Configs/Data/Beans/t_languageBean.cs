@@ -1,7 +1,9 @@
+
+using Geek.Server.Core.Utils;
 /**
- * Auto generated, do not edit it client
- * 语言表
- */
+* Auto generated, do not edit it client
+* 语言表
+*/
 namespace Geek.Server.Config
 {
     public class t_languageBean : BaseBin

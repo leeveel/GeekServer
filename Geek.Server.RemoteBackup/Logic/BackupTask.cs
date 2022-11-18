@@ -56,7 +56,7 @@
                     await Task.Delay(3000);
                 }
             }
-            catch (System.OperationCanceledException)
+            catch (OperationCanceledException)
             {
                 Log.Error("监听到关闭进程事件，取消正在执行的回存操作");
             }
@@ -83,7 +83,7 @@
 
         //最小回存间隔时间(3分钟)
         const int MIN_SAVE_INTERVAL_IN_MilliSECONDS = 180_000;
-        private static DateTime NextSaveTime(double cost=-1)
+        private static DateTime NextSaveTime(double cost = -1)
         {
             //如果是刚启动进程，等待10秒之后再开始备份
             if (cost < 0)

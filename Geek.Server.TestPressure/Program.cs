@@ -1,4 +1,6 @@
 ﻿
+using Geek.Server.Core.Actors;
+
 namespace Test.Pressure
 {
     class Program

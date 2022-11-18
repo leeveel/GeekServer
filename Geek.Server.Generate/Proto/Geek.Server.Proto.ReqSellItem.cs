@@ -1,13 +1,14 @@
 //auto generated, do not modify it
 
+using Geek.Server.Core.Net.Messages;
 using MessagePack;
 using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
-	[MessagePackObject(true)]
-	public class ReqSellItem : Geek.Server.Message
-	{
+    [MessagePackObject(true)]
+	public class ReqSellItem : Message
+    {
 		[IgnoreMember]
 		public const int Sid = -1395845865;
 

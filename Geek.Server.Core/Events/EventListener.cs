@@ -1,5 +1,6 @@
-﻿
-namespace Geek.Server
+﻿using Geek.Server.Core.Hotfix.Agent;
+
+namespace Geek.Server.Core.Events
 {
     public abstract class EventListener<T> : IEventListener where T : ICompAgent
     {

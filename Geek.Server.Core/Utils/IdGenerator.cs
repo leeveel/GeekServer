@@ -1,5 +1,6 @@
-﻿
-namespace Geek.Server
+﻿using Geek.Server.Core.Actors;
+
+namespace Geek.Server.Core.Utils
 {
 
     /// <summary>
@@ -62,11 +63,11 @@ namespace Geek.Server
             if (serverId < MIN_SERVER_ID)
             {
                 // IDModule unique_id
-                seconds = (id >> 16) & SECOND_MASK;
+                seconds = id >> 16 & SECOND_MASK;
             }
             else
             {
-                seconds = (id >> 12) & SECOND_MASK;
+                seconds = id >> 12 & SECOND_MASK;
             }
 
             var date = utcTimeStart.AddSeconds(seconds);
@@ -86,7 +87,7 @@ namespace Geek.Server
                 return (ActorType)(id % 1000);
             }
 
-            return (ActorType)((id >> 42) & 0xF);
+            return (ActorType)(id >> 42 & 0xF);
         }
 
         public static long GetActorID(int type, int serverId = 0)

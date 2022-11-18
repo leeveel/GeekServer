@@ -1,5 +1,4 @@
-
-namespace Geek.Server
+namespace Geek.Server.Core.Storage.DB
 {
     public class NotFindKeyException : Exception
     {

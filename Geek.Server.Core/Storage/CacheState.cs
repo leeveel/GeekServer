@@ -1,8 +1,10 @@
-﻿using MessagePack;
+﻿using Geek.Server.Core.Serialize;
+using Geek.Server.Core.Utils;
+using MessagePack;
 using MongoDB.Bson.Serialization.Attributes;
 using NLog;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Storage
 {
 
     /// <summary>

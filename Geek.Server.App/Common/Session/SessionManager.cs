@@ -1,8 +1,10 @@
-﻿
+﻿using Geek.Server.App.Common.Event;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Events;
 using Geek.Server.Proto;
 using System.Collections.Concurrent;
 
-namespace Geek.Server
+namespace Geek.Server.App.Common.Session
 {
     /// <summary>
     /// 管理玩家session，一个玩家一个，下线之后移除，顶号之后释放之前的channel，替换channel
@@ -23,7 +25,7 @@ namespace Geek.Server
             if (sessionMap.TryRemove(id, out Session session))
             {
                 connIdMap.TryRemove(session.ClientConnId, out _);
-                if(ActorMgr.HasActor(id))
+                if (ActorMgr.HasActor(id))
                     EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
             }
         }
@@ -79,7 +81,7 @@ namespace Geek.Server
                 }
             }
             sessionMap[session.Id] = session;
-            connIdMap[session.ClientConnId] = session.Id; 
+            connIdMap[session.ClientConnId] = session.Id;
         }
     }
 }

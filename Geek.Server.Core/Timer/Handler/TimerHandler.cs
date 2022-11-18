@@ -1,5 +1,6 @@
-﻿
-namespace Geek.Server
+﻿using Geek.Server.Core.Hotfix.Agent;
+
+namespace Geek.Server.Core.Timer.Handler
 {
     public abstract class TimerHandler<TAgent> : ITimerHandler where TAgent : ICompAgent
     {

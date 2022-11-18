@@ -1,4 +1,4 @@
-﻿namespace Geek.Server
+﻿namespace Geek.Server.Core.Timer
 {
     public interface ICrossDay
     {

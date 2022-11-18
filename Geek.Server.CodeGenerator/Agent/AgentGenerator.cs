@@ -1,11 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Geek.Server.CodeGenerator.Utils;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
-using System.Diagnostics;
-using Tools.Utils;
 
-namespace Geek.Server
+namespace Geek.Server.CodeGenerator.Agent
 {
     [Generator]
     public class AgentGenerator : ISourceGenerator
@@ -119,7 +118,7 @@ namespace Geek.Server
                                 continue;
 
                             if (mth.IsApi && !mth.Threadsafe && !mth.Returntype.Contains("Task"))
-                                context.LogError($"{fullName}.{method.Identifier.Text}, 非【Threadsafe】的【Api】接口只能是异步函数"); 
+                                context.LogError($"{fullName}.{method.Identifier.Text}, 非【Threadsafe】的【Api】接口只能是异步函数");
 
                             if ((mth.IsApi || mth.Discard || mth.Threadsafe) && !mth.IsVirtual)
                                 context.LogError($"{fullName}.{method.Identifier.Text}标记了【AsyncApi】【Threadsafe】【Discard】注解的函数必须申明为virtual");

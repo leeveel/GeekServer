@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Connections;
+﻿using Geek.Server.Core.Net.Messages;
+using Microsoft.AspNetCore.Connections;
 using NLog;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Tcp
 {
     public abstract class TcpConnectionHandler : ConnectionHandler
     {
@@ -56,9 +57,9 @@ namespace Geek.Server
 
         protected abstract void OnDisconnection(Connection conn);
 
-        protected abstract void Dispatcher(Connection conn, NMessage nmsg);
+        protected abstract void Dispatcher(Connection conn, NetMessage nmsg);
 
-        protected abstract void Decode(Connection conn, ref NMessage nmsg);
+        protected abstract void Decode(Connection conn, ref NetMessage nmsg);
 
     }
 }

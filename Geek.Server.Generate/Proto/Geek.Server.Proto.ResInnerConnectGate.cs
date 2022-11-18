@@ -1,12 +1,13 @@
 //auto generated, do not modify it
 
+using Geek.Server.Core.Net.Messages;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
-	[MessagePackObject(true)]
-	public class ResInnerConnectGate : Geek.Server.Message
-	{
+    [MessagePackObject(true)]
+	public class ResInnerConnectGate : Message
+    {
 		[IgnoreMember]
 		public const int Sid = 1306001561;
 
