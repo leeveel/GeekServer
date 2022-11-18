@@ -66,7 +66,7 @@ namespace Geek.Server.Role
 
         public void NotifyClient(Message msg, int uniId=0, StateCode code = StateCode.Success)
         {
-            var channel = HotfixMgr.SessionMgr.GetChannel(ActorId);
+            var channel = SessionManager.GetChannel(ActorId);
             if (channel != null && !channel.IsClose())
             {
                 channel.WriteAsync(msg, uniId, code);

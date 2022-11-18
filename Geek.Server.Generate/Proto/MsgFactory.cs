@@ -9,7 +9,7 @@ namespace Geek.Server.Proto
 
         static MsgFactory()
         {
-            lookup = new System.Collections.Generic.Dictionary<int, Type>(16)
+            lookup = new System.Collections.Generic.Dictionary<int, Type>(17)
             {
 			    { -399658839, typeof(Geek.Server.Proto.ReqBagInfo) },
 			    { -768070425, typeof(Geek.Server.Proto.ResBagInfo) },
@@ -27,6 +27,7 @@ namespace Geek.Server.Proto
 			    { 1405557910, typeof(Geek.Server.Proto.ResLevelUp) },
 			    { 1771311297, typeof(Geek.Server.Proto.HearBeat) },
 			    { -138811813, typeof(Geek.Server.Proto.ResErrorCode) },
+			    { -353424320, typeof(Geek.Server.Proto.ResPrompt) },
             };
         }
 

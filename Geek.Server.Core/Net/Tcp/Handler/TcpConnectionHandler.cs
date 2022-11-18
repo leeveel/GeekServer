@@ -55,17 +55,14 @@ namespace Geek.Server
             OnDisconnection(channel);
         }
 
-        protected void OnConnection(ConnectionContext connection)
+        protected virtual void OnConnection(ConnectionContext connection)
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
         }
 
-        protected void OnDisconnection(NetChannel channel)
+        protected virtual void OnDisconnection(NetChannel channel)
         {
             LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-            var sessionId = channel.GetSessionId();
-            if (sessionId > 0)
-                HotfixMgr.SessionMgr.Remove(sessionId);
         }
 
         protected async Task Dispatcher(NetChannel channel, Message msg)

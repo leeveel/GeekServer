@@ -26,6 +26,7 @@ namespace Geek.Server.Proto
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResLevelUp>(1405557910);
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.HearBeat>(1771311297);
 			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResErrorCode>(-138811813);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResPrompt>(-353424320);
         }
 	}
 }

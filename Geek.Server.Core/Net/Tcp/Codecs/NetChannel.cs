@@ -58,10 +58,17 @@ namespace Geek.Server
             Writer = null;
         }
 
-        public void WriteAsync(NMessage msg)
+        public async ValueTask WriteAsync(NMessage msg)
         {
             if (Writer != null)
-                _ = Writer.WriteAsync(Protocol, msg);
+                await Writer.WriteAsync(Protocol, msg);
         }
+
+        public void WriteAsync(Message msg)
+        {
+            WriteAsync(msg);
+        }
+
+
     }
 }

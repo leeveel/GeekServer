@@ -114,8 +114,6 @@ namespace Geek.Server
             return module.FindListeners(actorType, evtId) ?? EMPTY_LISTENER_LIST;
         }
 
-        public static ISessionMgr SessionMgr => module?.SessionMgr;
-
         private static readonly List<IEventListener> EMPTY_LISTENER_LIST = new();
 
         /// <summary>

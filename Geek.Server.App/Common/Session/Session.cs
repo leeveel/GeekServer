@@ -25,7 +25,7 @@ namespace Geek.Server
 
         public void WriteAsync(Message msg)
         {
-            Channel?.WriteAsync(new NMessage(msg));
+            Channel?.WriteAsync(msg);
         }
     }
 }

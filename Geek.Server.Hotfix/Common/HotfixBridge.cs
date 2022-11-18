@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.AspNetCore.Connections;
+
 namespace Geek.Server
 {
     internal class HotfixBridge : IHotfixBridge
@@ -16,7 +18,8 @@ namespace Geek.Server
             }
 
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
-            await TcpServer.Start(Settings.TcpPort);
+            //await TcpServer.Start(Settings.TcpPort);
+            await TcpServer.Start(Settings.TcpPort, builder => builder.UseConnectionHandler<AppTcpConnectionHandler>());
             Log.Info("tcp 服务启动完成...");
             await HttpServer.Start(Settings.HttpPort);
             MongoDBConnection.Init(Settings.MongoUrl, Settings.DbName);
@@ -47,7 +50,7 @@ namespace Geek.Server
         public async Task Stop()
         {
             // 断开所有连接
-            await (HotfixMgr.SessionMgr?.RemoveAll() ?? Task.CompletedTask);
+            await SessionManager.RemoveAll();
             // 取消所有未执行定时器
             await QuartzTimer.Stop();
             // 保证actor之前的任务都执行完毕

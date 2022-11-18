@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Connections;
 using NLog.Web;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace Geek.Server
 {
@@ -27,6 +28,23 @@ namespace Geek.Server
                 {
                     builder.UseConnectionHandler<TcpConnectionHandler>();
                 });
+            })
+            .ConfigureLogging(logging =>
+            {
+                logging.SetMinimumLevel(LogLevel.Error);
+            })
+            .UseNLog();
+
+            var app = builder.Build();
+            return app.StartAsync();
+        }
+
+        public static Task Start(int port, Action<ListenOptions> configure)
+        {
+            var builder = WebApplication.CreateBuilder();
+            builder.WebHost.UseKestrel(options =>
+            {
+                options.ListenAnyIP(port, configure);
             })
             .ConfigureLogging(logging =>
             {
