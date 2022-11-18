@@ -6,7 +6,7 @@
         {
             if (ActorId <= 0)
             {
-                var session = SessionManager.GetByTargetId(TargetId);
+                var session = SessionManager.GetByClientConnId(ClientConnId);
                 ActorId = session.Id;
             }
             return Task.CompletedTask;

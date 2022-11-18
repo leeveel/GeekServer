@@ -12,10 +12,10 @@ namespace Geek.Server.Gateway.Logic.Net
             LOGGER.Debug($"{context.RemoteEndPoint?.ToString()} 链接成功");
             var conn = new Connection
             {
-                //Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId),
+                Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId),
                 Channel = new NetChannel(context, new InnerProtocol())
             };
-            //GateNetHelper.ServerConns.Add(conn);
+            GateNetMgr.ServerConns.Add(conn);
             return conn;
         }
 
@@ -37,8 +37,8 @@ namespace Geek.Server.Gateway.Logic.Net
             else
             {
                 //分发到客户端(客户端有可能已经断开，找不到)
-                var clientConn = GateNetMgr.ClientConns.Get(nmsg.TargetId); 
-                clientConn?.Channel.WriteAsync(nmsg);
+                var clientConn = GateNetMgr.ClientConns.Get(nmsg.ClientConnId); 
+                clientConn?.WriteAsync(nmsg);
             }
         }
 

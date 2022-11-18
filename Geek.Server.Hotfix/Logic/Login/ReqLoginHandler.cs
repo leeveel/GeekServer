@@ -8,8 +8,8 @@ namespace Geek.Server.Login
         {
             var session = new Session
             {
-                TargetId = TargetId,
-                NodeId = NodeId
+                ClientConnId = ClientConnId,
+                GateNodeId = GateNodeId
             };
             await Comp.OnLogin(session, Msg as ReqLogin);
         }

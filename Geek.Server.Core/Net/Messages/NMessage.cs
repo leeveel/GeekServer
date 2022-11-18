@@ -20,7 +20,11 @@ namespace Geek.Server
 
         public byte[] MsgRaw = null;
 
-        public long TargetId = 0;
+        /// <summary>
+        /// 客户端网络连接ID
+        /// </summary>
+        public long ClientConnId = 0;
+
         public Message Msg { get; } = null;
 
         public NMessage(int msgId, byte[] msgData)

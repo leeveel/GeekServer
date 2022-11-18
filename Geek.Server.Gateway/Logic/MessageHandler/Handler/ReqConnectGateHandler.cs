@@ -14,8 +14,8 @@ namespace Geek.Server.Gateway.MessageHandler
             var nodeId = GateNetMgr.SelectAHealthNode(req.ServerId);
             if (nodeId > 0)
             {
-                //设置client connection的targetid
-                conn.TargetId = nodeId;
+                //设置client connection的nodeId
+                conn.NodeId = nodeId;
                 var res = new ResConnectGate
                 {
                     ServerId = req.ServerId,
@@ -30,7 +30,7 @@ namespace Geek.Server.Gateway.MessageHandler
                 {
                     NodeId = req.ServerId
                 };
-                conn.Channel.WriteAsync(new NMessage(res));
+                WriteWithStatus(conn, res, req.UniId);
             }
         }
 

@@ -35,21 +35,17 @@ namespace Geek.Server.Gateway.Logic.Net
 
         public static long SelectAHealthNode(int serverId)
         {
+            //TODO:分布式中一个大服的网络节点会存在多个
             //TODO:选择一个负载最小的节点
-            var nodes = ServerConns.GetAllNodes();
-            foreach (var node in nodes)
-            {
-                if (node.Id == serverId)
-                {
-                    return node.Id;
-                }
-            }
+            var conn = ServerConns.GetByNodeId(serverId);
+            if(conn != null)
+                return conn.NodeId;
             return -1;
         }
 
-        public static int GetNodeCount()
+        public static int GetConnectionCount()
         {
-            return ClientConns.GetNodeCount();
+            return ClientConns.GetConnectionCount();
         }
 
     }

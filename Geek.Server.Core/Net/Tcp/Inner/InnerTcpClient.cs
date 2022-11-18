@@ -109,8 +109,8 @@ namespace Geek.Server
                 LOGGER.Error($"找不到[{msg.MsgId}][{msg.GetType()}]对应的handler");
                 return;
             }
-            handler.TargetId = msg.TargetId;
-            handler.NodeId = netNode.NodeId;
+            handler.ClientConnId = msg.ClientConnId;
+            handler.GateNodeId = netNode.NodeId;
             handler.Msg = MessagePack.MessagePackSerializer.Deserialize<Message>(msg.MsgRaw);
             await handler.Init();
             await handler.InnerAction();

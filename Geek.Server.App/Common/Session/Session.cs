@@ -13,12 +13,12 @@ namespace Geek.Server
         /// <summary>
         /// 在网关中的id
         /// </summary>
-        public long TargetId { get; set; }
+        public long ClientConnId { get; set; }
 
         /// <summary>
         /// 网关节点id
         /// </summary>
-        public int NodeId { get; set; }
+        public int GateNodeId { get; set; }
 
         /// <summary>
         /// 连接时间
@@ -35,14 +35,14 @@ namespace Geek.Server
             var channel = GetNetChannel();
             var nmsg = new NMessage(msg)
             {
-                TargetId = TargetId
+                ClientConnId = ClientConnId
             };
             channel?.WriteAsync(nmsg);
         }
 
         public NetChannel GetNetChannel()
         {
-            var session = AppNetMgr.GetClientByNodeId(NodeId);
+            var session = AppNetMgr.GetClientByNodeId(GateNodeId);
             return session?.Channel;
         }
 

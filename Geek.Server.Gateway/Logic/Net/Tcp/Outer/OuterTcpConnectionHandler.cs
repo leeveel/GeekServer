@@ -36,9 +36,9 @@ namespace Geek.Server.Gateway.Logic.Net.Tcp.Outer
             else
             {
                 //分发到game server
-                var serverConn = GateNetMgr.ServerConns.Get(conn.TargetId);
-                nmsg.TargetId = conn.Id;
-                serverConn.Channel.WriteAsync(nmsg);
+                var serverConn = GateNetMgr.ServerConns.GetByNodeId(conn.NodeId);
+                nmsg.ClientConnId = conn.Id;
+                serverConn?.WriteAsync(nmsg);
             }
         }
 

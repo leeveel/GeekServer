@@ -47,10 +47,10 @@ namespace Test.Pressure
             }
         }
 
-        public void Write(NMessage msg, CancellationToken cancellationToken = default)
+        public void Write(NMessage msg)
         {
             if (writer != null)
-                _ = writer.WriteAsync(protocol, msg, cancellationToken);
+                Task.Run(async () => await writer.WriteAsync(protocol, msg));
         }
 
         void ConnectionClosed()

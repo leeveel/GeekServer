@@ -27,11 +27,11 @@ namespace Geek.Server
         public void WriteMessage(NMessage nmsg, IBufferWriter<byte> output)
         {
             byte[] bytes = nmsg.GetBytes();
-            int len = 16 + bytes.Length; //len(4) + targetId(8) + msgid(4)
+            int len = 16 + bytes.Length; //len(4) + clientConnId(8) + msgid(4)
             var span = output.GetSpan(len);
             int offset = 0;
             XBuffer.WriteInt(len, span, ref offset);
-            XBuffer.WriteLong(nmsg.TargetId, span, ref offset);
+            XBuffer.WriteLong(nmsg.ClientConnId, span, ref offset);
             XBuffer.WriteInt(nmsg.MsgId, span, ref offset);
             XBuffer.WriteBytesWithoutLength(bytes, span, ref offset);
             output.Advance(len);

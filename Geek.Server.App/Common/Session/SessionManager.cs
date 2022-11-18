@@ -10,6 +10,9 @@ namespace Geek.Server
     public static class SessionManager
     {
         internal static ConcurrentDictionary<long, Session> sessionMap = new();
+        //connId - session.id
+        internal static readonly ConcurrentDictionary<long, long> connIdMap = new();
+
         public static int Count()
         {
             return sessionMap.Count;
@@ -17,9 +20,11 @@ namespace Geek.Server
 
         public static void Remove(long id)
         {
-            if (sessionMap.TryRemove(id, out var _) && ActorMgr.HasActor(id))
+            if (sessionMap.TryRemove(id, out Session session))
             {
-                EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
+                connIdMap.TryRemove(session.ClientConnId, out _);
+                if(ActorMgr.HasActor(id))
+                    EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
             }
         }
 
@@ -33,14 +38,8 @@ namespace Geek.Server
                 }
             }
             sessionMap.Clear();
+            connIdMap.Clear();
             return Task.CompletedTask;
-        }
-
-
-        public static NetChannel GetChannel(long id)
-        {
-            sessionMap.TryGetValue(id, out Session session);
-            return session?.GetNetChannel();
         }
 
         public static Session Get(long id)
@@ -49,14 +48,12 @@ namespace Geek.Server
             return session;
         }
 
-        public static Session GetByTargetId(long id)
+        public static Session GetByClientConnId(long connId)
         {
-            foreach (var item in sessionMap)
+            if (connIdMap.TryGetValue(connId, out long id))
             {
-                if (item.Value.TargetId == id)
-                {
-                    return item.Value;
-                }
+                sessionMap.TryGetValue(id, out Session session);
+                return session;
             }
             return null;
         }
@@ -73,15 +70,16 @@ namespace Geek.Server
                         Type = 5,
                         Content = "你的账号已在其他设备上登陆"
                     };
-                    //old.WriteAsync(msg);
+                    old.WriteAsync(msg);
                 }
-                else if (old.NodeId != session.NodeId)
+                else if (old.GateNodeId != session.GateNodeId)
                 {
                     //do nothing
                     //同一个设备从不同的网络服重连上来
                 }
             }
             sessionMap[session.Id] = session;
+            connIdMap[session.ClientConnId] = session.Id; 
         }
     }
 }

@@ -4,9 +4,12 @@ namespace Geek.Server
     public abstract class BaseTcpHandler
     {
 
-        public int NodeId { get; set; }
+        public int GateNodeId { get; set; }
 
-        public long TargetId { get; set; }
+        /// <summary>
+        /// 客户端网络连接id
+        /// </summary>
+        public long ClientConnId { get; set; }
 
         public Message Msg { get; set; }
 

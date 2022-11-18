@@ -5,8 +5,6 @@ namespace Geek.Server
 {
     public class NetChannel
     {
-        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-
         public const string SESSIONID = "SESSIONID";
         public ConnectionContext Context { get; protected set; }
         public ProtocolReader Reader { get; protected set; }
@@ -61,7 +59,13 @@ namespace Geek.Server
         public void WriteAsync(NMessage msg)
         {
             if (Writer != null)
-                _ = Writer.WriteAsync(Protocol, msg);
+                _ = Task.Run(async () => await Writer.WriteAsync(Protocol, msg));
         }
+
+        public void WriteAsync(Message msg)
+        {
+            WriteAsync(new NMessage(msg));
+        }
+
     }
 }

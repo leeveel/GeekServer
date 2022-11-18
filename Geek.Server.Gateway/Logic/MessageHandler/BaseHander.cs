@@ -13,7 +13,7 @@ namespace Geek.Server.Gateway.MessageHandler
         protected void WriteWithStatus(Connection conn, Message msg, int uniId)
         {
             msg.UniId = uniId;
-            conn.Channel.WriteAsync(new NMessage(msg));
+            conn.WriteAsync(new NMessage(msg));
             if (uniId > 0)
             {
                 var res = new ResErrorCode
@@ -22,7 +22,7 @@ namespace Geek.Server.Gateway.MessageHandler
                     ErrCode = 0,
                     Desc = ""
                 };
-                conn.Channel.WriteAsync(new NMessage(res));
+                conn.WriteAsync(new NMessage(res));
             }
         }
     }

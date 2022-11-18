@@ -19,8 +19,8 @@ namespace Geek.Server
             if (!CheckMsgLen(msgLen))
                 return;
 
-            reader.TryReadBigEndian(out long targetId); // 8
-            msg.TargetId = targetId;
+            reader.TryReadBigEndian(out long connId); // 8
+            msg.ClientConnId = connId;
 
             reader.TryReadBigEndian(out int msgId);     //4
             msg.MsgId = msgId;
@@ -35,7 +35,7 @@ namespace Geek.Server
         /// <returns></returns>
         public static bool CheckMsgLen(int msgLen)
         {
-            //msglen(4)+targetId(8)+msgId(4)=16位
+            //msglen(4)+cliengConnId(8)+msgId(4)=16位
             if (msgLen <= 12)//(消息长度已经被读取)
             {
                 LOGGER.Error("从客户端接收的包大小异常:" + msgLen + ":至少大于12个字节");

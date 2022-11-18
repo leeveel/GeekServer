@@ -9,14 +9,12 @@ namespace Geek.Server.Gateway.MessageHandler
         public override void Action(Connection conn, Message msg)
         {
             var req = msg as ReqInnerConnectGate;
-            //conn.TargetId = req.NodeId;
-            conn.Id = req.NodeId;
-            GateNetMgr.ServerConns.Add(conn);
+            GateNetMgr.ServerConns.SetNodeId(conn, req.NodeId);
             var res = new ResInnerConnectGate
             {
                 IsSuccess = true
             };
-            conn.Channel.WriteAsync(new NMessage(res));
+            conn.WriteAsync(new NMessage(res));
         }
     }
 }

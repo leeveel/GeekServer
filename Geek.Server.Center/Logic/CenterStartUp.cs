@@ -6,7 +6,7 @@ namespace Geek.Server.Center.Logic
 {
     internal class CenterStartUp
     {
-        static NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
+        static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         public static async Task Enter()
         {
             try
