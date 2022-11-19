@@ -1,9 +1,8 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using Bedrock.Framework.Protocols;
-using MessagePack;
+using Geek.Server.Core.Net.Messages;
 
-namespace Test.Pressure
+namespace Geek.Server.TestPressure.Logic
 {
     public class ClientLengthPrefixedProtocol : IProtocal<NMessage>
     {

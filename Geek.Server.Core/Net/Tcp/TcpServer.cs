@@ -1,11 +1,12 @@
+using Geek.Server.Core.Net.Tcp.Handler;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Connections;
-using NLog.Web;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Logging;
+using NLog.Web;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Tcp
 {
     /// <summary>
     /// TCP server

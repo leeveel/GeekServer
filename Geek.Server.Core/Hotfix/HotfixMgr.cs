@@ -1,8 +1,13 @@
-﻿
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Reflection;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Events;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.Http;
+using Geek.Server.Core.Net.Tcp.Handler;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Hotfix
 {
     public class HotfixMgr
     {

@@ -1,8 +1,6 @@
 ﻿using MessagePack;
-using System;
-using System.Collections.Generic;
 
-namespace PolymorphicMessagePack
+namespace Geek.Server.Core.Serialize.PolymorphicMessagePack
 {
     public class PolymorphicMessagePackSettings
     {

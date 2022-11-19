@@ -118,7 +118,7 @@
 // [6] R. Baillie and S. S. Wagstaff Jr, "Lucas Pseudoprimes", Mathematics of Computation,
 //     Vol. 35, No. 152, Oct 1980, pp. 1391-1417.
 //
-// [7] H. C. Williams, "Édouard Lucas and Primality Testing", Canadian Mathematical
+// [7] H. C. Williams, "Ã‰douard Lucas and Primality Testing", Canadian Mathematical
 //     Society Series of Monographs and Advance Texts, vol. 22, John Wiley & Sons, New York,
 //     NY, 1998.
 //
@@ -130,8 +130,7 @@
 //
 //************************************************************************************
 
-using System;
-
+namespace Geek.Server.Core.Utils;
 
 public class BigInteger
 {
@@ -145,24 +144,24 @@ public class BigInteger
     public static readonly int[] primesBelow2000 = {
         2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
         101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199,
-    211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293,
-    307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397,
-    401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499,
-    503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599,
-    601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691,
-    701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797,
-    809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887,
-    907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997,
-    1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087, 1091, 1093, 1097,
-    1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193,
-    1201, 1213, 1217, 1223, 1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297,
-    1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373, 1381, 1399,
-    1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499,
-    1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597,
-    1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637, 1657, 1663, 1667, 1669, 1693, 1697, 1699,
-    1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789,
-    1801, 1811, 1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889,
-    1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987, 1993, 1997, 1999 };
+        211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293,
+        307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397,
+        401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499,
+        503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599,
+        601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691,
+        701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797,
+        809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887,
+        907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997,
+        1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087, 1091, 1093, 1097,
+        1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193,
+        1201, 1213, 1217, 1223, 1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297,
+        1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367, 1373, 1381, 1399,
+        1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499,
+        1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597,
+        1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637, 1657, 1663, 1667, 1669, 1693, 1697, 1699,
+        1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789,
+        1801, 1811, 1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889,
+        1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979, 1987, 1993, 1997, 1999 };
 
 
     private uint[] data = null;             // stores bytes from the Big Integer
@@ -514,7 +513,7 @@ public class BigInteger
         // overflow check
         int lastPos = maxLength - 1;
         if ((bi1.data[lastPos] & 0x80000000) == (bi2.data[lastPos] & 0x80000000) &&
-           (result.data[lastPos] & 0x80000000) != (bi1.data[lastPos] & 0x80000000))
+            (result.data[lastPos] & 0x80000000) != (bi1.data[lastPos] & 0x80000000))
         {
             throw (new ArithmeticException());
         }
@@ -560,7 +559,7 @@ public class BigInteger
         // change to negative.
 
         if ((bi1.data[lastPos] & 0x80000000) == 0 &&
-           (result.data[lastPos] & 0x80000000) != (bi1.data[lastPos] & 0x80000000))
+            (result.data[lastPos] & 0x80000000) != (bi1.data[lastPos] & 0x80000000))
         {
             throw (new ArithmeticException("Overflow in ++."));
         }
@@ -608,7 +607,7 @@ public class BigInteger
 
         int lastPos = maxLength - 1;
         if ((bi1.data[lastPos] & 0x80000000) != (bi2.data[lastPos] & 0x80000000) &&
-           (result.data[lastPos] & 0x80000000) != (bi1.data[lastPos] & 0x80000000))
+            (result.data[lastPos] & 0x80000000) != (bi1.data[lastPos] & 0x80000000))
         {
             throw (new ArithmeticException());
         }
@@ -655,7 +654,7 @@ public class BigInteger
         // change to positive.
 
         if ((bi1.data[lastPos] & 0x80000000) != 0 &&
-           (result.data[lastPos] & 0x80000000) != (bi1.data[lastPos] & 0x80000000))
+            (result.data[lastPos] & 0x80000000) != (bi1.data[lastPos] & 0x80000000))
         {
             throw (new ArithmeticException("Underflow in --."));
         }
@@ -701,7 +700,7 @@ public class BigInteger
                 {
                     // k = i + j
                     ulong val = ((ulong)bi1.data[i] * (ulong)bi2.data[j]) +
-                                 (ulong)result.data[k] + mcarry;
+                                (ulong)result.data[k] + mcarry;
 
                     result.data[k] = (uint)(val & 0xFFFFFFFF);
                     mcarry = (val >> 32);
@@ -1073,7 +1072,7 @@ public class BigInteger
     //***********************************************************************
 
     private static void multiByteDivide(BigInteger bi1, BigInteger bi2,
-                                        BigInteger outQuotient, BigInteger outRemainder)
+        BigInteger outQuotient, BigInteger outRemainder)
     {
         uint[] result = new uint[maxLength];
 
@@ -1098,12 +1097,12 @@ public class BigInteger
         bi2 = bi2 << shift;
 
         /*
-        Console.WriteLine("bi1 Len = {0}, bi2 Len = {1}", bi1.dataLength, bi2.dataLength);
-        Console.WriteLine("dividend = " + bi1 + "\ndivisor = " + bi2);
-        for(int q = remainderLen - 1; q >= 0; q--)
-                Console.Write("{0:x2}", remainder[q]);
-        Console.WriteLine();
-        */
+    Console.WriteLine("bi1 Len = {0}, bi2 Len = {1}", bi1.dataLength, bi2.dataLength);
+    Console.WriteLine("dividend = " + bi1 + "\ndivisor = " + bi2);
+    for(int q = remainderLen - 1; q >= 0; q--)
+            Console.Write("{0:x2}", remainder[q]);
+    Console.WriteLine();
+    */
 
         int j = remainderLen - bi2.dataLength;
         int pos = remainderLen - 1;
@@ -1130,7 +1129,7 @@ public class BigInteger
                 done = true;
 
                 if (q_hat == 0x100000000 ||
-                   (q_hat * secondDivisorByte) > ((r_hat << 32) + remainder[pos - 2]))
+                    (q_hat * secondDivisorByte) > ((r_hat << 32) + remainder[pos - 2]))
                 {
                     q_hat--;
                     r_hat += firstDivisorByte;
@@ -1163,11 +1162,11 @@ public class BigInteger
                 remainder[pos - h] = yy.data[bi2.dataLength - h];
 
             /*
-            Console.WriteLine("dividend = ");
-            for(int q = remainderLen - 1; q >= 0; q--)
-                    Console.Write("{0:x2}", remainder[q]);
-            Console.WriteLine("\n************ q_hat = {0:X}\n", q_hat);
-            */
+        Console.WriteLine("dividend = ");
+        for(int q = remainderLen - 1; q >= 0; q--)
+                Console.Write("{0:x2}", remainder[q]);
+        Console.WriteLine("\n************ q_hat = {0:X}\n", q_hat);
+        */
 
             result[resultPos++] = (uint)q_hat;
 
@@ -1203,7 +1202,7 @@ public class BigInteger
     //***********************************************************************
 
     private static void singleByteDivide(BigInteger bi1, BigInteger bi2,
-                                         BigInteger outQuotient, BigInteger outRemainder)
+        BigInteger outQuotient, BigInteger outRemainder)
     {
         uint[] result = new uint[maxLength];
         int resultPos = 0;
@@ -1687,7 +1686,7 @@ public class BigInteger
             {
                 // t = i + j
                 ulong val = ((ulong)q3.data[i] * (ulong)n.data[j]) +
-                             (ulong)r2.data[t] + mcarry;
+                            (ulong)r2.data[t] + mcarry;
 
                 r2.data[t] = (uint)(val & 0xFFFFFFFF);
                 mcarry = (val >> 32);
@@ -2004,11 +2003,11 @@ public class BigInteger
             BigInteger b = a.modPow(t, thisVal);
 
             /*
-            Console.WriteLine("a = " + a.ToString(10));
-            Console.WriteLine("b = " + b.ToString(10));
-            Console.WriteLine("t = " + t.ToString(10));
-            Console.WriteLine("s = " + s);
-            */
+        Console.WriteLine("a = " + a.ToString(10));
+        Console.WriteLine("b = " + b.ToString(10));
+        Console.WriteLine("t = " + t.ToString(10));
+        Console.WriteLine("s = " + s);
+        */
 
             bool result = false;
 
@@ -2205,12 +2204,12 @@ public class BigInteger
         long Q = (1 - D) >> 2;
 
         /*
-        Console.WriteLine("D = " + D);
-        Console.WriteLine("Q = " + Q);
-        Console.WriteLine("(n,D) = " + thisVal.gcd(D));
-        Console.WriteLine("(n,Q) = " + thisVal.gcd(Q));
-        Console.WriteLine("J(D|n) = " + BigInteger.Jacobi(D, thisVal));
-        */
+    Console.WriteLine("D = " + D);
+    Console.WriteLine("Q = " + Q);
+    Console.WriteLine("(n,D) = " + thisVal.gcd(D));
+    Console.WriteLine("(n,Q) = " + thisVal.gcd(Q));
+    Console.WriteLine("J(D|n) = " + BigInteger.Jacobi(D, thisVal));
+    */
 
         BigInteger p_add1 = thisVal + 1;
         int s = 0;
@@ -2247,7 +2246,7 @@ public class BigInteger
         bool isPrime = false;
 
         if ((lucas[0].dataLength == 1 && lucas[0].data[0] == 0) ||
-           (lucas[1].dataLength == 1 && lucas[1].data[0] == 0))
+            (lucas[1].dataLength == 1 && lucas[1].data[0] == 0))
         {
             // u(t) = 0 or V(t) = 0
             isPrime = true;
@@ -2325,8 +2324,8 @@ public class BigInteger
             {
                 /*
 Console.WriteLine("Not prime!  Divisible by {0}\n",
-                                  primesBelow2000[p]);
-                */
+                              primesBelow2000[p]);
+            */
                 return false;
             }
         }
@@ -2626,11 +2625,11 @@ Console.WriteLine("Not prime!  Divisible by {0}\n",
                 multiByteDivide(a, b, quotient, remainder);
 
             /*
-            Console.WriteLine(quotient.dataLength);
-            Console.WriteLine("{0} = {1}({2}) + {3}  p = {4}", a.ToString(10),
-                              b.ToString(10), quotient.ToString(10), remainder.ToString(10),
-                              p[1].ToString(10));
-            */
+        Console.WriteLine(quotient.dataLength);
+        Console.WriteLine("{0} = {1}({2}) + {3}  p = {4}", a.ToString(10),
+                          b.ToString(10), quotient.ToString(10), remainder.ToString(10),
+                          p[1].ToString(10));
+        */
 
             q[0] = q[1];
             r[0] = r[1];
@@ -2826,7 +2825,7 @@ Console.WriteLine("Not prime!  Divisible by {0}\n",
     //***********************************************************************
 
     public static BigInteger[] LucasSequence(BigInteger P, BigInteger Q,
-                                             BigInteger k, BigInteger n)
+        BigInteger k, BigInteger n)
     {
         if (k.dataLength == 1 && k.data[0] == 0)
         {
@@ -2880,8 +2879,8 @@ Console.WriteLine("Not prime!  Divisible by {0}\n",
     //***********************************************************************
 
     private static BigInteger[] LucasSequenceHelper(BigInteger P, BigInteger Q,
-                                                    BigInteger k, BigInteger n,
-                                                    BigInteger constant, int s)
+        BigInteger k, BigInteger n,
+        BigInteger constant, int s)
     {
         BigInteger[] result = new BigInteger[3];
 
@@ -2894,7 +2893,7 @@ Console.WriteLine("Not prime!  Divisible by {0}\n",
         // v = v0, v1 = v1, u1 = u1, Q_k = Q^0
 
         BigInteger v = 2 % n, Q_k = 1 % n,
-                   v1 = P % n, u1 = Q_k;
+            v1 = P % n, u1 = Q_k;
         bool flag = true;
 
         for (int i = k.dataLength - 1; i >= 0; i--)     // iterate on the binary expansion of k

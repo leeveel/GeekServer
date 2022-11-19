@@ -1,8 +1,8 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using Bedrock.Framework.Protocols;
+using Geek.Server.Core.Net.Messages;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Tcp.Codecs
 {
     public class LengthPrefixedProtocol : IProtocal<NMessage>
     {

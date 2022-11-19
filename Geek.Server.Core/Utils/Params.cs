@@ -1,4 +1,6 @@
-﻿public abstract class Param
+﻿namespace Geek.Server.Core.Utils;
+
+public abstract class Param
 {
 }
 

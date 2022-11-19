@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Tools.Utils
+namespace Geek.Server.CodeGenerator.Utils
 {
     public class ResLoader
     {

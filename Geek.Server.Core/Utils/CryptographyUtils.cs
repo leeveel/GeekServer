@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Utils
 {
     public static class CryptographyUtils
     {

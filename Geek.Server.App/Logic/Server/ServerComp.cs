@@ -1,5 +1,9 @@
 ﻿
-namespace Geek.Server.Server
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Storage;
+
+namespace Geek.Server.App.Logic.Server
 {
 
     public class ServerState : CacheState

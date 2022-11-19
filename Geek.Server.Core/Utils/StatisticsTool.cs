@@ -1,7 +1,8 @@
 ﻿
 using System.Text;
+using Geek.Server.Core.Actors.Impl;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Utils
 {
     public class StatisticsTool
     {

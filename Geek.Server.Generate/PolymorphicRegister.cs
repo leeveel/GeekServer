@@ -1,6 +1,6 @@
-﻿using MessagePack;
+﻿using Geek.Server.Core.Serialize.PolymorphicMessagePack;
+using MessagePack;
 using MessagePack.Resolvers;
-using PolymorphicMessagePack;
 
 namespace Geek.Server.Proto
 {

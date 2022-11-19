@@ -1,6 +1,10 @@
 ﻿using System.Collections.Concurrent;
+using Geek.Server.Core.Actors.Impl;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Timer;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Actors
 {
     sealed public class Actor
     {

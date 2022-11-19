@@ -1,4 +1,6 @@
-﻿namespace System.Collections.Generic
+﻿using Geek.Server.Core.Utils;
+
+namespace System.Collections.Generic
 {
     public static class CollectionExtensions
     {

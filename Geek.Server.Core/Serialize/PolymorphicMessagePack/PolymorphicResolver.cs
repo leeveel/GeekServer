@@ -1,9 +1,8 @@
-﻿using MessagePack;
+﻿using System.Collections.Concurrent;
+using MessagePack;
 using MessagePack.Formatters;
-using System;
-using System.Collections.Concurrent;
 
-namespace PolymorphicMessagePack
+namespace Geek.Server.Core.Serialize.PolymorphicMessagePack
 {
 
     internal sealed class PolymorphicResolver : IFormatterResolver

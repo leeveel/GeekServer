@@ -1,6 +1,6 @@
 ﻿using MessagePack;
 
-namespace PolymorphicMessagePack
+namespace Geek.Server.Core.Serialize.PolymorphicMessagePack
 {
     //I created this, because I have no clue how to create a delegate (MethodInfo.Invoke is too slow), that uses the generic parameter of the class (As opposed to a generic method that has it's own parameter 'T'). 
     //Is this the only way?

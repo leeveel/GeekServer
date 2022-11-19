@@ -1,8 +1,8 @@
-﻿
-using Newtonsoft.Json;
-using ServerLink;
+﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Storage;
 
-namespace Geek.Server.Role
+namespace Geek.Server.App.Logic.Role.Bag
 {
     public class BagState : CacheState
     {

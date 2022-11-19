@@ -1,5 +1,6 @@
-﻿using MessagePack;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Geek.Server.Core.Net.Messages;
+using MessagePack;
 
 namespace Geek.Server.Proto
 {

@@ -1,11 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using Geek.Server.CodeGenerator.Utils;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
-using System.Diagnostics;
-using Tools.Utils;
 
-namespace Geek.Server
+namespace Geek.Server.CodeGenerator.Agent
 {
     [Generator]
     public class AgentGenerator : ISourceGenerator

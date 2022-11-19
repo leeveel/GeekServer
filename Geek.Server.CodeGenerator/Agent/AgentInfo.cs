@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-namespace Geek.Server
+namespace Geek.Server.CodeGenerator.Agent
 {
 
     public class MthInfo

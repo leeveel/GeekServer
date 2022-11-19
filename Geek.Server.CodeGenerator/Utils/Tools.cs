@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Geek.Server
+namespace Geek.Server.CodeGenerator.Utils
 {
     public static class Tools
     {

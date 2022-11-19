@@ -1,4 +1,4 @@
-﻿namespace Geek.Server
+﻿namespace Geek.Server.Core.Actors.Impl
 {
     public abstract class WorkWrapper
     {

@@ -1,4 +1,4 @@
-﻿namespace Geek.Server
+﻿namespace Geek.Server.Core.Net.Tcp.Handler
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class MsgMapping : Attribute

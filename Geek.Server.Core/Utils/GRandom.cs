@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 #endif
 
-namespace ServerLink
+namespace Geek.Server.Core.Utils
 {
     public static class GRandom
     {

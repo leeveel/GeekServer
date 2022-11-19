@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Storage
 {
     public static class FileBackup
     {

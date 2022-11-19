@@ -1,5 +1,11 @@
 ﻿
-namespace Geek.Server
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Timer;
+using Geek.Server.Core.Timer.Handler;
+using Geek.Server.Core.Utils;
+
+namespace Geek.Server.Core.Hotfix.Agent
 {
     public abstract class BaseCompAgent<TComp> : ICompAgent where TComp : BaseComp
     {

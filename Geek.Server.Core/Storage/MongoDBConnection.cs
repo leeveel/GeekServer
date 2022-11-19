@@ -1,8 +1,9 @@
-﻿using MongoDB.Bson.Serialization;
+﻿using Geek.Server.Core.Utils;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NLog;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Storage
 {
     public static class MongoDBConnection
     {

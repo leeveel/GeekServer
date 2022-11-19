@@ -1,6 +1,17 @@
-﻿using Geek.Server.Role;
+﻿using Geek.Server.App.Common;
+using Geek.Server.App.Common.Session;
+using Geek.Server.App.Logic.Login;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.Tcp.Codecs;
+using Geek.Server.Core.Storage;
+using Geek.Server.Core.Utils;
+using Geek.Server.Proto;
+using Server.Logic.Common.Handler;
+using Server.Logic.Logic.Role.Base;
 
-namespace Geek.Server.Login
+namespace Server.Logic.Logic.Login
 {
     public class LoginCompAgent : BaseCompAgent<LoginComp>
     {

@@ -1,15 +1,16 @@
 //auto generated, do not modify it
 
-using MessagePack;
 using System.Collections.Generic;
+using Geek.Server.Core.Net.Messages;
+using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ReqSellItem : Geek.Server.Message
+	public class ReqSellItem : Geek.Server.Core.Net.Messages.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -1236539504;
+		public const int Sid = -1395845865;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

@@ -1,6 +1,7 @@
-using Geek.Server.Login;
+using Geek.Server.App.Common.Session;
+using Geek.Server.Core.Net.Http;
 
-namespace Geek.Server.Http
+namespace Server.Logic.Logic.Http
 {
     [HttpMsgMapping("online_num_query")]
     public class HttpGetOnlinePlayerHandler : BaseHttpHandler

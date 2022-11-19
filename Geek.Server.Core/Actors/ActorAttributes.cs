@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Geek.Server
+﻿namespace Geek.Server.Core.Actors
 {
 
     /// <summary>

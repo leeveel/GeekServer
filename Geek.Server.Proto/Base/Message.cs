@@ -1,8 +1,7 @@
 ﻿using MessagePack;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Messages
 {
-    //[MessagePackObject(true)]
     public abstract class Message
     {
         /// <summary>

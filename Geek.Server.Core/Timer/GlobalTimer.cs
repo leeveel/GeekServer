@@ -1,5 +1,9 @@
 ﻿
-namespace Geek.Server
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Utils;
+
+namespace Geek.Server.Core.Timer
 {
     public static class GlobalTimer
     {

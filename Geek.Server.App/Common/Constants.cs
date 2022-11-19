@@ -1,8 +1,4 @@
-
-using System.Collections.Generic;
-using Geek.Server;
-
-namespace Geek.Server.Common
+namespace Geek.Server.App.Common
 {
 
     /// <summary>

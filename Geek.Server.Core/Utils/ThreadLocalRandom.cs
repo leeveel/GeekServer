@@ -1,4 +1,4 @@
-﻿namespace System
+﻿namespace Geek.Server.Core.Utils
 {
 
     /// <summary>

@@ -1,6 +1,11 @@
 ﻿using System.Collections.Concurrent;
+using Geek.Server.Core.Actors.Impl;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Utils;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Actors
 {
     public class ActorMgr
     {

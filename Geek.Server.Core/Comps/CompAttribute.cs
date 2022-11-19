@@ -1,4 +1,6 @@
-﻿namespace Geek.Server
+﻿using Geek.Server.Core.Actors;
+
+namespace Geek.Server.Core.Comps
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class CompAttribute : Attribute

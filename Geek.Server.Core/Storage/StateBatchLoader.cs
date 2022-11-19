@@ -1,9 +1,11 @@
-﻿using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using System.Collections.Concurrent;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
-using System.Collections.Concurrent;
+using MongoDB.Driver;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Storage
 {
     public class RoleStateLoader
     {

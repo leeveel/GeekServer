@@ -1,7 +1,11 @@
-﻿using NLog;
-using System.Reflection;
+﻿using System.Reflection;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Utils;
+using NLog;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Comps
 {
     public static class CompRegister
     {

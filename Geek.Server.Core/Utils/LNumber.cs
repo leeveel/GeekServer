@@ -1,5 +1,7 @@
 using NLog;
 
+namespace Geek.Server.Core.Utils;
+
 public struct LNumber : IComparable<LNumber>, IEquatable<LNumber>
 {
     private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
@@ -315,20 +317,20 @@ public struct LNumber : IComparable<LNumber>, IEquatable<LNumber>
     }
 
     /*public static implicit operator LNumber(float number)
-    {
+{
 #if XNUMBER_CHECK
-        var tmp = (long)number;
-        if (tmp > Max || tmp < -Max)
-            Debug.LogError("Number数据超上限了 " + number);
+    var tmp = (long)number;
+    if (tmp > Max || tmp < -Max)
+        Debug.LogError("Number数据超上限了 " + number);
 #endif
-        return Convert(number);
-    }
+    return Convert(number);
+}
 
-    public static LNumber Convert(float f)
-    {
-        LNumber r;
-        r.raw = (long)(f * Muti_FACTOR);
-        return r;
-    }*/
+public static LNumber Convert(float f)
+{
+    LNumber r;
+    r.raw = (long)(f * Muti_FACTOR);
+    return r;
+}*/
 
 }

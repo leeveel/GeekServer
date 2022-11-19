@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace Test.Pressure
+﻿namespace Geek.Server.TestPressure.Logic
 {
     public class MsgWaiter
     {

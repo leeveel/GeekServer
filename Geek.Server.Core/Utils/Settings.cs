@@ -1,4 +1,4 @@
-﻿using Geek.Server;
+﻿using Geek.Server.Core.Utils;
 using Newtonsoft.Json;
 
 public enum ServerType

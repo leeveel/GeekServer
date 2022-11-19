@@ -1,5 +1,6 @@
 //auto generated, do not modify it
 
+using Geek.Server.Core.Net.Messages;
 using MessagePack;
 
 namespace Geek.Server.Proto
@@ -8,7 +9,7 @@ namespace Geek.Server.Proto
 	public class UserInfo 
 	{
 		[IgnoreMember]
-		public const int Sid = 724520320;
+		public const int Sid = -593677237;
 
 
         /// <summary>

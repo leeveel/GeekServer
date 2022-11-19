@@ -1,5 +1,8 @@
 ﻿
-namespace Geek.Server
+using Geek.Server.Core.Net.Messages;
+using Geek.Server.Core.Net.Tcp.Codecs;
+
+namespace Geek.Server.Core.Net.Tcp.Handler
 {
     public abstract class BaseTcpHandler
     {

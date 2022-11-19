@@ -1,9 +1,9 @@
-﻿using NLog;
+﻿using System.Text;
+using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
-using System.Text;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Utils
 {
     [ThreadAgnostic]
     [LayoutRenderer("NLogConfiguration")]

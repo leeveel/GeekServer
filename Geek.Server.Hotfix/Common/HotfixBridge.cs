@@ -1,7 +1,18 @@
 ﻿
+using Geek.Server.App.Common.Net;
+using Geek.Server.App.Common.Session;
+using Geek.Server.Config;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Net.Http;
+using Geek.Server.Core.Net.Tcp;
+using Geek.Server.Core.Storage;
+using Geek.Server.Core.Timer;
+using Geek.Server.Proto;
 using Microsoft.AspNetCore.Connections;
 
-namespace Geek.Server
+namespace Server.Logic.Common
 {
     internal class HotfixBridge : IHotfixBridge
     {

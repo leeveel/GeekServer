@@ -1,6 +1,8 @@
+using Geek.Server.Core.Net.Messages;
+using Geek.Server.Proto;
 using Newtonsoft.Json;
 
-namespace Test.Pressure
+namespace Geek.Server.TestPressure.Logic
 {
     public enum ServerErrorCode
     {

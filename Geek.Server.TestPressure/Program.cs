@@ -1,5 +1,9 @@
 ﻿
-namespace Test.Pressure
+using Geek.Server.Core.Actors;
+using Geek.Server.Proto;
+using Geek.Server.TestPressure.Logic;
+
+namespace Geek.Server.TestPressure
 {
     class Program
     {

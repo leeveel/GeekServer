@@ -1,4 +1,6 @@
-﻿namespace Geek.Server.Common
+﻿using Geek.Server.Core.Utils;
+
+namespace Geek.Server.App.Common
 {
     public class AppSetting : BaseSetting
     {

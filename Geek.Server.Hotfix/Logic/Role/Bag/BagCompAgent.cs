@@ -1,5 +1,13 @@
 ﻿
-namespace Geek.Server.Role
+using Geek.Server.App.Common.Event;
+using Geek.Server.App.Logic.Role.Bag;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Utils;
+using Geek.Server.Proto;
+using Server.Logic.Common.Events;
+using Server.Logic.Logic.Role.Base;
+
+namespace Server.Logic.Logic.Role.Bag
 {
     public class BagCompAgent : StateCompAgent<BagComp, BagState>
     {

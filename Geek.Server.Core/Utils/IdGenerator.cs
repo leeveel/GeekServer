@@ -1,5 +1,7 @@
 ﻿
-namespace Geek.Server
+using Geek.Server.Core.Actors;
+
+namespace Geek.Server.Core.Utils
 {
 
     /// <summary>

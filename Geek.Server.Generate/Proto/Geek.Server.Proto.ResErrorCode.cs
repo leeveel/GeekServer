@@ -1,14 +1,15 @@
 //auto generated, do not modify it
 
+using Geek.Server.Core.Net.Messages;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ResErrorCode : Geek.Server.Message
+	public class ResErrorCode : Geek.Server.Core.Net.Messages.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -138811813;
+		public const int Sid = 1179199001;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

@@ -1,4 +1,6 @@
-namespace Geek.Server.Http
+using Geek.Server.Core.Net.Http;
+
+namespace Server.Logic.Logic.Http
 {
     public class HttpTestRes : HttpResult
     {

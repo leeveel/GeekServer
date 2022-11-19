@@ -1,6 +1,7 @@
-﻿using Quartz;
+﻿using Geek.Server.Core.Utils;
+using Quartz;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Timer.Handler
 {
     public abstract class NotHotfixTimerHandler : IJob
     {

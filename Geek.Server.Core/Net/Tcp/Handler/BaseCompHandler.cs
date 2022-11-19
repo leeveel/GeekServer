@@ -1,5 +1,10 @@
 ﻿
-namespace Geek.Server
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Utils;
+
+namespace Geek.Server.Core.Net.Tcp.Handler
 {
 
     public abstract class BaseCompHandler : BaseTcpHandler

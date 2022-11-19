@@ -1,4 +1,4 @@
-﻿namespace Geek.Server.Login
+﻿namespace Geek.Server.App.Logic.Login
 {
     public class LoginInfo
     {

@@ -1,15 +1,16 @@
 //auto generated, do not modify it
 
-using MessagePack;
 using System.Collections.Generic;
+using Geek.Server.Core.Net.Messages;
+using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ResComposePet : Geek.Server.Message
+	public class ResComposePet : Geek.Server.Core.Net.Messages.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -1498495527;
+		public const int Sid = 750865816;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

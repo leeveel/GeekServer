@@ -1,7 +1,8 @@
 ﻿using Bedrock.Framework.Protocols;
+using Geek.Server.Core.Net.Messages;
 using Microsoft.AspNetCore.Connections;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Tcp.Codecs
 {
     public class NetChannel
     {
@@ -58,17 +59,16 @@ namespace Geek.Server
             Writer = null;
         }
 
-        public async ValueTask WriteAsync(NMessage msg)
+        public void WriteAsync(NMessage msg)
         {
             if (Writer != null)
-                await Writer.WriteAsync(Protocol, msg);
+                _ = Task.Run(async () => await Writer.WriteAsync(Protocol, msg));
         }
 
         public void WriteAsync(Message msg)
         {
-            WriteAsync(msg);
+            WriteAsync(new NMessage(msg));
         }
-
 
     }
 }

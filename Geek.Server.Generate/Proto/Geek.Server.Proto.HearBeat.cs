@@ -1,14 +1,15 @@
 //auto generated, do not modify it
 
+using Geek.Server.Core.Net.Messages;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class HearBeat : Geek.Server.Message
+	public class HearBeat : Geek.Server.Core.Net.Messages.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 1771311297;
+		public const int Sid = 1575482382;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

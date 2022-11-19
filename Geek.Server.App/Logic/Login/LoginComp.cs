@@ -1,6 +1,9 @@
 ﻿using System.Collections.Concurrent;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Storage;
 
-namespace Geek.Server.Login
+namespace Geek.Server.App.Logic.Login
 {
     public class PlayerInfo : InnerState
     {

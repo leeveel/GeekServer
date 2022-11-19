@@ -1,8 +1,11 @@
-﻿
-using Geek.Server.Role;
-using Geek.Server.Server;
+﻿using Geek.Server.App.Logic.Server;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Timer.Handler;
+using Geek.Server.Core.Utils;
+using Server.Logic.Logic.Role.Base;
 
-namespace Server.Logic.Logic
+namespace Server.Logic.Logic.Server
 {
     public class ServerCompAgent : StateCompAgent<ServerComp, ServerState>
     {

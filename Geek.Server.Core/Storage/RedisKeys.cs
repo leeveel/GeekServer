@@ -1,4 +1,4 @@
-﻿namespace Geek.Server
+﻿namespace Geek.Server.Core.Storage
 {
     /// <summary>
     /// 该特性用于兼容旧版本的redis key, 可以实现key类名与值不同;<br/>

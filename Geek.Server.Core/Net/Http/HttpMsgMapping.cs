@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Geek.Server
+﻿namespace Geek.Server.Core.Net.Http
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class HttpMsgMapping : Attribute

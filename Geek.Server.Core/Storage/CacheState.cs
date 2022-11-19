@@ -1,9 +1,9 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+﻿using Geek.Server.Core.Utils;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using NLog;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Storage
 {
     [BsonIgnoreExtraElements(true, Inherited = true)]// 兼容state的字段修改
     public abstract class InnerState

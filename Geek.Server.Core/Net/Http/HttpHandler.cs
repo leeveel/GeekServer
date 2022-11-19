@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using NLog;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
+using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Utils;
+using Microsoft.AspNetCore.Http;
+using NLog;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.Http
 {
     internal class HttpHandler
     {
