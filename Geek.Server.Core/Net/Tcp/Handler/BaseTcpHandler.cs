@@ -1,6 +1,4 @@
-﻿using Geek.Server.Core.Net.Messages;
-
-namespace Geek.Server.Core.Net.Tcp.Handler
+﻿namespace Geek.Server.Core.Net.Tcp.Handler
 {
     public abstract class BaseTcpHandler
     {

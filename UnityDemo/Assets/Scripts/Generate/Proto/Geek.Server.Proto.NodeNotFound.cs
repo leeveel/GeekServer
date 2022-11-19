@@ -5,16 +5,16 @@ using MessagePack;
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ResRouterMsg : Geek.Server.Message
+	public class NodeNotFound : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 1063387717;
+		public const int Sid = -498188700;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-        public bool Result { get; set; }
+        public int NodeId { get; set; }
 	}
 }

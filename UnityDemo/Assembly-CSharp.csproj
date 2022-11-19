@@ -111,34 +111,48 @@
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.A.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.B.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.HearBeat.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.NodeNotFound.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqBagInfo.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqComposePet.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqConnectGate.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqInnerConnectGate.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqLogin.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqSellItem.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ReqUseItem.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResBagInfo.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResComposePet.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResConnectGate.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResErrorCode.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResInnerConnectGate.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResItemChange.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResLevelUp.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResLogin.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResPrompt.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ServerNotConnect.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.TestEnum.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.TestStruct.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.UserInfo.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_AFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_BFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_HearBeatFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_NodeNotFoundFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqBagInfoFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqComposePetFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqConnectGateFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqInnerConnectGateFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqLoginFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqSellItemFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ReqUseItemFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResBagInfoFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResComposePetFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResConnectGateFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResErrorCodeFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResInnerConnectGateFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResItemChangeFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResLevelUpFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResLoginFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResPromptFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ServerNotConnectFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_TestEnumFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_TestStructFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_UserInfoFormatter.cs" />
@@ -340,9 +354,6 @@
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>Assets\Plugins\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Extensions.Features">
-      <HintPath>Assets\Plugins\Microsoft.Extensions.Features.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.NET.StringTools">
       <HintPath>Assets\Plugins\Microsoft.NET.StringTools.dll</HintPath>
     </Reference>
@@ -354,9 +365,6 @@
     </Reference>
     <Reference Include="System.Memory">
       <HintPath>Assets\Plugins\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics.Vectors">
-      <HintPath>Assets\Plugins\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>Assets\Plugins\System.Runtime.CompilerServices.Unsafe.dll</HintPath>

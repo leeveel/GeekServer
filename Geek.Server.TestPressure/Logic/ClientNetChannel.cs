@@ -3,7 +3,6 @@ using MessagePack;
 using Microsoft.AspNetCore.Connections;
 using System.Net;
 using System.Buffers;
-using Geek.Server.Core.Net.Messages;
 
 namespace Geek.Server.TestPressure.Logic
 {

@@ -5,16 +5,16 @@ using MessagePack;
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ReqRouterMsg : Geek.Server.Message
+	public class ReqConnectGate : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -520770015;
+		public const int Sid = -679570763;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-        public long TargetUid { get; set; }
+        public int ServerId { get; set; }
 	}
 }

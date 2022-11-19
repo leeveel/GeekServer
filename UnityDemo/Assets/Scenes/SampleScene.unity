@@ -313,13 +313,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1672025862}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f46921caf73008c47a0c8648214dfc01, type: 3}
+  m_Script: {fileID: 11500000, guid: fb3b8d49f09fce64ebb73631f1658a1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Txt: {fileID: 1931498146}
   gateIp: 127.0.0.1
   gatePort: 8899
-  serverId: 10001
+  serverId: 1001
   userName: 123456
 --- !u!1 &1931498144
 GameObject:

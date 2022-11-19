@@ -43,8 +43,8 @@ namespace Logic
 
         private Task ReqRouter()
         {
-            var req = new ReqRouterMsg();
-            req.TargetUid = serverId;
+            var req = new ReqConnectGate();
+            req.ServerId = serverId;
             return DemoService.Singleton.SendMsg(req);
         }
 

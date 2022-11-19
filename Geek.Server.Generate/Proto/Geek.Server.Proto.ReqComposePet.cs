@@ -1,14 +1,13 @@
 //auto generated, do not modify it
 
-using Geek.Server.Core.Net.Messages;
 using MessagePack;
 using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
-    [MessagePackObject(true)]
-	public class ReqComposePet : Message
-    {
+	[MessagePackObject(true)]
+	public class ReqComposePet : Geek.Server.Message
+	{
 		[IgnoreMember]
 		public const int Sid = 225320501;
 

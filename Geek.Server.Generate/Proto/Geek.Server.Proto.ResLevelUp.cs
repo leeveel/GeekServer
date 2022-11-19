@@ -1,13 +1,12 @@
 //auto generated, do not modify it
 
-using Geek.Server.Core.Net.Messages;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
-    [MessagePackObject(true)]
-	public class ResLevelUp : Message
-    {
+	[MessagePackObject(true)]
+	public class ResLevelUp : Geek.Server.Message
+	{
 		[IgnoreMember]
 		public const int Sid = 1587576546;
 

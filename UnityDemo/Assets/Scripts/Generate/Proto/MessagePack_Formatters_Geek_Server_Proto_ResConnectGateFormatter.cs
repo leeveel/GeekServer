@@ -16,14 +16,16 @@
 
 namespace MessagePack.Formatters.Geek.Server.Proto
 {
-    public sealed class ResRouterMsgFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ResRouterMsg>
+    public sealed class ResConnectGateFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ResConnectGate>
     {
-        // Result
-        private static global::System.ReadOnlySpan<byte> GetSpan_Result() => new byte[1 + 6] { 166, 82, 101, 115, 117, 108, 116 };
+        // ServerId
+        private static global::System.ReadOnlySpan<byte> GetSpan_ServerId() => new byte[1 + 8] { 168, 83, 101, 114, 118, 101, 114, 73, 100 };
+        // NodeId
+        private static global::System.ReadOnlySpan<byte> GetSpan_NodeId() => new byte[1 + 6] { 166, 78, 111, 100, 101, 73, 100 };
         // UniId
         private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResRouterMsg value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResConnectGate value, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (value is null)
             {
@@ -31,14 +33,16 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteMapHeader(2);
-            writer.WriteRaw(GetSpan_Result());
-            writer.Write(value.Result);
+            writer.WriteMapHeader(3);
+            writer.WriteRaw(GetSpan_ServerId());
+            writer.Write(value.ServerId);
+            writer.WriteRaw(GetSpan_NodeId());
+            writer.Write(value.NodeId);
             writer.WriteRaw(GetSpan_UniId());
             writer.Write(value.UniId);
         }
 
-        public global::Geek.Server.Proto.ResRouterMsg Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Geek.Server.Proto.ResConnectGate Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -47,7 +51,7 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 
             options.Security.DepthStep(ref reader);
             var length = reader.ReadMapHeader();
-            var ____result = new global::Geek.Server.Proto.ResRouterMsg();
+            var ____result = new global::Geek.Server.Proto.ResConnectGate();
 
             for (int i = 0; i < length; i++)
             {
@@ -58,10 +62,15 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                     FAIL:
                       reader.Skip();
                       continue;
-                    case 6:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 128009175786834UL) { goto FAIL; }
+                    case 8:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 7226432857197143379UL) { goto FAIL; }
 
-                        ____result.Result = reader.ReadBoolean();
+                        ____result.ServerId = reader.ReadInt32();
+                        continue;
+                    case 6:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 110266396471118UL) { goto FAIL; }
+
+                        ____result.NodeId = reader.ReadInt64();
                         continue;
                     case 5:
                         if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }

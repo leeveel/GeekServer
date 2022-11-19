@@ -1,5 +1,4 @@
-﻿using Geek.Server.Core.Net.Messages;
-using Microsoft.AspNetCore.Connections;
+﻿using Microsoft.AspNetCore.Connections;
 using NLog;
 
 namespace Geek.Server.Core.Net.Tcp

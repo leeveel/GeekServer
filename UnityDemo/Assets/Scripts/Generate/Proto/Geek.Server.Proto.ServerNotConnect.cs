@@ -8,7 +8,7 @@ namespace Geek.Server.Proto
 	public class ServerNotConnect : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -37174277;
+		public const int Sid = 445665195;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
