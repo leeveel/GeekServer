@@ -1,6 +1,6 @@
 ﻿using System.Buffers;
 
-namespace Geek.Server.Core.Net.Messages
+namespace Geek.Server
 {
     /// <summary>
     /// net message

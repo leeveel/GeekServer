@@ -1,12 +1,11 @@
 //auto generated, do not modify it
 
-using Geek.Server.Core.Net.Messages;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ReqLogin : Geek.Server.Core.Net.Messages.Message
+	public class ReqLogin : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 1267074761;

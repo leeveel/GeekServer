@@ -1,7 +1,12 @@
 ﻿using MessagePack;
 
-namespace Geek.Server.Core.Net.Messages
+
+namespace Geek.Server
 {
+    /// <summary>
+    /// 此类主要用于与Core工程解耦
+    /// 需要和Core工程的Message命名空间保持一致
+    /// </summary>
     public abstract class Message
     {
         /// <summary>

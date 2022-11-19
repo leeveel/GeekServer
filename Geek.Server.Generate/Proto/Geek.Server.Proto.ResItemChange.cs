@@ -1,13 +1,12 @@
 //auto generated, do not modify it
 
 using System.Collections.Generic;
-using Geek.Server.Core.Net.Messages;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ResItemChange : Geek.Server.Core.Net.Messages.Message
+	public class ResItemChange : Geek.Server.Message
 	{
 		[IgnoreMember]
 		public const int Sid = 901279609;

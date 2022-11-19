@@ -1,7 +1,7 @@
 //auto generated, do not modify it
 
-using MessagePack;
 using System.Collections.Generic;
+using MessagePack;
 
 namespace Geek.Server.Proto
 {
@@ -9,7 +9,7 @@ namespace Geek.Server.Proto
 	public class ResItemChange : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 1593491631;
+		public const int Sid = 901279609;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

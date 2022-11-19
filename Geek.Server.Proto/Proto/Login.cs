@@ -1,5 +1,4 @@
-﻿using Geek.Server.Core.Net.Messages;
-using MessagePack;
+﻿using MessagePack;
 
 namespace Geek.Server.Proto
 {

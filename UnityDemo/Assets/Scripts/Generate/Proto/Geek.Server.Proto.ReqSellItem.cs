@@ -1,7 +1,7 @@
 //auto generated, do not modify it
 
-using MessagePack;
 using System.Collections.Generic;
+using MessagePack;
 
 namespace Geek.Server.Proto
 {
@@ -9,7 +9,7 @@ namespace Geek.Server.Proto
 	public class ReqSellItem : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = -1236539504;
+		public const int Sid = -1395845865;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;

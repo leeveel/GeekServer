@@ -47,7 +47,7 @@ namespace MessagePack.Resolvers
 
         static GeneratedResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<global::System.Type, int>(18)
+            lookup = new global::System.Collections.Generic.Dictionary<global::System.Type, int>(19)
             {
                 { typeof(global::System.Collections.Generic.Dictionary<int, long>), 0 },
                 { typeof(global::Geek.Server.Proto.TestEnum), 1 },
@@ -65,8 +65,9 @@ namespace MessagePack.Resolvers
                 { typeof(global::Geek.Server.Proto.ResItemChange), 13 },
                 { typeof(global::Geek.Server.Proto.ResLevelUp), 14 },
                 { typeof(global::Geek.Server.Proto.ResLogin), 15 },
-                { typeof(global::Geek.Server.Proto.TestStruct), 16 },
-                { typeof(global::Geek.Server.Proto.UserInfo), 17 },
+                { typeof(global::Geek.Server.Proto.ResPrompt), 16 },
+                { typeof(global::Geek.Server.Proto.TestStruct), 17 },
+                { typeof(global::Geek.Server.Proto.UserInfo), 18 },
             };
         }
 
@@ -96,8 +97,9 @@ namespace MessagePack.Resolvers
                 case 13: return new MessagePack.Formatters.Geek.Server.Proto.ResItemChangeFormatter();
                 case 14: return new MessagePack.Formatters.Geek.Server.Proto.ResLevelUpFormatter();
                 case 15: return new MessagePack.Formatters.Geek.Server.Proto.ResLoginFormatter();
-                case 16: return new MessagePack.Formatters.Geek.Server.Proto.TestStructFormatter();
-                case 17: return new MessagePack.Formatters.Geek.Server.Proto.UserInfoFormatter();
+                case 16: return new MessagePack.Formatters.Geek.Server.Proto.ResPromptFormatter();
+                case 17: return new MessagePack.Formatters.Geek.Server.Proto.TestStructFormatter();
+                case 18: return new MessagePack.Formatters.Geek.Server.Proto.UserInfoFormatter();
                 default: return null;
             }
         }

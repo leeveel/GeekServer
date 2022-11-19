@@ -2,6 +2,6 @@
   "ProjectPath": "../../Geek.Server.Proto",
   "ServerOutPath": "../../Geek.Server.Generate/Proto",
   "ClientOutPath": "../../UnityDemo/Assets/Scripts/Generate/Proto",
-  "BaseMessageName": "Geek.Server.Core.Net.Messages.Message",
+  "BaseMessageName": "Geek.Server.Message",
   "GeneratedFirst": false
 }

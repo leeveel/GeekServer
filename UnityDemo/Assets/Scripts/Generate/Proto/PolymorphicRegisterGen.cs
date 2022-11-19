@@ -11,21 +11,21 @@ namespace Geek.Server.Proto
 
 		public static void Register()
         {
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqBagInfo>(-399658839);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResBagInfo>(-768070425);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqComposePet>(-1888378530);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResComposePet>(-1498495527);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqUseItem>(1478385002);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqSellItem>(-1236539504);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResItemChange>(1593491631);
-			settings.RegisterType<Geek.Server.Proto.A, Geek.Server.Proto.A>(-1878353591);
-			settings.RegisterType<Geek.Server.Proto.A, Geek.Server.Proto.B>(14791156);
-			settings.RegisterType<Geek.Server.Proto.UserInfo, Geek.Server.Proto.UserInfo>(724520320);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqLogin>(932720150);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResLogin>(2003930237);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResLevelUp>(1405557910);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.HearBeat>(1771311297);
-			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResErrorCode>(-138811813);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqBagInfo>(1435193915);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResBagInfo>(-1872884227);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqComposePet>(225320501);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResComposePet>(750865816);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqUseItem>(1686846581);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqSellItem>(-1395845865);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResItemChange>(901279609);
+			settings.RegisterType<Geek.Server.Proto.A, Geek.Server.Proto.A>(1250601847);
+			settings.RegisterType<Geek.Server.Proto.A, Geek.Server.Proto.B>(-899515946);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ReqLogin>(1267074761);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResLogin>(785960738);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResLevelUp>(1587576546);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.HearBeat>(1575482382);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResErrorCode>(1179199001);
+			settings.RegisterType<Geek.Server.Message, Geek.Server.Proto.ResPrompt>(537499886);
         }
 	}
 }
