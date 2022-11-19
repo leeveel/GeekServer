@@ -1,12 +1,10 @@
-
-
-using Geek.Server.Core.Utils;
 /**
-* Auto generated, do not edit it server
-*/
+ * Auto generated, do not edit it server
+ */
+
 namespace Geek.Server.Config
 {
-    ///<summary>测试表</summary>
+	///<summary>测试表</summary>
     public class t_testBean : BaseBin
     {
 		///<summary>t_id为key</summary>

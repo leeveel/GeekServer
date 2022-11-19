@@ -1,12 +1,10 @@
-
-
-using Geek.Server.Core.Utils;
 /**
-* Auto generated, do not edit it server
-*/
+ * Auto generated, do not edit it server
+ */
+
 namespace Geek.Server.Config
 {
-    ///<summary>用于测试的道具表</summary>
+	///<summary>用于测试的道具表</summary>
     public class t_itemBean : BaseBin
     {
 		///<summary>道具id</summary>
