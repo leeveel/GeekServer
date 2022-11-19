@@ -31,11 +31,13 @@ namespace Geek.Server.App
                 {
                     error = $"服务器运行时异常 e:{e}";
                     Console.WriteLine(error);
+                    ExceptionMonitor.Report(ExceptionType.UnhandledException, $"{e}").Wait(TimeSpan.FromSeconds(10));
                 }
                 else
                 {
                     error = $"启动服务器失败 e:{e}";
                     Console.WriteLine(error);
+                    ExceptionMonitor.Report(ExceptionType.UnhandledException, $"{e}").Wait(TimeSpan.FromSeconds(10));
                 }
                 File.WriteAllText("server_error.txt", $"{error}", Encoding.UTF8);
             }

@@ -19,7 +19,9 @@ namespace Geek.Server.Core.Utils
 
         private static void HandleFetalException(object e)
         {
-            //这里可以发送短信或者钉钉消息通知到运维
+            //发送钉钉消息通知到运维
+            ExceptionMonitor.Report(ExceptionType.UnhandledException, $"服务器异常退出 e:{e}").Wait(TimeSpan.FromSeconds(10));
+
             LOGGER.Error("get unhandled exception");
             if (e is IEnumerable arr)
             {

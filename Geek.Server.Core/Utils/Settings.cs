@@ -80,6 +80,10 @@ public static class Settings
     public static int SDKType => Ins.SDKType;
 
     public static string GateUrl => Ins.GateUrl;
+
+    public static string MonitorUrl => Ins.MonitorUrl;
+
+    public static string MonitorKey => Ins.MonitorKey;
 }
 
 public class BaseSetting
@@ -128,5 +132,11 @@ public class BaseSetting
 
     public int SDKType { get; set; }
     public string GateUrl { get; set; }
+
+    /// <summary> 钉钉监控地址 </summary>
+    public string MonitorUrl { get; set; }
+    /// <summary> 钉钉监控key </summary>
+    public string MonitorKey { get; set; }
+
     #endregion
 }

@@ -29,9 +29,11 @@ namespace Geek.Server.Core.Actors.Impl
             }
             catch (TimeoutException)
             {
-                Log.Fatal("wrapper执行超时:" + wrapper.GetTrace());
+                string message = "wrapper执行超时:" + wrapper.GetTrace();
+                Log.Fatal(message);
                 //强制设状态-取消该操作
                 wrapper.ForceSetResult();
+                _ = ExceptionMonitor.Report(ExceptionType.ActorTimeout, message);
             }
         }
 
