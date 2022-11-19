@@ -14,10 +14,10 @@
         Guild = 2, //公会 
         Logger = 4,
 
-        Separator = 16, /*分割线(勿调整,勿用于业务逻辑)*/
+        Separator = 128, /*分割线(勿调整,勿用于业务逻辑)*/
 
         //固定ID类型Actor
-        Server = 17,
+        Server = 129,
 
         Max = 999,
     }

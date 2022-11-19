@@ -1,5 +1,5 @@
 {
-  "serverId": 10197,
+  "serverId": 1001, //[1000,9999]
   "serverIp": "127.0.0.1",
   "serverPort": 8899,
   "clientCount": 1000
