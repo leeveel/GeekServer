@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Geek.Server.Core.Utils;
+using Newtonsoft.Json;
 
 public enum ServerType
 {
@@ -24,6 +25,10 @@ public static class Settings
         var configJson = File.ReadAllText(path);
         Ins = JsonConvert.DeserializeObject<T>(configJson);
         Ins.ServerType = serverType;
+        if (Ins.ServerId < IdGenerator.MIN_SERVER_ID || Ins.ServerId > IdGenerator.MAX_SERVER_ID)
+        {
+            throw new Exception($"ServerId不合法{Ins.ServerId},需要在[{IdGenerator.MIN_SERVER_ID},{IdGenerator.MAX_SERVER_ID}]范围之内");
+        }
     }
 
     public static T InsAs<T>() where T : BaseSetting

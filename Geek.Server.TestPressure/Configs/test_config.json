@@ -1,5 +1,5 @@
 {
-  "serverId": 10001,
+  "serverId": 1001, //[1000,9999]
   "gateIp": "127.0.0.1",
   "gatePort": 8899,
   "clientCount": 1000
