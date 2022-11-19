@@ -1,7 +1,7 @@
 using Geek.Server.Core.Actors.Impl;
 using System.Threading.Tasks.Dataflow;
 
-namespace Test.Pressure
+namespace Geek.Server.TestPressure.Logic
 {
     public class ClientWorkerActor
     {

@@ -1,6 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿using Geek.Server.Core.Center;
+using System.Collections.Concurrent;
 
-namespace Geek.Server.Core.Center
+namespace Geek.Server.Center.Logic
 {
     public class NamingService
     {

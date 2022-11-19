@@ -5,7 +5,7 @@ using System.Net;
 using System.Buffers;
 using Geek.Server.Core.Net.Messages;
 
-namespace Test.Pressure
+namespace Geek.Server.TestPressure.Logic
 {
     public enum NetCode
     {
@@ -111,7 +111,7 @@ namespace Test.Pressure
                 Log.Error($"消息ID:{msgId} 找不到对应的Msg.");
                 return;
             }
-            var msg = MessagePack.MessagePackSerializer.Deserialize<Message>(message.Payload.Slice(4));
+            var msg = MessagePackSerializer.Deserialize<Message>(message.Payload.Slice(4));
             if (msg.MsgId != msgId)
             {
                 Log.Error($"后台解析消息失败，注册消息id和消息无法对应.real:{msg.MsgId}, register:{msgId}");

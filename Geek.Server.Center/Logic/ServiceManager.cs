@@ -1,4 +1,4 @@
-﻿namespace Geek.Server.Core.Center
+﻿namespace Geek.Server.Center.Logic
 {
     internal class ServiceManager
     {

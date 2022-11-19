@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Geek.Server.Core.Center
+﻿namespace Geek.Server.Core.Center
 {
-
     /// <summary>
     /// 服务器通用配置
     /// </summary>
-    public class CommonSetting
+    public class GlobalSetting
     {
         /// <summary>数据回存最大时间(秒)</summary>
         public int TimerSaveMax { get; set; }

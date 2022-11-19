@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Geek.Server.Core.Center
+namespace Geek.Server.Center.Logic
 {
     internal class ConfigService
     {
@@ -20,9 +20,9 @@ namespace Geek.Server.Core.Center
             return configMap.Values.ToList();
         }
 
-        internal void GetConfig(string configId, byte[] data)
+        internal void SetConfig(string configId, byte[] data)
         {
-            throw new NotImplementedException();
+            configMap[configId] = data;
         }
     }
 }

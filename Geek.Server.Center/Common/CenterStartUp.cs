@@ -4,11 +4,11 @@ using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
 
-namespace Geek.Server.Center.Logic
+namespace Geek.Server.Center.Common
 {
     internal class CenterStartUp
     {
-        static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
+        static readonly Logger Log = LogManager.GetCurrentClassLogger();
         public static async Task Enter()
         {
             try

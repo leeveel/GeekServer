@@ -1,14 +1,15 @@
 ﻿
 using Geek.Server.Core.Actors;
+using Geek.Server.TestPressure.Logic;
 
-namespace Test.Pressure
+namespace Geek.Server.TestPressure
 {
     class Program
     {
         public static async Task Main(string[] args)
         {
             PolymorphicRegister.Load();
-            LogManager.Configuration = new XmlLoggingConfiguration("Configs/test_NLog.config");
+            LogManager.Configuration = new XmlLoggingConfiguration("Configs/test_log.config");
 
             TestSettings.Load("Configs/test_config.json");
             var maxCount = TestSettings.Ins.clientCount;

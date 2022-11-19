@@ -47,11 +47,12 @@ namespace Geek.Server.App.Net
         }
 
 
-        public static async Task GetCommonConfig()
+        public static async Task GetGlobalConfig()
         {
             //通用配置
             var bytes = await CenterRpcClient.ServerAgent.GetConfig("global");
-
+            //MessagePack.MessagePackSerializer.Deserialize<GlobalSetting>(bytes);
+            //TODO
         }
 
         /// <summary>

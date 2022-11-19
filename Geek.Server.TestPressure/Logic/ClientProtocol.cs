@@ -5,7 +5,7 @@ using Geek.Server.Core.Net.Messages;
 using Geek.Server.Core.Utils;
 using MessagePack;
 
-namespace Test.Pressure
+namespace Geek.Server.TestPressure.Logic
 {
     public class ClientProtocol : IProtocal<NetMessage>
     {

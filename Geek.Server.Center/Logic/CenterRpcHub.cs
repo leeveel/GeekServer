@@ -1,26 +1,9 @@
-﻿using MagicOnion;
+﻿using Geek.Server.Core.Center;
 using MagicOnion.Server.Hubs;
 using NLog;
 
-namespace Geek.Server.Core.Center
+namespace Geek.Server.Center.Logic
 {
-
-    public interface ICenterRpcClient
-    {
-        public void ConfigChanged(byte[] data);
-
-        public void NodesChanged(List<NetNode> nodes);
-    }
-
-    public interface ICenterRpcHub : IStreamingHub<ICenterRpcHub, ICenterRpcClient>
-    {
-        public Task<bool> Register(NetNode info);
-        public Task<byte[]> GetConfig(string configId);
-        public Task<bool> SetConfig(string configId, byte[] data);
-        public Task<List<NetNode>> GetAllNodes();
-        public Task<List<NetNode>> GetNodeByType(NodeType type);
-    }
-
     /// <summary>
     /// 一个客户端连接对应一个hub实例
     /// </summary>
@@ -86,7 +69,7 @@ namespace Geek.Server.Core.Center
 
         public Task<bool> SetConfig(string configId, byte[] data)
         {
-            ServiceManager.ConfigService.GetConfig(configId, data);
+            ServiceManager.ConfigService.SetConfig(configId, data);
             return Task.FromResult(true);
         }
 

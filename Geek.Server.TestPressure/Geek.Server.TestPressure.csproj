@@ -27,7 +27,7 @@
 		<None Update="Configs\test_config.json">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-		<None Update="Configs\test_NLog.config">
+		<None Update="Configs\test_log.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

@@ -13,9 +13,10 @@ namespace Geek.Server.App.Net
 
         public override void NodesChanged(List<NetNode> nodes)
         {
+            LOGGER.Debug("---------------------------------");
             foreach (var node in nodes)
             {
-                LOGGER.Debug("NodesChanged:" + node.NodeId);
+                LOGGER.Debug("NodeId:" + node.NodeId);
                 if (node.Type == NodeType.Gateway)
                 {
                     _ = AppNetMgr.ConnectGateway(node);

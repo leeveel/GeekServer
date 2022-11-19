@@ -39,7 +39,7 @@ namespace Geek.Server.Gateway.Net
 
         public static long SelectAHealthNode(int serverId)
         {
-            //TODO:分布式中一个大服的网络节点会存在多个
+            //TODO:分布式大服结构中网络节点会存在多个
             //TODO:选择一个负载最小的节点
             var conn = ServerConns.GetByNodeId(serverId);
             if (conn != null)

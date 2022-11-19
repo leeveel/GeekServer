@@ -6,6 +6,7 @@ using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Net.Http;
 using Geek.Server.Core.Timer;
+using Newtonsoft.Json;
 
 namespace Geek.Server.Hotfix
 {
@@ -42,9 +43,11 @@ namespace Geek.Server.Hotfix
                 HttpPort = Settings.HttpPort,
                 Type = NodeType.Game
             };
-            bool flag = await AppNetMgr.CenterRpcClient.ServerAgent.Register(node);
+            if(!await AppNetMgr.CenterRpcClient.ServerAgent.Register(node))
+                throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(node)}");
+
             //到中心服拉取通用配置
-            await AppNetMgr.GetCommonConfig();
+            await AppNetMgr.GetGlobalConfig();
 
             GlobalTimer.Start();
             await CompRegister.ActiveGlobalComps();

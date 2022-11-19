@@ -29,7 +29,7 @@ namespace Geek.Server.Core.Center
                     LOGGER.Error($"rpc.Dispose异常:{ex}");
                 }
                 ServerAgent = null;
-                _ = ReConnect();
+                await ReConnect();
             }
         }
 
@@ -46,13 +46,15 @@ namespace Geek.Server.Core.Center
             finally
             {
                 LOGGER.Info("disconnected from the center server.");
-                _ = ReConnect();
+                await ReConnect();
             }
         }
 
         private async Task ReConnect()
         {
-            await Task.Delay(15000);
+            int delay = 15000;
+            LOGGER.Error($"连接断开,{delay}ms后尝试重连");
+            await Task.Delay(delay);
             await Connect(url);
         }
 

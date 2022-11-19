@@ -13,9 +13,10 @@ namespace Geek.Server.Gateway.Net.Rpc
 
         public override void NodesChanged(List<NetNode> nodes)
         {
+            LOGGER.Debug("---------------------------------");
             foreach (var node in nodes)
             {
-                LOGGER.Debug("NodesChanged:" + node.NodeId);
+                LOGGER.Debug("NodeId:" + node.NodeId);
             }
             LOGGER.Debug("---------------------------------");
         }
