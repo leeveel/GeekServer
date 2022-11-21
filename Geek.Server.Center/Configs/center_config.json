@@ -7,7 +7,7 @@
   "RpcPort": 8900,
   "HttpCode": "inner_httpcode",
   "HttpPort": 30000,
-  "WebServerUrl": "http://localhost:5004",
+  "WebServerUrl": "https://localhost:5004",
   "LocalDBPrefix": "gamedb_",
   "LocalDBPath": "../../database/game/",
   "InitUserName": "admin",

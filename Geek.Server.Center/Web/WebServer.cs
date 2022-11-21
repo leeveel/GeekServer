@@ -73,7 +73,9 @@ namespace Geek.Server.Center.Web
 
             app.MapFallbackToPage("/_Host");
 
-            return app.StartAsync();
+            app.RunAsync(webUrl);
+
+            return Task.CompletedTask;
         }
 
         public static Task Stop()
