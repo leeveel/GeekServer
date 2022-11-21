@@ -39,6 +39,11 @@ namespace Geek.Server.App.Net
             return reConn.Connect();
         }
 
+        public void TryReConnectImmediately()
+        {
+            _ = reConn.TryReConnectImmediately();
+        }
+
         public async Task<bool> ConnectImpl()
         {
             try
