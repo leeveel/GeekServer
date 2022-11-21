@@ -15,8 +15,6 @@
         public string HttpInnerCode { get; set; }
         /// <summary> http外部命令验证,可能提供给sdk方 </summary>
         public string HttpCode { get; set; }
-        /// <summary> http指令路径 </summary>
-        public string HttpUrl { get; set; }
         /// <summary>语言</summary>
         public string Language { get; set; }
         /// <summary>本地数据库前缀</summary>

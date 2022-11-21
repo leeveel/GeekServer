@@ -20,6 +20,15 @@ namespace Geek.Server.App.Net
             return CenterRpcClient.Connect();
         }
 
+        public static async Task ConnectGateway()
+        {
+            var nodes = await CenterRpcClient.ServerAgent.GetNodeByType(NodeType.Gateway);
+            foreach (var node in nodes)
+            {
+                _ = ConnectGateway(node);
+            }
+        }
+
         public static async Task ConnectGateway(NetNode node)
         {
             if (node == null || node.Type != NodeType.Gateway)
@@ -59,7 +68,6 @@ namespace Geek.Server.App.Net
                 Settings.InsAs<BaseSetting>().MonitorKey = setting.MonitorKey;
                 Settings.InsAs<BaseSetting>().HttpInnerCode = setting.HttpInnerCode;
                 Settings.InsAs<BaseSetting>().HttpCode = setting.HttpCode;
-                Settings.InsAs<BaseSetting>().HttpUrl = setting.HttpUrl;
                 Settings.InsAs<BaseSetting>().LocalDBPrefix = setting.LocalDBPrefix;
                 Settings.InsAs<BaseSetting>().LocalDBPath = setting.LocalDBPath;
                 Settings.InsAs<BaseSetting>().Language = setting.Language;

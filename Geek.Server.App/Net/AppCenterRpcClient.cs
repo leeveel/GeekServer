@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Center;
+﻿using Geek.Server.App.Common;
+using Geek.Server.Core.Center;
 
 namespace Geek.Server.App.Net
 {
@@ -29,12 +30,14 @@ namespace Geek.Server.App.Net
             foreach (var node in nodes)
             {
                 LOGGER.Debug("NodeId:" + node.NodeId);
-                if (node.Type == NodeType.Gateway)
+                if (Settings.InsAs<AppSetting>().ServerReady 
+                    && node.Type == NodeType.Gateway)
                 {
                     _ = AppNetMgr.ConnectGateway(node);
                 }
             }
             LOGGER.Debug("---------------------------------");
         }
+
     }
 }

@@ -34,7 +34,7 @@ namespace Geek.Server.Center.Web.Pages
                     return str;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return str;
             }

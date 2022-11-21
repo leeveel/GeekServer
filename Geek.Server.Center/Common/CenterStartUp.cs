@@ -20,7 +20,7 @@ namespace Geek.Server.Center.Common
 
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");
-                await RpcServer.Start(Settings.InsAs<CenterSetting>().RpcPort);
+                await RpcServer.Start(Settings.RpcPort);
                 await WebServer.Start(Settings.InsAs<CenterSetting>().WebServerUrl);
 
                 Settings.LauchTime = DateTime.Now;
@@ -49,7 +49,7 @@ namespace Geek.Server.Center.Common
 
             Console.WriteLine($"退出服务器开始");
             await RpcServer.Stop();
-            await HttpServer.Stop();
+            await WebServer.Stop();
             Console.WriteLine($"退出服务器成功");
         }
 

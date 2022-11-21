@@ -4,7 +4,7 @@
     {
         public readonly List<int> Servers = new();
 
-        public bool AllowOpen { get; set; } = true;
+        public bool ServerReady { get; set; } 
 
         public override bool IsLocal(int serverId)
         {

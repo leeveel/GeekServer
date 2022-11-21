@@ -1,6 +1,7 @@
 ﻿using Geek.Server.Center.Web.Data;
 using Geek.Server.Center.Web.Pages.Config;
 using Geek.Server.Core.Center;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 
 namespace Geek.Server.Center.Logic
@@ -20,6 +21,22 @@ namespace Geek.Server.Center.Logic
             foreach (var c in cfgs)
             {
                 configMap[c.CfgId] = c;
+            }
+            if (!configMap.ContainsKey("global"))
+            {
+                var info = new ConfigInfo
+                {
+                    CfgId = "global",
+                    Describe = "global setting"
+                };
+                GlobalSetting globalSetting = new GlobalSetting();
+                globalSetting.LocalDBPath = "../../database/game/";
+                globalSetting.LocalDBPrefix = "gamedb_";
+                globalSetting.HttpInnerCode = "inner_httpcode";
+                globalSetting.HttpCode = "httpcode";
+                globalSetting.MongoUrl = "mongodb://127.0.0.1:27017/?authSource=admin";
+                info.Data = JsonConvert.SerializeObject(globalSetting);
+                configMap[info.CfgId] = info;
             }
         }
         internal int ConfigCount()

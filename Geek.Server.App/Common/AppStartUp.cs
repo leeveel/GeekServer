@@ -1,7 +1,10 @@
-﻿using Geek.Server.Core.Comps;
+﻿using Geek.Server.App.Net;
+using Geek.Server.Core.Center;
+using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Storage;
 using Geek.Server.Proto;
+using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
@@ -18,18 +21,37 @@ namespace Geek.Server.App.Common
                 var flag = Start();
                 if (!flag) return; //启动服务器失败
 
-                Log.Info($"launch embedded db...");
-                RocksDBConnection.Singleton.Connect(Settings.LocalDBPath + Settings.LocalDBPrefix + Settings.ServerId);
-                Log.Info($"regist comps...");
-                await CompRegister.Init();
-                Log.Info($"load hotfix module");
-                await HotfixMgr.LoadHotfixModule();
-
-                if (!Settings.InsAs<AppSetting>().AllowOpen)
+                _ = Task.Run(async () =>
                 {
-                    Log.Error($"起服逻辑执行失败，不予启动");
-                    return;
-                }
+                    //连接中心rpc
+                    if (await AppNetMgr.ConnectCenter())
+                    {
+                        //上报注册中心
+                        var node = new NetNode
+                        {
+                            NodeId = Settings.ServerId,
+                            Ip = Settings.LocalIp,
+                            TcpPort = Settings.TcpPort,
+                            HttpPort = Settings.HttpPort,
+                            Type = NodeType.Game
+                        };
+                        if (!await AppNetMgr.CenterRpcClient.ServerAgent.Register(node))
+                            throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(node)}");
+
+                        //到中心服拉取通用配置
+                        await AppNetMgr.GetGlobalConfig();
+
+                        Log.Info($"launch embedded db...");
+                        RocksDBConnection.Singleton.Connect(Settings.LocalDBPath + Settings.LocalDBPrefix + Settings.ServerId);
+                        Log.Info($"regist comps...");
+                        await CompRegister.Init();
+                        Log.Info($"load hotfix module");
+                        await HotfixMgr.LoadHotfixModule();
+
+                        Settings.InsAs<AppSetting>().ServerReady = true;
+                        _ = AppNetMgr.ConnectGateway();
+                    }
+                });
 
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");

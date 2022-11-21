@@ -94,12 +94,6 @@ namespace Geek.Server.Core.Comps
                         {
                             throw new Exception($"{compType}未实现agent");
                         }
-
-                        //if (actorType > ActorType.Separator)
-                        //{
-                        //    Log.Info($"激活全局组件：{actorType} {compType}");
-                        //    await ActorMgr.GetCompAgent(agentType, actorType);
-                        //}
                     }
                     if (actorType > ActorType.Separator)
                     {
@@ -121,23 +115,6 @@ namespace Geek.Server.Core.Comps
             return ActiveComps(compAgent.Owner.Actor,
                 t => !CompFuncDic.TryGetValue(t, out var func)
                 || openFuncSet.Contains(func));
-            //foreach (var compType in GetComps(ActorType.Role))
-            //{
-            //    bool active;
-            //    if (CompFuncDic.TryGetValue(compType, out var func))
-            //    {
-            //        active = openFuncSet.Contains(func);
-            //    }
-            //    else
-            //    {
-            //        active = true;
-            //    }
-            //    if (active)
-            //    {
-            //        var agentType = HotfixMgr.GetAgentType(compType);
-            //        await compAgent.GetCompAgent(agentType);
-            //    }
-            //}
         }
 
         internal static async Task ActiveComps(Actor actor, Func<Type, bool> predict = null)
