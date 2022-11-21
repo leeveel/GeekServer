@@ -2,12 +2,8 @@
   "IsDebug": true,
   "ServerId": 3001, //[1000,9999]
   "ServerName": "Geek Server",
-  "LocalIp": "127.0.0.1",
-  "TcpPort": 8899,
   "RpcPort": 8900,
-  "HttpCode": "inner_httpcode",
-  "HttpPort": 30000,
-  "WebServerUrl": "https://localhost:5004",
+  "WebServerUrl": "https://*:5004",
   "LocalDBPrefix": "gamedb_",
   "LocalDBPath": "../../database/game/",
   "InitUserName": "admin",

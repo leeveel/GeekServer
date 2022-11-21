@@ -49,7 +49,7 @@ namespace Geek.Server.Center.Common
 
             Console.WriteLine($"退出服务器开始");
             await RpcServer.Stop();
-            await HttpServer.Stop();
+            await WebServer.Stop();
             Console.WriteLine($"退出服务器成功");
         }
 

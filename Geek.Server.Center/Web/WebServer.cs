@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using MudBlazor.Services;
+using System.Security.Policy;
 
 namespace Geek.Server.Center.Web
 {
@@ -26,12 +27,11 @@ namespace Geek.Server.Center.Web
             // Add services to the container.
             builder.Services.AddRazorPages().WithRazorPagesRoot("/Web/Pages");
             builder.Services.AddServerSideBlazor();
-            builder.Services.AddHttpContextAccessor(); //用于获得客户端信息
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddSingleton<DBService>();
             builder.Services.AddSingleton<LoginService>();
             builder.Services.AddSingleton<ConfigService>();
             builder.Services.AddSingleton<NamingService>();
-            //builder.Services.AddSingleton<ServerNodeService>();
             builder.Services.AddScoped<ProtectedSessionStorage>();
             builder.Services.AddScoped<ProtectedLocalStorage>();
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
@@ -60,9 +60,6 @@ namespace Geek.Server.Center.Web
                 //app.UseHsts();
             }
 
-            //app.Urls.Clear();
-            //app.Urls.Add(webUrl);
-
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
@@ -73,14 +70,21 @@ namespace Geek.Server.Center.Web
 
             app.MapFallbackToPage("/_Host");
 
-            app.RunAsync(webUrl);
+            app.Urls.Clear();
+            var urlList = webUrl.Split(";");
+            foreach (var u in urlList)
+            {
+                app.Urls.Add(u);
+            }
 
-            return Task.CompletedTask;
+            return app.StartAsync();
         }
 
         public static Task Stop()
         {
-            return app.StopAsync();
+            if (app != null)
+                return app.StopAsync();
+            return Task.CompletedTask;
         }
     }
 }
