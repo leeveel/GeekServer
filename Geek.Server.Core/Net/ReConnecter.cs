@@ -44,6 +44,30 @@ namespace Geek.Server.Core.Net
             }
         }
 
+
+        /// <summary>
+        /// 尝试立即重连
+        /// </summary>
+        /// <returns></returns>
+        public async Task TryReConnectImmediately()
+        {
+            try
+            {
+                if (cancel != null)
+                {
+                    cancel.Cancel();
+                    cancel.Token.ThrowIfCancellationRequested();
+                }
+            }
+            catch (Exception)
+            {
+                LOGGER.Error($"取消当前重连,尝试立即重连");
+                retryed--;
+                await Connect();  
+            }
+        }
+
+        private CancellationTokenSource cancel;
         public async Task ReConnect()
         {
             try
@@ -56,7 +80,8 @@ namespace Geek.Server.Core.Net
                     int delay = GetNextDelayTime();
                     retryed++;
                     LOGGER.Error($"连接断开,{delay}ms后尝试重连");
-                    await Task.Delay(delay);
+                    cancel = new CancellationTokenSource();
+                    await Task.Delay(delay, cancel.Token);
                     await Connect();
                 }
                 else

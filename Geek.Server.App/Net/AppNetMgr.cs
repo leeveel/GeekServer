@@ -41,10 +41,10 @@ namespace Geek.Server.App.Net
             }
             else
             {
-                //TODO:对于已有连接，可以立即尝试重连
+                //对于已有连接，可以立即尝试重连
+                tcpClient.TryReConnectImmediately();
             }
         }
-
 
         public static async Task GetGlobalConfig()
         {
