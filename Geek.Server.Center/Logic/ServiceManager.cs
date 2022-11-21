@@ -2,8 +2,8 @@
 {
     internal class ServiceManager
     {
-        public static NamingService NamingService { get; private set; } = new NamingService();
+        public static NamingService NamingService { get; set; }
 
-        public static ConfigService ConfigService { get; private set; } = new ConfigService();
+        public static ConfigService ConfigService { get; set; }
     }
 }

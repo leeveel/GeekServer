@@ -1,0 +1,61 @@
+﻿@page "/dashboard"
+
+@attribute [Authorize]
+
+@implements IDisposable
+@using System.Diagnostics
+
+@inject ConfigService cfgService
+@inject NamingService namingService
+
+
+<MudText Typo="Typo.h5" Color="Color.Primary" Class="mb-4">Dashboard</MudText>
+<MudGrid>
+    @foreach (var sinfo in systemInfos)
+    {
+        <MudItem xs="12" sm="6" md="3">
+            <DashboardItem info="@sinfo" />
+        </MudItem>
+    }
+</MudGrid>
+
+@code {
+    DashboardItemInfo[] systemInfos;
+    Timer refreshTimer;
+    protected override void OnInitialized()
+    {
+        int count = 2;
+        systemInfos = new DashboardItemInfo[count];
+        for (int i = 0; i < count; i++)
+        {
+            systemInfos[i] = new DashboardItemInfo();
+        }
+        systemInfos[0].Name = "配置数量";
+        systemInfos[0].Icon = Icons.Filled.SettingsRemote;
+        systemInfos[0].navUrl = "config";
+
+        systemInfos[1].Name = "服务节点";
+        systemInfos[1].Icon = Icons.Filled.ElectricalServices;
+        systemInfos[1].navUrl = "servernodes";
+
+        refreshTimer = new Timer(new TimerCallback(_ =>
+        {
+            InvokeAsync(async () =>
+            {
+                refresh();
+            });
+        }), null, 0, 1000);
+    }
+
+    void refresh()
+    {
+        systemInfos[0].Value = cfgService.ConfigCount().ToString();
+        systemInfos[1].Value = namingService.NodeCount().ToString();
+        StateHasChanged();
+    }
+
+    void IDisposable.Dispose()
+    {
+        refreshTimer?.Dispose();
+    }
+}

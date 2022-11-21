@@ -1,4 +1,6 @@
-﻿using Geek.Server.Core.Net.Http;
+﻿using Geek.Server.Center.Logic;
+using Geek.Server.Center.Web;
+using Geek.Server.Core.Net.Http;
 using Geek.Server.Core.Net.Rpc;
 using NLog;
 using NLog.Config;
@@ -19,9 +21,19 @@ namespace Geek.Server.Center.Common
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");
                 await RpcServer.Start(Settings.InsAs<CenterSetting>().RpcPort);
-                await HttpServer.Start(Settings.HttpPort);
+                await WebServer.Start(Settings.InsAs<CenterSetting>().WebServerUrl);
+
                 Settings.LauchTime = DateTime.Now;
                 Settings.AppRunning = true;
+
+                //服务节点添加自己
+                ServiceManager.NamingService.Add(new Core.Center.NetNode
+                {
+                    NodeId = Settings.ServerId,
+                    ServerId = Settings.ServerId,
+                    Type = Core.Center.NodeType.Center,
+                    RpcPort = Settings.RpcPort,
+                });
 
                 TimeSpan delay = TimeSpan.FromSeconds(1);
                 while (Settings.AppRunning)
