@@ -15,10 +15,10 @@ namespace Geek.Server.Gateway.Net
 
         public static GateCenterRpcClient CenterRpcClient { get; set; }
 
-        public static async Task ConnectCenter()
+        public static Task<bool> ConnectCenter()
         {
-            CenterRpcClient = new GateCenterRpcClient();
-            await CenterRpcClient.Connect(Settings.CenterUrl);
+            CenterRpcClient = new GateCenterRpcClient(Settings.CenterUrl);
+            return CenterRpcClient.Connect();
         }
 
         private static TcpServer outerTcpServer;
@@ -33,8 +33,10 @@ namespace Geek.Server.Gateway.Net
 
         public static async Task StopTcpServer()
         {
-            await outerTcpServer?.Stop();
-            await innerTcpServer?.Stop();
+            if(outerTcpServer != null)
+                await outerTcpServer.Stop();
+            if(innerTcpServer != null)
+                await innerTcpServer.Stop();
         }
 
         public static long SelectAHealthNode(int serverId)

@@ -6,6 +6,18 @@ namespace Geek.Server.App.Net
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
+        public AppCenterRpcClient(string ip, int port) 
+            : base(ip, port)
+        {
+
+        }
+
+        public AppCenterRpcClient(string url)
+           : base(url)
+        {
+
+        }
+
         public override void ConfigChanged(byte[] data)
         {
             Console.WriteLine("ConfigChanged:" + data);

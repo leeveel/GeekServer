@@ -10,6 +10,7 @@ namespace Geek.Server.Core.Utils
         StartFailed = 1,
         UnhandledException,
         ActorTimeout,
+        NetworkTimeout
     }
 
     public class ExceptionMonitor

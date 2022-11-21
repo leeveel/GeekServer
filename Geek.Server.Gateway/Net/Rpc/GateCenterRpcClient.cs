@@ -6,6 +6,10 @@ namespace Geek.Server.Gateway.Net.Rpc
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
+        public GateCenterRpcClient(string url) : base(url)
+        {
+        }
+
         public override void ConfigChanged(byte[] data)
         {
             LOGGER.Debug("ConfigChanged:" + data);

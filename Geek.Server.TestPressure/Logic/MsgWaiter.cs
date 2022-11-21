@@ -2,7 +2,7 @@
 {
     public class MsgWaiter
     {
-        class innerWaiter
+        class InnerWaiter
         {
             public TaskCompletionSource<bool> Tcs { private set; get; }
 
@@ -28,7 +28,7 @@
             }
         }
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        private readonly Dictionary<int, innerWaiter> waitDic = new();
+        private readonly Dictionary<int, InnerWaiter> waitDic = new();
 
         public void Clear()
         {
@@ -75,7 +75,7 @@
         {
             if (!waitDic.ContainsKey(uniId))
             {
-                var waiter = new innerWaiter();
+                var waiter = new InnerWaiter();
                 waitDic.Add(uniId, waiter);
                 waiter.Start();
                 return await waiter.Tcs.Task;

@@ -1,4 +1,5 @@
-﻿using Grpc.Net.Client;
+﻿using Geek.Server.Core.Net;
+using Grpc.Net.Client;
 using MagicOnion.Client;
 
 namespace Geek.Server.Core.Center
@@ -7,29 +8,50 @@ namespace Geek.Server.Core.Center
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public ICenterRpcHub ServerAgent { private set; get; }
-        private string url;
-        public async Task Connect(string url)
+        protected string connUrl;
+
+        protected ReConnecter reConn;
+
+        public BaseCenterRpcClient(string ip, int port)
+        {
+            connUrl = $"http://{ip}:{port}";
+            reConn = new ReConnecter(ConnectImpl,$"中心服:{connUrl}");
+        }
+
+        public BaseCenterRpcClient(string url)
+        {
+            connUrl = url;
+            reConn = new ReConnecter(ConnectImpl, $"中心服:{connUrl}");
+        }
+
+        public Task<bool> Connect()
+        {
+            return reConn.Connect();
+        }
+
+        private async Task<bool> ConnectImpl()
         {
             try
             {
-                this.url = url;
-                var channel = GrpcChannel.ForAddress(url);
+                var channel = GrpcChannel.ForAddress(connUrl);
                 ServerAgent = await StreamingHubClient.ConnectAsync<ICenterRpcHub, ICenterRpcClient>(channel, this);
                 _ = RegisterDisconnectEvent();
+                return true;
             }
             catch (Exception e)
             {
-                LOGGER.Error($"rpc连接异常:{e}");
+                LOGGER.Error($"rpc连接异常:{e.Message}");
                 try
                 {
-                    await ServerAgent?.DisposeAsync();
+                    if(ServerAgent != null)
+                        await ServerAgent.DisposeAsync();
                 }
                 catch (Exception ex)
                 {
-                    LOGGER.Error($"rpc.Dispose异常:{ex}");
+                    LOGGER.Error($"rpc.Dispose异常:{ex.Message}");
                 }
                 ServerAgent = null;
-                await ReConnect();
+                return false;
             }
         }
 
@@ -46,20 +68,13 @@ namespace Geek.Server.Core.Center
             finally
             {
                 LOGGER.Info("disconnected from the center server.");
-                await ReConnect();
+                await reConn.ReConnect();
             }
-        }
-
-        private async Task ReConnect()
-        {
-            int delay = 15000;
-            LOGGER.Error($"连接断开,{delay}ms后尝试重连");
-            await Task.Delay(delay);
-            await Connect(url);
         }
 
         public abstract void ConfigChanged(byte[] data);
 
         public abstract void NodesChanged(List<NetNode> nodes);
+
     }
 }

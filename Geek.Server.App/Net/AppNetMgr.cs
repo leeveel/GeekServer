@@ -1,5 +1,4 @@
 ﻿using Geek.Server.Core.Center;
-using Geek.Server.Core.Net.Tcp.Inner;
 using Geek.Server.Proto;
 using System.Collections.Concurrent;
 
@@ -16,8 +15,8 @@ namespace Geek.Server.App.Net
 
         public static async Task ConnectCenter()
         {
-            CenterRpcClient = new AppCenterRpcClient();
-            await CenterRpcClient.Connect(Settings.CenterUrl);
+            CenterRpcClient = new AppCenterRpcClient(Settings.CenterUrl);
+            await CenterRpcClient.Connect();
         }
 
         public static async Task ConnectGateway(NetNode node)
@@ -27,8 +26,8 @@ namespace Geek.Server.App.Net
             if (!tcpClientDic.TryGetValue(node.NodeId, out InnerTcpClient tcpClient))
             {
                 tcpClient = new InnerTcpClient(node);
-                var res = await tcpClient.Connect(node.Ip, node.InnerTcpPort);
-                if (res == NetCode.Success)
+                var res = await tcpClient.Connect();
+                if (res)
                 {
                     tcpClientDic[node.NodeId] = tcpClient;
                     var req = new ReqInnerConnectGate();
@@ -42,7 +41,7 @@ namespace Geek.Server.App.Net
             }
             else
             {
-                LOGGER.Error($"忽略,网关已连接:{node.NodeId},{node.Ip},{node.TcpPort}");
+                //TODO:对于已有连接，可以立即尝试重连
             }
         }
 

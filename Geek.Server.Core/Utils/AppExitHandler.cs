@@ -6,15 +6,20 @@ namespace Geek.Server.Core.Utils
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         static Action callBack;
-        public static void Init(Action existCallBack)
+        public static void Init(Action exitCallBack)
         {
-            callBack = existCallBack;
-            //退出监听
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => { callBack?.Invoke(); };
+            callBack = exitCallBack;
+            OnExit(exitCallBack);
             //Fetal异常监听
             AppDomain.CurrentDomain.UnhandledException += (s, e) => { HandleFetalException(e.ExceptionObject); };
+        }
+
+        public static void OnExit(Action exitCallBack)
+        {
+            //退出监听
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => { exitCallBack?.Invoke(); };
             //ctrl+c
-            Console.CancelKeyPress += (s, e) => { callBack?.Invoke(); };
+            Console.CancelKeyPress += (s, e) => { exitCallBack?.Invoke(); };
         }
 
         private static void HandleFetalException(object e)

@@ -28,20 +28,24 @@ namespace Geek.Server.Gateway.Common
                 Settings.LauchTime = DateTime.Now;
                 Settings.AppRunning = true;
 
-                //连接中心rpc
-                await GateNetMgr.ConnectCenter();
-                //上报注册中心
-                var node = new NetNode
+                _ = Task.Run(async () => 
                 {
-                    NodeId = Settings.ServerId,
-                    Ip = Settings.LocalIp,
-                    TcpPort = Settings.TcpPort,
-                    InnerTcpPort = Settings.InsAs<GateSettings>().InnerTcpPort,
-                    HttpPort = Settings.HttpPort,
-                    Type = NodeType.Gateway
-                };
-                await GateNetMgr.CenterRpcClient.ServerAgent.Register(node);
-
+                    //连接中心rpc
+                    if (await GateNetMgr.ConnectCenter())
+                    {
+                        var node = new NetNode
+                        {
+                            NodeId = Settings.ServerId,
+                            Ip = Settings.LocalIp,
+                            TcpPort = Settings.TcpPort,
+                            InnerTcpPort = Settings.InsAs<GateSettings>().InnerTcpPort,
+                            HttpPort = Settings.HttpPort,
+                            Type = NodeType.Gateway
+                        };
+                        //上报注册中心
+                        await GateNetMgr.CenterRpcClient.ServerAgent.Register(node);
+                    }
+                });
                 TimeSpan delay = TimeSpan.FromSeconds(1);
                 while (Settings.AppRunning)
                 {

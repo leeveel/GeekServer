@@ -4,8 +4,11 @@ using Bedrock.Framework;
 using NLog;
 using Geek.Server.Core.Center;
 using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Net;
+using Geek.Server.Core.Net.Tcp;
+using Geek.Server.Core.Net.Tcp.Inner;
 
-namespace Geek.Server.Core.Net.Tcp.Inner
+namespace Geek.Server.App.Net
 {
     public enum NetCode
     {
@@ -22,24 +25,33 @@ namespace Geek.Server.Core.Net.Tcp.Inner
 
         readonly NetNode netNode;
 
+
+        private ReConnecter reConn;
+
         public InnerTcpClient(NetNode node)
         {
             netNode = node;
+            reConn = new ReConnecter(ConnectImpl, $"网关服{node.Ip}:{node.InnerTcpPort}");
         }
 
-        public async Task<NetCode> Connect(string host, int port)
+        public Task<bool> Connect()
+        {
+            return reConn.Connect();
+        }
+
+        public async Task<bool> ConnectImpl()
         {
             try
             {
-                var connection = await ClientFactory.ConnectAsync(new IPEndPoint(IPAddress.Parse(host), port));
+                var connection = await ClientFactory.ConnectAsync(new IPEndPoint(IPAddress.Parse(netNode.Ip), netNode.InnerTcpPort));
                 OnConnection(connection);
                 _ = Task.Run(NetLooping);
-                return NetCode.Success;
+                return true;
             }
             catch (Exception e)
             {
                 LOGGER.Error(e.Message);
-                return NetCode.Failed;
+                return false;
             }
         }
 
@@ -63,7 +75,8 @@ namespace Geek.Server.Core.Net.Tcp.Inner
         protected void OnDisconnection(NetChannel channel)
         {
             LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-            //TODO:尝试重连
+            //尝试重连
+            _ = reConn.ReConnect();
         }
 
         async Task NetLooping()
