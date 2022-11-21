@@ -89,6 +89,8 @@ public static class Settings
     public static string MonitorUrl => Ins.MonitorUrl;
 
     public static string MonitorKey => Ins.MonitorKey;
+
+    public static int RpcPort => Ins.RpcPort;
 }
 
 public class BaseSetting
@@ -142,6 +144,7 @@ public class BaseSetting
     public string MonitorUrl { get; set; }
     /// <summary> 钉钉监控key </summary>
     public string MonitorKey { get; set; }
+    public int RpcPort { get; set; }
 
     #endregion
 }

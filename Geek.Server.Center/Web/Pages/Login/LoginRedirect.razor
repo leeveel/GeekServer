@@ -1,0 +1,10 @@
+@using System.Security.Claims
+@inject AuthenticationStateProvider _authenticationStateProvider
+@inject NavigationManager navigationManager;
+
+@code {
+    protected override void OnAfterRender(bool firstRender)
+    {  
+        navigationManager.NavigateTo("/");
+    } 
+}

@@ -1,0 +1,46 @@
+﻿@page "/user"
+
+@attribute [Authorize]
+
+@inject DBService dbService
+
+<MudText Typo="Typo.h6" GutterBottom="true">用户列表</MudText>
+@if (userList != null)
+{
+    <MudDataGrid T="UserInfo" ReadOnly="false" Items="@userList" SortMode="@SortMode.None" Hover="true" EditMode="@DataGridEditMode.Form"
+             StartedEditingItem="@StartedEditingItem" CancelledEditingItem="@CancelledEditingItem" CommittedItemChanges="@CommittedItemChanges"
+             Bordered="true" Dense="true" EditTrigger="@DataGridEditTrigger.Manual">
+        <Columns>
+            <Column T="UserInfo" Field="Name" IsEditable="false" />
+            <Column T="UserInfo" Field="Password" />
+            <Column T="UserInfo" CellClass="d-flex justify-end">
+                <CellTemplate>
+                    <MudIconButton Size="@Size.Small" Icon="@Icons.Outlined.Edit" OnClick="@context.Actions.StartEditingItem" />
+                </CellTemplate>
+            </Column>
+        </Columns>
+    </MudDataGrid>
+}
+
+@code {
+    private UserInfo[]? userList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        userList = dbService.GetAllData<UserInfo>();
+    }
+
+    // events
+    void StartedEditingItem(UserInfo item)
+    {
+    }
+
+    void CancelledEditingItem(UserInfo item)
+    {
+    }
+
+    void CommittedItemChanges(UserInfo item)
+    {
+        dbService.UpdateData(item.Name, item);
+    }
+}

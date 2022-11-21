@@ -1,0 +1,110 @@
+﻿@page "/config"
+
+@attribute [Authorize]
+
+@using Geek.Server.Center.Web.Data
+
+@inject ConfigService cfgService
+@inject IDialogService DialogService
+
+<MudPaper Class="d-flex flex-grow-1 gap-4" Elevation="0">
+    <MudText Typo="Typo.h6" GutterBottom="true">配置列表</MudText>
+    <MudSpacer />
+    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(async ()=>await AddItem())" />
+</MudPaper>
+
+<MudDataGrid T="ConfigInfo"
+             Items="@cfgList"
+             SortMode="@SortMode.None"
+             Hover="true"
+             RowsPerPage="10"
+             EditMode="@DataGridEditMode.Form"
+             Bordered="false"
+             Dense="true"
+             ColumnResizeMode="@ResizeMode.Column"
+             EditTrigger="@DataGridEditTrigger.Manual">
+
+    <Columns>
+        <HierarchyColumn T="ConfigInfo" />
+        <Column T="ConfigInfo" Field="CfgId" Title="配置ID(唯一)" />
+        <Column T="ConfigInfo" Field="Describe" Title="说明" />
+        <Column T="ConfigInfo" Field="ChangeTime" IsEditable="false" Title="修改时间" />
+        @* <Column T="ConfigInfo" Field="Data" IsEditable="true" Title="数据"/>  *@
+        <Column T="ConfigInfo">
+            <CellTemplate>
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Filled.EditCalendar" OnClick="@(async ()=>await EditItem(context.Item))" />
+                <MudIconButton Size="@Size.Small" Icon="@Icons.Filled.DeleteForever" OnClick="()=>DeleteItem(context.Item)" />
+            </CellTemplate>
+        </Column>
+    </Columns>
+
+    <ChildRowContent>
+        <MudCard Elevation="2">
+            <MudCardContent>
+                <MudText Typo="Typo.caption">@context.Item.Data</MudText>
+            </MudCardContent>
+        </MudCard>
+    </ChildRowContent>
+
+    <PagerContent>
+        <MudDataGridPager T="ConfigInfo" PageSizeOptions=@(new int[] {10, 20, 30,50}) />
+    </PagerContent>
+</MudDataGrid>
+
+
+<MudMessageBox @ref="deleteTipsBox" Title="警告" CancelText="Cancel">
+    <MessageContent>
+        删除后<b><i>不能</i></b>被恢复!
+    </MessageContent>
+    <YesButton>
+        <MudButton>Delete! </MudButton>
+    </YesButton>
+</MudMessageBox>
+
+<MudScrollToTop>
+    <MudFab Color="Color.Primary" Icon="@Icons.Filled.ArrowCircleUp" />
+</MudScrollToTop>
+
+
+@code {
+    MudMessageBox deleteTipsBox { get; set; }
+    private List<ConfigInfo> cfgList;
+
+    protected override void OnInitialized()
+    {
+        cfgList = cfgService.GetAllConfigs();
+    }
+
+
+    async Task AddItem()
+    {
+        var dialog = DialogService.Show<AddConfigDialog>("新增配置");
+        var result = await dialog.Result;
+        if (result != null && result.Data != null)
+        {
+            cfgService.SetConfig(result.Data as ConfigInfo);
+            StateHasChanged();
+        }
+    }
+
+    async void DeleteItem(ConfigInfo item)
+    {
+        bool? result = await deleteTipsBox.Show();
+        if (result != null && result.Value)
+        {
+            cfgService.DeleteConfig(item);
+            StateHasChanged();
+        }
+    }
+
+    async Task EditItem(ConfigInfo item)
+    {
+        var parameters = new DialogParameters { ["cfgItem"] = item };
+        var dialog = DialogService.Show<EditConfigDialog>("编辑配置", parameters);
+        var result = await dialog.Result;
+        if (!result.Cancelled)
+        {
+            cfgService.UpdateConfig(item);
+        }
+    }
+}

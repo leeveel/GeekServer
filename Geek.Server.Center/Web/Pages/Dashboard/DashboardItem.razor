@@ -1,0 +1,23 @@
+﻿@inject NavigationManager NavigationManager
+
+<MudPaper Elevation="3" Class="d-flex flex-row pt-6 pb-4" Style="height:100px;" onclick="@OnClick">
+    <MudIcon Icon="@info.Icon" Color="Color.Primary" Class="mx-4" Style="width:54px; height:54px;">
+    </MudIcon>
+    <div>
+        <MudText Typo="Typo.subtitle1" Class="mud-text-secondary mb-n1">@info.Name</MudText>
+        <MudText Typo="Typo.h5">@info.Value</MudText>
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public DashboardItemInfo info { get; set; }
+
+    void OnClick()
+    {
+        if (!string.IsNullOrEmpty(info.navUrl))
+        {
+            NavigationManager.NavigateTo(info.navUrl);
+        }
+    }
+}

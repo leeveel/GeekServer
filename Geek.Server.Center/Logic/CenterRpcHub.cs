@@ -1,4 +1,6 @@
-﻿using Geek.Server.Core.Center;
+﻿using Geek.Server.Center.Web.Data;
+using Geek.Server.Center.Web.Pages.Config;
+using Geek.Server.Core.Center;
 using MagicOnion.Server.Hubs;
 using NLog;
 
@@ -61,15 +63,15 @@ namespace Geek.Server.Center.Logic
             return Task.FromResult(true);
         }
 
-        public Task<byte[]> GetConfig(string configId)
+        public Task<ConfigInfo> GetConfig(string configId)
         {
-            var bytes = ServiceManager.ConfigService.GetConfig(configId);
-            return Task.FromResult(bytes);
+            var cfg = ServiceManager.ConfigService.GetConfig(configId);
+            return Task.FromResult(cfg);
         }
 
-        public Task<bool> SetConfig(string configId, byte[] data)
+        public Task<bool> SetConfig(ConfigInfo cfg)
         {
-            ServiceManager.ConfigService.SetConfig(configId, data);
+            ServiceManager.ConfigService.SetConfig(cfg);
             return Task.FromResult(true);
         }
 

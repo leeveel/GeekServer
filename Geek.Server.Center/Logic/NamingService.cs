@@ -9,6 +9,11 @@ namespace Geek.Server.Center.Logic
         //服务器节点的id 为自身的serverid
         internal readonly ConcurrentDictionary<long, NetNode> nodeMap = new();
 
+        public int NodeCount()
+        {
+            return nodeMap.Count;
+        }
+
         public NetNode Remove(long id)
         {
             nodeMap.TryRemove(id, out var node);
@@ -61,6 +66,5 @@ namespace Geek.Server.Center.Logic
             }
             return list;
         }
-
     }
 }

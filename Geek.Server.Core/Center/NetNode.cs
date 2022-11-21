@@ -29,6 +29,8 @@ namespace Geek.Server.Core.Center
         public int InnerTcpPort { get; set; }
         [Key(6)]
         public int HttpPort { get; set; }
+        [Key(7)]
+        public int RpcPort { get; set; }
     }
 
 }
