@@ -17,5 +17,7 @@ namespace Geek.Server.RemoteBackup.Logic
         /// 备份进程本地数据库
         /// </summary>
         public string BackupDBPath { get; set; }
+
+        public string BackupDBName { get; set; }
     }
 }

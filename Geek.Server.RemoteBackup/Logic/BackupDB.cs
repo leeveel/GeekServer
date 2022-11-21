@@ -16,8 +16,8 @@ namespace Geek.Server.RemoteBackup.Logic
         {
             try
             {
-                var path = Settings.InsAs<BackupSetting>().BackupDBPath + Settings.DbName;
-                DB = new EmbeddedDB(path);
+                var backSetting = Settings.InsAs<BackupSetting>();
+                DB = new EmbeddedDB(backSetting.BackupDBPath + backSetting.BackupDBName);
                 BackupTable = DB.GetTable<SaveTimestamp>();
             }
             catch (Exception e)

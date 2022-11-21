@@ -1,5 +1,6 @@
 ﻿using Geek.Server.Core.Center;
 using Geek.Server.Proto;
+using Newtonsoft.Json;
 using System.Collections.Concurrent;
 
 namespace Geek.Server.App.Net
@@ -13,10 +14,10 @@ namespace Geek.Server.App.Net
         /// </summary>
         private static ConcurrentDictionary<int, InnerTcpClient> tcpClientDic = new ConcurrentDictionary<int, InnerTcpClient>();
 
-        public static async Task ConnectCenter()
+        public static Task<bool> ConnectCenter()
         {
             CenterRpcClient = new AppCenterRpcClient(Settings.CenterUrl);
-            await CenterRpcClient.Connect();
+            return CenterRpcClient.Connect();
         }
 
         public static async Task ConnectGateway(NetNode node)
@@ -49,9 +50,25 @@ namespace Geek.Server.App.Net
         public static async Task GetGlobalConfig()
         {
             //通用配置
-            var bytes = await CenterRpcClient.ServerAgent.GetConfig("global");
-            //MessagePack.MessagePackSerializer.Deserialize<GlobalSetting>(bytes);
-            //TODO
+            var config = await CenterRpcClient.ServerAgent.GetConfig("global");
+            var setting = JsonConvert.DeserializeObject<GlobalSetting>(config.Data);
+            if (setting != null)
+            {
+                Settings.InsAs<BaseSetting>().MongoUrl = setting.MongoUrl;
+                Settings.InsAs<BaseSetting>().MonitorUrl = setting.MonitorUrl;
+                Settings.InsAs<BaseSetting>().MonitorKey = setting.MonitorKey;
+                Settings.InsAs<BaseSetting>().HttpInnerCode = setting.HttpInnerCode;
+                Settings.InsAs<BaseSetting>().HttpCode = setting.HttpCode;
+                Settings.InsAs<BaseSetting>().HttpUrl = setting.HttpUrl;
+                Settings.InsAs<BaseSetting>().LocalDBPrefix = setting.LocalDBPrefix;
+                Settings.InsAs<BaseSetting>().LocalDBPath = setting.LocalDBPath;
+                Settings.InsAs<BaseSetting>().Language = setting.Language;
+                Settings.InsAs<BaseSetting>().SDKType = setting.SDKType;
+            }
+            else
+            {
+                LOGGER.Error($"反序列化通用配置失败{setting}");
+            }
         }
 
         /// <summary>

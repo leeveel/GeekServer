@@ -62,6 +62,8 @@ public static class Settings
 
     public static string HttpCode => Ins.HttpCode;
 
+    public static string HttpInnerCode => Ins.HttpInnerCode;
+
     public static string HttpUrl => Ins.HttpUrl;
 
     public static int HttpPort => Ins.HttpPort;
@@ -70,21 +72,15 @@ public static class Settings
 
     public static string MongoUrl => Ins.MongoUrl;
 
-    public static string DbName => Ins.DbName;
-
     public static string LocalDBPrefix => Ins.LocalDBPrefix;
 
     public static string LocalDBPath => Ins.LocalDBPath;
 
     public static string Language => Ins.Language;
 
-    public static string DataCenter => Ins.DataCenter;
-
     public static string CenterUrl => Ins.CenterUrl;
 
     public static int SDKType => Ins.SDKType;
-
-    public static string GateUrl => Ins.GateUrl;
 
     public static string MonitorUrl => Ins.MonitorUrl;
 
@@ -115,36 +111,35 @@ public class BaseSetting
 
     public string LocalIp { get; init; }
 
-    public string HttpCode { get; init; }
+    public string HttpCode { get; set; }
 
-    public string HttpUrl { get; init; }
+    public string HttpInnerCode { get; set; }
+
+    public string HttpUrl { get; set; }
 
     public int HttpPort { get; init; }
 
     public int TcpPort { get; init; }
 
-    public string MongoUrl { get; init; }
+    public int RpcPort { get; set; }
 
-    public string DbName { get; init; }
+    public string MongoUrl { get; set; }
 
-    public string LocalDBPrefix { get; init; }
+    public string LocalDBPrefix { get; set; }
 
-    public string LocalDBPath { get; init; }
+    public string LocalDBPath { get; set; }
 
-    public string Language { get; init; }
-
-    public string DataCenter { get; init; }
+    public string Language { get; set; }
 
     public string CenterUrl { get; init; }
 
     public int SDKType { get; set; }
-    public string GateUrl { get; set; }
 
     /// <summary> 钉钉监控地址 </summary>
     public string MonitorUrl { get; set; }
+
     /// <summary> 钉钉监控key </summary>
     public string MonitorKey { get; set; }
-    public int RpcPort { get; set; }
-
+ 
     #endregion
 }

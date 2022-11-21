@@ -4,11 +4,6 @@
   "ServerName": "geek_server",
   "LocalIp": "127.0.0.1",
   "TcpPort": 8899,
-  "HttpCode": "inner_httpcode",
   "HttpPort": 20000,
-  "LocalDBPrefix": "gamedb_",
-  "LocalDBPath": "../../database/game/",
-  "SDKType": 0,
-  "GateUrl": "http://127.0.0.1:8900",
   "CenterUrl": "http://127.0.0.1:8900"
 }

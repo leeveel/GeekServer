@@ -4,6 +4,7 @@ using Geek.Server.Gateway.Net;
 using Geek.Server.Gateway.Net.Http;
 using Geek.Server.Gateway.Net.Tcp.Handler;
 using Geek.Server.Proto;
+using Newtonsoft.Json;
 using NLog.LayoutRenderers;
 
 namespace Geek.Server.Gateway.Common
@@ -43,7 +44,8 @@ namespace Geek.Server.Gateway.Common
                             Type = NodeType.Gateway
                         };
                         //上报注册中心
-                        await GateNetMgr.CenterRpcClient.ServerAgent.Register(node);
+                        if (!await GateNetMgr.CenterRpcClient.ServerAgent.Register(node))
+                            throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(node)}");
                     }
                 });
                 TimeSpan delay = TimeSpan.FromSeconds(1);
