@@ -84,7 +84,7 @@ namespace Geek.Server.Hotfix.Server
         [TimeOut(12000)]
         public virtual Task<bool> IsOnline(long roleId)
         {
-            foreach (var id in State.OnlineList)
+            foreach (var id in Comp.OnlineSet)
             {
                 if (id == roleId)
                     return Task.FromResult(true);
