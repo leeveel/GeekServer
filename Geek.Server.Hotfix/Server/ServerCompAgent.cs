@@ -32,7 +32,7 @@ namespace Geek.Server.Hotfix.Server
             Schedule<ScheduleTimer>(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30));
         }
 
-        [Api]
+        [Service]
         [Discard]
         public virtual ValueTask AddOnlineRole(long actorId)
         {
@@ -40,7 +40,7 @@ namespace Geek.Server.Hotfix.Server
             return ValueTask.CompletedTask;
         }
 
-        [Api]
+        [Service]
         [Discard]
         public virtual ValueTask RemoveOnlineRole(long actorId)
         {
@@ -73,14 +73,14 @@ namespace Geek.Server.Hotfix.Server
             return Task.CompletedTask;
         }
 
-        [Api]
+        [Service]
         [ThreadSafe]
         public virtual Task<int> GetWorldLevel()
         {
             return Task.FromResult(State.WorldLevel);
         }
 
-        [Api]
+        [Service]
         [TimeOut(12000)]
         public virtual Task<bool> IsOnline(long roleId)
         {
@@ -93,7 +93,7 @@ namespace Geek.Server.Hotfix.Server
         }
 
         /*******************演示代码**************************/
-        [Api]
+        [Service]
         [ThreadSafe]
         public virtual int DoSomething0()
         {

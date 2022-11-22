@@ -56,7 +56,7 @@ namespace Geek.Server.Hotfix.Role.Base
 
         public virtual async Task OnLogout()
         {
-            Log.Debug($"客户端下线:{State.Id}");
+            //Log.Debug($"客户端下线:{State.Id}");
             //移除在线玩家
             var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
             await serverComp.RemoveOnlineRole(ActorId);
