@@ -1,5 +1,7 @@
-﻿using Geek.Server.App.Net.Session;
+﻿using Geek.Server.App.Common.Event;
+using Geek.Server.App.Net.Session;
 using Geek.Server.App.Role.Base;
+using Geek.Server.Core.Events;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Timer;
 using Geek.Server.Hotfix.Role.Bag;
@@ -24,6 +26,15 @@ namespace Geek.Server.Hotfix.Role.Base
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
+        [Event(EventID.SessionRemove)]
+        private class EL : EventListener<RoleCompAgent>
+        {
+            protected override Task HandleEvent(RoleCompAgent agent, Event evt)
+            {
+                return agent.OnLogout();
+            }
+        }
+
         public async Task<ResLogin> OnLogin(ReqLogin reqLogin, bool isNewRole)
         {
             //玩家在线不进行回收
@@ -43,6 +54,7 @@ namespace Geek.Server.Hotfix.Role.Base
 
         public virtual Task OnLogout()
         {
+            Log.Debug($"客户端下线:{State.Id}");
             //下线后会被自动回收
             SetAutoRecycle(true);
             QuartzTimer.Unschedule(ScheduleIdSet);
