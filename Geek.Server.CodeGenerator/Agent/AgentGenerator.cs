@@ -129,8 +129,8 @@ namespace Geek.Server.CodeGenerator.Agent
                                 mth.Name = method.Identifier.Text;
                                 mth.ParamDeclare = method.ParameterList.ToString();  //(int a, List<int> list)
                                 //mth.Returntype = method.ReturnType.ToString();   //Task<T>
-                                if (mth.Discard && !mth.Returntype.Equals("Task"))
-                                    context.LogError($"{fullName}.{method.Identifier.Text}只有返回值为Task类型才能添加【Discard】注解");
+                                if (mth.Discard && !mth.Returntype.Equals("Task") && !mth.Returntype.Equals("ValueTask"))
+                                    context.LogError($"{fullName}.{method.Identifier.Text}只有返回值为Task/ValueTask类型才能添加【Discard】注解");
                                 mth.Constraint = method.ConstraintClauses.ToString(); //where T : class, new() where K : BagState
                                 mth.Typeparams = method.TypeParameterList?.ToString(); //"<T, K>"	
                                 foreach (var p in method.ParameterList.Parameters)
