@@ -2,6 +2,9 @@
 @using System.Text
 
 @inject ISnackbar Snackbar
+@inject ConfigService cfgService
+@inject IDialogService DialogService
+
 
 <MudDialog DisableSidePadding="true" Style="min-width:1000px;">
     <DialogContent>
@@ -19,9 +22,9 @@
     </DialogActions>
 </MudDialog>
 
-
 @code {
     [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+    MudMessageBox tipMsgBox { get; set; }
     int cfgIdMaxLen = 25;
     int describeMaxLen = 50;
 
@@ -34,12 +37,19 @@
         if (!CheckJson(false))
             return;
 
+        if (cfgService.GetConfig(cfgId) != null)
+        {
+            DialogService.ShowMessageBox(title: "错误", message: $"已存在相同配置id:{cfgId}的配置项，不能重复添加!", yesText: "确定");
+            return;
+        }
+
         var item = new ConfigInfo();
         item.CfgId = cfgId;
         item.Describe = describe;
         item.Data = content;
         MudDialog.Close(DialogResult.Ok(item));
     }
+
     private void Cancel()
     {
         MudDialog.Close(DialogResult.Cancel());

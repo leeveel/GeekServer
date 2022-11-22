@@ -45,6 +45,10 @@ namespace Geek.Server.Center.Web.Pages
             //格式化json字符串 
             try
             {
+                if (str == null)
+                {
+                    return false;
+                }
                 str = str.Trim();
                 if (str.StartsWith("{") && str.EndsWith("}") || str.StartsWith("[") && str.EndsWith("]"))
                 {

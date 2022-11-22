@@ -37,7 +37,7 @@
     protected override void OnParametersSet()
     {
         describe = cfgItem.Describe;
-        content = cfgItem.Data;
+        content = Utils.FormatJson(cfgItem.Data);
     }
 
     private void Ok()
