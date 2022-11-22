@@ -4,6 +4,7 @@ using Geek.Server.Core.Actors;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Utils;
 using Geek.Server.Hotfix.Role.Base;
+using Geek.Server.Hotfix.Server;
 
 namespace Geek.Server.Hotfix.Login
 {
@@ -45,6 +46,10 @@ namespace Geek.Server.Hotfix.Login
             //从登录线程-->调用Role线程 所以需要入队
             var resLogin = await roleComp.OnLogin(reqLogin, isNewRole);
             session.WriteAsync(resLogin, reqLogin.UniId, StateCode.Success);
+
+            var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
+            //加入在线玩家
+            await serverComp.AddOnlineRole(ActorId);
         }
 
         private long GetRoleIdOfPlayer(string userName, int sdkType)

@@ -34,6 +34,21 @@ namespace Geek.Server.Hotfix.Server
             Schedule<ScheduleTimer>(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30));
         }
 
+        [Api]
+        [Discard]
+        public virtual Task AddOnlineRole(long actorId)
+        {
+            Comp.OnlineSet.Add(actorId);
+            return Task.CompletedTask;
+        }
+
+        [Api]
+        [Discard]
+        public virtual Task RemoveOnlineRole(long actorId)
+        {
+            Comp.OnlineSet.Add(actorId);
+            return Task.CompletedTask;
+        }
 
         public static async Task OnlineRoleForeach(Action<RoleCompAgent> func)
         {

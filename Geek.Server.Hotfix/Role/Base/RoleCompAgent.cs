@@ -1,10 +1,12 @@
 ﻿using Geek.Server.App.Common.Event;
 using Geek.Server.App.Net.Session;
 using Geek.Server.App.Role.Base;
+using Geek.Server.Core.Actors;
 using Geek.Server.Core.Events;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Timer;
 using Geek.Server.Hotfix.Role.Bag;
+using Geek.Server.Hotfix.Server;
 
 namespace Geek.Server.Hotfix.Role.Base
 {
@@ -52,13 +54,15 @@ namespace Geek.Server.Hotfix.Role.Base
             return BuildLoginMsg();
         }
 
-        public virtual Task OnLogout()
+        public virtual async Task OnLogout()
         {
             Log.Debug($"客户端下线:{State.Id}");
+            //移除在线玩家
+            var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
+            await serverComp.RemoveOnlineRole(ActorId);
             //下线后会被自动回收
             SetAutoRecycle(true);
             QuartzTimer.Unschedule(ScheduleIdSet);
-            return Task.CompletedTask;
         }
 
         private ResLogin BuildLoginMsg()
