@@ -3,7 +3,8 @@
   "ServerId": 3001, //[1000,9999]
   "ServerName": "Geek Server",
   "RpcPort": 8900,
-  "WebServerUrl": "https://*:5004",
+  //"WebServerUrl": "https://*:5004",
+  "WebServerUrl": "https://localhost:5004",
   "LocalDBPrefix": "gamedb_",
   "LocalDBPath": "../../database/game/",
   "InitUserName": "admin",

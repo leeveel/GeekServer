@@ -83,7 +83,7 @@
         if (result != null && result.Data != null)
         {
             cfgService.SetConfig(result.Data as ConfigInfo);
-            StateHasChanged();
+            Refresh();
         }
     }
 
@@ -93,7 +93,7 @@
         if (result != null && result.Value)
         {
             cfgService.DeleteConfig(item);
-            StateHasChanged();
+            Refresh();
         }
     }
 
@@ -106,5 +106,11 @@
         {
             cfgService.UpdateConfig(item);
         }
+    }
+
+    void Refresh()
+    {
+        cfgList = cfgService.GetAllConfigs();
+        StateHasChanged();
     }
 }

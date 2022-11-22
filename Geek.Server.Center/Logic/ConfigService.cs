@@ -36,7 +36,7 @@ namespace Geek.Server.Center.Logic
                 globalSetting.HttpCode = "httpcode";
                 globalSetting.MongoUrl = "mongodb://127.0.0.1:27017/?authSource=admin";
                 info.Data = JsonConvert.SerializeObject(globalSetting);
-                configMap[info.CfgId] = info;
+                SetConfig(info);
             }
         }
         internal int ConfigCount()
