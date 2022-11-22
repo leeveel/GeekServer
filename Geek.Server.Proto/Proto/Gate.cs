@@ -2,15 +2,6 @@
 
 namespace Geek.Server.Proto
 {
-    /// <summary>
-    /// 通知客户端服务节点没有连接
-    /// </summary>
-    [MessagePackObject(true)]
-    public class ServerNotConnect : Message
-    {
-        public long serverUid { get; set; }
-    }
-
 
     [MessagePackObject(true)]
     public class ReqConnectGate : Message
@@ -37,8 +28,6 @@ namespace Geek.Server.Proto
         public int NodeId { get; set; }
     }
 
-
-
     [MessagePackObject(true)]
     public class ReqInnerConnectGate : Message
     {
@@ -49,6 +38,16 @@ namespace Geek.Server.Proto
     public class ResInnerConnectGate : Message
     {
         public bool IsSuccess { get; set; }
+    }
+
+
+    [MessagePackObject(true)]
+    public class PlayerDisconnected : Message
+    {
+        /// <summary>
+        /// 网关网络节点
+        /// </summary>
+        public int GateNodeId { get; set; }
     }
 
 }

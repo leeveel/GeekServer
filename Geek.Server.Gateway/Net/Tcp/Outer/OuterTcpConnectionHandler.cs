@@ -2,6 +2,7 @@
 using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Core.Utils;
 using Geek.Server.Gateway.Net.Tcp.Handler;
+using Geek.Server.Proto;
 using Microsoft.AspNetCore.Connections;
 
 namespace Geek.Server.Gateway.Net.Tcp.Outer
@@ -27,6 +28,17 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
             LOGGER.Debug($"{conn.Channel.Context.RemoteEndPoint?.ToString()} 断开链接");
             GateNetMgr.ClientConns.Remove(conn);
             //TODO:通知游戏服客户端掉线
+            var msg = new PlayerDisconnected
+            {
+                GateNodeId = Settings.ServerId
+            };
+            var nmsg = new NetMessage(msg)
+            {
+                ClientConnId = conn.Id
+            };
+            var serverConn = GateNetMgr.ServerConns.GetByNodeId(conn.NodeId);
+            nmsg.ClientConnId = conn.Id;
+            serverConn?.WriteAsync(nmsg);
         }
 
         protected override void Dispatcher(Connection conn, NetMessage nmsg)

@@ -30,6 +30,13 @@ namespace Geek.Server.App.Net.Session
             }
         }
 
+        public static void RemoveByClientConnId(long id)
+        {
+            var session = GetByClientConnId(id);
+            if(session != null)
+                Remove(session.Id);
+        }
+
         public static Task RemoveAll()
         {
             foreach (var session in sessionMap.Values)

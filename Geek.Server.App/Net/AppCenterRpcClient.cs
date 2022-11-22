@@ -30,7 +30,7 @@ namespace Geek.Server.App.Net
             foreach (var node in nodes)
             {
                 LOGGER.Debug("NodeId:" + node.NodeId);
-                if (Settings.InsAs<AppSetting>().ServerReady 
+                if (Settings.InsAs<AppSetting>().ServerReady  //服务器处于ready状态再连接网关
                     && node.Type == NodeType.Gateway)
                 {
                     _ = AppNetMgr.ConnectGateway(node);
