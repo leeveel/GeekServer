@@ -20,7 +20,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 ### 7.网络模块  
 网络模块替换了原来的DotNetty，采用Asp.Net的默认服务器Kestrel，支持协议多（Tcp，udp,Http123,websocket，signalr等），而且性能比dotnetty高很多[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E7%BD%91%E7%BB%9CNet(tcp%26http).md)
 ### 8.持久化透明  
-采用Mongodb作为数据存储，状态的持久化全透明，框架会自动序列化/反序列（并在编译期通过[Source Generator]自动生成检测代码，高效过滤非变化的状态）让开发人员更加专注于业务逻辑，无需操心数据库。 [了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/2.Actor%26Component%26State.md)
+采用Mongodb作为数据存储，状态的持久化全透明，框架会自动序列化/反序列,让开发人员更加专注于业务逻辑，无需操心数据库。 [了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/2.Actor%26Component%26State.md)
 ### 9.Timer/Scheduler/Event  
 内置线程安全的Timer，Scheduler，Event系统，轻松应对游戏服务器常见的定时，任务计划，事件触发等业务需求。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E4%BA%8B%E4%BB%B6Event-timer.md)
 ### 10.定期释放不活跃内存数据  
@@ -29,6 +29,8 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 [Geek.MsgPackTool](https://github.com/leeveel/Geek.MsgPackTool) [MessagePack]对多态支持不够友好，GeekServer提供了工具来生成多态注册信息，序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E5%85%B3%E4%BA%8E%E5%8D%8F%E8%AE%AE.md)
 ### 12.一键导表工具(GeekConfig)  
 [GeekConfig](https://github.com/leeveel/GeekConfig)是一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的API供游戏调用   
+### 13.数据库客户端(GeekDB.GUI)  
+[GeekDB.GUI](https://github.com/leeveel/GeekDB.GUI)是一个数据库客户端，GeekServer支持内嵌(RocksDB)和直连MongoDB的模式，但是存放的数据都是通过MessagePack序列化之后的二进制，此工具用于对这些二进制数据进行浏览。   
 
 # 运行
 1. 安装[.NetCore6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
