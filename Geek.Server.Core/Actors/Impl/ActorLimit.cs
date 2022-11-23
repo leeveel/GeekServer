@@ -73,6 +73,7 @@ namespace Geek.Server.Core.Actors.Impl
         }
 
 
+        #region ByLevelRule
         class ByLevelRule : IRule
         {
             public bool AllowCall(long target)
@@ -95,6 +96,7 @@ namespace Geek.Server.Core.Actors.Impl
                 return true;
             }
         }
+        #endregion
 
 
         #region NoBidirectionCallRule
