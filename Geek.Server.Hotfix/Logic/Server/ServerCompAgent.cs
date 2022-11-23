@@ -83,7 +83,6 @@ namespace Server.Logic.Logic.Server
         }
 
         [Service]
-        [TimeOut(12000)]
         public virtual Task<bool> IsOnline(long roleId)
         {
             foreach (var id in Comp.OnlineSet)
@@ -115,6 +114,7 @@ namespace Server.Logic.Logic.Server
         }
 
         [Discard]
+        [TimeOut(12000)]
         protected virtual Task DoSomething3()
         {
             return Task.CompletedTask;

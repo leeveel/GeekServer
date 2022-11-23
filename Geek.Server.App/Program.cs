@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text;
 using Geek.Server.App.Common;
+using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Storage;
@@ -62,6 +63,7 @@ class Program
         try
         {
             Log.Info($"launch embedded db...");
+            ActorLimit.Init(ActorLimit.RuleType.None);
             GameDB.Init();
             GameDB.Open();
             Log.Info($"regist comps...");

@@ -42,7 +42,7 @@ namespace Geek.Server.Core.Actors
             var comp = compDic.GetOrAdd(compType, k => CompRegister.NewComp(this, k));
             // 这里对交叉死锁检测的影响？
             if (!comp.IsActive)
-                await SendAsync(comp.Active);
+                await SendAsyncWithoutCheck(comp.Active);
             return comp.GetAgent(agentType);
         }
 
@@ -127,6 +127,11 @@ namespace Geek.Server.Core.Actors
         public Task SendAsync(Func<Task> work, int timeout = TIME_OUT)
         {
             return WorkerActor.SendAsync(work, timeout);
+        }
+
+        public Task SendAsyncWithoutCheck(Func<Task> work, int timeout = TIME_OUT)
+        {
+            return WorkerActor.SendAsync(work, timeout, false);
         }
 
         public Task<T> SendAsync<T>(Func<Task<T>> work, int timeout = TIME_OUT)

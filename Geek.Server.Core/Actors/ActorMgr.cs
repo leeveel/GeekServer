@@ -149,7 +149,7 @@ namespace Geek.Server.Core.Actors
                 var taskList = new List<Task>();
                 foreach (var actor in actorDic.Values)
                 {
-                    taskList.Add(actor.SendAsync(() => actor.SaveAllState()));
+                    taskList.Add(actor.SendAsync(async () => await actor.SaveAllState()));
                 }
                 await Task.WhenAll(taskList);
                 Log.Info($"save all state, use: {(DateTime.Now - begin).TotalMilliseconds}ms");
@@ -179,7 +179,7 @@ namespace Geek.Server.Core.Actors
                         return;
                     if (count < ONCE_SAVE_COUNT)
                     {
-                        taskList.Add(actor.SendAsync(() => actor.SaveAllState()));
+                        taskList.Add(actor.SendAsync(async () => await actor.SaveAllState()));
                         count++;
                     }
                     else

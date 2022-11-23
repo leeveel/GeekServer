@@ -10,9 +10,8 @@
     {
         //ID全服唯一类型
         None,
-        Role = 1, // 角色
-        Guild = 2, //公会 
-        Logger = 4,
+        Role, // 角色
+        Guild, //公会 
 
         Separator = 128, /*分割线(勿调整,勿用于业务逻辑)*/
 
@@ -21,4 +20,15 @@
 
         Max = 999,
     }
+
+    /// <summary>
+    /// 供ActorLimit检测调用关系
+    /// </summary>
+    public enum ActorTypeLevel
+    {
+        Role = 1,
+        Guild, 
+        Server,
+    }
+
 }

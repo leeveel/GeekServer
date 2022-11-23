@@ -50,9 +50,11 @@ namespace Geek.Server.Core.Actors.Impl
             return (needEnqueue, chainId);
         }
 
-        #region 供代码生成器调用
-        public Task Enqueue(Action work, long callChainId, int timeOut = TIME_OUT)
+        #region 勿调用(仅供代码生成器调用)
+        public Task Enqueue(Action work, long callChainId, bool discard=false, int timeOut = TIME_OUT)
         {
+            if (!discard && Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                return default;
             var at = new ActionWrapper(work)
             {
                 Owner = this,
@@ -62,8 +64,10 @@ namespace Geek.Server.Core.Actors.Impl
             ActionBlock.SendAsync(at);
             return at.Tcs.Task;
         }
-        public Task<T> Enqueue<T>(Func<T> work, long callChainId, int timeOut = TIME_OUT)
+        public Task<T> Enqueue<T>(Func<T> work, long callChainId, bool discard = false, int timeOut = TIME_OUT)
         {
+            if (!discard && Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                return default;
             var at = new FuncWrapper<T>(work)
             {
                 Owner = this,
@@ -74,8 +78,10 @@ namespace Geek.Server.Core.Actors.Impl
             return at.Tcs.Task;
         }
 
-        public Task Enqueue(Func<Task> work, long callChainId, int timeOut = TIME_OUT)
+        public Task Enqueue(Func<Task> work, long callChainId, bool discard = false, int timeOut = TIME_OUT)
         {
+            if (!discard && Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                return default;
             var at = new ActionAsyncWrapper(work)
             {
                 Owner = this,
@@ -86,8 +92,10 @@ namespace Geek.Server.Core.Actors.Impl
             return at.Tcs.Task;
         }
 
-        public Task<T> Enqueue<T>(Func<Task<T>> work, long callChainId, int timeOut = TIME_OUT)
+        public Task<T> Enqueue<T>(Func<Task<T>> work, long callChainId, bool discard = false, int timeOut = TIME_OUT)
         {
+            if (!discard && Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                return default;
             var at = new FuncAsyncWrapper<T>(work)
             {
                 Owner = this,
@@ -130,6 +138,9 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
+                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                    return default;
+
                 var at = new ActionWrapper(work)
                 {
                     Owner = this,
@@ -151,6 +162,9 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
+                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                    return default;
+
                 var at = new FuncWrapper<T>(work)
                 {
                     Owner = this,
@@ -166,11 +180,14 @@ namespace Geek.Server.Core.Actors.Impl
             }
         }
 
-        public Task SendAsync(Func<Task> work, int timeout = Actor.TIME_OUT)
+        public Task SendAsync(Func<Task> work, int timeout = Actor.TIME_OUT, bool checkLock = true)
         {
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
+                if (checkLock && Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                    return default;
+
                 var wrapper = new ActionAsyncWrapper(work)
                 {
                     Owner = this,
@@ -191,6 +208,9 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
+                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                    return default;
+
                 var wrapper = new FuncAsyncWrapper<T>(work)
                 {
                     Owner = this,
