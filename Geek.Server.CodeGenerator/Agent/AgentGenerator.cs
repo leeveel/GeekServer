@@ -80,7 +80,7 @@ namespace Geek.Server.CodeGenerator.Agent
                             foreach (var a in method.AttributeLists)
                             {
                                 var attStr = a.ToString().RemoveWhitespace();
-                                if (attStr.Contains("[Api]"))
+                                if (attStr.Contains("[Api]") || attStr.Contains("[Service]"))
                                 {
                                     mth.IsApi = true;
                                 }

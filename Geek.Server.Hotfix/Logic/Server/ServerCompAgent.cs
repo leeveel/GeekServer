@@ -34,7 +34,7 @@ namespace Server.Logic.Logic.Server
         }
 
 
-        [Api]
+        [Service]
         [Discard]
         public virtual ValueTask AddOnlineRole(long actorId)
         {
@@ -42,7 +42,7 @@ namespace Server.Logic.Logic.Server
             return ValueTask.CompletedTask;
         }
 
-        [Api]
+        [Service]
         [Discard]
         public virtual ValueTask RemoveOnlineRole(long actorId)
         {
@@ -75,14 +75,14 @@ namespace Server.Logic.Logic.Server
             return Task.CompletedTask;
         }
 
-        [Api]
+        [Service]
         [ThreadSafe]
         public virtual Task<int> GetWorldLevel()
         {
             return Task.FromResult(State.WorldLevel);
         }
 
-        [Api]
+        [Service]
         [TimeOut(12000)]
         public virtual Task<bool> IsOnline(long roleId)
         {
@@ -95,7 +95,7 @@ namespace Server.Logic.Logic.Server
         }
 
         /*******************演示代码**************************/
-        [Api]
+        [Service]
         [ThreadSafe]
         public virtual int DoSomething0()
         {
