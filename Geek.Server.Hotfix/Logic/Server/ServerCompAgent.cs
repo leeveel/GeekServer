@@ -33,6 +33,23 @@ namespace Server.Logic.Logic.Server
             Schedule<ScheduleTimer>(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30));
         }
 
+
+        [Api]
+        [Discard]
+        public virtual Task AddOnlineRole(long actorId)
+        {
+            Comp.OnlineSet.Add(actorId);
+            return Task.CompletedTask;
+        }
+
+        [Api]
+        [Discard]
+        public virtual Task RemoveOnlineRole(long actorId)
+        {
+            Comp.OnlineSet.Add(actorId);
+            return Task.CompletedTask;
+        }
+
         public static async Task OnlineRoleForeach(Action<RoleCompAgent> func)
         {
             var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
@@ -69,7 +86,7 @@ namespace Server.Logic.Logic.Server
         [TimeOut(12000)]
         public virtual Task<bool> IsOnline(long roleId)
         {
-            foreach (var id in State.OnlineList)
+            foreach (var id in Comp.OnlineSet)
             {
                 if (id == roleId)
                     return Task.FromResult(true);

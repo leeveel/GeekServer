@@ -1,11 +1,15 @@
 ﻿
 using Geek.Server.App.Common;
+using Geek.Server.App.Common.Event;
 using Geek.Server.App.Common.Session;
 using Geek.Server.App.Logic.Role.Base;
+using Geek.Server.Core.Actors;
+using Geek.Server.Core.Events;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Timer;
 using Server.Logic.Common.Handler;
 using Server.Logic.Logic.Role.Bag;
+using Server.Logic.Logic.Server;
 
 namespace Server.Logic.Logic.Role.Base
 {
@@ -27,6 +31,16 @@ namespace Server.Logic.Logic.Role.Base
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
+
+        [Event(EventID.SessionRemove)]
+        private class EL : EventListener<RoleCompAgent>
+        {
+            protected override Task HandleEvent(RoleCompAgent agent, Event evt)
+            {
+                return agent.OnLogout();
+            }
+        }
+
         public async Task<ResLogin> OnLogin(ReqLogin reqLogin, bool isNewRole)
         {
             SetAutoRecycle(false);
@@ -43,11 +57,14 @@ namespace Server.Logic.Logic.Role.Base
             return BuildLoginMsg();
         }
 
-        public virtual Task OnLogout()
+        public async Task OnLogout()
         {
+            //移除在线玩家
+            var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
+            await serverComp.RemoveOnlineRole(ActorId);
+            //下线后会被自动回收
             SetAutoRecycle(true);
             QuartzTimer.Unschedule(ScheduleIdSet);
-            return Task.CompletedTask;
         }
 
         private ResLogin BuildLoginMsg()
