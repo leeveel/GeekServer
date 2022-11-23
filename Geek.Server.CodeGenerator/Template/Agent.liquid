@@ -19,7 +19,7 @@ namespace {{space}}
 			long callChainId = Geek.Server.Core.Actors.Impl.WorkerActor.NextChainId();
 			_ = base.Actor.WorkerActor.Enqueue(()=>{return base.{{mth.name}}{{mth.typeparams}}({{mth.paramstr}});}, callChainId, {{mth.timeout}});
 			{{~ end ~}}
-			return Task.CompletedTask;
+			return {{mth.returntype}}.CompletedTask;
 
 			{{~ else ~}}{{~#************************************************~}}
 			(bool needEnqueue, long chainId)= base.Actor.WorkerActor.IsNeedEnqueue();

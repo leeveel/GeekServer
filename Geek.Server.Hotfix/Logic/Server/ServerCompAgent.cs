@@ -36,18 +36,18 @@ namespace Server.Logic.Logic.Server
 
         [Api]
         [Discard]
-        public virtual Task AddOnlineRole(long actorId)
+        public virtual ValueTask AddOnlineRole(long actorId)
         {
             Comp.OnlineSet.Add(actorId);
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
         [Api]
         [Discard]
-        public virtual Task RemoveOnlineRole(long actorId)
+        public virtual ValueTask RemoveOnlineRole(long actorId)
         {
             Comp.OnlineSet.Add(actorId);
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
         public static async Task OnlineRoleForeach(Action<RoleCompAgent> func)
