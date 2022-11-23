@@ -32,13 +32,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Configs\app_config.json">
+	  <None Update="Configs\backup_config.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
-	  <None Update="Configs\NLog.config">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Configs\NLog.xsd">
+	  <None Update="Configs\backup_log.config">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>

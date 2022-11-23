@@ -51,9 +51,9 @@ namespace Geek.Server.RemoteBackup.Logic
             {
                 Console.WriteLine("init NLog config...");
                 LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
-                LogManager.Configuration = new XmlLoggingConfiguration("Configs/NLog.config");
+                LogManager.Configuration = new XmlLoggingConfiguration("Configs/backup_log.config");
                 LogManager.AutoShutdown = false;
-                Settings.Load<BackupSetting>("Configs/app_config.json", ServerType.Backup);
+                Settings.Load<BackupSetting>("Configs/backup_config.json", ServerType.Backup);
                 return true;
             }
             catch (Exception e)

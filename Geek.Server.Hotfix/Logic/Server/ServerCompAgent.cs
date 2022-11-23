@@ -30,7 +30,7 @@ namespace Server.Logic.Logic.Server
         public override void Active()
         {
             Delay<DelayTimer>(TimeSpan.FromSeconds(3));
-            Schedule<ScheduleTimer>(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3));
+            Schedule<ScheduleTimer>(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(30));
         }
 
         public static async Task OnlineRoleForeach(Action<RoleCompAgent> func)
@@ -48,13 +48,13 @@ namespace Server.Logic.Logic.Server
 
         private Task TestDelayTimer()
         {
-            LOGGER.Debug("ServerCompAgent.TestDelayTimer.延时2秒执行.执行一次");
+            LOGGER.Debug("ServerCompAgent.TestDelayTimer.延时3秒执行.执行一次");
             return Task.CompletedTask;
         }
 
         private Task TestScheduleTimer()
         {
-            LOGGER.Debug("ServerCompAgent.TestSchedueTimer.延时1秒执行.每隔3秒执行");
+            LOGGER.Debug("ServerCompAgent.TestSchedueTimer.延时1秒执行.每隔30秒执行");
             return Task.CompletedTask;
         }
 
