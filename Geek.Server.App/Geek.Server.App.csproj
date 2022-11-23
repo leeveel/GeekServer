@@ -8,6 +8,8 @@
 
 	<PropertyGroup>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<ApplicationIcon />
+		<StartupObject />
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -19,10 +21,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Update="Configs\NLog.config">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Configs\NLog.xsd">
+		<None Update="Configs\app_log.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 		<None Update="Configs\app_config.json">
@@ -32,6 +31,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Geek.Server.Generate\Geek.Server.Generate.csproj" />
+		<ProjectReference Include="..\Geek.Server.CodeGenerator\Geek.Server.CodeGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 </Project>

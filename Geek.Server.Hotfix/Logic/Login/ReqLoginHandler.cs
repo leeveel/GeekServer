@@ -1,6 +1,5 @@
 ﻿
 using Geek.Server.Core.Net.Tcp.Handler;
-using Geek.Server.Proto;
 
 namespace Server.Logic.Logic.Login
 {

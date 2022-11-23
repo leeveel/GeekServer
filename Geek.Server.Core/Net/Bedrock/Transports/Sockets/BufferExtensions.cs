@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace Bedrock.Framework
+namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
 {
     internal static class BufferExtensions
     {

@@ -1,8 +1,7 @@
 ﻿using System.Buffers;
 using System.Net;
-using Bedrock.Framework;
-using Bedrock.Framework.Protocols;
-using Geek.Server.Proto;
+using Geek.Server.Core.Net.Bedrock.Client;
+using Geek.Server.Core.Net.Bedrock.Protocols;
 using Microsoft.AspNetCore.Connections;
 
 namespace Geek.Server.TestPressure.Logic

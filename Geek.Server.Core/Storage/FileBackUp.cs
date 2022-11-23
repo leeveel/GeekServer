@@ -16,7 +16,7 @@ namespace Geek.Server.Core.Storage
 
                 try
                 {
-                    var curDataBase = MongoDBConnection.CurDB;
+                    var curDataBase = GameDB.As<MongoDBConnection>().CurDB;
                     var root = new DirectoryInfo(folder);
                     foreach (var dir in root.GetDirectories())
                     {
@@ -61,9 +61,9 @@ namespace Geek.Server.Core.Storage
             }
         }
 
-        internal static async Task SaveToFile<TState>(List<ReplaceOneModel<TState>> list) where TState : CacheState, new()
+        internal static async Task SaveToFile(List<ReplaceOneModel<MongoState>> list, string stateName)
         {
-            var folder = Environment.CurrentDirectory + $"/../State/{DateTime.Now:yyyy-MM-dd-HH-mm}/{typeof(TState).FullName}/";
+            var folder = Environment.CurrentDirectory + $"/../State/{DateTime.Now:yyyy-MM-dd-HH-mm}/{stateName}/";
             folder.CreateAsDirectory();
             foreach (var one in list)
             {

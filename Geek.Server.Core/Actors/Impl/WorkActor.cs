@@ -50,45 +50,56 @@ namespace Geek.Server.Core.Actors.Impl
             return (needEnqueue, chainId);
         }
 
+        #region 供代码生成器调用
         public Task Enqueue(Action work, long callChainId, int timeOut = TIME_OUT)
         {
-            ActionWrapper at = new ActionWrapper(work);
-            at.Owner = this;
-            at.TimeOut = timeOut;
-            at.CallChainId = callChainId;
+            var at = new ActionWrapper(work)
+            {
+                Owner = this,
+                TimeOut = timeOut,
+                CallChainId = callChainId
+            };
             ActionBlock.SendAsync(at);
             return at.Tcs.Task;
         }
         public Task<T> Enqueue<T>(Func<T> work, long callChainId, int timeOut = TIME_OUT)
         {
-            FuncWrapper<T> at = new FuncWrapper<T>(work);
-            at.Owner = this;
-            at.TimeOut = timeOut;
-            at.CallChainId = callChainId;
+            var at = new FuncWrapper<T>(work)
+            {
+                Owner = this,
+                TimeOut = timeOut,
+                CallChainId = callChainId
+            };
             ActionBlock.SendAsync(at);
             return at.Tcs.Task;
         }
 
         public Task Enqueue(Func<Task> work, long callChainId, int timeOut = TIME_OUT)
         {
-            ActionAsyncWrapper at = new ActionAsyncWrapper(work);
-            at.Owner = this;
-            at.TimeOut = timeOut;
-            at.CallChainId = callChainId;
+            var at = new ActionAsyncWrapper(work)
+            {
+                Owner = this,
+                TimeOut = timeOut,
+                CallChainId = callChainId
+            };
             ActionBlock.SendAsync(at);
             return at.Tcs.Task;
         }
 
         public Task<T> Enqueue<T>(Func<Task<T>> work, long callChainId, int timeOut = TIME_OUT)
         {
-            FuncAsyncWrapper<T> at = new FuncAsyncWrapper<T>(work);
-            at.Owner = this;
-            at.TimeOut = timeOut;
-            at.CallChainId = callChainId;
+            var at = new FuncAsyncWrapper<T>(work)
+            {
+                Owner = this,
+                TimeOut = timeOut,
+                CallChainId = callChainId
+            };
             ActionBlock.SendAsync(at);
             return at.Tcs.Task;
         }
+        #endregion
 
+        #region 供框架底层调用(逻辑开发人员应尽量避免调用)
         public void Tell(Action work, int timeout = Actor.TIME_OUT)
         {
             var at = new ActionWrapper(work)
@@ -119,9 +130,6 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
-                    return default;
-
                 var at = new ActionWrapper(work)
                 {
                     Owner = this,
@@ -143,9 +151,6 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
-                    return default;
-
                 var at = new FuncWrapper<T>(work)
                 {
                     Owner = this,
@@ -161,14 +166,11 @@ namespace Geek.Server.Core.Actors.Impl
             }
         }
 
-        public Task SendAsync(Func<Task> work, int timeout = Actor.TIME_OUT, bool checkLock = true)
+        public Task SendAsync(Func<Task> work, int timeout = Actor.TIME_OUT)
         {
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (checkLock && Settings.IsDebug && !ActorLimit.AllowCall(Id))
-                    return default;
-
                 var wrapper = new ActionAsyncWrapper(work)
                 {
                     Owner = this,
@@ -189,9 +191,6 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
-                    return default;
-
                 var wrapper = new FuncAsyncWrapper<T>(work)
                 {
                     Owner = this,
@@ -206,6 +205,7 @@ namespace Geek.Server.Core.Actors.Impl
                 return work();
             }
         }
+        #endregion
 
         private static long chainId = DateTime.Now.Ticks;
 

@@ -1,5 +1,5 @@
 ﻿using System.Buffers;
-using Bedrock.Framework.Protocols;
+using Geek.Server.Core.Net.Bedrock.Protocols;
 
 namespace Geek.Server.Core.Net.Tcp.Codecs
 {

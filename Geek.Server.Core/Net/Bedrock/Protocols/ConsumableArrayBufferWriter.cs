@@ -1,8 +1,7 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Diagnostics;
 
-namespace Bedrock.Framework.Protocols
+namespace Geek.Server.Core.Net.Bedrock.Protocols
 {
     internal class ConsumableArrayBufferWriter : IBufferWriter<byte>, IDisposable
     {

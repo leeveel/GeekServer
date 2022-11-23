@@ -2,76 +2,17 @@
 using Geek.Server.App.Common.Session;
 using Geek.Server.App.Logic.Login;
 using Geek.Server.Core.Actors;
-using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Net.Tcp.Codecs;
-using Geek.Server.Core.Storage;
 using Geek.Server.Core.Utils;
-using Geek.Server.Proto;
 using Server.Logic.Common.Handler;
 using Server.Logic.Logic.Role.Base;
 
 namespace Server.Logic.Logic.Login
 {
-    public class LoginCompAgent : BaseCompAgent<LoginComp>
+    public class LoginCompAgent : StateCompAgent<LoginComp, LoginState>
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        public override void Active()
-        {
-            base.Active();
-            Tell(Init);
-            StateComp.AddShutdownSaveFunc(SaveAll);
-        }
-
-        private async Task Init()
-        {
-            var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
-            using var cursor = await col.FindAsync(Builders<PlayerInfo>.Filter.Empty);
-            await cursor.ForEachAsync(t =>
-            {
-                Comp.PlayerMap[t.playerId] = t;
-                //Log.Info("加载数据:" + t.playerId);
-            });
-        }
-
-        private async Task SaveAll(bool shutdown)
-        {
-            if (shutdown)
-            {
-                await SaveLogic(shutdown);
-            }
-            else
-            {
-                Tell(() => SaveLogic(shutdown));
-            }
-        }
-
-        private async Task SaveLogic(bool shutdown)
-        {
-            var writeList = new List<ReplaceOneModel<PlayerInfo>>();
-            foreach (var registInfo in Comp.PlayerMap.Values)
-            {
-                if (registInfo.IsChanged)
-                {
-                    var filter = Builders<PlayerInfo>.Filter.Eq(nameof(PlayerInfo.playerId), registInfo.playerId);
-                    var model = new ReplaceOneModel<PlayerInfo>(filter, registInfo) { IsUpsert = true };
-                    writeList.Add(model);
-                }
-            }
-
-            if (writeList.Count > 0)
-            {
-                var col = MongoDBConnection.CurDB.GetCollection<PlayerInfo>();
-                var result = await col.BulkWriteAsync(writeList, new BulkWriteOptions { IsOrdered = false });
-                if (!shutdown && result.IsAcknowledged)
-                {
-                    foreach (var model in writeList)
-                    {
-                        model.Replacement.IsChanged = false;
-                    }
-                }
-            }
-        }
 
         public async Task OnLogin(NetChannel channel, ReqLogin reqLogin)
         {
@@ -117,7 +58,7 @@ namespace Server.Logic.Logic.Login
         private long GetRoleIdOfPlayer(string userName, int sdkType)
         {
             var playerId = $"{sdkType}_{userName}";
-            if (Comp.PlayerMap.TryGetValue(playerId, out var state))
+            if (State.PlayerMap.TryGetValue(playerId, out var state))
             {
                 if (state.RoleMap.TryGetValue(Settings.ServerId, out var roleId))
                     return roleId;
@@ -129,14 +70,14 @@ namespace Server.Logic.Logic.Login
         private void CreateRoleToPlayer(string userName, int sdkType, long roleId)
         {
             var playerId = $"{sdkType}_{userName}";
-            Comp.PlayerMap.TryGetValue(playerId, out var info);
+            State.PlayerMap.TryGetValue(playerId, out var info);
             if (info == null)
             {
                 info = new PlayerInfo();
                 info.playerId = playerId;
                 info.SdkType = sdkType;
                 info.UserName = userName;
-                Comp.PlayerMap[playerId] = info;
+                State.PlayerMap[playerId] = info;
             }
             info.IsChanged = true;
             info.RoleMap[Settings.ServerId] = roleId;

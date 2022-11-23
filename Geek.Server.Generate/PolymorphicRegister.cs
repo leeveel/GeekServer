@@ -1,13 +1,13 @@
-﻿using Geek.Server.Core.Serialize.PolymorphicMessagePack;
-using MessagePack;
+﻿using MessagePack;
 using MessagePack.Resolvers;
+using PolymorphicMessagePack;
 
 namespace Geek.Server.Proto
 {
     public partial class PolymorphicRegister
     {
         static bool serializerRegistered = false;
-        private static PolymorphicMessagePackSettings settings;
+        public static PolymorphicMessagePackSettings settings;
         /// <summary>
         /// 为True时需要把Geek.MsgPackTool配置中的gen-first打开
         /// 建议使用 GeneratedFirst = false

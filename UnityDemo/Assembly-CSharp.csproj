@@ -122,6 +122,7 @@
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResItemChange.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResLevelUp.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResLogin.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.ResPrompt.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.TestEnum.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.TestStruct.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\Geek.Server.Proto.UserInfo.cs" />
@@ -139,6 +140,7 @@
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResItemChangeFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResLevelUpFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResLoginFormatter.cs" />
+    <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_ResPromptFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_TestEnumFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_TestStructFormatter.cs" />
     <Compile Include="Assets\Scripts\Generate\Proto\MessagePack_Formatters_Geek_Server_Proto_UserInfoFormatter.cs" />
@@ -340,9 +342,6 @@
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>Assets\Plugins\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Extensions.Features">
-      <HintPath>Assets\Plugins\Microsoft.Extensions.Features.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.NET.StringTools">
       <HintPath>Assets\Plugins\Microsoft.NET.StringTools.dll</HintPath>
     </Reference>
@@ -354,9 +353,6 @@
     </Reference>
     <Reference Include="System.Memory">
       <HintPath>Assets\Plugins\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics.Vectors">
-      <HintPath>Assets\Plugins\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>Assets\Plugins\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
@@ -753,13 +749,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="MessagePack.Annotations.csproj">
-      <Project>{40499E94-4057-5E14-DCA8-E9C2EC000646}</Project>
-      <Name>MessagePack.Annotations</Name>
-    </ProjectReference>
     <ProjectReference Include="MessagePack.csproj">
       <Project>{B3626C39-A2BC-81DF-4AA0-87EBF4719CE2}</Project>
       <Name>MessagePack</Name>
+    </ProjectReference>
+    <ProjectReference Include="MessagePack.Annotations.csproj">
+      <Project>{40499E94-4057-5E14-DCA8-E9C2EC000646}</Project>
+      <Name>MessagePack.Annotations</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -3,6 +3,7 @@ using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Timer;
 using Geek.Server.Core.Utils;
 
 namespace Geek.Server.Core.Actors
@@ -138,6 +139,65 @@ namespace Geek.Server.Core.Actors
             }
             return Task.CompletedTask;
         }
+
+       
+        public static async Task SaveAll()
+        {
+            try
+            {
+                var begin = DateTime.Now;
+                var taskList = new List<Task>();
+                foreach (var actor in actorDic.Values)
+                {
+                    taskList.Add(actor.SendAsync(() => actor.SaveAllState()));
+                }
+                await Task.WhenAll(taskList);
+                Log.Info($"save all state, use: {(DateTime.Now - begin).TotalMilliseconds}ms");
+            }
+            catch (Exception e)
+            {
+                Log.Error($"save all state error \n{e}"); throw;
+            }
+        }
+
+        //public static readonly StatisticsTool statisticsTool = new();
+        const int ONCE_SAVE_COUNT = 1000;
+        /// <summary>
+        ///  定时回存所有数据
+        /// </summary>
+        /// <returns></returns>
+        public static async Task TimerSave()
+        {
+            try
+            {
+                int count = 0;
+                var taskList = new List<Task>();
+                foreach (var actor in actorDic.Values)
+                {
+                    //如果定时回存的过程中关服了，直接终止定时回存，因为关服时会调用SaveAll以保证数据回存
+                    if (!GlobalTimer.working)
+                        return;
+                    if (count < ONCE_SAVE_COUNT)
+                    {
+                        taskList.Add(actor.SendAsync(() => actor.SaveAllState()));
+                        count++;
+                    }
+                    else
+                    {
+                        await Task.WhenAll(taskList);
+                        await Task.Delay(1000);
+                        taskList = new List<Task>();
+                        count = 0;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Info("timer save state error");
+                Log.Error(e.ToString());
+            }
+        }
+
 
         public static Task RoleCrossDay(int openServerDay)
         {

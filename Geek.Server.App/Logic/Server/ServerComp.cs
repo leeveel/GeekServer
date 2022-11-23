@@ -1,11 +1,9 @@
-﻿
-using Geek.Server.Core.Actors;
+﻿using Geek.Server.Core.Actors;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Storage;
 
 namespace Geek.Server.App.Logic.Server
 {
-
     public class ServerState : CacheState
     {
         /// <summary>
@@ -15,6 +13,7 @@ namespace Geek.Server.App.Logic.Server
 
         public List<long> OnlineList { get; set; } = new List<long>();
     }
+
 
     [Comp(ActorType.Server)]
     public class ServerComp : StateComp<ServerState>

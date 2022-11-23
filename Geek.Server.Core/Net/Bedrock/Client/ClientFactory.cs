@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Connections;
-using System.Net;
+﻿using System.Net;
+using Geek.Server.Core.Net.Bedrock.Transports.Sockets;
+using Microsoft.AspNetCore.Connections;
 
-namespace Bedrock.Framework
+namespace Geek.Server.Core.Net.Bedrock.Client
 {
     public static class ClientFactory
     {

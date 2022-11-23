@@ -1,0 +1,23 @@
+using System;
+using MessagePack;
+using MessagePack.Resolvers;
+using PolymorphicMessagePack;
+
+
+    public class {{prefix}}PolymorphicDBStateRegister
+    { 
+	   public static void Load()
+	   {
+			Register(Geek.Server.Proto.PolymorphicRegister.settings);
+	   }
+
+		static void Register(PolymorphicMessagePackSettings settings)
+		{
+			System.Console.WriteLine("***PolymorphicDBStateRegister Register***"); 
+			{
+			{{~ for info in infos ~}}
+				settings.RegisterType<{{info.subname}}, {{info.basename}}>({{info.subsid}});
+			{{~ end ~}}
+			}
+		}
+	}

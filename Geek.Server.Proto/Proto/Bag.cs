@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using MessagePack;
+﻿using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {

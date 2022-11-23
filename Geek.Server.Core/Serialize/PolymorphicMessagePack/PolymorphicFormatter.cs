@@ -1,7 +1,15 @@
 ﻿using MessagePack;
 using MessagePack.Formatters;
+using MessagePack.Resolvers;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Geek.Server.Core.Serialize.PolymorphicMessagePack
+namespace PolymorphicMessagePack
 {
 
     public class PolymorphicFormatter<T> : IMessagePackFormatter<T>

@@ -1,4 +1,3 @@
-using Geek.Server.Proto;
 using Newtonsoft.Json;
 
 namespace Geek.Server.TestPressure.Logic

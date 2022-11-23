@@ -13,16 +13,23 @@ namespace Geek.Server.Core.Comps
     public sealed class StateComp
     {
 
+        #region 仅DBModel.Mongodb调用
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        private static readonly ConcurrentBag<Func<bool, Task>> saveFuncs = new();
+        private static readonly ConcurrentBag<Func<bool, bool, Task>> saveFuncs = new();
 
-        public static void AddShutdownSaveFunc(Func<bool, Task> shutdown)
+        public static void AddShutdownSaveFunc(Func<bool, bool, Task> shutdown)
         {
             saveFuncs.Add(shutdown);
         }
 
-        public static async Task SaveAll()
+        /// <summary>
+        /// 当游戏出现异常，导致无法正常回存，才需要将force=true
+        /// 由后台http指令调度
+        /// </summary>
+        /// <param name="force"></param>
+        /// <returns></returns>
+        public static async Task SaveAll(bool force = false)
         {
             try
             {
@@ -30,7 +37,7 @@ namespace Geek.Server.Core.Comps
                 var tasks = new List<Task>();
                 foreach (var saveFunc in saveFuncs)
                 {
-                    tasks.Add(saveFunc(true));
+                    tasks.Add(saveFunc(true, force));
                 }
                 await Task.WhenAll(tasks);
                 Log.Info($"save all state, use: {(DateTime.Now - begin).TotalMilliseconds}ms");
@@ -50,7 +57,7 @@ namespace Geek.Server.Core.Comps
             {
                 foreach (var func in saveFuncs)
                 {
-                    await func(false);
+                    await func(false, false);
                     if (!GlobalTimer.working)
                         return;
                 }
@@ -63,6 +70,7 @@ namespace Geek.Server.Core.Comps
         }
 
         public static readonly StatisticsTool statisticsTool = new();
+        #endregion
     }
 
     public abstract class StateComp<TState> : BaseComp, IState where TState : CacheState, new()
@@ -72,14 +80,15 @@ namespace Geek.Server.Core.Comps
 
         static readonly ConcurrentDictionary<long, TState> stateDic = new();
 
-        static StateComp()
-        {
-            StateComp.AddShutdownSaveFunc(SaveAll);
-        }
-
         public TState State { get; private set; }
 
         public override bool IsActive => State != null;
+
+        static StateComp()
+        {
+            if (Settings.DBModel == (int)DBModel.Mongodb)
+                StateComp.AddShutdownSaveFunc(SaveAll);
+        }
 
         public override Task Active()
         {
@@ -90,30 +99,64 @@ namespace Geek.Server.Core.Comps
 
         public override Task Deactive()
         {
-            stateDic.TryRemove(ActorId, out _);
+            if (Settings.DBModel == (int)DBModel.Mongodb)
+                stateDic.TryRemove(ActorId, out _);
             return base.Deactive();
         }
 
+
         internal override bool ReadyToDeactive => State == null || !State.IsChanged().isChanged;
+
+        internal override async Task SaveState()
+        {
+            try
+            {
+                await GameDB.SaveState(State);
+            }
+            catch (Exception e)
+            {
+                Log.Fatal($"StateComp.SaveState.Failed.StateId:{State.Id},{e}");
+            }
+        }
 
         public async Task ReadStateAsync()
         {
-            State = await MongoDBConnection.LoadState<TState>(ActorId);
-            stateDic.TryRemove(State.Id, out _);
-            stateDic.TryAdd(State.Id, State);
+            State = await GameDB.LoadState<TState>(ActorId);
+            if (Settings.DBModel == (int)DBModel.Mongodb)
+            {
+                stateDic.TryRemove(State.Id, out _);
+                stateDic.TryAdd(State.Id, State);
+            }
         }
 
         public Task WriteStateAsync()
         {
-            return MongoDBConnection.SaveState(State);
+            RocksDBConnection.Singleton.SaveState(State);
+            return Task.CompletedTask;
         }
 
-        const int ONCE_SAVE_COUNT = 500;
 
-        public static async Task SaveAll(bool shutdown)
+        #region 仅DBModel.Mongodb调用
+        const int ONCE_SAVE_COUNT = 500;
+        public static async Task SaveAll(bool shutdown, bool force = false)
         {
-            var writeList = new List<ReplaceOneModel<TState>>();
-            var tasks = new List<Task<(bool, byte[])>>();
+            static void AddReplaceModel(List<ReplaceOneModel<MongoState>> writeList, bool isChanged, long stateId, byte[] data)
+            {
+                if (isChanged)
+                {
+                    var mongoState = new MongoState()
+                    {
+                        Data = data,
+                        Id = stateId.ToString(),
+                        Timestamp = TimeUtils.CurrentTimeMillisUTC()
+                    };
+                    var filter = Builders<MongoState>.Filter.Eq(CacheState.UniqueId, mongoState.Id);
+                    writeList.Add(new ReplaceOneModel<MongoState>(filter, mongoState) { IsUpsert = true });
+                }
+            }
+
+            var writeList = new List<ReplaceOneModel<MongoState>>();
+            var tasks = new List<Task<(bool, long, byte[])>>();
             foreach (var state in stateDic.Values)
             {
                 var actor = ActorMgr.GetActor(state.Id);
@@ -121,19 +164,22 @@ namespace Geek.Server.Core.Comps
                 byte[] data;
                 if (actor != null)
                 {
-                    tasks.Add(actor.SendAsync(() => state.IsChanged()));
-                }
-                else
-                {
-                    (isChanged, data) = state.IsChanged();
-                    CheckChangeAndAddReplaceModel(writeList, isChanged, data);
+                    if (force)
+                    {
+                        (isChanged, data) = state.IsChanged();
+                        AddReplaceModel(writeList, isChanged, state.Id, data);
+                    }
+                    else
+                    {
+                        tasks.Add(actor.SendAsync(() => state.IsChangedWithId()));
+                    }
                 }
             }
 
             var results = await Task.WhenAll(tasks);
-            foreach (var (isChanged, data) in results)
+            foreach (var (isChanged, stateId, data) in results)
             {
-                CheckChangeAndAddReplaceModel(writeList, isChanged, data);
+                AddReplaceModel(writeList, isChanged, stateId, data);
             }
 
             if (!writeList.IsNullOrEmpty())
@@ -141,8 +187,8 @@ namespace Geek.Server.Core.Comps
                 var stateName = typeof(TState).FullName;
                 StateComp.statisticsTool.Count(stateName, writeList.Count);
                 Log.Debug($"状态回存 {stateName} count:{writeList.Count}");
-                var db = MongoDBConnection.CurDB;
-                var col = db.GetCollection<TState>();
+                var db = GameDB.As<MongoDBConnection>().CurDB; 
+                var col = db.GetCollection<MongoState>(stateName);
                 for (int idx = 0; idx < writeList.Count; idx += ONCE_SAVE_COUNT)
                 {
                     var list = writeList.GetRange(idx, Math.Min(ONCE_SAVE_COUNT, writeList.Count - idx));
@@ -155,7 +201,7 @@ namespace Geek.Server.Core.Comps
                         {
                             list.ForEach(model =>
                             {
-                                if (stateDic.TryGetValue(model.Replacement.Id, out var st))
+                                if (stateDic.TryGetValue(long.Parse(model.Replacement.Id), out var st))
                                 {
                                     st.AfterSaveToDB();
                                 }
@@ -173,20 +219,12 @@ namespace Geek.Server.Core.Comps
                     }
                     if (!save && shutdown)
                     {
-                        await FileBackup.SaveToFile(list);
+                        await FileBackup.SaveToFile(list, stateName);
                     }
                 }
             }
-
-            static void CheckChangeAndAddReplaceModel(List<ReplaceOneModel<TState>> writeList, bool isChanged, byte[] data)
-            {
-                if (isChanged)
-                {
-                    var _state = BsonSerializer.Deserialize<TState>(data);
-                    var filter = Builders<TState>.Filter.Eq(CacheState.UniqueId, _state.Id);
-                    writeList.Add(new ReplaceOneModel<TState>(filter, _state) { IsUpsert = true });
-                }
-            }
         }
+        #endregion
+
     }
 }

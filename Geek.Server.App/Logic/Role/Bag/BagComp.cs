@@ -4,6 +4,7 @@ using Geek.Server.Core.Storage;
 
 namespace Geek.Server.App.Logic.Role.Bag
 {
+
     public class BagState : CacheState
     {
         [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]

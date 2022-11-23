@@ -1,6 +1,6 @@
 ﻿using System.Buffers;
 
-namespace Bedrock.Framework.Protocols
+namespace Geek.Server.Core.Net.Bedrock.Protocols
 {
     public interface IMessageWriter<TMessage>
     {

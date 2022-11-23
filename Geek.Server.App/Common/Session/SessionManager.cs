@@ -3,6 +3,7 @@ using Geek.Server.App.Common.Event;
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Events;
 using Geek.Server.Core.Net.Tcp.Codecs;
+using Geek.Server.Proto;
 
 namespace Geek.Server.App.Common.Session
 {

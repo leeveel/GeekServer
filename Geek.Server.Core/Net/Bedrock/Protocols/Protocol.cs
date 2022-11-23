@@ -2,7 +2,7 @@
 using System.IO.Pipelines;
 using Microsoft.AspNetCore.Connections;
 
-namespace Bedrock.Framework.Protocols
+namespace Geek.Server.Core.Net.Bedrock.Protocols
 {
     public static class Protocol
     {

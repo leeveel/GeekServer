@@ -3,6 +3,7 @@ using System.Text;
 using Geek.Server.App.Common;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Storage;
 using Geek.Server.Core.Utils;
 using Geek.Server.Proto;
 using NLog;
@@ -23,10 +24,12 @@ class Program
             Console.WriteLine($"init NLog config...");
             Settings.Load<AppSetting>("Configs/app_config.json", ServerType.Game);
             LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
-            LogManager.Configuration = new XmlLoggingConfiguration("Configs/NLog.config");
+            LogManager.Configuration = new XmlLoggingConfiguration("Configs/app_log.config");
             LogManager.AutoShutdown = false;
 
             PolymorphicRegister.Load();
+            GeekServerAppPolymorphicDBStateRegister.Load();
+
             GameLoopTask = EnterGameLoop();
             await GameLoopTask;
             if (ShutDownTask != null)
@@ -58,6 +61,9 @@ class Program
     {
         try
         {
+            Log.Info($"launch embedded db...");
+            GameDB.Init();
+            GameDB.Open();
             Log.Info($"regist comps...");
             await CompRegister.Init();
             Log.Info($"load hotfix module");

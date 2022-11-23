@@ -1,4 +1,4 @@
-﻿namespace Bedrock.Framework
+﻿namespace Geek.Server.Core.Net.Bedrock.Client
 {
     public class ConnectTimeoutException : Exception
     {

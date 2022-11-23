@@ -1,4 +1,4 @@
-﻿using Bedrock.Framework.Protocols;
+﻿using Geek.Server.Core.Net.Bedrock.Protocols;
 using Microsoft.AspNetCore.Connections;
 
 namespace Geek.Server.Core.Net.Tcp.Codecs
@@ -58,15 +58,15 @@ namespace Geek.Server.Core.Net.Tcp.Codecs
             Writer = null;
         }
 
-        public void WriteAsync(NMessage msg)
+        public async ValueTask WriteAsync(NMessage msg)
         {
             if (Writer != null)
-                _ = Task.Run(async () => await Writer.WriteAsync(Protocol, msg));
+                await Writer.WriteAsync(Protocol, msg);
         }
 
         public void WriteAsync(Message msg)
         {
-            WriteAsync(new NMessage(msg));
+            WriteAsync(msg);
         }
 
     }

@@ -261,9 +261,6 @@
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>Assets\Plugins\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Extensions.Features">
-      <HintPath>Assets\Plugins\Microsoft.Extensions.Features.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.NET.StringTools">
       <HintPath>Assets\Plugins\Microsoft.NET.StringTools.dll</HintPath>
     </Reference>
@@ -275,9 +272,6 @@
     </Reference>
     <Reference Include="System.Memory">
       <HintPath>Assets\Plugins\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics.Vectors">
-      <HintPath>Assets\Plugins\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe">
       <HintPath>Assets\Plugins\System.Runtime.CompilerServices.Unsafe.dll</HintPath>

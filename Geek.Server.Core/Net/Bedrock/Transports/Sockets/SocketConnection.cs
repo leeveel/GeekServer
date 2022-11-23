@@ -1,11 +1,12 @@
 using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
+using Geek.Server.Core.Net.Bedrock.Infrastructure;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Http.Features;
 
-namespace Bedrock.Framework
+namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
 {
     internal class SocketConnection : ConnectionContext, IConnectionInherentKeepAliveFeature
     {

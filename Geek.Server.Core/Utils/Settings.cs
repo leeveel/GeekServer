@@ -10,6 +10,8 @@ public enum ServerType
     Center,
     ///<summary>充值服</summary>
     Recharge,
+    ///<summary>远程备份</summary>
+    Backup
 }
 
 public static class Settings
@@ -68,7 +70,11 @@ public static class Settings
 
     public static string MongoUrl => Ins.MongoUrl;
 
-    public static string DbName => Ins.DbName;
+    public static string MongoDBName => Ins.MongoDBName;
+
+    public static string LocalDBPrefix => Ins.LocalDBPrefix;
+
+    public static string LocalDBPath => Ins.LocalDBPath;
 
     public static string Language => Ins.Language;
 
@@ -77,6 +83,8 @@ public static class Settings
     public static string CenterUrl => Ins.CenterUrl;
 
     public static int SDKType => Ins.SDKType;
+
+    public static int DBModel => Ins.DBModel;
 }
 
 public class BaseSetting
@@ -113,7 +121,11 @@ public class BaseSetting
 
     public string MongoUrl { get; init; }
 
-    public string DbName { get; init; }
+    public string MongoDBName { get; init; }
+
+    public string LocalDBPrefix { get; init; }
+
+    public string LocalDBPath { get; init; }
 
     public string Language { get; init; }
 
@@ -122,5 +134,7 @@ public class BaseSetting
     public string CenterUrl { get; init; }
 
     public int SDKType { get; set; }
+
+    public int DBModel { get; set; }
     #endregion
 }

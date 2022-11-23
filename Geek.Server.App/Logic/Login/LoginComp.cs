@@ -5,6 +5,7 @@ using Geek.Server.Core.Storage;
 
 namespace Geek.Server.App.Logic.Login
 {
+
     public class PlayerInfo : InnerState
     {
         //player相对特殊，id不是long，所以不继承DBState，自定义mongoDB的id
@@ -20,9 +21,16 @@ namespace Geek.Server.App.Logic.Login
         public bool IsChanged;
     }
 
-    [Comp(ActorType.Server)]
-    public class LoginComp : BaseComp
+    public class LoginState : CacheState
     {
         public ConcurrentDictionary<string, PlayerInfo> PlayerMap = new();
     }
+
+
+    [Comp(ActorType.Server)]
+    public class LoginComp : StateComp<LoginState>
+    {
+
+    }
+
 }

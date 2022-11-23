@@ -47,6 +47,8 @@ namespace Geek.Server.Core.Comps
                 await agent.Deactive();
         }
 
+        internal virtual Task SaveState() { return Task.CompletedTask; }
+
         internal virtual bool ReadyToDeactive => true;
     }
 }

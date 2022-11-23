@@ -1,6 +1,6 @@
 ﻿using System.IO.Pipelines;
 
-namespace Bedrock.Framework.Protocols
+namespace Geek.Server.Core.Net.Bedrock.Protocols
 {
     public class ProtocolWriter : IAsyncDisposable
     {

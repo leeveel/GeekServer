@@ -1,20 +1,27 @@
-﻿using Geek.Server.Core.Utils;
-using MongoDB.Bson.Serialization;
+﻿using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NLog;
 
 namespace Geek.Server.Core.Storage
 {
-    public static class MongoDBConnection
+
+    public static class MongoDBExtensions
     {
+        public static IMongoCollection<TDocument> GetCollection<TDocument>(this IMongoDatabase self, MongoCollectionSettings settings = null)
+        {
+            return self.GetCollection<TDocument>(typeof(TDocument).FullName, settings);
+        }
+    }
 
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+    public class MongoDBConnection : IGameDB
+    {
+        private readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public static MongoClient Client { get; private set; }
+        public MongoClient Client { get; private set; }
 
-        public static IMongoDatabase CurDB { get; private set; }
+        public IMongoDatabase CurDB { get; private set; }
 
-        public static void Init(string url, string dbName)
+        public void Open(string url, string dbName)
         {
             try
             {
@@ -30,35 +37,22 @@ namespace Geek.Server.Core.Storage
             }
         }
 
-        public static readonly StatisticsTool statisticsTool = new();
-
-        public static async Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
+        public async Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
         {
-            statisticsTool.Count(typeof(TState).FullName);
-            var state = RoleStateLoader.GetState<TState>(id);
-            bool isNew;
+            var filter = Builders<TState>.Filter.Eq(CacheState.UniqueId, id);
+            var col = CurDB.GetCollection<TState>();
+            using var cursor = await col.FindAsync(filter);
+            var state = await cursor.FirstOrDefaultAsync();
+            bool isNew = state == null;
+            if (state == null && defaultGetter != null)
+                state = defaultGetter();
             if (state == null)
-            {
-                var filter = Builders<TState>.Filter.Eq(CacheState.UniqueId, id);
-                var col = CurDB.GetCollection<TState>();
-                using var cursor = await col.FindAsync(filter);
-                state = await cursor.FirstOrDefaultAsync();
-                isNew = state == null;
-                if (state == null && defaultGetter != null)
-                    state = defaultGetter();
-                if (state == null)
-                    state = new TState { Id = id };
-            }
-            else
-            {
-                isNew = false;
-            }
-
+                state = new TState { Id = id };
             state.AfterLoadFromDB(isNew);
             return state;
         }
 
-        public static async Task SaveState<TState>(TState state) where TState : CacheState
+        public async Task SaveState<TState>(TState state) where TState : CacheState
         {
             var (isChanged, data) = state.IsChanged();
             if (isChanged)
@@ -78,12 +72,18 @@ namespace Geek.Server.Core.Storage
 
         public static readonly BulkWriteOptions BULK_WRITE_OPTIONS = new() { IsOrdered = false };
 
-        public static Task CreateIndex<TState>(string indexKey)
+        public Task CreateIndex<TState>(string indexKey)
         {
             var col = CurDB.GetCollection<TState>();
             var key = Builders<TState>.IndexKeys.Ascending(indexKey);
             var model = new CreateIndexModel<TState>(key);
             return col.Indexes.CreateOneAsync(model);
         }
+
+        public void Close()
+        {
+            Client.Cluster.Dispose();
+        }
+        
     }
 }

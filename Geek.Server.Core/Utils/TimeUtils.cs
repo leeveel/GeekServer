@@ -2,6 +2,57 @@
 {
     public static class TimeUtils
     {
+        private static readonly DateTime epochLocal = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local);
+        private static readonly DateTime epochUtc = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Utc);
+
+        public static long CurrentTimeMillis()
+        {
+            return TimeMillis(DateTime.Now, false);
+        }
+
+        public static long CurrentTimeMillisUTC()
+        {
+            return TimeMillis(DateTime.Now, true);
+        }
+
+        public static int CurrentTimeSecondUTC()
+        {
+            return TimeSecond(DateTime.Now, true);
+        }
+
+        /// <summary>
+        /// 某个时间的毫秒数
+        /// </summary>
+        /// <param name="time"></param>
+        /// <param name="utc"></param>
+        /// <returns></returns>
+        public static long TimeMillis(DateTime time, bool utc = false)
+        {
+            if (utc)
+                return (long)(time - epochUtc).TotalMilliseconds;
+            return (long)(time - epochLocal).TotalMilliseconds;
+        }
+
+        public static int TimeSecond(DateTime time, bool utc = false)
+        {
+            if (utc)
+                return (int)(time - epochUtc).TotalSeconds;
+            return (int)(time - epochLocal).TotalSeconds;
+        }
+
+        /// <summary>
+        /// 毫秒转时间
+        /// </summary>
+        /// <param name="time"></param>
+        /// <param name="utc"></param>
+        /// <returns></returns>
+        public static DateTime MillisToDateTime(long time, bool utc = false)
+        {
+            if (utc)
+                return epochUtc.AddMilliseconds(time);
+            return epochLocal.AddMilliseconds(time);
+        }
+
 
         /// <summary>
         /// 获取跨过了几天

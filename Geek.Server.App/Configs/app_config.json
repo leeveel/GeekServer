@@ -7,8 +7,10 @@
   "HttpCode": "inner_httpcode",
   "HttpPort": 20000,
   "GrpcPort": 30000,
+  "LocalDBPrefix": "gamedb_",
+  "LocalDBPath": "../../database/game/",
+  "SDKType": 0,
+  "DBModel": 0, //0:内嵌 1:mongodb
   "MongoUrl": "mongodb://127.0.0.1:27017/?authSource=admin",
-  "DbName": "geek_server",
-  "Language": "chinese",
-  "SDKType": 0
+  "MongoDBName": "geek_server"
 }
