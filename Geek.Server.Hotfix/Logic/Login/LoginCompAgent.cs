@@ -7,6 +7,7 @@ using Geek.Server.Core.Net.Tcp.Codecs;
 using Geek.Server.Core.Utils;
 using Server.Logic.Common.Handler;
 using Server.Logic.Logic.Role.Base;
+using Server.Logic.Logic.Server;
 
 namespace Server.Logic.Logic.Login
 {
@@ -53,6 +54,10 @@ namespace Server.Logic.Logic.Login
             //从登录线程-->调用Role线程 所以需要入队
             var resLogin = await roleComp.OnLogin(reqLogin, isNewRole);
             channel.WriteAsync(resLogin, reqLogin.UniId, StateCode.Success);
+
+            //加入在线玩家
+            var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
+            await serverComp.AddOnlineRole(ActorId);
         }
 
         private long GetRoleIdOfPlayer(string userName, int sdkType)
