@@ -14,7 +14,6 @@ namespace Geek.Server.App.Logic.Login
         public string UserName;
 
         //这里设定每个账号在1服只有能创建1个角色
-        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
         public Dictionary<int, long> RoleMap = new Dictionary<int, long>();
 
         [BsonIgnore]
