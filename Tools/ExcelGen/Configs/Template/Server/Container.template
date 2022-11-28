@@ -8,14 +8,29 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using MessagePack;
 using NLog;
 
 namespace Geek.Server.Config
 {
-	public class {{ContainerClassName}} : BaseContainer
-	{
-	    private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
+	[MessagePackObject(true)]
+    public class {{BeanClassName}}DeserializeProxyData
+    {
+		{%- for field in Fields -%}  
+        public List<{{field.Serializetype}}> {{field.Name}}; 
+        {%- endfor -%} 
+    }
 
+    [MessagePackObject(true)]
+    public class {{BeanClassName}}DeserializeProxy
+    { 
+        public string sheetName;   
+		public {{BeanClassName}}DeserializeProxyData datas;
+    }
+
+	public class {{ContainerClassName}} : BaseContainer
+	{ 
+		private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
 		private List<{{BeanClassName}}> list = new List<{{BeanClassName}}>();
 		private Dictionary<{{PrimaryKeyType}}, {{BeanClassName}}> map = new Dictionary<{{PrimaryKeyType}}, {{BeanClassName}}>();
 
@@ -38,24 +53,53 @@ namespace Geek.Server.Config
 			map.Clear();
 			list.Clear();
 			Loaded = true;
-			
+			 
 			string binPath = System.Environment.CurrentDirectory + "/Bytes/{{BeanClassName}}.bytes";
             byte[] data;
             if (File.Exists(binPath))
                 data = File.ReadAllBytes(binPath);
             else
             	throw new Exception("can not find " + binPath);
-			// FieldCount:int + FieldType:byte(0:int 1:long 2:string 3:float)
-			int offset = {{ContentStartOffset}};  
-			while (data.Length > offset)
+			if(data != null)
 			{
-				{{BeanClassName}} bean = new {{BeanClassName}}();
-				bean.LoadData(data, ref offset);
-				list.Add(bean);
-				if(!map.ContainsKey(bean.t_id))
-					map.Add(bean.t_id, bean);
-				else
-					throw new Exception("Exist duplicate Key: " + bean.t_id + " {{BeanClassName}}");
+				try
+				{
+					var proxy = MessagePack.MessagePackSerializer.Deserialize<{{BeanClassName}}DeserializeProxy>(data); 
+					var datas = proxy.datas;
+					var rowCount = datas.t_id.Count;
+					list = new List<{{BeanClassName}}>(rowCount); 
+                    for (int i = 0; i < rowCount; i++)
+                    {
+                        var bean = new {{BeanClassName}}();
+                        list.Add(bean);
+						{%- for field in Fields -%}   
+						if (datas.{{field.Name}} != null && datas.{{field.Name}}.Count > i)
+                        { 
+							{%- if field.Datatype == "textmult" -%}  
+                            bean.m_{{field.Name}} = datas.{{field.Name}}[i];
+							{%- else -%}
+							bean.{{field.Name}} = datas.{{field.Name}}[i];
+							{%- endif -%}
+                        }
+						{%- endfor -%}  
+                    }
+
+                    foreach (var d in list)
+                    {
+                        if (!map.ContainsKey(d.t_id))
+                            map.Add(d.t_id, d);
+                        else
+                             LOGGER.Error("Exist duplicate Key: " + d.t_id + " {{BeanClassName}}");
+                    }
+				}
+				catch (Exception ex)
+				{
+					 LOGGER.Error("import data error: {{BeanClassName}} >>" + ex.ToString());
+				}
+			}
+			else
+			{
+				 LOGGER.Error("can not find conf data: {{BeanClassName}}.bytes");
 			}
 		}
 		
