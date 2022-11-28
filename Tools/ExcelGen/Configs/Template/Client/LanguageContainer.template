@@ -1,0 +1,97 @@
+/**
+ * Auto generated, do not edit it server
+ *
+ * {{SheetNameDesc}}
+ */
+ 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using MessagePack; 
+using UnityEngine;
+
+namespace Geek.Client.Config
+{   
+	[MessagePackObject(true)]
+    public class {{BeanClassName}}DeserializeProxyData
+    {
+        public List<int> t_id;  
+        public List<string> content;  
+    }
+
+    [MessagePackObject(true)]
+    public class {{BeanClassName}}DeserializeProxy
+    { 
+        public string sheetName;  
+		public int rowCount; 
+		public {{BeanClassName}}DeserializeProxyData datas;
+    }
+
+	public class {{ContainerClassName}} : BaseContainer
+	{
+		
+		private List<{{BeanClassName}}> list = new List<{{BeanClassName}}>();
+		private Dictionary<{{PrimaryKeyType}}, {{BeanClassName}}> map = new Dictionary<{{PrimaryKeyType}}, {{BeanClassName}}>();
+
+		//public override List<{{BeanClassName}}> getList()
+		public override IList getList()
+		{
+			return list;
+		}
+
+		//public override Dictionary<{{PrimaryKeyType}}, {{BeanClassName}}> getMap()
+		public override IDictionary getMap()
+		{
+			return map;
+		}
+		
+		public Type BinType = typeof({{BeanClassName}});
+
+		public override void loadDataFromBin()
+		{    
+			map.Clear();
+			list.Clear();
+			Loaded = true;
+			
+            string useField = "t_chinese";  
+            byte[] data = Resources.Load<TextAsset>($"Bin/t_language{useField.Replace("t_", "")}Bean").bytes;
+			if(data != null)
+			{
+				try
+				{
+					var proxy = MessagePack.MessagePackSerializer.Deserialize<{{BeanClassName}}DeserializeProxy>(data); 
+					var datas = proxy.datas;
+					var rowCount = datas.t_id.Count;
+					list = new List<{{BeanClassName}}>(rowCount);  
+                    for (int i = 0; i < rowCount; i++)
+                    {
+                        var bean = new {{BeanClassName}}();
+                        list.Add(bean); 
+                        bean.t_id = datas.t_id[i];  
+                        bean.t_content = datas.content[i];  
+                    }
+
+                    foreach (var d in list)
+                    {
+                        if (!map.ContainsKey(d.t_id))
+                            map.Add(d.t_id, d);
+                        else
+                             Debug.LogError("Exist duplicate Key: " + d.t_id + " {{BeanClassName}}");
+                    }
+				}
+				catch (Exception ex)
+				{
+					 Debug.LogError("import data error: {{BeanClassName}} >>" + ex.ToString());
+				}
+			}
+			else
+			{
+				 Debug.LogError("can not find conf data: {{BeanClassName}}.bytes");
+			}
+		}
+		
+	}
+}
+
+
