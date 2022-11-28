@@ -3,19 +3,34 @@
  *
  * 语言表
  */
-
+ 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using MessagePack;
 using NLog;
 
 namespace Geek.Server.Config
-{
+{   
+	[MessagePackObject(true)]
+    public class t_languageBeanDeserializeProxyData
+    {
+        public List<int> t_id;  
+        public List<string> content;  
+    }
+
+    [MessagePackObject(true)]
+    public class t_languageBeanDeserializeProxy
+    { 
+        public string sheetName;  
+		public int rowCount; 
+		public t_languageBeanDeserializeProxyData datas;
+    }
+
 	public class t_languageContainer : BaseContainer
 	{
-	    private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
-
+		private static readonly NLog.Logger LOGGER = LogManager.GetCurrentClassLogger();
 		private List<t_languageBean> list = new List<t_languageBean>();
 		private Dictionary<int, t_languageBean> map = new Dictionary<int, t_languageBean>();
 
@@ -39,23 +54,46 @@ namespace Geek.Server.Config
 			list.Clear();
 			Loaded = true;
 			
-			string binPath = System.Environment.CurrentDirectory + "/Bytes/t_languageBean.bytes";
+            string useField = Settings.Language==null?"t_chinese":Settings.Language; 
+            
+			string binPath = System.Environment.CurrentDirectory + $"/Bytes/t_language{useField.Replace("t_", "")}Bean.bytes";
             byte[] data;
             if (File.Exists(binPath))
                 data = File.ReadAllBytes(binPath);
             else
             	throw new Exception("can not find " + binPath);
-			// FieldCount:int + FieldType:byte(0:int 1:long 2:string 3:float)
-			int offset = 58;  
-			while (data.Length > offset)
+			if(data != null)
 			{
-				t_languageBean bean = new t_languageBean();
-				bean.LoadData(data, ref offset);
-				list.Add(bean);
-				if(!map.ContainsKey(bean.t_id))
-					map.Add(bean.t_id, bean);
-				else
-					throw new Exception("Exist duplicate Key: " + bean.t_id + " t_languageBean");
+				try
+				{
+					var proxy = MessagePack.MessagePackSerializer.Deserialize<t_languageBeanDeserializeProxy>(data); 
+					var datas = proxy.datas;
+					var rowCount = datas.t_id.Count;
+					list = new List<t_languageBean>(rowCount);  
+                    for (int i = 0; i < rowCount; i++)
+                    {
+                        var bean = new t_languageBean();
+                        list.Add(bean); 
+                        bean.t_id = datas.t_id[i];  
+                        bean.t_content = datas.content[i];  
+                    }
+
+                    foreach (var d in list)
+                    {
+                        if (!map.ContainsKey(d.t_id))
+                            map.Add(d.t_id, d);
+                        else
+                             LOGGER.Error("Exist duplicate Key: " + d.t_id + " t_languageBean");
+                    }
+				}
+				catch (Exception ex)
+				{
+					 LOGGER.Error("import data error: t_languageBean >>" + ex.ToString());
+				}
+			}
+			else
+			{
+				 LOGGER.Error("can not find conf data: t_languageBean.bytes");
 			}
 		}
 		

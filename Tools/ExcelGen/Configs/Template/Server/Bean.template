@@ -1,21 +1,24 @@
 ﻿/**
- * Auto generated, do not edit it server
+ * Auto generated, do not edit it client
  */
+using Geek.Server.Config;
+using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Config
 {
-	///<summary>{{SheetNameDesc}}</summary>
+	///<summary>{{SheetNameDesc}}</summary> 
     public class {{BeanClassName}} : BaseBin
     {
         {%- for field in Fields -%}
-        {%- if field.Datatype == "textmult" -%}
-        private int m_{{field.Name}};
-		///<summary>{{field.Desc}}</summary>
+        {%- if field.Datatype == "textmult" -%}  
+        public int m_{{field.Name}};
+		///<summary>{{field.Desc}}</summary> 
         public string {{field.name}}
 		{
 			get           
 			{
-				if(m_{{field.Name}} == 0)
+				if(m_{{field.Name}} == 0) 
 					return "";
 				t_languageBean lanBean = ConfigBean.GetBean<t_languageBean, int>(m_{{field.Name}});
 				if (lanBean != null)
@@ -25,25 +28,9 @@ namespace Geek.Server.Config
 			}
 		}
         {%- else -%}
-		///<summary>{{field.Desc}}</summary>
+		///<summary>{{field.Desc}}</summary> 
         public {{field.Datatype}} {{field.Name}};
 		{%- endif -%}
-        {%- endfor -%}
-
-        public void LoadData(byte[] data, ref int offset)
-        {
-            {%- for field in Fields -%}
-            {%- if field.Datatype == "int" -%}
-            {{field.Name}} = XBuffer.ReadInt(data, ref offset);
-            {%- elsif field.Datatype == "long" -%}
-            {{field.Name}} = XBuffer.ReadLong(data, ref offset);
-			{%- elsif field.Datatype == "textmult" -%}
-            m_{{field.Name}} = XBuffer.ReadInt(data, ref offset);
-			{%- elsif field.Datatype == "string" -%}
-			{{field.Name}} = XBuffer.ReadString(data, ref offset);
-            {%- endif -%}
-            {%- endfor -%}
-        }
-
+        {%- endfor -%} 
     }
 }

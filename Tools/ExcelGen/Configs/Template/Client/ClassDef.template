@@ -1,0 +1,38 @@
+/**
+ * Auto generated, do not edit it client
+ */
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using MessagePack;
+
+namespace Geek.Client.Config
+{
+{%- for classType in Classtypes -%}
+	[MessagePackObject(true)]
+	public class {{classType.Name}}
+	{ 
+       {%- for field in classType.Fields -%}
+	   {%- if field.Datatype == "textmult" -%}  
+        public int m_{{field.Name}}; 
+		[IgnoreMember]
+        public string {{field.name}}
+		{
+			get           
+			{
+				if(m_{{field.Name}} == 0) 
+					return "";
+				t_languageBean lanBean = ConfigBean.GetBean<t_languageBean, int>(m_{{field.Name}});
+				if (lanBean != null)
+					return lanBean.t_content;
+				else
+					return m_{{field.Name}}.ToString();
+			}
+		}
+        {%- else -%}  
+        public {{field.Datatype}} {{field.Name}};
+		{%- endif -%}
+        {%- endfor -%} 
+	}
+{%- endfor -%}
+}

@@ -1,0 +1,18 @@
+/**
+ * Auto generated, do not edit it client
+ */
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace Geek.Server.Config
+{
+{%- for enumType in Enumtypes -%}
+	public enum {{enumType.Name}}
+	{ 
+        {%- for field in enumType.Fields -%}
+		{{field.Name}} = {{field.Value}},
+		{%- endfor -%}
+	}
+{%- endfor -%}
+}

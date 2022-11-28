@@ -1,6 +1,7 @@
 ﻿using MessagePack;
 using MessagePack.Resolvers;
 using PolymorphicMessagePack;
+using Resolvers;
 
 namespace Geek.Server.Proto
 {
@@ -15,7 +16,8 @@ namespace Geek.Server.Proto
             {
                 StaticCompositeResolver.Instance.Register(
                     MessagePack.Resolvers.GeneratedResolver.Instance,
-                    MessagePack.Resolvers.BuiltinResolver.Instance
+                    MessagePack.Resolvers.BuiltinResolver.Instance,
+                    ConfigDataResolver.Instance
                 );
 
                 settings = new PolymorphicMessagePackSettings(StaticCompositeResolver.Instance);

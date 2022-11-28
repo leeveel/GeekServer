@@ -1,6 +1,10 @@
 ﻿using Geek.Client;
+using Geek.Client.Config;
 using Geek.Server;
 using Geek.Server.Proto;
+using MessagePack;
+using MessagePack.Resolvers;
+using Resolvers;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -15,7 +19,7 @@ namespace Logic
 
         public string gateIp = "127.0.0.1";
         public int gatePort = 8899;
-        public int serverId;
+        public int serverId = 1001;
         public string userName = "123456";
 
         private void Awake()
@@ -25,6 +29,7 @@ namespace Logic
 
         async void Start()
         {
+            GameDataManager.ReloadAll();
             GameClient.Singleton.Init();
             DemoService.Singleton.RegisterEventListener();
             await ConnectServer();
