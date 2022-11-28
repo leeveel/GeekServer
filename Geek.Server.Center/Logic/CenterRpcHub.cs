@@ -3,6 +3,8 @@ using Geek.Server.Center.Web.Pages.Config;
 using Geek.Server.Core.Center;
 using MagicOnion.Server.Hubs;
 using NLog;
+using System.Collections.Concurrent;
+using System.Security.Policy;
 
 namespace Geek.Server.Center.Logic
 {
@@ -16,6 +18,8 @@ namespace Geek.Server.Center.Logic
         const string globalGroupName = "global";
 
         private IGroup group;
+
+        private ConcurrentDictionary<string, bool> SubscribeEvts = new();
 
         public long CurNodeId { private set; get; }
 
@@ -32,6 +36,7 @@ namespace Geek.Server.Center.Logic
             if (group != null)
                 group.RemoveAsync(Context);
             //group = null;
+            UnsubscribeAll();
             NodesChanged();
             return ValueTask.CompletedTask;
         }
@@ -63,16 +68,12 @@ namespace Geek.Server.Center.Logic
             return Task.FromResult(true);
         }
 
+
         public Task<ConfigInfo> GetConfig(string configId)
         {
             var cfg = ServiceManager.ConfigService.GetConfig(configId);
+            Subscribe(SubscribeEvent.ConfigChange);
             return Task.FromResult(cfg);
-        }
-
-        public Task<bool> SetConfig(ConfigInfo cfg)
-        {
-            ServiceManager.ConfigService.SetConfig(cfg);
-            return Task.FromResult(true);
         }
 
         public Task<List<NetNode>> GetAllNodes()
@@ -85,6 +86,34 @@ namespace Geek.Server.Center.Logic
         {
             var nodes = ServiceManager.NamingService.GetNodeByType(type);
             return Task.FromResult(nodes);
+        }
+
+        public Task Subscribe(string eventId)
+        {
+            SubscribeEvts[eventId] = true;
+            ServiceManager.SubscribeService.Subscribe(eventId, this);
+            return Task.CompletedTask;
+        }
+        public Task Unsubscribe(string eventId)
+        {
+            SubscribeEvts.TryRemove(eventId, out _);
+            ServiceManager.SubscribeService.Unsubscribe(eventId, this);
+            return Task.CompletedTask;
+        }
+
+        public Task UnsubscribeAll()
+        {
+            foreach (var v in SubscribeEvts)
+            {
+                ServiceManager.SubscribeService.Unsubscribe(v.Key, this);
+            }
+            SubscribeEvts.Clear();
+            return Task.CompletedTask;
+        }
+
+        public void PostMessageToClient(string eid, string msg)
+        {
+            GetRpcClientAgent().HaveMessage(eid, msg);
         }
     }
 }

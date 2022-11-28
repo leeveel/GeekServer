@@ -5,5 +5,7 @@
         public static NamingService NamingService { get; set; }
 
         public static ConfigService ConfigService { get; set; }
+
+        public static SubscribeService SubscribeService { get; set; }
     }
 }

@@ -15,7 +15,7 @@ namespace Geek.Server.Core.Center
         public BaseCenterRpcClient(string ip, int port)
         {
             connUrl = $"http://{ip}:{port}";
-            reConn = new ReConnecter(ConnectImpl,$"中心服:{connUrl}");
+            reConn = new ReConnecter(ConnectImpl, $"中心服:{connUrl}");
         }
 
         public BaseCenterRpcClient(string url)
@@ -43,7 +43,7 @@ namespace Geek.Server.Core.Center
                 LOGGER.Error($"rpc连接异常:{e.Message}");
                 try
                 {
-                    if(ServerAgent != null)
+                    if (ServerAgent != null)
                         await ServerAgent.DisposeAsync();
                 }
                 catch (Exception ex)
@@ -72,9 +72,10 @@ namespace Geek.Server.Core.Center
             }
         }
 
-        public abstract void ConfigChanged(byte[] data);
+        public abstract void ConfigChanged(ConfigInfo data);
 
         public abstract void NodesChanged(List<NetNode> nodes);
 
+        public abstract void HaveMessage(string eid, string msg);
     }
 }

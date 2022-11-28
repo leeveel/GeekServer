@@ -10,9 +10,13 @@ namespace Geek.Server.Gateway.Net.Rpc
         {
         }
 
-        public override void ConfigChanged(byte[] data)
+        public override void ConfigChanged(ConfigInfo data)
         {
             LOGGER.Debug("ConfigChanged:" + data);
+        }
+
+        public override void HaveMessage(string eid, string msg)
+        {
         }
 
         public override void NodesChanged(List<NetNode> nodes)

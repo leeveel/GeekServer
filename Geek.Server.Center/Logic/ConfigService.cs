@@ -9,14 +9,16 @@ namespace Geek.Server.Center.Logic
     internal class ConfigService
     {
         private DBService dbService;
+        private SubscribeService subscribeService;
         /// <summary>
         /// configid - config data
         /// </summary>
         internal readonly ConcurrentDictionary<string, ConfigInfo> configMap = new();
 
-        public ConfigService(DBService dbService)
+        public ConfigService(DBService dbService, SubscribeService subscribeService)
         {
             this.dbService = dbService;
+            this.subscribeService = subscribeService;
             var cfgs = dbService.GetAllData<ConfigInfo>();
             foreach (var c in cfgs)
             {
@@ -59,18 +61,22 @@ namespace Geek.Server.Center.Logic
             //todo  需要判断是否存在
             configMap[cfg.CfgId] = cfg;
             dbService.UpdateData(cfg.CfgId, cfg);
+            subscribeService.Publish(SubscribeEvent.ConfigChange, cfg);
         }
 
         internal void DeleteConfig(ConfigInfo cfg)
         {
             configMap.TryRemove(cfg.CfgId, out _);
             dbService.DeleteData<ConfigInfo>(cfg.CfgId);
+            cfg.Data = null;
+            subscribeService.Publish(SubscribeEvent.ConfigChange, cfg);
         }
 
         internal void UpdateConfig(ConfigInfo cfg)
         {
             configMap[cfg.CfgId] = cfg;
             dbService.UpdateData(cfg.CfgId, cfg);
+            subscribeService.Publish(SubscribeEvent.ConfigChange, cfg);
         }
     }
 }

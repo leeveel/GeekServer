@@ -32,6 +32,7 @@ namespace Geek.Server.Center.Web
             builder.Services.AddSingleton<LoginService>();
             builder.Services.AddSingleton<ConfigService>();
             builder.Services.AddSingleton<NamingService>();
+            builder.Services.AddSingleton<SubscribeService>();
             builder.Services.AddScoped<ProtectedSessionStorage>();
             builder.Services.AddScoped<ProtectedLocalStorage>();
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
@@ -51,6 +52,7 @@ namespace Geek.Server.Center.Web
 
             ServiceManager.ConfigService = provider.GetRequiredService<ConfigService>();
             ServiceManager.NamingService = provider.GetRequiredService<NamingService>();
+            ServiceManager.SubscribeService = provider.GetRequiredService<SubscribeService>();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

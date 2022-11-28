@@ -7,7 +7,7 @@ namespace Geek.Server.App.Net
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-        public AppCenterRpcClient(string ip, int port) 
+        public AppCenterRpcClient(string ip, int port)
             : base(ip, port)
         {
 
@@ -19,7 +19,7 @@ namespace Geek.Server.App.Net
 
         }
 
-        public override void ConfigChanged(byte[] data)
+        public override void ConfigChanged(ConfigInfo data)
         {
             Console.WriteLine("ConfigChanged:" + data);
         }
@@ -39,5 +39,8 @@ namespace Geek.Server.App.Net
             LOGGER.Debug("---------------------------------");
         }
 
+        public override void HaveMessage(string eid, string msg)
+        {
+        }
     }
 }
