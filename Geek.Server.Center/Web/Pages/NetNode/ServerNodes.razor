@@ -2,6 +2,7 @@
 
 @attribute [Authorize]
 
+@implements IDisposable
 @inject NamingService namingService
 @inject IDialogService DialogService
 
@@ -25,6 +26,8 @@
         <MudTh>InnerTcpPort</MudTh>
         <MudTh>HttPort</MudTh>
         <MudTh>RpcPort</MudTh>
+        <MudTh>承载上限</MudTh>
+        <MudTh>当前承载</MudTh>
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="NodeId">@context.NodeId</MudTd>
@@ -35,6 +38,8 @@
         <MudTd DataLabel="InnerTcpPort">@context.InnerTcpPort</MudTd>
         <MudTd DataLabel="HttpPort">@context.HttpPort</MudTd>
         <MudTd DataLabel="HttpPort">@context.RpcPort</MudTd>
+        <MudTd DataLabel="HttpPort">@context.State.MaxLoad</MudTd>
+        <MudTd DataLabel="HttpPort">@context.State.CurrentLoad</MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager />
@@ -45,10 +50,18 @@
 
     private string searchString = "";
     private List<NetNode> netNodeList = new List<NetNode>();
+    Timer refreshTimer;
 
     protected override void OnInitialized()
     {
         netNodeList = namingService.GetAllNodes();
+        refreshTimer = new Timer(new TimerCallback(_ =>
+         {
+             InvokeAsync(async () =>
+             {
+                 StateHasChanged();
+             });
+         }), null, 0, 1000);
     }
 
     private bool FilterFunc(NetNode item)
@@ -68,5 +81,10 @@
     {
         netNodeList = namingService.GetAllNodes();
         StateHasChanged();
+    }
+
+    void IDisposable.Dispose()
+    {
+        refreshTimer?.Dispose();
     }
 }

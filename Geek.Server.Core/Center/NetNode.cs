@@ -33,7 +33,7 @@ namespace Geek.Server.Core.Center
         [Key(7)]
         public int RpcPort { get; set; }
         [Key(8)]
-        public NetNodeState State { get; set; }
+        public NetNodeState State { get; set; } = new NetNodeState();
     }
 
     [MessagePackObject(true)]

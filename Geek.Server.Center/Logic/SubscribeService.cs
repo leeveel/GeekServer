@@ -4,10 +4,6 @@ using System.Collections.Generic;
 
 namespace Geek.Server.Center.Logic
 {
-    public class SubscribeEvent
-    {
-        public const string ConfigChange = "ConfigChange";
-    }
     public class SubscribeService
     {
         ConcurrentDictionary<string, ConcurrentDictionary<CenterRpcHub, CenterRpcHub>> subClients = new();
