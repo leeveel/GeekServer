@@ -1,8 +1,6 @@
 using Geek.Server.Core.Net.Http;
-using Geek.Server.Gateway.Net;
-using Geek.Server.GatewaySelect;
 
-namespace Geek.Server.Gateway.Handler.Http
+namespace Geek.Server.Rebalance.Handler.Http
 {
     [HttpMsgMapping("getidlegate")]
     public class QueryIdleGateHandler : BaseHttpHandler

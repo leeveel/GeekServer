@@ -1,6 +1,6 @@
 {
   "isDebug": true,
-  "ServerId": 2001, //[1000,9999]
+  "ServerId": 9101, //[9101,9200]
   "InnerTcpPort": 8898,
   "TcpPort": 8899,
   "RpcPort": 8900,

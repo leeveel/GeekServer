@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Geek.Server.GatewaySelect
+namespace Geek.Server.Rebalance
 {
     internal static class GatewayMgr
     {

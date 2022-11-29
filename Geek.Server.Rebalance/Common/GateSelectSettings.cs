@@ -1,4 +1,4 @@
-namespace Geek.Server.Gateway.Common
+namespace Geek.Server.Rebalance.Common
 {
     public class GateSelectSettings : BaseSetting
     {

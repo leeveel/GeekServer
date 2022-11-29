@@ -1,12 +1,11 @@
 ﻿using Geek.Server.Core.Center;
 using Geek.Server.Core.Net.Http;
-using Geek.Server.Gateway.Net.Http;
-using Geek.Server.Gateway.Net.Rpc;
-using Geek.Server.GatewaySelect;
+using Geek.Server.Rebalance.Net.Http;
+using Geek.Server.Rebalance.Net.Rpc;
 using Newtonsoft.Json;
 using NLog.LayoutRenderers;
 
-namespace Geek.Server.Gateway.Common
+namespace Geek.Server.Rebalance.Common
 {
     internal class StartUp
     {
@@ -70,10 +69,10 @@ namespace Geek.Server.Gateway.Common
         {
             try
             {
-                Settings.Load<GateSelectSettings>("Configs/gatewayselect_config.json", ServerType.Gate);
+                Settings.Load<GateSelectSettings>("Configs/rebalance_config.json", ServerType.Gate);
                 Console.WriteLine("init NLog config...");
                 LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
-                LogManager.Configuration = new XmlLoggingConfiguration("Configs/gatewayselect_log.config");
+                LogManager.Configuration = new XmlLoggingConfiguration("Configs/rebalance_log.config");
                 LogManager.AutoShutdown = false;
                 return true;
             }

@@ -19,10 +19,10 @@
 	</PropertyGroup>
 
   <ItemGroup>
-    <None Update="Configs\gatewayselect_config.json">
+    <None Update="Configs\rebalance_config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Configs\gatewayselect_log.config">
+    <None Update="Configs\rebalance_log.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

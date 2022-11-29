@@ -1,11 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Text;
-using Geek.Server.Core.Net;
 using Geek.Server.Core.Utils;
-using Geek.Server.Gateway.Common;
-using Geek.Server.Gateway.Net;
+using Geek.Server.Rebalance.Common;
 
-namespace Geek.Server.Gateway
+namespace Geek.Server.Rebalance
 {
     class Program
     {

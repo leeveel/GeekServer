@@ -1,7 +1,6 @@
 ﻿using Geek.Server.Core.Center;
-using Geek.Server.GatewaySelect;
 
-namespace Geek.Server.Gateway.Net.Rpc
+namespace Geek.Server.Rebalance.Net.Rpc
 {
     public class CenterRpcClient : BaseCenterRpcClient
     {

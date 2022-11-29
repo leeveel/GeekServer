@@ -1,7 +1,7 @@
 ﻿using Geek.Server.Core.Net.Http;
 using System.Reflection;
 
-namespace Geek.Server.Gateway.Net.Http
+namespace Geek.Server.Rebalance.Net.Http
 {
     public class HttpHanderFactory
     {

@@ -1,6 +1,6 @@
 ﻿{
   "IsDebug": true,
-  "ServerId": 3001, //[1000,9999]
+  "ServerId": 9001, //[9001,9100]
   "ServerName": "Geek Server",
   "RpcPort": 8900,
   //"WebServerUrl": "https://*:5004",
