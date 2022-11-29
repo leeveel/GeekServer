@@ -8,6 +8,12 @@ namespace Geek.Server.Center.Logic
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid
         internal readonly ConcurrentDictionary<long, NetNode> nodeMap = new();
+        private SubscribeService subscribeService;
+
+        public NamingService(SubscribeService subscribeService)
+        {
+            this.subscribeService = subscribeService;
+        }
 
         public int NodeCount()
         {
@@ -54,7 +60,7 @@ namespace Geek.Server.Center.Logic
             return old != node ? old : null;
         }
 
-        public List<NetNode> GetNodeByType(NodeType type)
+        public List<NetNode> GetNodesByType(NodeType type)
         {
             var list = new List<NetNode>();
             foreach (var node in nodeMap)
@@ -73,6 +79,7 @@ namespace Geek.Server.Center.Logic
             if (nodeMap.TryGetValue(nodeId, out var node))
             {
                 node.State = state;
+                subscribeService.Publish(SubscribeEvent.NetNodeStateChange(node.Type), MessagePack.MessagePackSerializer.Serialize(node));
             }
         }
     }

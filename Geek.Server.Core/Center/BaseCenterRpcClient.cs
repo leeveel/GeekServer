@@ -124,6 +124,6 @@ namespace Geek.Server.Core.Center
 
         public abstract void NodesChanged(List<NetNode> nodes);
 
-        public abstract void HaveMessage(string eid, string msg);
+        public abstract void HaveMessage(string eid, byte[] msg);
     }
 }

@@ -10,7 +10,7 @@ namespace Geek.Server.Core.Center
         Game = 3,
         Center = 4,
         Gateway = 5,
-        Proxy = 6
+        GatewaySelect = 6
     }
 
     [MessagePackObject]

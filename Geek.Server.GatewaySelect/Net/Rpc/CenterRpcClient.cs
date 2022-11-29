@@ -1,12 +1,13 @@
 ﻿using Geek.Server.Core.Center;
+using Geek.Server.GatewaySelect;
 
 namespace Geek.Server.Gateway.Net.Rpc
 {
-    public class GateCenterRpcClient : BaseCenterRpcClient
+    public class CenterRpcClient : BaseCenterRpcClient
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        public GateCenterRpcClient(string url) : base(url)
+        public CenterRpcClient(string url) : base(url)
         {
         }
 
@@ -15,8 +16,13 @@ namespace Geek.Server.Gateway.Net.Rpc
             LOGGER.Debug("ConfigChanged:" + data);
         }
 
+
         public override void HaveMessage(string eid, byte[] msg)
         {
+            if (eid.EndsWith(SubscribeEvent.NetNodeStateChangeSuffix))
+            {
+                GatewayMgr.UpdateNode(MessagePack.MessagePackSerializer.Deserialize<NetNode>(msg));
+            }
         }
 
         public override void NodesChanged(List<NetNode> nodes)
@@ -26,6 +32,11 @@ namespace Geek.Server.Gateway.Net.Rpc
             {
                 LOGGER.Debug("NodeId:" + node.NodeId);
             }
+
+            GatewayMgr.ResetAllNode(nodes.FindAll((node) =>
+            {
+                return node.Type == NodeType.Gateway;
+            }));
             LOGGER.Debug("---------------------------------");
         }
     }

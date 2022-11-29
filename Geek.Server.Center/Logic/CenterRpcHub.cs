@@ -83,9 +83,9 @@ namespace Geek.Server.Center.Logic
             return Task.FromResult(nodes);
         }
 
-        public Task<List<NetNode>> GetNodeByType(NodeType type)
+        public Task<List<NetNode>> GetNodesByType(NodeType type)
         {
-            var nodes = ServiceManager.NamingService.GetNodeByType(type);
+            var nodes = ServiceManager.NamingService.GetNodesByType(type);
             return Task.FromResult(nodes);
         }
 
@@ -112,7 +112,7 @@ namespace Geek.Server.Center.Logic
             return Task.CompletedTask;
         }
 
-        public void PostMessageToClient(string eid, string msg)
+        public void PostMessageToClient(string eid, byte[] msg)
         {
             GetRpcClientAgent().HaveMessage(eid, msg);
         }

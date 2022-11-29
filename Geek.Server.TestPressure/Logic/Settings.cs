@@ -6,8 +6,7 @@ namespace Geek.Server.TestPressure.Logic
     {
         public static TestSettings Ins;
         public int serverId;
-        public string gateIp;
-        public int gatePort;
+        public string gateSelectUrl;
         public int clientCount;
         public static void Load(string path)
         {

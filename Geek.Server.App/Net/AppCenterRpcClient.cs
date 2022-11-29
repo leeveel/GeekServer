@@ -39,7 +39,7 @@ namespace Geek.Server.App.Net
             LOGGER.Debug("---------------------------------");
         }
 
-        public override void HaveMessage(string eid, string msg)
+        public override void HaveMessage(string eid, byte[] msg)
         {
         }
     }

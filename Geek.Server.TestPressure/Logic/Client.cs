@@ -27,10 +27,10 @@ namespace Geek.Server.TestPressure.Logic
             this.id = id;
         }
 
-        public async Task Start()
+        public async Task Start(string ip, int port)
         {
             netChannel = new ClientNetChannel(this);
-            var connCode = await netChannel.Connect(TestSettings.Ins.gateIp, TestSettings.Ins.gatePort);
+            var connCode = await netChannel.Connect(ip, port);
             Log.Info($"客户端[{id}]链接:{connCode}");
             if (connCode == NetCode.Success)
                 await ReqRouter();

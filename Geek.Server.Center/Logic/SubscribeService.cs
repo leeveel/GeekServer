@@ -27,7 +27,7 @@ namespace Geek.Server.Center.Logic
             }
         }
 
-        public void Publish(string eid, string msg)
+        public void Publish(string eid, byte[] msg)
         {
             var dic = GetOrAddSubscribeMap(eid);
             foreach (var v in dic)

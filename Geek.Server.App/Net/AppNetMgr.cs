@@ -22,7 +22,7 @@ namespace Geek.Server.App.Net
 
         public static async Task ConnectGateway()
         {
-            var nodes = await CenterRpcClient.ServerAgent.GetNodeByType(NodeType.Gateway);
+            var nodes = await CenterRpcClient.ServerAgent.GetNodesByType(NodeType.Gateway);
             foreach (var node in nodes)
             {
                 _ = ConnectGateway(node);
