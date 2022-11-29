@@ -13,13 +13,10 @@ namespace Geek.Server.Core.Comps
         {
             lock (_cacheAgentLock)
             {
-                bool needActive = _cacheAgent == null;
                 if (_cacheAgent != null && !HotfixMgr.DoingHotfix)
                     return _cacheAgent;
                 var agent = HotfixMgr.GetAgent<ICompAgent>(this, refAssemblyType);
                 _cacheAgent = agent;
-                if (needActive)
-                    agent.Active();
                 return agent;
             }
         }

@@ -40,10 +40,16 @@ namespace Geek.Server.Core.Actors
         {
             var compType = agentType.BaseType.GetGenericArguments()[0];
             var comp = compDic.GetOrAdd(compType, k => CompRegister.NewComp(this, k));
-            // 这里对交叉死锁检测的影响？
+            var agent = comp.GetAgent();
             if (!comp.IsActive)
-                await SendAsyncWithoutCheck(comp.Active);
-            return comp.GetAgent(agentType);
+            {
+                await SendAsyncWithoutCheck(async () =>
+                {
+                    await comp.Active();
+                    agent.Active();
+                });
+            }
+            return agent;
         }
 
         public const int TIME_OUT = int.MaxValue;
