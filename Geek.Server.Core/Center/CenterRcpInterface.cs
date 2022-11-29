@@ -15,6 +15,7 @@ namespace Geek.Server.Core.Center
         public Task<ConfigInfo> GetConfig(string configId);
         public Task<List<NetNode>> GetAllNodes();
         public Task<List<NetNode>> GetNodeByType(NodeType type);
+        public Task SyncState(NetNodeState state);
         public Task Subscribe(string eventId);
         public Task Unsubscribe(string eventId);
     }

@@ -1,4 +1,5 @@
-﻿using Geek.Server.Center.Web.Data;
+﻿using Consul;
+using Geek.Server.Center.Web.Data;
 using Geek.Server.Center.Web.Pages.Config;
 using Geek.Server.Core.Center;
 using MagicOnion.Server.Hubs;
@@ -114,6 +115,13 @@ namespace Geek.Server.Center.Logic
         public void PostMessageToClient(string eid, string msg)
         {
             GetRpcClientAgent().HaveMessage(eid, msg);
+        }
+
+        //节点主动同步状态
+        public Task SyncState(NetNodeState state)
+        {
+            ServiceManager.NamingService.SetNodeState(CurNodeId, state);
+            return Task.CompletedTask;
         }
     }
 }

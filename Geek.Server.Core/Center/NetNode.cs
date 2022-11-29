@@ -10,6 +10,7 @@ namespace Geek.Server.Core.Center
         Game = 3,
         Center = 4,
         Gateway = 5,
+        Proxy = 6
     }
 
     [MessagePackObject]
@@ -31,6 +32,18 @@ namespace Geek.Server.Core.Center
         public int HttpPort { get; set; }
         [Key(7)]
         public int RpcPort { get; set; }
+        [Key(8)]
+        public NetNodeState State { get; set; }
     }
 
+    [MessagePackObject(true)]
+    public class NetNodeState
+    {
+        //承载上限
+        public int MaxLoad = int.MaxValue;
+        //当前承载
+        public int CurrentLoad = 0;
+        //是否可以提供服务
+        public bool CanServe = true;
+    }
 }

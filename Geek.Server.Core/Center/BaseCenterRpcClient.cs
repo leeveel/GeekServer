@@ -1,6 +1,7 @@
 ﻿using Geek.Server.Core.Net;
 using Grpc.Net.Client;
 using MagicOnion.Client;
+using System.Threading;
 
 namespace Geek.Server.Core.Center
 {
@@ -9,8 +10,9 @@ namespace Geek.Server.Core.Center
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public ICenterRpcHub ServerAgent { private set; get; }
         protected string connUrl;
-
         protected ReConnecter reConn;
+        protected Func<NetNodeState> getstateFunc;
+        CancellationTokenSource cancelStateSyncSrc;
 
         public BaseCenterRpcClient(string ip, int port)
         {
@@ -24,9 +26,55 @@ namespace Geek.Server.Core.Center
             reConn = new ReConnecter(ConnectImpl, $"中心服:{connUrl}");
         }
 
+        public void StartSyncState(Func<NetNodeState> getstateFunc)
+        {
+            if (Settings.SyncStateToCenterInterval <= 0.0001)
+            {
+                LOGGER.Error($"开始向中心服同步状态失败，SyncStateToCenterInterval参数为{Settings.SyncStateToCenterInterval}");
+                return;
+            }
+
+            if (cancelStateSyncSrc != null)
+            {
+                cancelStateSyncSrc.Cancel();
+                cancelStateSyncSrc = null;
+            }
+
+            this.getstateFunc = getstateFunc;
+            cancelStateSyncSrc = new CancellationTokenSource();
+            var token = cancelStateSyncSrc.Token;
+            Task.Run(async () =>
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        if (ServerAgent != null)
+                            await ServerAgent.SyncState(getstateFunc());
+                    }
+                    catch (Exception ex)
+                    {
+                        LOGGER.Error($"rpc.同步状态到中心服异常:{ex.Message}");
+                    }
+                    await Task.Delay((int)(Settings.SyncStateToCenterInterval * 1000));
+                }
+            });
+        }
+
         public Task<bool> Connect()
         {
             return reConn.Connect();
+        }
+
+        public async Task Stop()
+        {
+            if (cancelStateSyncSrc != null)
+            {
+                cancelStateSyncSrc.Cancel();
+                cancelStateSyncSrc = null;
+            }
+            if (ServerAgent != null)
+                await ServerAgent.DisposeAsync();
         }
 
         private async Task<bool> ConnectImpl()

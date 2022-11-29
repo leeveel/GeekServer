@@ -80,6 +80,8 @@ public static class Settings
 
     public static string CenterUrl => Ins.CenterUrl;
 
+    public static float SyncStateToCenterInterval => Ins.SyncStateToCenterInterval;
+
     public static int SDKType => Ins.SDKType;
 
     public static string MonitorUrl => Ins.MonitorUrl;
@@ -132,7 +134,7 @@ public class BaseSetting
     public string Language { get; set; }
 
     public string CenterUrl { get; init; }
-
+    public float SyncStateToCenterInterval { get; init; }
     public int SDKType { get; set; }
 
     /// <summary> 钉钉监控地址 </summary>
@@ -140,6 +142,6 @@ public class BaseSetting
 
     /// <summary> 钉钉监控key </summary>
     public string MonitorKey { get; set; }
- 
+
     #endregion
 }

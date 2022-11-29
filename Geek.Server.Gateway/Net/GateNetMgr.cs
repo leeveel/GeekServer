@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Net.Tcp;
+﻿using Geek.Server.Core.Center;
+using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Gateway.Common;
 using Geek.Server.Gateway.Net.Rpc;
 using Geek.Server.Gateway.Net.Tcp.Inner;
@@ -21,6 +22,11 @@ namespace Geek.Server.Gateway.Net
             return CenterRpcClient.Connect();
         }
 
+        public static void StartSyncState(Func<NetNodeState> getStateFunc)
+        {
+            CenterRpcClient.StartSyncState(getStateFunc);
+        }
+
         private static TcpServer outerTcpServer;
         private static TcpServer innerTcpServer;
         public static async Task StartTcpServer()
@@ -31,12 +37,14 @@ namespace Geek.Server.Gateway.Net
             await innerTcpServer.Start(Settings.InsAs<GateSettings>().InnerTcpPort, builder => builder.UseConnectionHandler<InnerTcpConnectionHandler>());
         }
 
-        public static async Task StopTcpServer()
+        public static async Task Stop()
         {
-            if(outerTcpServer != null)
+            if (outerTcpServer != null)
                 await outerTcpServer.Stop();
-            if(innerTcpServer != null)
+            if (innerTcpServer != null)
                 await innerTcpServer.Stop();
+            if (CenterRpcClient != null)
+                await CenterRpcClient.Stop();
         }
 
         public static long SelectAHealthNode(int serverId)

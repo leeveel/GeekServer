@@ -66,5 +66,14 @@ namespace Geek.Server.Center.Logic
             }
             return list;
         }
+
+        public void SetNodeState(long nodeId, NetNodeState state)
+        {
+            //Log.Debug($"设置节点{nodeId}状态");
+            if (nodeMap.TryGetValue(nodeId, out var node))
+            {
+                node.State = state;
+            }
+        }
     }
 }

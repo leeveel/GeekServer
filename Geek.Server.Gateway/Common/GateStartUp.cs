@@ -29,7 +29,7 @@ namespace Geek.Server.Gateway.Common
                 Settings.LauchTime = DateTime.Now;
                 Settings.AppRunning = true;
 
-                _ = Task.Run(async () => 
+                _ = Task.Run(async () =>
                 {
                     //连接中心rpc
                     if (await GateNetMgr.ConnectCenter())
@@ -41,11 +41,20 @@ namespace Geek.Server.Gateway.Common
                             TcpPort = Settings.TcpPort,
                             InnerTcpPort = Settings.InsAs<GateSettings>().InnerTcpPort,
                             HttpPort = Settings.HttpPort,
-                            Type = NodeType.Gateway
+                            Type = NodeType.Gateway,
                         };
                         //上报注册中心
                         if (!await GateNetMgr.CenterRpcClient.ServerAgent.Register(node))
                             throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(node)}");
+
+                        GateNetMgr.StartSyncState(() =>
+                        {
+                            var state = new NetNodeState();
+                            state.MaxLoad = Settings.InsAs<GateSettings>().MaxClientCount;
+                            state.CurrentLoad = GateNetMgr.GetConnectionCount();
+                            state.CanServe = true;
+                            return state;
+                        });
                     }
                 });
                 TimeSpan delay = TimeSpan.FromSeconds(1);
@@ -62,7 +71,7 @@ namespace Geek.Server.Gateway.Common
 
             Console.WriteLine($"退出服务器开始");
             await HttpServer.Stop();
-            await GateNetMgr.StopTcpServer();
+            await GateNetMgr.Stop();
             Console.WriteLine($"退出服务器成功");
         }
 
