@@ -30,10 +30,11 @@ namespace Geek.Server.Core.Comps
 
         internal long ActorId => Actor.Id;
 
-        public virtual bool IsActive => true;
+        public bool IsActive { get; private set; } = false;
 
         public virtual Task Active()
         {
+            IsActive = true;
             return Task.CompletedTask;
         }
 

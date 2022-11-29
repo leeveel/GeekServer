@@ -81,19 +81,18 @@ namespace Geek.Server.Core.Comps
 
         public TState State { get; private set; }
 
-        public override bool IsActive => State != null;
-
         static StateComp()
         {
             if (Settings.DBModel == (int)DBModel.Mongodb)
                 StateComp.AddShutdownSaveFunc(SaveAll);
         }
 
-        public override Task Active()
+        public override async Task Active()
         {
+            await base.Active();
             if (State != null)
-                return Task.CompletedTask;
-            return ReadStateAsync();
+                return;
+            await ReadStateAsync();
         }
 
         public override Task Deactive()
