@@ -36,7 +36,7 @@ namespace Geek.Server.Rebalance.Common
                             NodeId = Settings.ServerId,
                             Ip = Settings.LocalIp,
                             HttpPort = Settings.HttpPort,
-                            Type = NodeType.GatewaySelect,
+                            Type = NodeType.Rebalance,
                         };
                         //上报注册中心
                         if (!await CenterRpcClient.ServerAgent.Register(node))
