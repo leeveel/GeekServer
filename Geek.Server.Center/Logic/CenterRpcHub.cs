@@ -1,6 +1,5 @@
-﻿using Consul;
+
 using Geek.Server.Center.Web.Data;
-using Geek.Server.Center.Web.Pages.Config;
 using Geek.Server.Core.Center;
 using MagicOnion.Server.Hubs;
 using NLog;
