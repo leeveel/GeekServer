@@ -42,7 +42,9 @@ namespace Geek.Server.App.Common
                         await AppNetMgr.GetGlobalConfig();
 
                         Log.Info($"launch embedded db...");
-                        RocksDBConnection.Singleton.Connect(Settings.LocalDBPath + Settings.LocalDBPrefix + Settings.ServerId);
+                        GameDB.Init();
+                        GameDB.Open();
+
                         Log.Info($"regist comps...");
                         await CompRegister.Init();
                         Log.Info($"load hotfix module");

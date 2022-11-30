@@ -72,6 +72,8 @@ public static class Settings
 
     public static string MongoUrl => Ins.MongoUrl;
 
+    public static string MongoDBName => Ins.MongoDBName;
+
     public static string LocalDBPrefix => Ins.LocalDBPrefix;
 
     public static string LocalDBPath => Ins.LocalDBPath;
@@ -89,6 +91,8 @@ public static class Settings
     public static string MonitorKey => Ins.MonitorKey;
 
     public static int RpcPort => Ins.RpcPort;
+
+    public static int DBModel => Ins.DBModel;
 }
 
 public class BaseSetting
@@ -127,6 +131,8 @@ public class BaseSetting
 
     public string MongoUrl { get; set; }
 
+    public string MongoDBName { get; init; }
+
     public string LocalDBPrefix { get; set; }
 
     public string LocalDBPath { get; set; }
@@ -142,6 +148,8 @@ public class BaseSetting
 
     /// <summary> 钉钉监控key </summary>
     public string MonitorKey { get; set; }
+
+    public int DBModel { get; set; }
 
     #endregion
 }

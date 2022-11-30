@@ -1,7 +1,6 @@
 ﻿using Geek.Server.Core.Serialize;
 using Geek.Server.Core.Utils;
 using MessagePack;
-using MongoDB.Bson.Serialization.Attributes;
 using NLog;
 
 namespace Geek.Server.Core.Storage
@@ -45,8 +44,8 @@ namespace Geek.Server.Core.Storage
         }
 
         #region hash
-        [BsonIgnore]
-        private StateHash stateHash { get; set; }
+        [IgnoreMember]
+        private StateHash stateHash;
 
         public void AfterLoadFromDB(bool isNew)
         {
@@ -58,9 +57,18 @@ namespace Geek.Server.Core.Storage
             return stateHash.IsChanged();
         }
 
+        public (bool isChanged, long stateId, byte[] data) IsChangedWithId()
+        {
+            var res = stateHash.IsChanged();
+            return (res.Item1, Id, res.Item2);
+        }
+
+        /// <summary>
+        /// 仅DBModel.Mongodb时调用
+        /// </summary>
         public void BeforeSaveToDB()
         {
-            var db = RocksDBConnection.Singleton.CurDataBase;
+            var db = GameDB.As<RocksDBConnection>().CurDataBase;
             var table = db.GetTable<SaveTimestamp>();
             var saveState = new SaveTimestamp
             {

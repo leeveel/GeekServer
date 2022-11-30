@@ -1,8 +1,8 @@
-﻿using Geek.Server.Core.Actors.Impl;
+﻿using System.Collections.Concurrent;
+using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Timer;
-using System.Collections.Concurrent;
 
 namespace Geek.Server.Core.Actors
 {
@@ -40,10 +40,16 @@ namespace Geek.Server.Core.Actors
         {
             var compType = agentType.BaseType.GetGenericArguments()[0];
             var comp = compDic.GetOrAdd(compType, k => CompRegister.NewComp(this, k));
-            // 这里对交叉死锁检测的影响？
+            var agent = comp.GetAgent();
             if (!comp.IsActive)
-                await SendAsync(comp.Active, checkLock: false);
-            return comp.GetAgent(agentType);
+            {
+                await SendAsyncWithoutCheck(async () =>
+                {
+                    await comp.Active();
+                    agent.Active();
+                });
+            }
+            return agent;
         }
 
         public const int TIME_OUT = int.MaxValue;
@@ -85,7 +91,15 @@ namespace Geek.Server.Core.Actors
             }
         }
 
-        internal bool SaveAllState() => compDic.Values.All(item => item.SaveState());
+        internal bool ReadyToDeactive => compDic.Values.All(item => item.ReadyToDeactive);
+
+        internal async Task SaveAllState()
+        {
+            foreach (var item in compDic)
+            {
+               await item.Value.SaveState();
+            }
+        }
 
         public async Task Deactive()
         {
@@ -116,9 +130,14 @@ namespace Geek.Server.Core.Actors
             return WorkerActor.SendAsync(work, timeout);
         }
 
-        public Task SendAsync(Func<Task> work, int timeout = TIME_OUT, bool checkLock = true)
+        public Task SendAsync(Func<Task> work, int timeout = TIME_OUT)
         {
-            return WorkerActor.SendAsync(work, timeout, checkLock);
+            return WorkerActor.SendAsync(work, timeout);
+        }
+
+        public Task SendAsyncWithoutCheck(Func<Task> work, int timeout = TIME_OUT)
+        {
+            return WorkerActor.SendAsync(work, timeout, false);
         }
 
         public Task<T> SendAsync<T>(Func<Task<T>> work, int timeout = TIME_OUT)

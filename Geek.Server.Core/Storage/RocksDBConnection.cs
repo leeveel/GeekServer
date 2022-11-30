@@ -2,14 +2,15 @@
 
 namespace Geek.Server.Core.Storage
 {
-    public class RocksDBConnection
+    public class RocksDBConnection : IGameDB
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public static readonly RocksDBConnection Singleton = new RocksDBConnection();
         public EmbeddedDB CurDataBase { get; private set; }
-        public void Connect(string db)
+
+        public void Open(string url, string dbName)
         {
-            CurDataBase = new EmbeddedDB(db);
+            CurDataBase = new EmbeddedDB(url + dbName);
         }
 
         public void Close()
@@ -17,7 +18,7 @@ namespace Geek.Server.Core.Storage
             CurDataBase.Close();
         }
 
-        public TState LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
+        public Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
         {
             try
             {
@@ -31,7 +32,7 @@ namespace Geek.Server.Core.Storage
                     state = new TState { Id = id };
 
                 state.AfterLoadFromDB(isNew);
-                return state;
+                return Task.FromResult(state);
             }
             catch (Exception e)
             {
@@ -46,7 +47,7 @@ namespace Geek.Server.Core.Storage
         /// </summary>
         /// <typeparam name="TState"></typeparam>
         /// <param name="state"></param>
-        public void SaveState<TState>(TState state) where TState : CacheState
+        public Task SaveState<TState>(TState state) where TState : CacheState
         {
             var (isChanged, data) = state.IsChanged();
             if (isChanged)
@@ -56,7 +57,8 @@ namespace Geek.Server.Core.Storage
                 CurDataBase.GetTable<TState>().SetRaw(state.Id, data);
                 state.AfterSaveToDB();
             }
+            return Task.CompletedTask;
         }
-
+        
     }
 }

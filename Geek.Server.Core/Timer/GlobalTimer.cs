@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Actors;
+﻿
+using Geek.Server.Core.Actors;
 using Geek.Server.Core.Storage;
 
 namespace Geek.Server.Core.Timer
@@ -30,7 +31,7 @@ namespace Geek.Server.Core.Timer
                 if (!working)
                     break;
                 var startTime = DateTime.Now;
-                await ActorMgr.TimerSave();
+                await GameDB.TimerSave();
                 var cost = (DateTime.Now - startTime).TotalMilliseconds;
                 Log.Info($"定时回存完成 耗时: {cost:f4}ms");
 
@@ -71,8 +72,8 @@ namespace Geek.Server.Core.Timer
         {
             working = false;
             await LoopTask;
-            await ActorMgr.SaveAll();
-            RocksDBConnection.Singleton.Close();
+            await GameDB.SaveAll();
+            GameDB.Close();
             Log.Info($"停止全局定时完成");
         }
     }

@@ -1,7 +1,9 @@
-﻿using Geek.Server.Core.Actors;
+﻿
+using Geek.Server.Core.Actors;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Timer;
 using Geek.Server.Core.Timer.Handler;
+using Geek.Server.Core.Utils;
 
 namespace Geek.Server.Core.Hotfix.Agent
 {
@@ -67,7 +69,7 @@ namespace Geek.Server.Core.Hotfix.Agent
 
         public Task SendAsync(Func<Task> work, int timeout = Actor.TIME_OUT)
         {
-            return Actor.SendAsync(work, timeout, true);
+            return Actor.SendAsync(work, timeout);
         }
 
         public Task<T> SendAsync<T>(Func<Task<T>> work, int timeOut = Actor.TIME_OUT)

@@ -1,10 +1,10 @@
-﻿using Geek.Server.Core.Actors.Impl;
+﻿using System.Collections.Concurrent;
+using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Timer;
 using Geek.Server.Core.Utils;
-using System.Collections.Concurrent;
 
 namespace Geek.Server.Core.Actors
 {
@@ -119,7 +119,7 @@ namespace Geek.Server.Core.Actors
                                 && (DateTime.Now - activeTimeDic[actor.Id]).TotalMinutes > 15)
                                 {
                                     // 防止定时回存失败时State被直接移除
-                                    if (actor.SaveAllState())
+                                    if (actor.ReadyToDeactive)
                                     {
                                         await actor.Deactive();
                                         actorDic.TryRemove(actor.Id, out var _);
@@ -140,7 +140,7 @@ namespace Geek.Server.Core.Actors
             return Task.CompletedTask;
         }
 
-
+       
         public static async Task SaveAll()
         {
             try
@@ -149,7 +149,7 @@ namespace Geek.Server.Core.Actors
                 var taskList = new List<Task>();
                 foreach (var actor in actorDic.Values)
                 {
-                    taskList.Add(actor.SendAsync(() => actor.SaveAllState()));
+                    taskList.Add(actor.SendAsync(async () => await actor.SaveAllState()));
                 }
                 await Task.WhenAll(taskList);
                 Log.Info($"save all state, use: {(DateTime.Now - begin).TotalMilliseconds}ms");
@@ -179,7 +179,7 @@ namespace Geek.Server.Core.Actors
                         return;
                     if (count < ONCE_SAVE_COUNT)
                     {
-                        taskList.Add(actor.SendAsync(() => actor.SaveAllState()));
+                        taskList.Add(actor.SendAsync(async () => await actor.SaveAllState()));
                         count++;
                     }
                     else

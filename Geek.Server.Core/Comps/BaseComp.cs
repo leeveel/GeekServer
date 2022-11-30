@@ -13,13 +13,10 @@ namespace Geek.Server.Core.Comps
         {
             lock (_cacheAgentLock)
             {
-                bool needActive = _cacheAgent == null;
                 if (_cacheAgent != null && !HotfixMgr.DoingHotfix)
                     return _cacheAgent;
                 var agent = HotfixMgr.GetAgent<ICompAgent>(this, refAssemblyType);
                 _cacheAgent = agent;
-                if (needActive)
-                    agent.Active();
                 return agent;
             }
         }
@@ -33,10 +30,11 @@ namespace Geek.Server.Core.Comps
 
         internal long ActorId => Actor.Id;
 
-        public virtual bool IsActive => true;
+        public bool IsActive { get; private set; } = false;
 
         public virtual Task Active()
         {
+            IsActive = true;
             return Task.CompletedTask;
         }
 
@@ -47,6 +45,8 @@ namespace Geek.Server.Core.Comps
                 await agent.Deactive();
         }
 
-        internal virtual bool SaveState() { return true; }
+        internal virtual Task SaveState() { return Task.CompletedTask; }
+
+        internal virtual bool ReadyToDeactive => true;
     }
 }
