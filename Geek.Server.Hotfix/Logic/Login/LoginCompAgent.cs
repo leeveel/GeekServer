@@ -20,12 +20,14 @@ namespace Server.Logic.Logic.Login
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {
                 channel.WriteAsync(null, reqLogin.UniId, StateCode.AccountCannotBeNull);
+                return;
             }
 
             if (reqLogin.Platform != "android" && reqLogin.Platform != "ios" && reqLogin.Platform != "unity")
             {
                 //验证平台合法性
                 channel.WriteAsync(null, reqLogin.UniId, StateCode.UnknownPlatform);
+                return;
             }
 
             //查询角色账号，这里设定每个服务器只能有一个角色
