@@ -13,26 +13,17 @@ namespace Geek.Server.Core.Center
         GatewaySelect = 6
     }
 
-    [MessagePackObject]
+    [MessagePackObject(true)]
     public class NetNode
     {
-        [Key(0)]
         public int NodeId { get; set; }
-        [Key(1)]
         public int ServerId { get; set; }
-        [Key(2)]
         public NodeType Type { get; set; }
-        [Key(3)]
         public string Ip { get; set; }
-        [Key(4)]
         public int TcpPort { get; set; }
-        [Key(5)]
         public int InnerTcpPort { get; set; }
-        [Key(6)]
         public int HttpPort { get; set; }
-        [Key(7)]
         public int RpcPort { get; set; }
-        [Key(8)]
         public NetNodeState State { get; set; } = new NetNodeState();
     }
 

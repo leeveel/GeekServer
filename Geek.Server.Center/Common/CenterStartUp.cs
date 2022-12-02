@@ -2,6 +2,7 @@
 using Geek.Server.Center.Web;
 using Geek.Server.Core.Net.Http;
 using Geek.Server.Core.Net.Rpc;
+using PolymorphicMessagePack;
 using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
@@ -17,6 +18,8 @@ namespace Geek.Server.Center.Common
             {
                 var flag = Start();
                 if (!flag) return; //启动服务器失败
+
+                PolymorphicResolver.Init();
 
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");

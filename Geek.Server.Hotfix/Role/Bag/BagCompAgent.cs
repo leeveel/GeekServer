@@ -1,5 +1,4 @@
-﻿
-using Geek.Server.App.Common.Event;
+﻿using Geek.Server.App.Common.Event;
 using Geek.Server.App.Role.Bag;
 using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Hotfix.Common.Events;

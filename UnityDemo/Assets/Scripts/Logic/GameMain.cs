@@ -29,6 +29,7 @@ namespace Logic
 
         async void Start()
         {
+            Txt = GameObject.Find("Text").GetComponent<Text>();
             GameDataManager.ReloadAll();
             GameClient.Singleton.Init();
             DemoService.Singleton.RegisterEventListener();

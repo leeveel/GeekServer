@@ -5,6 +5,7 @@ using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Timer;
 using Geek.Server.Core.Utils;
 using System.Collections.Concurrent;
+using System.Drawing.Imaging;
 
 namespace Geek.Server.Core.Actors
 {
@@ -13,6 +14,35 @@ namespace Geek.Server.Core.Actors
         private static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
 
         private static readonly ConcurrentDictionary<long, Actor> actorDic = new();
+
+        private static Dictionary<int, bool> curServeActorType = new Dictionary<int, bool>();
+
+        private static readonly ConcurrentDictionary<long, DateTime> activeTimeDic = new();
+
+        private static readonly List<WorkerActor> workerActors = new();
+        private const int workerCount = 10;
+
+        static ActorMgr()
+        {
+            System.Array values = System.Enum.GetValues(typeof(ActorType));
+            foreach (var value in values)
+            {
+                curServeActorType[(int)value] = false;
+            }
+            for (int i = 0; i < workerCount; i++)
+            {
+                workerActors.Add(new WorkerActor());
+            }
+        }
+
+        public static void SetServeActorTypes(List<string> types)
+        {
+            foreach (var t in types)
+            {
+                var at = (ActorType)Enum.Parse(typeof(ActorType), t);
+                curServeActorType[(int)at] = true;
+            }
+        }
 
         public static async Task<T> GetCompAgent<T>(long actorId) where T : ICompAgent
         {
@@ -80,18 +110,6 @@ namespace Geek.Server.Core.Actors
                 tasks.Add(actor.SendAsync(() => true));
             }
             return Task.WhenAll(tasks);
-        }
-
-        private static readonly ConcurrentDictionary<long, DateTime> activeTimeDic = new();
-
-        private static readonly List<WorkerActor> workerActors = new();
-        private const int workerCount = 10;
-        static ActorMgr()
-        {
-            for (int i = 0; i < workerCount; i++)
-            {
-                workerActors.Add(new WorkerActor());
-            }
         }
 
         private static WorkerActor GetLifeActor(long actorId)

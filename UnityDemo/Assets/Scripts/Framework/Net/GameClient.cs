@@ -17,10 +17,10 @@ namespace Geek.Client
         Failed,                  //链接失败
     }
 
-    public class GameClient 
+    public class GameClient
     {
         public static GameClient Singleton = new GameClient();
-        private readonly Queue<Message> msgQueue = new Queue<Message>(); 
+        private readonly Queue<Message> msgQueue = new Queue<Message>();
         private ClientNetChannel Channel { get; set; }
         private UniActor receiveActor = null;
         private GameClient() { }
@@ -52,6 +52,7 @@ namespace Geek.Client
 
         public void Send(Message msg)
         {
+            UnityEngine.Debug.LogFormat("发送网络消息{0}", MessagePack.MessagePackSerializer.SerializeToJson(msg));
             Channel?.WriteAsync(new NMessage(msg));
         }
 

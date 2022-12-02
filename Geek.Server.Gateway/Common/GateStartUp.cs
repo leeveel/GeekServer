@@ -1,9 +1,11 @@
 ﻿using Geek.Server.Core.Center;
 using Geek.Server.Core.Net.Http;
+using PolymorphicMessagePack;
 using Geek.Server.Gateway.Net;
 using Geek.Server.Gateway.Net.Http;
 using Geek.Server.Gateway.Net.Tcp.Handler;
 using Geek.Server.Proto;
+using MongoDB.Driver.Core.Servers;
 using Newtonsoft.Json;
 using NLog.LayoutRenderers;
 
@@ -21,7 +23,10 @@ namespace Geek.Server.Gateway.Common
 
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");
+
                 PolymorphicRegister.Load();
+                PolymorphicResolver.Init();
+
                 MsgHanderFactory.Init();
                 HttpHanderFactory.Init();
                 await HttpServer.Start(Settings.HttpPort);

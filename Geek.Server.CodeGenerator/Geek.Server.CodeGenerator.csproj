@@ -17,7 +17,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Remove="Template\PolymorphicDBStateRegister.liquid" />
 		<None Remove="Template\State.liquid" />
 	</ItemGroup>
 
@@ -37,7 +36,6 @@
 	<ItemGroup>
 		<EmbeddedResource Include="$(PKGScriban)\lib\netstandard2.0\Scriban.dll" Visible="false" />
 		<EmbeddedResource Include="$(ProjectPath)\..\Template\Agent.liquid" Visible="true" />
-		<EmbeddedResource Include="Template\PolymorphicDBStateRegister.liquid" />
 	</ItemGroup>
 
 </Project>

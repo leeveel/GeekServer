@@ -1,5 +1,7 @@
 ﻿using Geek.Server.Core.Center;
 using Geek.Server.Core.Net.Http;
+using PolymorphicMessagePack;
+using Geek.Server.Proto;
 using Geek.Server.Rebalance.Net.Http;
 using Geek.Server.Rebalance.Net.Rpc;
 using Newtonsoft.Json;
@@ -17,6 +19,9 @@ namespace Geek.Server.Rebalance.Common
             {
                 var flag = Start();
                 if (!flag) return; //启动服务器失败
+
+                PolymorphicRegister.Load();
+                PolymorphicResolver.Init();
 
                 Log.Info("进入主循环...");
                 Console.WriteLine("***进入主循环***");

@@ -13,7 +13,7 @@ namespace Geek.Server.Gateway.Net.Tcp.Inner
 
         protected override Connection OnConnection(ConnectionContext context)
         {
-            LOGGER.Debug($"{context.RemoteEndPoint?.ToString()} 链接成功");
+            LOGGER.Debug($"内部节点 {context.RemoteEndPoint?.ToString()} 链接成功");
             var conn = new Connection
             {
                 Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId),

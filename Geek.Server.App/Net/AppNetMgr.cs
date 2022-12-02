@@ -33,6 +33,9 @@ namespace Geek.Server.App.Net
         {
             if (node == null || node.Type != NodeType.Gateway)
                 return;
+
+            LOGGER.Info($"开始连接网关:{node.NodeId},{node.Ip},{node.TcpPort}");
+
             if (!tcpClientDic.TryGetValue(node.NodeId, out InnerTcpClient tcpClient))
             {
                 tcpClient = new InnerTcpClient(node);
