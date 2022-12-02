@@ -5,16 +5,19 @@ using MessagePack;
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ServerNotConnect : Geek.Server.Message
+	public class PlayerDisconnected : Geek.Server.Message
 	{
 		[IgnoreMember]
-		public const int Sid = 445665195;
+		public const int Sid = 1739074562;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-        public long serverUid { get; set; }
+        /// <summary>
+        /// 网关网络节点
+        /// </summary>
+        public int GateNodeId { get; set; }
 	}
 }

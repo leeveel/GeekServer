@@ -16,14 +16,14 @@
 
 namespace MessagePack.Formatters.Geek.Server.Proto
 {
-    public sealed class ServerNotConnectFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ServerNotConnect>
+    public sealed class PlayerDisconnectedFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.PlayerDisconnected>
     {
-        // serverUid
-        private static global::System.ReadOnlySpan<byte> GetSpan_serverUid() => new byte[1 + 9] { 169, 115, 101, 114, 118, 101, 114, 85, 105, 100 };
+        // GateNodeId
+        private static global::System.ReadOnlySpan<byte> GetSpan_GateNodeId() => new byte[1 + 10] { 170, 71, 97, 116, 101, 78, 111, 100, 101, 73, 100 };
         // UniId
         private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ServerNotConnect value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.PlayerDisconnected value, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (value is null)
             {
@@ -32,13 +32,13 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             writer.WriteMapHeader(2);
-            writer.WriteRaw(GetSpan_serverUid());
-            writer.Write(value.serverUid);
+            writer.WriteRaw(GetSpan_GateNodeId());
+            writer.Write(value.GateNodeId);
             writer.WriteRaw(GetSpan_UniId());
             writer.Write(value.UniId);
         }
 
-        public global::Geek.Server.Proto.ServerNotConnect Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Geek.Server.Proto.PlayerDisconnected Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -47,7 +47,7 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 
             options.Security.DepthStep(ref reader);
             var length = reader.ReadMapHeader();
-            var ____result = new global::Geek.Server.Proto.ServerNotConnect();
+            var ____result = new global::Geek.Server.Proto.PlayerDisconnected();
 
             for (int i = 0; i < length; i++)
             {
@@ -58,10 +58,10 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                     FAIL:
                       reader.Skip();
                       continue;
-                    case 9:
-                        if (!global::System.MemoryExtensions.SequenceEqual(stringKey, GetSpan_serverUid().Slice(1))) { goto FAIL; }
+                    case 10:
+                        if (!global::System.MemoryExtensions.SequenceEqual(stringKey, GetSpan_GateNodeId().Slice(1))) { goto FAIL; }
 
-                        ____result.serverUid = reader.ReadInt64();
+                        ____result.GateNodeId = reader.ReadInt32();
                         continue;
                     case 5:
                         if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }

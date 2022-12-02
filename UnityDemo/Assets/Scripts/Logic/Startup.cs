@@ -14,14 +14,5 @@ namespace Logic
             PolymorphicRegister.Load();
             new GameObject("GameMain").AddComponent<GameMain>();
         }
-
-        // #if UNITY_EDITOR
-        //         [UnityEditor.InitializeOnLoadMethod]
-        //         static void EditorInitialize()
-        //         {
-        //             Initialize();
-        //         }
-        // #endif
-
     }
 }

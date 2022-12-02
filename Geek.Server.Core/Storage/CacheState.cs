@@ -8,8 +8,7 @@ namespace Geek.Server.Core.Storage
 
     /// <summary>
     /// 回存时间戳
-    /// </summary>
-    [MessagePackObject(true)]
+    /// </summary> 
     public class SaveTimestamp
     {
         /// <summary>
@@ -25,13 +24,11 @@ namespace Geek.Server.Core.Storage
         public long Timestamp { get; set; }
     }
 
-    [MessagePackObject(true)]
     public abstract class InnerState
     {
 
     }
 
-    [MessagePackObject(true)]
     public abstract class CacheState
     {
         public const string UniqueId = nameof(Id);

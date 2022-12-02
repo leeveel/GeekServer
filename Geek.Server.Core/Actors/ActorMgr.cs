@@ -14,6 +14,35 @@ namespace Geek.Server.Core.Actors
 
         private static readonly ConcurrentDictionary<long, Actor> actorDic = new();
 
+        private static Dictionary<int, bool> curServeActorType = new Dictionary<int, bool>();
+
+        private static readonly ConcurrentDictionary<long, DateTime> activeTimeDic = new();
+
+        private static readonly List<WorkerActor> workerActors = new();
+        private const int workerCount = 10;
+
+        static ActorMgr()
+        {
+            System.Array values = System.Enum.GetValues(typeof(ActorType));
+            foreach (var value in values)
+            {
+                curServeActorType[(int)value] = false;
+            }
+            for (int i = 0; i < workerCount; i++)
+            {
+                workerActors.Add(new WorkerActor());
+            }
+        }
+
+        public static void SetServeActorTypes(List<string> types)
+        {
+            foreach (var t in types)
+            {
+                var at = (ActorType)Enum.Parse(typeof(ActorType), t);
+                curServeActorType[(int)at] = true;
+            }
+        }
+
         public static async Task<T> GetCompAgent<T>(long actorId) where T : ICompAgent
         {
             var actor = await GetOrNew(actorId);
@@ -82,18 +111,6 @@ namespace Geek.Server.Core.Actors
             return Task.WhenAll(tasks);
         }
 
-        private static readonly ConcurrentDictionary<long, DateTime> activeTimeDic = new();
-
-        private static readonly List<WorkerActor> workerActors = new();
-        private const int workerCount = 10;
-        static ActorMgr()
-        {
-            for (int i = 0; i < workerCount; i++)
-            {
-                workerActors.Add(new WorkerActor());
-            }
-        }
-
         private static WorkerActor GetLifeActor(long actorId)
         {
             return workerActors[(int)(actorId % workerCount)];
@@ -140,7 +157,7 @@ namespace Geek.Server.Core.Actors
             return Task.CompletedTask;
         }
 
-       
+
         public static async Task SaveAll()
         {
             try

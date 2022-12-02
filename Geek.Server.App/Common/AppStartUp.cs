@@ -1,7 +1,10 @@
-﻿using Geek.Server.App.Net;
+﻿using Consul;
+using Geek.Server.App.Net;
+using Geek.Server.Core.Actors;
 using Geek.Server.Core.Center;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
+using PolymorphicMessagePack;
 using Geek.Server.Core.Storage;
 using Geek.Server.Proto;
 using Newtonsoft.Json;
@@ -21,7 +24,7 @@ namespace Geek.Server.App.Common
                 var flag = Start();
                 if (!flag) return; //启动服务器失败
 
-                _ = Task.Run(async () =>
+                await Task.Run(async () =>
                 {
                     //连接中心rpc
                     if (await AppNetMgr.ConnectCenter())
@@ -67,8 +70,9 @@ namespace Geek.Server.App.Common
             }
             catch (Exception e)
             {
-                Console.WriteLine($"服务器执行异常，e:{e}");
-                Log.Fatal(e);
+                var re = e.InnerException != null ? e.InnerException : e;
+                Console.WriteLine($"服务器执行异常，e:{re}");
+                Log.Fatal(re);
             }
 
             Console.WriteLine($"退出服务器开始");
@@ -86,8 +90,10 @@ namespace Geek.Server.App.Common
                 LogManager.Configuration = new XmlLoggingConfiguration("Configs/app_log.config");
                 LogManager.AutoShutdown = false;
 
+                PolymorphicTypeMapper.Register(typeof(AppStartUp).Assembly); //app
                 PolymorphicRegister.Load();
-                GeekServerAppPolymorphicDBStateRegister.Load();
+                PolymorphicResolver.Init();
+                //GeekServerAppPolymorphicDBStateRegister.Load();
 
                 return true;
             }

@@ -60,7 +60,7 @@ namespace Logic
             }
 
 #if UNITY_EDITOR
-            UnityEngine.Debug.Log("deal msg:" + msgId + ">" + typeof(T));
+            UnityEngine.Debug.Log("deal msg:" + msgId + ">" + MessagePack.MessagePackSerializer.SerializeToJson(rMsg));
 #endif
 
             //已经提前解析好了
@@ -71,7 +71,7 @@ namespace Logic
         {
             AddListener(GameClient.ConnectEvt, OnConnectServer);
             AddListener(GameClient.DisconnectEvt, OnDisconnectServer);
-            AddListener(ResLogin.MsgID, OnResLogin); 
+            AddListener(ResLogin.MsgID, OnResLogin);
             AddListener(ResBagInfo.MsgID, OnResBagInfo);
             AddListener(ResComposePet.MsgID, OnResComposePet);
             AddListener(ResErrorCode.MsgID, OnResErrorCode);
