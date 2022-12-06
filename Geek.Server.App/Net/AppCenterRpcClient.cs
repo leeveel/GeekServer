@@ -20,7 +20,7 @@ namespace Geek.Server.App.Net
         public AppCenterRpcClient(string url)
            : base(url)
         {
-            ActorRemoteCall.SetGetter((nodeType, actorType) =>
+            ActorRemoteCallHelper.SetGetter((nodeType, actorType) =>
             {
                 return this.GetNode(nodeType, actorType);
             }, (typename) =>

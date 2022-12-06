@@ -90,9 +90,9 @@ namespace {{space}}
             paramObj.AddParam({{para}});
             {{~ end ~}} 
             {{~ if mth.havetaskreturnvalue ~}}  
-			return ActorRemoteCall.Call<{{mth.taskreturnvalue}}>(ActorMgr.GetAgentActorType<{{super}}>(), paramObj); 
+			return ActorRemoteCallHelper.Call<{{mth.taskreturnvalue}}>(ActorMgr.GetAgentActorType<{{super}}>(), paramObj); 
             {{~ else ~}} 
-			return ActorRemoteCall.Call(ActorMgr.GetAgentActorType<{{super}}>(),paramObj); 
+			return ActorRemoteCallHelper.Call(ActorMgr.GetAgentActorType<{{super}}>(),paramObj); 
             {{~ end ~}} 
 		} 
         {{~ else ~}} 

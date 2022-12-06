@@ -49,7 +49,7 @@ namespace Geek.Server.Core.Actors.Impl
                 LOGGER.Fatal($"actor远程调用,参数index不匹配{targetActorId}{agentName}{funcName}");
                 return defValue;
             }
-            var type = ActorRemoteCall.typeGetter(realParamTypes[index]);
+            var type = ActorRemoteCallHelper.typeGetter(realParamTypes[index]);
             return (T)MessagePack.MessagePackSerializer.Deserialize(type, paramDatas[index]);
         }
     }
@@ -62,8 +62,7 @@ namespace Geek.Server.Core.Actors.Impl
         public byte[] resultData;
     }
 
-
-    public static class ActorRemoteCall
+    public static class ActorRemoteCallHelper
     {
         static ConcurrentDictionary<int, KeyValuePair<string, IActorAgentRemoteCallService>> nodeAARCSMap = new ConcurrentDictionary<int, KeyValuePair<string, IActorAgentRemoteCallService>>();
         internal static Func<string, Type> typeGetter;
@@ -72,8 +71,8 @@ namespace Geek.Server.Core.Actors.Impl
         public static void SetGetter(Func<NodeType, ActorType, NetNode> netNodeGetter, Func<string, Type> typeGetter)
         {
             nodeAARCSMap.Clear();
-            ActorRemoteCall.typeGetter = typeGetter;
-            ActorRemoteCall.netNodeGetter = netNodeGetter;
+            ActorRemoteCallHelper.typeGetter = typeGetter;
+            ActorRemoteCallHelper.netNodeGetter = netNodeGetter;
         }
 
         static IActorAgentRemoteCallService GetCallAgent(NodeType targetNodeType, ActorType targetActorType)
