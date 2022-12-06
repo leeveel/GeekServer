@@ -73,7 +73,7 @@ namespace Geek.Server.App.Net
                     var agent = await ActorMgr.GetCompAgent(agentType);
                     var ret = await agent.RemoteCall(paras);
                     await ServerAgent.SetActorAgentCallResult(callId, ret);
-                    LOGGER.Debug("调用结束，设置结果:" + callId);
+                    //LOGGER.Debug("调用结束，设置结果:" + callId);
                 }
                 catch (Exception ex)
                 {

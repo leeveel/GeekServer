@@ -5,6 +5,7 @@ using Geek.Server.App.TestServer;
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Storage;
 using Geek.Server.Core.Timer.Handler;
 using Geek.Server.Hotfix.Role.Base;
 
@@ -34,6 +35,11 @@ namespace Geek.Server.Hotfix.Server
         {
             Log.Info($"TestServerCompAgent.....TestCall4");
             return Task.FromResult(new BagState { Id = 666, ItemMap = new Dictionary<int, long> { { 2, 33 } } });
+        }
+        public virtual Task<CacheState> TestCall5()
+        {
+            Log.Info($"TestServerCompAgent.....TestCall5");
+            return Task.FromResult((CacheState)new BagState { Id = 666, ItemMap = new Dictionary<int, long> { { 2, 33 } } });
         }
     }
 }

@@ -39,12 +39,14 @@ namespace Geek.Server.Hotfix.Http
         public override async Task<string> Action(string ip, string url, Dictionary<string, string> parameters)
         {
             var agent = await ActorMgr.GetCompAgent<TestServerCompAgent>();
+
             await agent.TestCall("测试参数1", 234567);
             await agent.TestCall2(new App.Login.PlayerInfo { playerId = "playerid111", UserName = "23232323", RoleMap = new Dictionary<int, long> { { 2, 32 } } });
             await agent.TestCall3(new List<int> { 4, 5, 2, 65, 2, 32, 23 });
             var data = await agent.TestCall4();
-
-            Log.Info($"远程调用actor test call4结果：{MessagePack.MessagePackSerializer.SerializeToJson(data)}");
+            Log.Warn($"远程调用actor test call4结果：{MessagePack.MessagePackSerializer.SerializeToJson(data)}");
+            var data2 = await agent.TestCall5();
+            Log.Warn($"远程调用actor test call5结果：{MessagePack.MessagePackSerializer.SerializeToJson(data2)}  {data2.GetType().FullName}");
 
             var res = new HttpTestRes
             {
