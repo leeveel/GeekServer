@@ -213,6 +213,10 @@ namespace Geek.Server.CodeGenerator.Agent
                                 mth.IsPublic = true;
                             if (m.Text.Equals("static"))
                                 mth.IsStatic = true;
+                            if (m.Text.Equals("virtual"))
+                            {
+                                mth.IsVirtual = true;
+                            }
                         }
 
                         mth.Returntype = method.ReturnType?.ToString();   //Task<T>
@@ -226,6 +230,11 @@ namespace Geek.Server.CodeGenerator.Agent
 
                         if (mth.IsPublic)
                         {
+                            if (!mth.IsVirtual)
+                            {
+                                context.LogError($"{fullName}.{method.Identifier.Text} 必须为virtual函数");
+                            }
+
                             info.Methods.Add(mth);
                             mth.Name = method.Identifier.Text;
                             mth.ParamDeclare = method.ParameterList.ToString();  //(int a, List<int> list)
