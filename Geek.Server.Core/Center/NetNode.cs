@@ -24,6 +24,14 @@ namespace Geek.Server.Core.Center
         public int InnerTcpPort { get; set; }
         public int HttpPort { get; set; }
         public int RpcPort { get; set; }
+        [IgnoreMember]
+        public string RpcUrl
+        {
+            get
+            {
+                return $"http://{Ip}:{RpcPort}";
+            }
+        }
         public List<string> ActorTypes { get; set; }
         [IgnoreMember]
         public string ActorTypesStr

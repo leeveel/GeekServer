@@ -20,7 +20,5 @@ namespace Geek.Server.Core.Center
         public Task SyncState(NetNodeState state);
         public Task Subscribe(string eventId);
         public Task Unsubscribe(string eventId);
-        public Task<ActorRemoteCallResult> ActorAgentCall(int nodeId, byte[] paras);
-        public Task SetActorAgentCallResult(string callId, ActorRemoteCallResult result);
     }
 }

@@ -129,53 +129,5 @@ namespace Geek.Server.Center.Logic
             ServiceManager.NamingService.SetNodeState(CurNodeId, state);
             return Task.CompletedTask;
         }
-
-        class WaitActorAgentCallResult
-        {
-            public CancellationTokenSource cancellationSrc;
-            public ActorRemoteCallResult result;
-        }
-        static ConcurrentDictionary<string, WaitActorAgentCallResult> actorAgentCallWaitCache = new ConcurrentDictionary<string, WaitActorAgentCallResult>();
-        public async Task<ActorRemoteCallResult> ActorAgentCall(int nodeId, byte[] paras)
-        {
-            var node = ServiceManager.NamingService.Get(nodeId);
-            if (node == null)
-            {
-                return new ActorRemoteCallResult { success = false };
-            }
-            var callId = Guid.NewGuid().ToString();
-            var cancellationSrc = new CancellationTokenSource();
-            var waitObj = new WaitActorAgentCallResult { cancellationSrc = cancellationSrc };
-            actorAgentCallWaitCache.TryAdd(callId, waitObj);
-            try
-            {
-                (node.rpcHub as CenterRpcHub).GetRpcClientAgent().RemoteGameServerCallLocalAgent(callId, paras);
-                await Task.Delay(50000, cancellationSrc.Token);
-            }
-            catch (TaskCanceledException e)
-            {
-                LOGGER.Debug("ActorAgentCall完成");
-            }
-            catch (Exception e)
-            {
-                LOGGER.Error("ActorAgentCall exception:" + e.Message);
-            }
-            finally
-            {
-                actorAgentCallWaitCache.TryRemove(callId, out _);
-            }
-            return waitObj.result;
-        }
-
-        public Task SetActorAgentCallResult(string callId, ActorRemoteCallResult result)
-        {
-            if (actorAgentCallWaitCache.TryGetValue(callId, out var waitObj))
-            {
-                LOGGER.Debug("中心服,设置远程调用结果：。。。。。" + callId);
-                waitObj.result = result;
-                waitObj.cancellationSrc.Cancel();
-            }
-            return Task.CompletedTask;
-        }
     }
 }

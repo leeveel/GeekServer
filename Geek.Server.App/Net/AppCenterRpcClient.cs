@@ -3,6 +3,7 @@ using Geek.Server.Core.Actors;
 using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Center;
 using Geek.Server.Core.Hotfix;
+using MagicOnion;
 
 namespace Geek.Server.App.Net
 {
@@ -19,7 +20,10 @@ namespace Geek.Server.App.Net
         public AppCenterRpcClient(string url)
            : base(url)
         {
-            ActorRemoteCall.SetRpc(this, (typename) =>
+            ActorRemoteCall.SetGetter((nodeType, actorType) =>
+            {
+                return this.GetNode(nodeType, actorType);
+            }, (typename) =>
             {
                 var t = Type.GetType(typename);
                 if (t != null)
@@ -55,31 +59,7 @@ namespace Geek.Server.App.Net
 
         public override void RemoteGameServerCallLocalAgent(string callId, byte[] data)
         {
-            LOGGER.Info("RemoteGameServerCallLocalAgent.........................");
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    var paras = MessagePack.MessagePackSerializer.Deserialize<ActorRemoteCallParams>(data);
-                    var agentType = HotfixMgr.GetAgentTypeByAgentName(paras.agentName);
 
-                    if (agentType == null)
-                    {
-                        await ServerAgent.SetActorAgentCallResult(callId, new ActorRemoteCallResult { success = false });
-                        return;
-                    }
-                    //目前只针对server级别的actor，否则要改i
-                    //var agent = await ActorMgr.GetCompAgent(paras.targetActorId, agentType); 
-                    var agent = await ActorMgr.GetCompAgent(agentType);
-                    var ret = await agent.RemoteCall(paras);
-                    await ServerAgent.SetActorAgentCallResult(callId, ret);
-                    //LOGGER.Debug("调用结束，设置结果:" + callId);
-                }
-                catch (Exception ex)
-                {
-                    LOGGER.Error("调用异常:" + ex.Message);
-                }
-            });
         }
     }
 }
