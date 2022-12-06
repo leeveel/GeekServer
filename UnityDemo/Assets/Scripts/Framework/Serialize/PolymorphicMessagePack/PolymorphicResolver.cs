@@ -1,41 +1,48 @@
 ﻿using MessagePack;
 using MessagePack.Formatters;
+using MessagePack.Resolvers;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace PolymorphicMessagePack
 {
-
-    internal sealed class PolymorphicResolver : IFormatterResolver
+    public sealed class PolymorphicResolver : IFormatterResolver
     {
-        private PolymorphicMessagePackSettings _polymorphicSettings;
-        private readonly ConcurrentDictionary<Type, PolymorphicDelegate> _innerFormatterCache;
-        public PolymorphicResolver(PolymorphicMessagePackSettings polymorphicSettings)
+        static IFormatterResolver InnerResolver;
+        static List<IFormatterResolver> innerResolver = new List<IFormatterResolver>()
         {
-            _polymorphicSettings = polymorphicSettings;
-            _innerFormatterCache = new ConcurrentDictionary<Type, PolymorphicDelegate>();
+                //MessagePack.Resolvers.BuiltinResolver.Instance,
+               StandardResolver.Instance,
+               ContractlessStandardResolver.Instance
+        };
+
+        //先调用此函数注册需要的resolver，然后再调用init，比如客户端需要注册proto和配置表的resolver
+        public static void AddInnerResolver(IFormatterResolver resolver)
+        {
+            if (innerResolver.IndexOf(resolver) < 0)
+            {
+                innerResolver.Add(resolver);
+            }
         }
+
+        public static void Init()
+        {
+            StaticCompositeResolver.Instance.Register(innerResolver.ToArray());
+            InnerResolver = StaticCompositeResolver.Instance;
+            MessagePackSerializer.DefaultOptions = new MessagePackSerializerOptions(new PolymorphicResolver());
+        }
+
+        private readonly ConcurrentDictionary<Type, PolymorphicDelegate> _innerFormatterCache = new ConcurrentDictionary<Type, PolymorphicDelegate>();
 
         public IMessagePackFormatter<T> GetFormatter<T>()
         {
-            //Have to check the type here, because of two reasons:
-            //1. Deserialize will not work with non-polymorphic types, as it assumes a typeid as the first item in a two part array, the second being the object itself
-            //2. We need the polymorphic settings, and they are an instance and are required to be.
-
-            //If i had the object to be serialized or its actual type, I could make this a lot more efficient and remove the need for the Polymorphic delegate.
-
-            //Can something be optimized here?
-            if (_polymorphicSettings.BaseTypes.Contains(typeof(T)) ||
-                _polymorphicSettings.TypeToId.ContainsKey(typeof(T)))
+            if (PolymorphicTypeMapper.Contains(typeof(T)))
             {
                 return FormatterCache<T>.Formatter;
             }
-            else if (_polymorphicSettings.SerializeOnlyRegisteredTypes)
-            {
-                throw new MessagePackSerializationException($"Type '{ typeof(T).FullName }' is not registered in the { nameof(PolymorphicMessagePackSettings) } and { nameof(PolymorphicMessagePackSettings.SerializeOnlyRegisteredTypes) } is set to true");
-            }
 
-            return _polymorphicSettings.InnerResolver.GetFormatter<T>();
+            return InnerResolver.GetFormatter<T>();
         }
 
         //Bottleneck
@@ -56,11 +63,11 @@ namespace PolymorphicMessagePack
             {
                 var constructedType = typeof(PolymorphicDelegate<>).MakeGenericType(type);
 
-                ploymorphicDeletegate = (PolymorphicDelegate)Activator.CreateInstance(constructedType, _polymorphicSettings.InnerResolver);
+                ploymorphicDeletegate = (PolymorphicDelegate)Activator.CreateInstance(constructedType, InnerResolver);
 
                 _innerFormatterCache.TryAdd(type, ploymorphicDeletegate);
             }
-            
+
             return ploymorphicDeletegate;
         }
 

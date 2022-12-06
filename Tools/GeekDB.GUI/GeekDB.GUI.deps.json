@@ -12,7 +12,7 @@
           "MongoDB.Driver": "2.15.0",
           "Newtonsoft.Json": "13.0.1",
           "ObjectListView.Updated": "2.9.3",
-          "SunnyUI": "3.2.8.1"
+          "SunnyUI": "3.2.9"
         },
         "runtime": {
           "GeekDB.GUI.dll": {}
@@ -262,22 +262,22 @@
           }
         }
       },
-      "SunnyUI/3.2.8.1": {
+      "SunnyUI/3.2.9": {
         "dependencies": {
-          "SunnyUI.Common": "3.2.8"
+          "SunnyUI.Common": "3.2.9"
         },
         "runtime": {
           "lib/net6.0-windows7.0/SunnyUI.dll": {
-            "assemblyVersion": "3.2.8.1",
-            "fileVersion": "3.2.8.1"
+            "assemblyVersion": "3.2.9.0",
+            "fileVersion": "3.2.9.0"
           }
         }
       },
-      "SunnyUI.Common/3.2.8": {
+      "SunnyUI.Common/3.2.9": {
         "runtime": {
           "lib/net6.0/SunnyUI.Common.dll": {
-            "assemblyVersion": "3.2.8.0",
-            "fileVersion": "3.2.8.0"
+            "assemblyVersion": "3.2.9.0",
+            "fileVersion": "3.2.9.0"
           }
         }
       },
@@ -504,19 +504,19 @@
       "path": "sharpcompress/0.30.1",
       "hashPath": "sharpcompress.0.30.1.nupkg.sha512"
     },
-    "SunnyUI/3.2.8.1": {
+    "SunnyUI/3.2.9": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-efhH4SgI8i9wiuIxk6T5e7WagVEopBczuTqbDW7H4eP5YP2FZ0cDDrisYS8M53ndBUX1p5v+sku71vz0PrLaQA==",
-      "path": "sunnyui/3.2.8.1",
-      "hashPath": "sunnyui.3.2.8.1.nupkg.sha512"
+      "sha512": "sha512-nJ6kUbQwhrpwJX+Oh20YYXsajnLb0D/v5UTky8a6ktrLa2eO8YC/Ohu8XZ+DyehLR4AJro1HTrnkzzpch9qLQA==",
+      "path": "sunnyui/3.2.9",
+      "hashPath": "sunnyui.3.2.9.nupkg.sha512"
     },
-    "SunnyUI.Common/3.2.8": {
+    "SunnyUI.Common/3.2.9": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-5nqu9itKe+I+6BHG6eX8iqBImNr65SwWTzM7vVWN+Ny0lFxYjdtUfUdWk4KrzRxxC+ItE63LZETragk9LSZUYA==",
-      "path": "sunnyui.common/3.2.8",
-      "hashPath": "sunnyui.common.3.2.8.nupkg.sha512"
+      "sha512": "sha512-7jHTgsEjbXWoILR2L1raXRuRiTmqXUCLAlPue6rhZo0ilngfk1hPjFLTWQnjxmdM/P7BeMwNZgXOm6opnAgE4Q==",
+      "path": "sunnyui.common/3.2.9",
+      "hashPath": "sunnyui.common.3.2.9.nupkg.sha512"
     },
     "System.Buffers/4.5.1": {
       "type": "package",
