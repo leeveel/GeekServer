@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Geek.Client.Config
 {
@@ -11,7 +12,25 @@ namespace Geek.Client.Config
 	{
 		public DateTime ReloadTime { get; private set; }
 		
-		public static GameDataManager Instance { get; private set; } = new GameDataManager();
+		public static GameDataManager Instance { get; private set; }
+
+        public static (bool, string) ReloadAll()
+        {
+            try
+            {
+                var data = new GameDataManager();
+                data.LoadAll(true);
+                data.ReloadTime = DateTime.Now;
+                Instance = data;
+				return (true, "");
+            }
+            catch (Exception e)
+            {
+                Debug.LogError(e.Message);
+				return (false, e.Message);
+            }
+        }
+		
 		public Dictionary<string, DateTime> GetBeanFileTime()
 		{
 			var folder = System.Environment.CurrentDirectory;
@@ -63,7 +82,7 @@ namespace Geek.Client.Config
 					return map[key];
 			}
 			if(false == ignoreErrLog)
-				UnityEngine.Debug.LogError("can not find Bin:" + t.Name + " id=" + key);
+				Debug.LogError("can not find Bin:" + t.Name + " id=" + key);
 			return null;
 		}
 		
@@ -77,9 +96,9 @@ namespace Geek.Client.Config
 				List<T> list = t_container.getList() as List<T>;
 				if(list != null)
 					return list;
-				UnityEngine.Debug.LogError("can not find Bin > " + t.Name);
+				Debug.LogError("can not find Bin > " + t.Name);
 			}
-			UnityEngine.Debug.LogError("can not find Bin > " + t.Name);
+			Debug.LogError("can not find Bin > " + t.Name);
 			return null;
 		}
 		
@@ -93,7 +112,7 @@ namespace Geek.Client.Config
 				Dictionary<K, T> map = t_container.getMap() as Dictionary<K, T>;
 				if(map != null)
 					return map;
-				UnityEngine.Debug.LogError("T,K get " + t.Name + "," + typeof(K).Name + " should be " + t_container.getMap());
+				Debug.LogError("T,K get " + t.Name + "," + typeof(K).Name + " should be " + t_container.getMap());
 			}
 			return null;
 		}

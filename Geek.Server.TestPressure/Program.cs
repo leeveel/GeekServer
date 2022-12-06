@@ -1,6 +1,7 @@
 ﻿
 using Geek.Server.Core.Actors;
 using Geek.Server.TestPressure.Logic;
+using PolymorphicMessagePack;
 
 namespace Geek.Server.TestPressure
 {
@@ -9,6 +10,7 @@ namespace Geek.Server.TestPressure
         public static async Task Main(string[] args)
         {
             PolymorphicRegister.Load();
+            PolymorphicResolver.Init();
             LogManager.Configuration = new XmlLoggingConfiguration("Configs/test_log.config");
 
             TestSettings.Load("Configs/test_config.json");

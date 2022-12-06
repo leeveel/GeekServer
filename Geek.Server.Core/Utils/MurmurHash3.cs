@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace Geek.Server.CodeGenerator.State
+namespace Geek.Server.Core.Utils
 {
     public class MurmurHash3
     {
-        static public uint Hash(string str, uint seed)
+        static public uint Hash(string str, uint seed = 27)
         {
             var data = System.Text.Encoding.UTF8.GetBytes(str);
             return Hash(data, (uint)data.Length, seed);
@@ -80,7 +80,7 @@ namespace Geek.Server.CodeGenerator.State
 
         static uint rotl32(uint x, byte r)
         {
-            return (x << r) | (x >> (32 - r));
+            return x << r | x >> 32 - r;
         }
     }
 }

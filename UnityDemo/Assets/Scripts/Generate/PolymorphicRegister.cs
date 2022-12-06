@@ -1,6 +1,7 @@
 ﻿using MessagePack;
 using MessagePack.Resolvers;
 using PolymorphicMessagePack;
+using Resolvers;
 
 namespace Geek.Server.Proto
 {
@@ -8,23 +9,18 @@ namespace Geek.Server.Proto
     {
 
         static bool serializerRegistered = false;
-        private static PolymorphicMessagePackSettings settings;
         private static void Init()
         {
             if (!serializerRegistered)
             {
-                StaticCompositeResolver.Instance.Register(
-                    MessagePack.Resolvers.GeneratedResolver.Instance,
-                    MessagePack.Resolvers.BuiltinResolver.Instance
-                );
-
-                settings = new PolymorphicMessagePackSettings(StaticCompositeResolver.Instance);
-                var options = new PolymorphicMessagePackSerializerOptions(settings);
-                MessagePackSerializer.DefaultOptions = options;
+                PolymorphicResolver.AddInnerResolver(ConfigDataResolver.Instance);
+                PolymorphicResolver.AddInnerResolver(MessagePack.Resolvers.GeneratedResolver.Instance);
+                PolymorphicTypeMapper.Register<Geek.Server.Message>();
+                PolymorphicResolver.Init();
                 serializerRegistered = true;
             }
         }
 
-        public static void Load() { }
+        public static void Load() { Init(); }
     }
 }

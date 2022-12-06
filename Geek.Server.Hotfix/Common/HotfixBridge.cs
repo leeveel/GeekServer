@@ -9,6 +9,7 @@ using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Core.Timer;
 using Geek.Server.Core.Utils;
 using Microsoft.AspNetCore.Connections;
+using PolymorphicMessagePack;
 
 namespace Server.Logic.Common
 {
@@ -25,7 +26,7 @@ namespace Server.Logic.Common
                 ActorMgr.ClearAgent();
                 return true;
             }
-
+            PolymorphicTypeMapper.Register(this.GetType().Assembly);
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
             //await TcpServer.Start(Settings.TcpPort);
             await TcpServer.Start(Settings.TcpPort, builder => builder.UseConnectionHandler<AppTcpConnectionHandler>());

@@ -1,4 +1,5 @@
 ﻿using Geek.Client;
+using Geek.Client.Config;
 using Geek.Server;
 using Geek.Server.Proto;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace Logic
 
         async void Start()
         {
+            Txt = GameObject.Find("Text").GetComponent<Text>();
+            GameDataManager.ReloadAll();
             GameClient.Singleton.Init();
             DemoService.Singleton.RegisterEventListener();
             await ConnectServer();

@@ -7,6 +7,7 @@ using Geek.Server.Proto;
 using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
+using PolymorphicMessagePack;
 
 namespace Geek.Server.App.Common
 {
@@ -60,8 +61,9 @@ namespace Geek.Server.App.Common
                 LogManager.Configuration = new XmlLoggingConfiguration("Configs/app_log.config");
                 LogManager.AutoShutdown = false;
 
+                PolymorphicTypeMapper.Register(typeof(AppStartUp).Assembly); //app
                 PolymorphicRegister.Load();
-                GeekServerAppPolymorphicDBStateRegister.Load();
+                PolymorphicResolver.Init();
 
                 return true;
             }

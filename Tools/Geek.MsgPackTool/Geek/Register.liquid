@@ -1,18 +1,18 @@
+using PolymorphicMessagePack;
 namespace Geek.Server.Proto
 {
 	public partial class PolymorphicRegister
 	{
 	    static PolymorphicRegister()
         {
-            System.Console.WriteLine("***PolymorphicRegister Init***");
-			Init();
+            System.Console.WriteLine("***PolymorphicRegister Init***"); 
             Register();
         }
 
 		public static void Register()
         {
 			{{~ for info in infos ~}}
-			settings.RegisterType<{{info.basename}}, {{info.subname}}>({{info.subsid}});
+			PolymorphicTypeMapper.Register<{{info.subname}}>();
 			{{~ end ~}}
         }
 	}
