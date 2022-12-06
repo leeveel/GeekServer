@@ -5,6 +5,7 @@ using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Timer;
 using Geek.Server.Core.Utils;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Drawing.Imaging;
 
 namespace Geek.Server.Core.Actors
@@ -15,7 +16,7 @@ namespace Geek.Server.Core.Actors
 
         private static readonly ConcurrentDictionary<long, Actor> actorDic = new();
 
-        private static Dictionary<int, bool> curServeActorType = new Dictionary<int, bool>();
+        private static readonly ConcurrentDictionary<int, bool> curServeActorType = new();
 
         private static readonly ConcurrentDictionary<long, DateTime> activeTimeDic = new();
 
@@ -29,23 +30,32 @@ namespace Geek.Server.Core.Actors
             {
                 curServeActorType[(int)value] = false;
             }
+
+            //当前服处理的actor类型
+            if (Settings.ActorTypes != null)
+                foreach (var t in Settings.ActorTypes)
+                {
+                    Log.Info("当前服处理actortype:" + t);
+                    var at = (ActorType)Enum.Parse(typeof(ActorType), t);
+                    curServeActorType[(int)at] = true;
+                }
+
             for (int i = 0; i < workerCount; i++)
             {
                 workerActors.Add(new WorkerActor());
             }
         }
 
-        public static void SetServeActorTypes(List<string> types)
-        {
-            foreach (var t in types)
-            {
-                var at = (ActorType)Enum.Parse(typeof(ActorType), t);
-                curServeActorType[(int)at] = true;
-            }
-        }
-
         public static async Task<T> GetCompAgent<T>(long actorId) where T : ICompAgent
         {
+            //TODO:判断是否是当前server处理的actor类型，如果不是,...   
+            var actorType = IdGenerator.GetActorType(actorId);
+            if (!curServeActorType[(int)actorType])
+            {
+                var agent = HotfixMgr.GetRemoteAgent<T>();
+                agent.ActorId = actorId;
+                return agent;
+            }
             var actor = await GetOrNew(actorId);
             return await actor.GetCompAgent<T>();
         }
@@ -61,10 +71,26 @@ namespace Geek.Server.Core.Actors
             return actor;
         }
 
-        internal static async Task<ICompAgent> GetCompAgent(long actorId, Type agentType)
+        public static async Task<ICompAgent> GetCompAgent(long actorId, Type agentType)
         {
-            var actor = await GetOrNew(actorId);
-            return await actor.GetCompAgent(agentType);
+            var actorType = IdGenerator.GetActorType(actorId);
+            if (curServeActorType[(int)actorType])
+            {
+                var actor = await GetOrNew(actorId);
+                return await actor.GetCompAgent(agentType);
+            }
+            else
+            {
+                var agent = HotfixMgr.GetRemoteAgent(agentType);
+                agent.ActorId = actorId;
+                return agent;
+            }
+        }
+        public static Task<ICompAgent> GetCompAgent(Type agentType)
+        {
+            var compType = HotfixMgr.GetCompType(agentType);
+            var actorType = CompRegister.GetActorType(compType);
+            return GetCompAgent(IdGenerator.GetActorID(actorType), agentType);
         }
 
         public static Task<T> GetCompAgent<T>() where T : ICompAgent
@@ -74,9 +100,21 @@ namespace Geek.Server.Core.Actors
             return GetCompAgent<T>(IdGenerator.GetActorID(actorType));
         }
 
+        public static ActorType GetAgentActorType<T>()
+        {
+            var compType = HotfixMgr.GetCompType(typeof(T));
+            return CompRegister.GetActorType(compType);
+        }
+
         internal static async Task<Actor> GetOrNew(long actorId)
         {
             var actorType = IdGenerator.GetActorType(actorId);
+
+            if (!curServeActorType[(int)actorType])
+            {
+                return null;
+            }
+
             if (actorType == ActorType.Role)
             {
                 var now = DateTime.Now;

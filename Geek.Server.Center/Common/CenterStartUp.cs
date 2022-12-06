@@ -6,6 +6,7 @@ using PolymorphicMessagePack;
 using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
+using Geek.Server.Core.Center;
 
 namespace Geek.Server.Center.Common
 {
@@ -19,6 +20,7 @@ namespace Geek.Server.Center.Common
                 var flag = Start();
                 if (!flag) return; //启动服务器失败
 
+                PolymorphicTypeMapper.Register(typeof(CenterStartUp).Assembly);
                 PolymorphicResolver.Init();
 
                 Log.Info("进入游戏主循环...");

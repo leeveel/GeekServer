@@ -1,0 +1,11 @@
+﻿{
+  "IsDebug": true,
+  "ServerId": 1001, //[1000,9999]
+  "ServerName": "geek_server",
+  "LocalIp": "127.0.0.1",
+  "TcpPort": 8899,
+  "RpcPort": 8911,
+  "HttpPort": 20000,
+  "ActorTypes": [ "Role", "Guild", "Server", "Login" ],
+  "CenterUrl": "http://127.0.0.1:8900"
+}

@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Center;
+﻿using Geek.Server.Core.Actors.Impl;
+using Geek.Server.Core.Center;
 
 namespace Geek.Server.Gateway.Net.Rpc
 {
@@ -9,6 +10,7 @@ namespace Geek.Server.Gateway.Net.Rpc
         public GateCenterRpcClient(string url) : base(url)
         {
         }
+
 
         public override void ConfigChanged(ConfigInfo data)
         {

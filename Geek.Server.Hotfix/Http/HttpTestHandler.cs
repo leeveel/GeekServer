@@ -1,4 +1,6 @@
+using Geek.Server.Core.Actors;
 using Geek.Server.Core.Net.Http;
+using Geek.Server.Hotfix.Server;
 
 namespace Geek.Server.Hotfix.Http
 {
@@ -32,8 +34,14 @@ namespace Geek.Server.Hotfix.Http
         /// <param name="url"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public override Task<string> Action(string ip, string url, Dictionary<string, string> parameters)
+        public override async Task<string> Action(string ip, string url, Dictionary<string, string> parameters)
         {
+            var agent = await ActorMgr.GetCompAgent<TestServerCompAgent>();
+            await agent.TestCall("测试参数1", 234567);
+            await agent.TestCall2(new App.Login.PlayerInfo { playerId = "playerid111", UserName = "23232323", RoleMap = new Dictionary<int, long> { { 2, 32 } } });
+            await agent.TestCall3(new List<int> { 4, 5, 2, 65, 2, 32, 23 });
+
+
             var res = new HttpTestRes
             {
                 A = 100,
@@ -42,7 +50,8 @@ namespace Geek.Server.Hotfix.Http
             };
             res.TestInfo.Age = 18;
             res.TestInfo.Name = "leeveel";
-            return Task.FromResult(res.ToString());
+            // return Task.FromResult(res.ToString());
+            return res.ToString();
         }
     }
 }

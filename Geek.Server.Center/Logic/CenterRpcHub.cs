@@ -1,11 +1,16 @@
 ﻿using Consul;
 using Geek.Server.Center.Web.Data;
 using Geek.Server.Center.Web.Pages.Config;
+using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Center;
+using MagicOnion;
 using MagicOnion.Server.Hubs;
+using MessagePack.Resolvers;
 using NLog;
+using NLog.Fluent;
 using System.Collections.Concurrent;
 using System.Security.Policy;
+using System.Threading.Tasks;
 
 namespace Geek.Server.Center.Logic
 {
@@ -65,6 +70,7 @@ namespace Geek.Server.Center.Logic
         {
             CurNodeId = node.NodeId;
             ServiceManager.NamingService.Add(node);
+            node.rpcHub = this;
             NodesChanged();
             return Task.FromResult(true);
         }
@@ -121,6 +127,50 @@ namespace Geek.Server.Center.Logic
         public Task SyncState(NetNodeState state)
         {
             ServiceManager.NamingService.SetNodeState(CurNodeId, state);
+            return Task.CompletedTask;
+        }
+
+        class WaitActorAgentCallResult
+        {
+            public CancellationTokenSource cancellationSrc;
+            public ActorRemoteCallResult result;
+        }
+        static ConcurrentDictionary<string, WaitActorAgentCallResult> actorAgentCallWaitCache = new ConcurrentDictionary<string, WaitActorAgentCallResult>();
+        public async Task<ActorRemoteCallResult> ActorAgentCall(int nodeId, byte[] paras)
+        {
+            var node = ServiceManager.NamingService.Get(nodeId);
+            if (node == null)
+            {
+                return new ActorRemoteCallResult { success = false };
+            }
+            var callId = Guid.NewGuid().ToString();
+            try
+            {
+                var cancellationSrc = new CancellationTokenSource();
+                var waitObj = new WaitActorAgentCallResult { cancellationSrc = cancellationSrc };
+                actorAgentCallWaitCache.TryAdd(callId, waitObj);
+                (node.rpcHub as CenterRpcHub).GetRpcClientAgent().RemoteGameServerCallLocalAgent(callId, paras);
+                await Task.Delay(50000, cancellationSrc.Token);
+                return waitObj.result;
+            }
+            catch (Exception e)
+            {
+            }
+            finally
+            {
+                actorAgentCallWaitCache.TryRemove(callId, out _);
+            }
+            return null;
+        }
+
+        public Task SetActorAgentCallResult(string callId, ActorRemoteCallResult result)
+        {
+            if (actorAgentCallWaitCache.TryGetValue(callId, out var waitObj))
+            {
+                LOGGER.Debug("中心服,设置远程调用结果：。。。。。" + callId);
+                waitObj.result = result;
+                waitObj.cancellationSrc.Cancel();
+            }
             return Task.CompletedTask;
         }
     }

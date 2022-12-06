@@ -1,5 +1,6 @@
 ﻿using Geek.Server.Core.Utils;
 using Newtonsoft.Json;
+using System.Net;
 
 public enum ServerType
 {
@@ -49,7 +50,6 @@ public static class Settings
         get => Ins.AppRunning;
         set => Ins.AppRunning = value;
     }
-
     public static ServerType ServerType => Ins.ServerType;
 
     public static bool IsDebug => Ins.IsDebug;
@@ -89,6 +89,8 @@ public static class Settings
     public static string MonitorKey => Ins.MonitorKey;
 
     public static int RpcPort => Ins.RpcPort;
+
+    public static List<string> ActorTypes => Ins.ActorTypes;
 }
 
 public class BaseSetting
@@ -134,7 +136,11 @@ public class BaseSetting
     public string Language { get; set; }
 
     public string CenterUrl { get; init; }
+
     public float SyncStateToCenterInterval { get; init; }
+
+    public List<string> ActorTypes { get; init; }
+
     public int SDKType { get; set; }
 
     /// <summary> 钉钉监控地址 </summary>

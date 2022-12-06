@@ -26,6 +26,7 @@
         <MudTh>InnerTcpPort</MudTh>
         <MudTh>HttPort</MudTh>
         <MudTh>RpcPort</MudTh>
+        <MudTh>处理Actor类型</MudTh>
         <MudTh>承载上限</MudTh>
         <MudTh>当前承载</MudTh>
     </HeaderContent>
@@ -37,9 +38,10 @@
         <MudTd DataLabel="TcpPort">@context.TcpPort</MudTd>
         <MudTd DataLabel="InnerTcpPort">@context.InnerTcpPort</MudTd>
         <MudTd DataLabel="HttpPort">@context.HttpPort</MudTd>
-        <MudTd DataLabel="HttpPort">@context.RpcPort</MudTd>
-        <MudTd DataLabel="HttpPort">@context.State.MaxLoad</MudTd>
-        <MudTd DataLabel="HttpPort">@context.State.CurrentLoad</MudTd>
+        <MudTd DataLabel="RpcPort">@context.RpcPort</MudTd>
+        <MudTd DataLabel="处理Actor类型">@context.ActorTypesStr</MudTd>
+        <MudTd DataLabel="承载上限">@context.State.MaxLoad</MudTd>
+        <MudTd DataLabel="当前承载">@context.State.CurrentLoad</MudTd>
     </RowTemplate>
     <PagerContent>
         <MudTablePager />

@@ -24,7 +24,18 @@ namespace Geek.Server.Core.Center
         public int InnerTcpPort { get; set; }
         public int HttpPort { get; set; }
         public int RpcPort { get; set; }
+        public List<string> ActorTypes { get; set; }
+        [IgnoreMember]
+        public string ActorTypesStr
+        {
+            get
+            {
+                return ActorTypes == null ? "" : string.Join(",", ActorTypes);
+            }
+        }
         public NetNodeState State { get; set; } = new NetNodeState();
+        [IgnoreMember]
+        public ICenterRpcHub rpcHub;
     }
 
     [MessagePackObject(true)]

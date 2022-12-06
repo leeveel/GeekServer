@@ -1,6 +1,8 @@
 ﻿using Geek.Server.App.Common;
+using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Utils;
 using NLog;
+using NLog.Fluent;
 using System.Diagnostics;
 using System.Text;
 
@@ -18,8 +20,11 @@ namespace Geek.Server.App
         {
             try
             {
+                var configName = args.Length > 0 ? args[0] : "app_config.json";
+                Console.WriteLine("配置名字：" + configName);
+
                 AppExitHandler.Init(HandleExit);
-                GameLoopTask = AppStartUp.Enter();
+                GameLoopTask = AppStartUp.Enter(configName);
                 await GameLoopTask;
                 if (ShutDownTask != null)
                     await ShutDownTask;

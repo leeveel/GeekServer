@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Center;
+﻿using Geek.Server.Core.Actors.Impl;
+using Geek.Server.Core.Center;
 
 namespace Geek.Server.Rebalance.Net.Rpc
 {

@@ -46,6 +46,7 @@ namespace Geek.Server.Core.Actors
             return comp.GetAgent(agentType);
         }
 
+
         public const int TIME_OUT = int.MaxValue;
 
         public Actor(long id, ActorType type)
@@ -111,16 +112,14 @@ namespace Geek.Server.Core.Actors
             return WorkerActor.SendAsync(work, timeout);
         }
 
+        public Task SendAsync(Func<Task> work, int timeout = TIME_OUT, bool checkLock = true)
+        {
+            return WorkerActor.SendAsync(work, timeout);
+        }
         public Task<T> SendAsync<T>(Func<T> work, int timeout = TIME_OUT)
         {
             return WorkerActor.SendAsync(work, timeout);
         }
-
-        public Task SendAsync(Func<Task> work, int timeout = TIME_OUT, bool checkLock = true)
-        {
-            return WorkerActor.SendAsync(work, timeout, checkLock);
-        }
-
         public Task<T> SendAsync<T>(Func<Task<T>> work, int timeout = TIME_OUT)
         {
             return WorkerActor.SendAsync(work, timeout);

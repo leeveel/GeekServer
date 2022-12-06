@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Center;
+﻿using Geek.Server.Core.Actors.Impl;
+using Geek.Server.Core.Center;
 using Geek.Server.Proto;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
@@ -58,6 +59,8 @@ namespace Geek.Server.App.Net
                 tcpClient.TryReConnectImmediately();
             }
         }
+
+        //public static Task<>
 
         public static async Task GetGlobalConfig()
         {

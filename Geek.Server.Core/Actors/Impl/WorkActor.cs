@@ -163,12 +163,12 @@ namespace Geek.Server.Core.Actors.Impl
             }
         }
 
-        public Task SendAsync(Func<Task> work, int timeout = Actor.TIME_OUT, bool checkLock = true)
+        public Task SendAsync(Func<Task> work, int timeout = Actor.TIME_OUT)
         {
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (checkLock && Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
                     return default;
 
                 var wrapper = new ActionAsyncWrapper(work)

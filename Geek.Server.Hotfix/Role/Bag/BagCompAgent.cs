@@ -27,7 +27,7 @@ namespace Geek.Server.Hotfix.Role.Bag
             return res;
         }
 
-        public async Task GetBagInfo(ReqBagInfo reqMsg)
+        public async virtual Task GetBagInfo(ReqBagInfo reqMsg)
         {
             var ret = BuildInfoMsg();
             await this.NotifyClient(ret, reqMsg.UniId);
@@ -37,7 +37,7 @@ namespace Geek.Server.Hotfix.Role.Bag
         /// 宠物合成
         /// </summary>
         /// <returns></returns>
-        public async Task ComposePet(ReqComposePet reqMsg)
+        public async virtual Task ComposePet(ReqComposePet reqMsg)
         {
             //宠物碎片合成相关逻辑
             //.....

@@ -1,9 +1,11 @@
 ﻿{
   "IsDebug": true,
-  "ServerId": 1001, //[1000,9999]
+  "ServerId": 1002, //[1000,9999]
   "ServerName": "geek_server",
   "LocalIp": "127.0.0.1",
-  "TcpPort": 8899,
-  "HttpPort": 20000,
+  "TcpPort": 8900,
+  "RpcPort": 8912,
+  "HttpPort": 20001,
+  "ActorTypes": [ "TestServer" ],
   "CenterUrl": "http://127.0.0.1:8900"
 }

@@ -6,6 +6,5 @@
         {
             return self.GetInterface(target.FullName) != null && !self.IsInterface && !self.IsAbstract;
         }
-
     }
 }

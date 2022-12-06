@@ -1,0 +1,106 @@
+using Geek.Server;
+using Geek.Server.Core.Actors.Impl;
+using Geek.Server.Core.Comps;
+using Geek.Server.Core.Actors;
+{{~ for use in usingspaces ~}}
+using {{use}};
+{{~ end ~}}
+
+namespace {{space}}
+{
+    public class {{name}} : {{super}}
+	{ 
+        static readonly Logger Log = LogManager.GetCurrentClassLogger();
+	    public long _remoteActorId; 
+        public long ActorId
+        {
+            get
+            {
+                return _remoteActorId;
+            }
+            set
+            {
+                _remoteActorId = value;
+            }
+        }
+
+        public BaseComp Owner { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public ActorType OwnerType => throw new NotImplementedException();
+
+        public void Active()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task Deactive()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ICompAgent> GetCompAgent(Type agentType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> GetCompAgent<T>() where T : ICompAgent
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SendAsync(Action work, int timeOut = int.MaxValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> SendAsync<T>(Func<T> work, int timeOut = int.MaxValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SendAsync(Func<Task> work, int timeOut = int.MaxValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> SendAsync<T>(Func<Task<T>> work, int timeOut = int.MaxValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public  void Tell(Action work, int timeOut = int.MaxValue)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Tell(Func<Task> work, int timeOut = int.MaxValue)
+        {
+            throw new NotImplementedException();
+        }
+
+		{{~ for mth in methods ~}} 
+        {{~ if mth.isreturntask ~}}  
+        public override {{mth.declare}}
+		{ 
+            var paramObj = new ActorRemoteCallParams();
+            paramObj.targetActorId = _remoteActorId;
+            paramObj.agentName = "{{fullname}}";
+            paramObj.funcName = "{{mth.name}}";
+            {{~ for para in mth.params ~}}  
+            paramObj.AddParam({{para}});
+            {{~ end ~}} 
+            {{~ if mth.havetaskreturnvalue ~}}  
+			return ActorRemoteCall.Call<{{mth.taskreturnvalue}}>(ActorMgr.GetAgentActorType<{{super}}>(), paramObj); 
+            {{~ else ~}} 
+			return ActorRemoteCall.Call(ActorMgr.GetAgentActorType<{{super}}>(),paramObj); 
+            {{~ end ~}} 
+		} 
+        {{~ else ~}} 
+        public override {{mth.declare}}
+		{  
+            throw new NotImplementedException();
+		} 
+        {{~ end ~}} 
+		{{~ end ~}}
+	}
+}

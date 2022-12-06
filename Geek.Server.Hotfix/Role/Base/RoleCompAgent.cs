@@ -37,7 +37,7 @@ namespace Geek.Server.Hotfix.Role.Base
             }
         }
 
-        public async Task<ResLogin> OnLogin(ReqLogin reqLogin, bool isNewRole)
+        public async virtual Task<ResLogin> OnLogin(ReqLogin reqLogin, bool isNewRole)
         {
             //玩家在线不进行回收
             SetAutoRecycle(false);
@@ -87,7 +87,7 @@ namespace Geek.Server.Hotfix.Role.Base
             return Task.CompletedTask;
         }
 
-        public void NotifyClient(Message msg, int uniId = 0, StateCode code = StateCode.Success)
+        public virtual void NotifyClient(Message msg, int uniId = 0, StateCode code = StateCode.Success)
         {
             var session = SessionManager.Get(ActorId);
             if (session != null)

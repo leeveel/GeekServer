@@ -53,13 +53,13 @@ namespace Geek.Server.Gateway.Common
                             throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(node)}");
 
                         GateNetMgr.StartSyncState(() =>
-                        {
-                            var state = new NetNodeState();
-                            state.MaxLoad = Settings.InsAs<GateSettings>().MaxClientCount;
-                            state.CurrentLoad = GateNetMgr.GetConnectionCount();
-                            state.CanServe = true;
-                            return state;
-                        });
+                    {
+                        var state = new NetNodeState();
+                        state.MaxLoad = Settings.InsAs<GateSettings>().MaxClientCount;
+                        state.CurrentLoad = GateNetMgr.GetConnectionCount();
+                        state.CanServe = true;
+                        return state;
+                    });
                     }
                 });
                 TimeSpan delay = TimeSpan.FromSeconds(1);

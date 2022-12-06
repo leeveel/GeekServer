@@ -1,4 +1,5 @@
 using Geek.Server;
+using Geek.Server.Core.Actors.Impl;
 {{~ for use in usingspaces ~}}
 using {{use}};
 {{~ end ~}}
@@ -32,5 +33,27 @@ namespace {{space}}
 		}
 
 		{{~ end ~}}
+
+		public override async Task<ActorRemoteCallResult> RemoteCall(ActorRemoteCallParams paras)
+		{
+			var result = new ActorRemoteCallResult();
+			switch (paras.funcName)
+			{
+				{{~ for mth in publictaskmethods ~}}
+				case "{{mth.name}}":
+				{{~ if mth.havetaskreturnvalue ~}}   
+				var {{mth.name}}Ret = await {{mth.name}}({{mth.remotecallparamsexpand}});
+				result.resultData = MessagePack.MessagePackSerializer.Serialize({{mth.name}}Ret);
+				{{~ else ~}}  
+				await {{mth.name}}({{mth.remotecallparamsexpand}});
+				{{~ end ~}} 
+				result.success = true;
+				break;
+				{{~ end ~}}
+				default:
+				break;
+			}
+			return result;
+		}
 	}
 }

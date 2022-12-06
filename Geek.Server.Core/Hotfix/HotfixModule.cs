@@ -27,7 +27,10 @@ namespace Geek.Server.Core.Hotfix
 
         readonly Dictionary<Type, Type> compAgentMap = new();
 
+        readonly Dictionary<string, Type> agentNameAgentTypeMap = new();
+
         readonly Dictionary<Type, Type> agentAgentWrapperMap = new();
+        readonly Dictionary<Type, Type> agentRemoteAgentWrapperMap = new();
 
         /// <summary>
         /// cmd -> handler
@@ -218,9 +221,12 @@ namespace Geek.Server.Core.Hotfix
             if (!type.IsImplWithInterface(typeof(ICompAgent)))
                 return false;
 
-            if (type.FullName.StartsWith("Wrapper.Agent.") && type.FullName.EndsWith("Wrapper"))
+            if (type.FullName.StartsWith("Wrapper.Agent."))
             {
-                agentAgentWrapperMap[type.BaseType] = type;
+                if (type.FullName.EndsWith("RemoteWrapper"))
+                    agentRemoteAgentWrapperMap[type.BaseType] = type;
+                else if (type.FullName.EndsWith("Wrapper"))
+                    agentAgentWrapperMap[type.BaseType] = type;
                 return true;
             }
             var compType = type.BaseType.GetGenericArguments()[0];
@@ -231,6 +237,7 @@ namespace Geek.Server.Core.Hotfix
 
             compAgentMap[compType] = type;
             agentCompMap[type] = compType;
+            agentNameAgentTypeMap[type.FullName] = type;
             return true;
         }
 
@@ -262,6 +269,17 @@ namespace Geek.Server.Core.Hotfix
             // throw new HttpHandlerNotFoundException($"未注册的http命令:{cmd}");
         }
 
+        internal ICompAgent GetRemoteAgent(Type agentType)
+        {
+            var agent = (ICompAgent)Activator.CreateInstance(agentRemoteAgentWrapperMap[agentType]);
+            return agent;
+        }
+
+        internal T GetRemoteAgent<T>() where T : ICompAgent
+        {
+            return (T)GetRemoteAgent(typeof(T));
+        }
+
         internal T GetAgent<T>(BaseComp comp) where T : ICompAgent
         {
             var agentType = compAgentMap[comp.GetType()];
@@ -291,6 +309,12 @@ namespace Geek.Server.Core.Hotfix
         internal Type GetAgentType(Type compType)
         {
             compAgentMap.TryGetValue(compType, out var agentType);
+            return agentType;
+        }
+
+        internal Type GetAgentTypeByAgentName(string name)
+        {
+            agentNameAgentTypeMap.TryGetValue(name, out var agentType);
             return agentType;
         }
 

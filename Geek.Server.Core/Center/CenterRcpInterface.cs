@@ -1,4 +1,5 @@
-﻿using MagicOnion;
+﻿using Geek.Server.Core.Actors.Impl;
+using MagicOnion;
 
 namespace Geek.Server.Core.Center
 {
@@ -7,6 +8,7 @@ namespace Geek.Server.Core.Center
         public void ConfigChanged(ConfigInfo data);
         public void NodesChanged(List<NetNode> nodes);
         public void HaveMessage(string eid, byte[] msg);
+        public void RemoteGameServerCallLocalAgent(string callId, byte[] paras);
     }
 
     public interface ICenterRpcHub : IStreamingHub<ICenterRpcHub, ICenterRpcClient>
@@ -18,5 +20,7 @@ namespace Geek.Server.Core.Center
         public Task SyncState(NetNodeState state);
         public Task Subscribe(string eventId);
         public Task Unsubscribe(string eventId);
+        public Task<ActorRemoteCallResult> ActorAgentCall(int nodeId, byte[] paras);
+        public Task SetActorAgentCallResult(string callId, ActorRemoteCallResult result);
     }
 }

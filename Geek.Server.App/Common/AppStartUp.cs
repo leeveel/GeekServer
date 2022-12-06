@@ -11,17 +11,18 @@ using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
+using Geek.Server.Core.Net.Rpc;
 
 namespace Geek.Server.App.Common
 {
-    internal class AppStartUp
+    public class AppStartUp
     {
         static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        public static async Task Enter()
+        public static async Task Enter(string cfgName)
         {
             try
             {
-                var flag = Start();
+                var flag = Start(cfgName);
                 if (!flag) return; //启动服务器失败
 
                 await Task.Run(async () =>
@@ -36,9 +37,11 @@ namespace Geek.Server.App.Common
                             Ip = Settings.LocalIp,
                             TcpPort = Settings.TcpPort,
                             HttpPort = Settings.HttpPort,
-                            Type = NodeType.Game
+                            Type = NodeType.Game,
+                            RpcPort = Settings.RpcPort,
+                            ActorTypes = Settings.ActorTypes
                         };
-                        if (!await AppNetMgr.CenterRpcClient.ServerAgent.Register(node))
+                        if (!await AppNetMgr.CenterRpcClient.Register(node))
                             throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(node)}");
 
                         //到中心服拉取通用配置
@@ -55,6 +58,8 @@ namespace Geek.Server.App.Common
                         _ = AppNetMgr.ConnectGateway();
                     }
                 });
+
+                await RpcServer.Start(Settings.RpcPort);
 
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");
@@ -78,11 +83,11 @@ namespace Geek.Server.App.Common
             Console.WriteLine($"退出服务器成功");
         }
 
-        private static bool Start()
+        public static bool Start(string cfgName)
         {
             try
             {
-                Settings.Load<AppSetting>("Configs/app_config.json", ServerType.Game);
+                Settings.Load<AppSetting>($"Configs/{cfgName}", ServerType.Game);
                 Console.WriteLine("init NLog config...");
                 LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
                 LogManager.Configuration = new XmlLoggingConfiguration("Configs/app_log.config");

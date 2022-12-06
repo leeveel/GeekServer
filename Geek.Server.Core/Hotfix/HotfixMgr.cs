@@ -72,6 +72,12 @@ namespace Geek.Server.Core.Hotfix
             return module.GetAgentType(compType);
         }
 
+        public static Type GetAgentTypeByAgentName(string name)
+        {
+            return module.GetAgentTypeByAgentName(name);
+        }
+
+
         internal static Type GetCompType(Type agentType)
         {
             return module.GetCompType(agentType);
@@ -91,6 +97,17 @@ namespace Geek.Server.Core.Hotfix
                 }
             }
             return module.GetAgent<T>(comp);
+        }
+
+        public static ICompAgent GetRemoteAgent(Type type)
+        {
+            return module.GetRemoteAgent(type);
+        }
+
+        //这里每次都创建了一个新的instance 可优化  
+        public static T GetRemoteAgent<T>() where T : ICompAgent
+        {
+            return (T)GetRemoteAgent(typeof(T));
         }
 
         public static BaseTcpHandler GetTcpHandler(int msgId)

@@ -18,6 +18,8 @@
 
         //固定ID类型Actor
         Server = 129,
+        Login = 130,
+        TestServer = 131,
 
         Max = 999,
     }

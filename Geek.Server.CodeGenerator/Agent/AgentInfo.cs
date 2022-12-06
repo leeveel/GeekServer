@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Geek.Server.CodeGenerator.Utils;
+using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Geek.Server.CodeGenerator.Agent
 {
@@ -27,9 +29,30 @@ namespace Geek.Server.CodeGenerator.Agent
             }
         }
 
+        public bool Havetaskreturnvalue
+        {
+            get
+            {
+                return Returntype.RemoveWhitespace().StartsWith("Task<");
+            }
+        }
 
-        //public bool IsApi { get; set; }
+        public string Taskreturnvalue
+        {
+            get
+            {
+                return Returntype.RemoveWhitespace().Replace("Task<", "").TrimEnd(new char[] { '>' });
+            }
+        }
 
+        //远程调用必须返回task  valuetask都不行
+        public bool Isreturntask
+        {
+            get
+            {
+                return Returntype.StartsWith("Task");
+            }
+        }
         public bool IsApi { get; set; }
 
         public string Modify { get; set; }
@@ -41,6 +64,7 @@ namespace Geek.Server.CodeGenerator.Agent
         public bool IsVirtual { get; set; }
 
         public List<string> Params { get; private set; } = new List<string>();
+        public List<string> ParamTypes { get; private set; } = new List<string>();
 
         public List<string> AttributeList { get; private set; } = new List<string>();
 
@@ -84,14 +108,32 @@ namespace Geek.Server.CodeGenerator.Agent
                 return "";
             }
         }
+        public string Remotecallparamsexpand
+        {
+            get
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < Params.Count; i++)
+                {
+                    sb.Append($"paras.GetParam<{ParamTypes[i]}>({i})");
+                    if (i != Params.Count - 1)
+                        sb.Append(",");
+                }
+                return sb.ToString();
+            }
+        }
     }
+
+
 
     public class AgentInfo
     {
         public string Space { get; set; }
         public string Name { get; set; }
+        public string Fullname { get; set; }
         public string Super { get; set; }
         public List<MthInfo> Methods { get; set; } = new List<MthInfo>();
+        public List<MthInfo> Publictaskmethods { get; set; } = new List<MthInfo>();
         public List<string> Usingspaces { get; set; } = new List<string>();
     }
 }

@@ -26,7 +26,7 @@ namespace Geek.Server.App.Login
     }
 
 
-    [Comp(ActorType.Server)]
+    [Comp(ActorType.Login)]
     public class LoginComp : StateComp<LoginState>
     {
 

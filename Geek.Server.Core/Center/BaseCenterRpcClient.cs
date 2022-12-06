@@ -1,4 +1,6 @@
-﻿using Geek.Server.Core.Net;
+﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Actors.Impl;
+using Geek.Server.Core.Net;
 using Grpc.Net.Client;
 using MagicOnion.Client;
 using System.Threading;
@@ -13,6 +15,8 @@ namespace Geek.Server.Core.Center
         protected ReConnecter reConn;
         protected Func<NetNodeState> getstateFunc;
         CancellationTokenSource cancelStateSyncSrc;
+        NetNode selfNode;
+        List<NetNode> nodes = new List<NetNode>();
 
         public BaseCenterRpcClient(string ip, int port)
         {
@@ -24,6 +28,33 @@ namespace Geek.Server.Core.Center
         {
             connUrl = url;
             reConn = new ReConnecter(ConnectImpl, $"中心服:{connUrl}");
+        }
+
+        public NetNode GetNode(NodeType type, ActorType haveActorType = ActorType.None)
+        {
+            var atStr = haveActorType.ToString();
+            foreach (var n in nodes)
+            {
+                if (n.NodeId == selfNode.NodeId)
+                    continue;
+                if (n.Type != type)
+                    continue;
+                if (haveActorType == ActorType.None)
+                    return n;
+                if (n.ActorTypes.Contains(atStr))
+                {
+                    return n;
+                }
+            }
+            return null;
+        }
+
+        //向中心服注册自己
+        public Task<bool> Register(NetNode node = null)
+        {
+            if (node != null)
+                selfNode = node;
+            return ServerAgent.Register(selfNode);
         }
 
         public void StartSyncState(Func<NetNodeState> getstateFunc)
@@ -122,8 +153,13 @@ namespace Geek.Server.Core.Center
 
         public abstract void ConfigChanged(ConfigInfo data);
 
-        public abstract void NodesChanged(List<NetNode> nodes);
+        public virtual void NodesChanged(List<NetNode> nodes)
+        {
+            this.nodes = nodes;
+        }
 
         public abstract void HaveMessage(string eid, byte[] msg);
+
+        public virtual void RemoteGameServerCallLocalAgent(string callId, byte[] paras) { }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Geek.Server.Core.Actors;
+using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Timer;
 using Geek.Server.Core.Timer.Handler;
@@ -10,7 +11,16 @@ namespace Geek.Server.Core.Hotfix.Agent
         public BaseComp Owner { get; set; }
         public TComp Comp => (TComp)Owner;
         public Actor Actor => Owner.Actor;
-        public long ActorId => Actor.Id;
+        public long ActorId
+        {
+            get
+            {
+                return Actor.Id;
+            }
+            set
+            {
+            }
+        }
         public ActorType OwnerType => Actor.Type;
 
         public HashSet<long> ScheduleIdSet => Actor.ScheduleIdSet;
@@ -150,6 +160,11 @@ namespace Geek.Server.Core.Hotfix.Agent
             long scheduleId = QuartzTimer.WithCronExpression<T>(ActorId, cronExpression, param);
             ScheduleIdSet.Add(scheduleId);
             return scheduleId;
+        }
+
+        public virtual Task<ActorRemoteCallResult> RemoteCall(ActorRemoteCallParams paras)
+        {
+            throw new NotImplementedException();
         }
     }
 }
