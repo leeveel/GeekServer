@@ -1,6 +1,7 @@
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Net.Http;
 using Geek.Server.Hotfix.Server;
+using NLog.Fluent;
 
 namespace Geek.Server.Hotfix.Http
 {
@@ -22,6 +23,7 @@ namespace Geek.Server.Hotfix.Http
     [HttpMsgMapping("test")]
     public class HttpTestHandler : BaseHttpHandler
     {
+        static readonly Logger Log = LogManager.GetCurrentClassLogger();
         /// <summary>
         /// ***正式的HttpHandler请一定设置CheckSign为True***
         /// </summary>
@@ -40,7 +42,9 @@ namespace Geek.Server.Hotfix.Http
             await agent.TestCall("测试参数1", 234567);
             await agent.TestCall2(new App.Login.PlayerInfo { playerId = "playerid111", UserName = "23232323", RoleMap = new Dictionary<int, long> { { 2, 32 } } });
             await agent.TestCall3(new List<int> { 4, 5, 2, 65, 2, 32, 23 });
+            var data = await agent.TestCall4();
 
+            Log.Info($"远程调用actor test call4结果：{MessagePack.MessagePackSerializer.SerializeToJson(data)}");
 
             var res = new HttpTestRes
             {

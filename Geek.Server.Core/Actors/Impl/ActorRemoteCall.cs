@@ -2,6 +2,7 @@
 using Geek.Server.Core.Center;
 using Geek.Server.Core.Serialize.PolymorphicMessagePack;
 using MessagePack;
+using Microsoft.AspNetCore.DataProtection;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -83,7 +84,7 @@ namespace Geek.Server.Core.Actors.Impl
             if (node != null)
             {
                 var ret = await rpcClient.ServerAgent.ActorAgentCall(node.NodeId, MessagePack.MessagePackSerializer.Serialize(param));
-                if (ret.success)
+                if (ret != null && ret.success)
                 {
                     return MessagePack.MessagePackSerializer.Deserialize<TResult>(ret.resultData);
                 }

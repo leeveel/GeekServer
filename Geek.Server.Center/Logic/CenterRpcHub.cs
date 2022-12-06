@@ -144,23 +144,27 @@ namespace Geek.Server.Center.Logic
                 return new ActorRemoteCallResult { success = false };
             }
             var callId = Guid.NewGuid().ToString();
+            var cancellationSrc = new CancellationTokenSource();
+            var waitObj = new WaitActorAgentCallResult { cancellationSrc = cancellationSrc };
+            actorAgentCallWaitCache.TryAdd(callId, waitObj);
             try
             {
-                var cancellationSrc = new CancellationTokenSource();
-                var waitObj = new WaitActorAgentCallResult { cancellationSrc = cancellationSrc };
-                actorAgentCallWaitCache.TryAdd(callId, waitObj);
                 (node.rpcHub as CenterRpcHub).GetRpcClientAgent().RemoteGameServerCallLocalAgent(callId, paras);
                 await Task.Delay(50000, cancellationSrc.Token);
-                return waitObj.result;
+            }
+            catch (TaskCanceledException e)
+            {
+                LOGGER.Debug("ActorAgentCall完成");
             }
             catch (Exception e)
             {
+                LOGGER.Error("ActorAgentCall exception:" + e.Message);
             }
             finally
             {
                 actorAgentCallWaitCache.TryRemove(callId, out _);
             }
-            return null;
+            return waitObj.result;
         }
 
         public Task SetActorAgentCallResult(string callId, ActorRemoteCallResult result)

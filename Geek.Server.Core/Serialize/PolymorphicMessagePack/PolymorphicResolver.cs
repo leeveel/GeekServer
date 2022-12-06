@@ -11,7 +11,7 @@ namespace PolymorphicMessagePack
         static IFormatterResolver InnerResolver;
         static List<IFormatterResolver> innerResolver = new()
         {
-                //MessagePack.Resolvers.BuiltinResolver.Instance,
+               BuiltinResolver.Instance,
                StandardResolver.Instance,
                ContractlessStandardResolver.Instance
         };

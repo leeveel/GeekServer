@@ -80,15 +80,6 @@ namespace Geek.Server.App.Net
                     LOGGER.Error("调用异常:" + ex.Message);
                 }
             });
-
-            //var agentType = Type.GetType(paras.agentName);
-            //if (agentType == null)
-            //{
-            //    return new ActorRemoteCallResult { success = false };
-            //}
-            //var agent = await ActorMgr.GetCompAgent(paras.targetActorId, agentType);
-            //await agent.RemoteCall(paras);
-            //return null;
         }
     }
 }
