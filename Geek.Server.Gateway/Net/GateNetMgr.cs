@@ -22,10 +22,6 @@ namespace Geek.Server.Gateway.Net
             return CenterRpcClient.Connect();
         }
 
-        public static void StartSyncState(Func<NetNodeState> getStateFunc)
-        {
-            CenterRpcClient.StartSyncState(getStateFunc);
-        }
 
         private static TcpServer outerTcpServer;
         private static TcpServer innerTcpServer;

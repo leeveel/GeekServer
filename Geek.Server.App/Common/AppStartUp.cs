@@ -29,17 +29,20 @@ namespace Geek.Server.App.Common
                     //连接中心rpc
                     if (await AppNetMgr.ConnectCenter())
                     {
-                        //上报注册中心
-                        var node = new NetNode
+                        var getNode = () =>
                         {
-                            NodeId = Settings.ServerId,
-                            Ip = Settings.LocalIp,
-                            TcpPort = Settings.TcpPort,
-                            HttpPort = Settings.HttpPort,
-                            Type = NodeType.Game
+                            return new NetNode
+                            {
+                                NodeId = Settings.ServerId,
+                                Ip = Settings.LocalIp,
+                                TcpPort = Settings.TcpPort,
+                                HttpPort = Settings.HttpPort,
+                                Type = NodeType.Game
+                            };
                         };
-                        if (!await AppNetMgr.CenterRpcClient.ServerAgent.Register(node))
-                            throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(node)}");
+
+                        if (!await AppNetMgr.CenterRpcClient.Register(getNode))
+                            throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(getNode())}");
 
                         //到中心服拉取通用配置
                         await AppNetMgr.GetGlobalConfig();

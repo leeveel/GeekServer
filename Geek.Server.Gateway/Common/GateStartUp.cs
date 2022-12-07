@@ -39,7 +39,7 @@ namespace Geek.Server.Gateway.Common
                     //连接中心rpc
                     if (await GateNetMgr.ConnectCenter())
                     {
-                        var node = new NetNode
+                        var nodeGetter = () => new NetNode
                         {
                             NodeId = Settings.ServerId,
                             Ip = Settings.LocalIp,
@@ -48,18 +48,19 @@ namespace Geek.Server.Gateway.Common
                             HttpPort = Settings.HttpPort,
                             Type = NodeType.Gateway,
                         };
-                        //上报注册中心
-                        if (!await GateNetMgr.CenterRpcClient.ServerAgent.Register(node))
-                            throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(node)}");
 
-                        GateNetMgr.StartSyncState(() =>
+                        var stateGetter = () =>
                         {
                             var state = new NetNodeState();
                             state.MaxLoad = Settings.InsAs<GateSettings>().MaxClientCount;
                             state.CurrentLoad = GateNetMgr.GetConnectionCount();
                             state.CanServe = true;
                             return state;
-                        });
+                        };
+
+                        //上报注册中心
+                        if (!await GateNetMgr.CenterRpcClient.Register(nodeGetter, stateGetter))
+                            throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(nodeGetter())}");
                     }
                 });
                 TimeSpan delay = TimeSpan.FromSeconds(1);

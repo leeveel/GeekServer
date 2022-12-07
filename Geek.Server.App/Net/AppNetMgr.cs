@@ -43,9 +43,13 @@ namespace Geek.Server.App.Net
                 if (res)
                 {
                     tcpClientDic[node.NodeId] = tcpClient;
-                    var req = new ReqInnerConnectGate();
-                    req.NodeId = Settings.ServerId;
-                    tcpClient.Write(req);
+
+                    tcpClient.Register(() =>
+                    {
+                        var req = new ReqInnerConnectGate();
+                        req.NodeId = Settings.ServerId;
+                        return req;
+                    });
                 }
                 else
                 {

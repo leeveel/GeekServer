@@ -24,8 +24,7 @@ namespace Geek.Server.App.Net
         public NetChannel Channel { private set; get; }
 
         readonly NetNode netNode;
-
-
+        private Func<Message> regMsgGetter;
         private ReConnecter reConn;
 
         public InnerTcpClient(NetNode node)
@@ -37,6 +36,13 @@ namespace Geek.Server.App.Net
         public Task<bool> Connect()
         {
             return reConn.Connect();
+        }
+
+        public void Register(Func<Message> regMsgGetter)
+        {
+            this.regMsgGetter = regMsgGetter;
+            if (regMsgGetter != null)
+                Write(regMsgGetter());
         }
 
         public void TryReConnectImmediately()
@@ -75,6 +81,10 @@ namespace Geek.Server.App.Net
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
             Channel = new NetChannel(connection, new InnerProtocol());
+            if (regMsgGetter != null)
+            {
+                Write(regMsgGetter());
+            }
         }
 
         protected void OnDisconnection(NetChannel channel)

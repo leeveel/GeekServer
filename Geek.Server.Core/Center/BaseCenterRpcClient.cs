@@ -11,7 +11,8 @@ namespace Geek.Server.Core.Center
         public ICenterRpcHub ServerAgent { private set; get; }
         protected string connUrl;
         protected ReConnecter reConn;
-        protected Func<NetNodeState> getstateFunc;
+        protected Func<NetNodeState> selfNodeStateGetter;
+        protected Func<NetNode> selfNodeGetter;
         CancellationTokenSource cancelStateSyncSrc;
 
         public BaseCenterRpcClient(string ip, int port)
@@ -26,8 +27,19 @@ namespace Geek.Server.Core.Center
             reConn = new ReConnecter(ConnectImpl, $"中心服:{connUrl}");
         }
 
-        public void StartSyncState(Func<NetNodeState> getstateFunc)
+        public async Task<bool> Register(Func<NetNode> selfNodeGetter, Func<NetNodeState> selfNodeStateGetter = null)
         {
+            this.selfNodeGetter = selfNodeGetter;
+            this.selfNodeStateGetter = selfNodeStateGetter;
+            var ret = await ServerAgent.Register(selfNodeGetter());
+            StartSyncState();
+            return ret;
+        }
+
+        void StartSyncState()
+        {
+            if (selfNodeStateGetter == null)
+                return;
             if (Settings.SyncStateToCenterInterval <= 0.0001)
             {
                 LOGGER.Error($"开始向中心服同步状态失败，SyncStateToCenterInterval参数为{Settings.SyncStateToCenterInterval}");
@@ -40,7 +52,6 @@ namespace Geek.Server.Core.Center
                 cancelStateSyncSrc = null;
             }
 
-            this.getstateFunc = getstateFunc;
             cancelStateSyncSrc = new CancellationTokenSource();
             var token = cancelStateSyncSrc.Token;
             Task.Run(async () =>
@@ -50,7 +61,7 @@ namespace Geek.Server.Core.Center
                     try
                     {
                         if (ServerAgent != null)
-                            await ServerAgent.SyncState(getstateFunc());
+                            await ServerAgent.SyncState(selfNodeStateGetter());
                     }
                     catch (Exception ex)
                     {
@@ -83,6 +94,14 @@ namespace Geek.Server.Core.Center
             {
                 var channel = GrpcChannel.ForAddress(connUrl);
                 ServerAgent = await StreamingHubClient.ConnectAsync<ICenterRpcHub, ICenterRpcClient>(channel, this);
+                if (selfNodeGetter != null)
+                {
+                    var ret = await ServerAgent.Register(selfNodeGetter());
+                    if (!ret)
+                    {
+                        LOGGER.Error("连接center服，注册信息失败...");
+                    }
+                }
                 _ = RegisterDisconnectEvent();
                 return true;
             }
