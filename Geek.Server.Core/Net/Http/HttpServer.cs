@@ -9,7 +9,7 @@ namespace Geek.Server.Core.Net.Http
     public static class HttpServer
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
-        public static WebApplication WebApp { get; set; }
+        static WebApplication app { get; set; }
 
         /// <summary>
         /// 启动
@@ -41,7 +41,7 @@ namespace Geek.Server.Core.Net.Http
             })
             .UseNLog();
 
-            var app = builder.Build();
+            app = builder.Build();
             app.MapGet("/game/{text}", (HttpContext context) => HttpHandler.HandleRequest(context));
             app.MapPost("/game/{text}", (HttpContext context) => HttpHandler.HandleRequest(context));
             return app.StartAsync();
@@ -52,11 +52,11 @@ namespace Geek.Server.Core.Net.Http
         /// </summary>
         public static Task Stop()
         {
-            if (WebApp != null)
+            if (app != null)
             {
                 Log.Info("停止http服务...");
-                var task = WebApp.StopAsync();
-                WebApp = null;
+                var task = app.StopAsync();
+                app = null;
                 return task;
             }
             return Task.CompletedTask;
