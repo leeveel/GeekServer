@@ -12,7 +12,7 @@ namespace Geek.Server.Core.Net.Tcp
     public class TcpServer
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
-        public WebApplication WebApp { get; set; }
+        public WebApplication app { get; set; }
 
         public Task Start(int port, Action<ListenOptions> configure)
         {
@@ -27,17 +27,17 @@ namespace Geek.Server.Core.Net.Tcp
             })
             .UseNLog();
 
-            var app = builder.Build();
+            app = builder.Build();
             return app.StartAsync();
         }
 
         public Task Stop()
         {
-            if (WebApp != null)
+            if (app != null)
             {
                 Log.Info("停止Tcp服务...");
-                var task = WebApp.StopAsync();
-                WebApp = null;
+                var task = app.StopAsync();
+                app = null;
                 return task;
             }
             return Task.CompletedTask;
