@@ -38,7 +38,7 @@ namespace Geek.Server.Center.Web
             builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStateProvider>();
             builder.Services.AddMudServices();
 
-            var app = builder.Build();
+            app = builder.Build();
 
             var provider = app.Services;
             //如果没有默认用户,初始化默认用户
