@@ -1,20 +1,11 @@
-﻿using Geek.Server.Core.Net.Http;
-using Geek.Server.Core.Serialize.PolymorphicMessagePack;
+﻿using Geek.Server.Core.Serialize.PolymorphicMessagePack;
 using Geek.Server.Core.Utils;
 using NLog;
-using NLog.Fluent;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PolymorphicMessagePack
 {
-    //TODO? 如果是多态类型的类型，继承自已经注册的类型，那也需要走多态序列化
     public class PolymorphicTypeMapper
     {
         static readonly Logger Log = LogManager.GetCurrentClassLogger();
