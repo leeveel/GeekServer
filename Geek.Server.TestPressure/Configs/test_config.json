@@ -1,5 +1,5 @@
 {
-  "serverId": 1001, //[1000,9999]
-  "gateSelectUrl": "http://127.0.0.1:8902/game/api?command=getidlegate",
+  "serverId": 1001, //serverid ready to connect
+  "gateSelectUrl": "http://127.0.0.1:9201/game/api?command=getidlegate",
   "clientCount": 1000
 }

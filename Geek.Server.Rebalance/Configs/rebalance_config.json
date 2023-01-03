@@ -1,7 +1,7 @@
 {
   "isDebug": true,
   "ServerId": 9201, //[9201,9300]
-  "HttpPort": 8902,
+  "HttpPort": 9201,
   "LocalIp": "127.0.0.1",
-  "CenterUrl": "http://127.0.0.1:8900"
+  "CenterUrl": "http://127.0.0.1:9001"
 }
