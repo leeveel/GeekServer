@@ -66,7 +66,7 @@ namespace Geek.Server.Core.Net.Tcp.Codecs
 
         public void WriteAsync(Message msg)
         {
-            WriteAsync(msg);
+            _ = WriteAsync(new NMessage(msg));
         }
 
     }
