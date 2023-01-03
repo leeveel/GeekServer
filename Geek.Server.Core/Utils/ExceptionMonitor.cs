@@ -55,7 +55,6 @@ namespace Geek.Server.Core.Utils
             TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
             var timestamp = Convert.ToInt64(ts.TotalMilliseconds).ToString();
             Console.WriteLine(timestamp);
-            // var secret = "SECf5e87c31592a77eb40eff223aa20dee54860d966b234d24a80c08a2a4ee379db";
             var stringToSign = timestamp + "\n" + secret;
             var encoding = new System.Text.ASCIIEncoding();
             byte[] keyByte = encoding.GetBytes(secret);
