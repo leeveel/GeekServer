@@ -6,7 +6,7 @@
   //"WebServerUrl": "https://*:5004",
   "WebServerUrl": "https://localhost:5004",
   "LocalDBPrefix": "gamedb_",
-  "LocalDBPath": "../../database/game/",
+  "LocalDBPath": "../database/game/",
   "InitUserName": "admin",
   "InitPassword": "123456"
 }
