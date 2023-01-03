@@ -15,9 +15,6 @@ namespace Geek.Server.App.Login
 
         //这里设定每个账号在1服只有能创建1个角色 
         public Dictionary<int, long> RoleMap = new Dictionary<int, long>();
-
-        [BsonIgnore]
-        public bool IsChanged;
     }
 
     public class LoginState : CacheState
