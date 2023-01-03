@@ -72,6 +72,8 @@ namespace Geek.Server.Core.Net
         {
             try
             {
+                if (!Settings.AppRunning)
+                    return;
                 if (retryTimes < 0 || retryed < retryTimes)
                 {
                     //每失败三次通知一次
