@@ -23,7 +23,6 @@ namespace Geek.Server.Center.Logic
             foreach (var v in dic)
             {
                 v.Value.GetRpcClientAgent().ConfigChanged(msg);
-
             }
         }
 

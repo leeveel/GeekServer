@@ -1,8 +1,4 @@
-
-using Geek.Server;
-using Geek.Server.Center.Common;
 using Geek.Server.Core.Storage.DB;
-using MudBlazor.Extensions;
 
 namespace Geek.Server.Center.Logic
 {
@@ -23,10 +19,12 @@ namespace Geek.Server.Center.Logic
         {
             return db.GetTable<T>().ToArray();
         }
+
         public void UpdateData<T>(string key, T user) where T : class
         {
             db.GetTable<T>().Set(key, user);
         }
+
         public void DeleteData<T>(string key) where T : class
         {
             db.GetTable<T>().Delete(key);
