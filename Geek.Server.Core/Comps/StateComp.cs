@@ -129,8 +129,7 @@ namespace Geek.Server.Core.Comps
 
         public Task WriteStateAsync()
         {
-            RocksDBConnection.Singleton.SaveState(State);
-            return Task.CompletedTask;
+            return GameDB.SaveState(State);
         }
 
 
