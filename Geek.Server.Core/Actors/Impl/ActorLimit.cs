@@ -68,7 +68,7 @@ namespace Geek.Server.Core.Actors.Impl
         public static bool AllowCall(long target)
         {
             if(rule != null)
-                rule.AllowCall(target); 
+                return rule.AllowCall(target); 
             return true;
         }
 
