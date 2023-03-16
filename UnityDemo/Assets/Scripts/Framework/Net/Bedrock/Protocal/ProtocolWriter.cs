@@ -7,17 +7,18 @@ using System.Threading.Tasks;
 
 namespace Bedrock.Framework.Protocols
 {
+
+    public static class ProtocolWriterCreator
+    {
+        public static ProtocolWriter CreateWriter(this ConnectionContext connection)
+            => new ProtocolWriter(connection.Transport.Output);
+    }
+
     public class ProtocolWriter //: IAsyncDisposable
     {
         private readonly PipeWriter _writer;
         private readonly SemaphoreSlim _semaphore;
         private bool _disposed;
-
-        public ProtocolWriter(Stream stream) : 
-            this(PipeWriter.Create(stream))
-        {
-
-        }
 
         public ProtocolWriter(PipeWriter writer)
             : this(writer, new SemaphoreSlim(1))
@@ -30,7 +31,7 @@ namespace Bedrock.Framework.Protocols
             _semaphore = semaphore;
         }
 
-        public async ValueTask WriteAsync<TWriteMessage>(IMessageWriter<TWriteMessage> writer, TWriteMessage protocolMessage, CancellationToken cancellationToken = default)
+        public async ValueTask WriteAsync<TMessage>(IProtocal<TMessage> protocal, TMessage protocolMessage, CancellationToken cancellationToken = default)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
@@ -41,7 +42,7 @@ namespace Bedrock.Framework.Protocols
                     return;
                 }
 
-                writer.WriteMessage(protocolMessage, _writer);
+                protocal.WriteMessage(protocolMessage, _writer);
 
                 var result = await _writer.FlushAsync(cancellationToken).ConfigureAwait(false);
 
@@ -61,39 +62,6 @@ namespace Bedrock.Framework.Protocols
             }
         }
 
-        public async ValueTask WriteManyAsync<TWriteMessage>(IMessageWriter<TWriteMessage> writer, IEnumerable<TWriteMessage> protocolMessages, CancellationToken cancellationToken = default)
-        {
-            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-
-            try
-            {
-                if (_disposed)
-                {
-                    return;
-                }
-
-                foreach(var protocolMessage in protocolMessages)
-                {
-                    writer.WriteMessage(protocolMessage, _writer);
-                }
-
-                var result = await _writer.FlushAsync(cancellationToken).ConfigureAwait(false);
-
-                if (result.IsCanceled)
-                {
-                    throw new OperationCanceledException();
-                }
-
-                if (result.IsCompleted)
-                {
-                    _disposed = true;
-                }
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
-        }
 
         public async ValueTask DisposeAsync()
         {

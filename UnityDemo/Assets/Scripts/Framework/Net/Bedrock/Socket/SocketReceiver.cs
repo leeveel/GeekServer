@@ -25,10 +25,11 @@ namespace Bedrock.Framework
 #if NETCOREAPP
             _eventArgs.SetBuffer(buffer);
 #else
-            var segment = buffer.GetArray();
+            var segment = ((ReadOnlyMemory<byte>)buffer).GetArray();
 
             _eventArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
-#endif
+#endif 
+
             if (!_socket.ReceiveAsync(_eventArgs))
             {
                 _awaitable.Complete(_eventArgs.BytesTransferred, _eventArgs.SocketError);

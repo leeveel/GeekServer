@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace Bedrock.Framework
 {
@@ -26,9 +27,9 @@ namespace Bedrock.Framework
 
         public SocketAwaitable SendAsync(in ReadOnlySequence<byte> buffers)
         {
-            if (buffers.IsSingleSegment)
             {
-                return SendAsync(buffers.First);
+                if (buffers.IsSingleSegment)
+                    return SendAsync(buffers.First);
             }
 
 #if NETCOREAPP
@@ -90,7 +91,11 @@ namespace Bedrock.Framework
 
             foreach (var b in buffer)
             {
-                _bufferList.Add(b.GetArray());
+                if (!MemoryMarshal.TryGetArray(b, out var result))
+                {
+                    throw new InvalidOperationException("Buffer backed by array was expected");
+                }
+                _bufferList.Add(result);
             }
 
             return _bufferList;

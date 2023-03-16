@@ -1,6 +1,8 @@
-﻿using Geek.Client;
+﻿using Base.Net;
+using Geek.Client;
 using Geek.Server;
 using Geek.Server.Proto;
+using Protocol;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -48,30 +50,16 @@ namespace Logic
             return MsgWaiter.StartWait(msg.UniId);
         }
 
-        protected T GetCurMsg<T>(int msgId) where T : Message, new()
+        protected T GetCurMsg<T>(object msg) where T : Message, new()
         {
-            var rMsg = GameClient.Singleton.GetCurMsg();
-            if (rMsg == null)
-                return null;
-            if (rMsg.MsgId != msgId)
-            {
-                UnityEngine.Debug.LogErrorFormat("获取网络消息失败, mine:{0}   cur:{1}", msgId, rMsg.MsgId);
-                return null;
-            }
-
-#if UNITY_EDITOR
-            UnityEngine.Debug.Log("deal msg:" + msgId + ">" + typeof(T));
-#endif
-
-            //已经提前解析好了
-            return rMsg as T;
+            return msg as T;
         }
 
         public void RegisterEventListener()
         {
             AddListener(GameClient.ConnectEvt, OnConnectServer);
             AddListener(GameClient.DisconnectEvt, OnDisconnectServer);
-            AddListener(ResLogin.MsgID, OnResLogin); 
+            AddListener(ResLogin.MsgID, OnResLogin);
             AddListener(ResBagInfo.MsgID, OnResBagInfo);
             AddListener(ResComposePet.MsgID, OnResComposePet);
             AddListener(ResErrorCode.MsgID, OnResErrorCode);
@@ -79,7 +67,7 @@ namespace Logic
 
         private void OnResErrorCode(Event e)
         {
-            ResErrorCode res = GetCurMsg<ResErrorCode>(e.EventId);
+            ResErrorCode res = GetCurMsg<ResErrorCode>(e.Data);
             switch (res.ErrCode)
             {
                 case (int)ErrCode.Success:
@@ -100,9 +88,8 @@ namespace Logic
 
         private void OnConnectServer(Event e)
         {
-            UnityEngine.Debug.Log("-------OnConnectServer-->>>" + (NetCode)e.Data);
-            int code = (int)e.Data;
-            if ((NetCode)code == NetCode.Success)
+            var code = (NetCode)e.Data;
+            if (code == NetCode.Success)
             {
                 UnityEngine.Debug.Log("连接服务器成功!");
                 MsgWaiter.EndWait(GameClient.ConnectEvt);
@@ -121,14 +108,14 @@ namespace Logic
 
         private void OnResLogin(Event e)
         {
-            var res = GetCurMsg<ResLogin>(e.EventId);
+            var res = GetCurMsg<ResLogin>(e.Data);
             UnityEngine.Debug.Log($"{res.UserInfo.RoleName}:登录成功!");
             GameMain.Singleton.AppendLog($"{res.UserInfo.RoleName}:登录成功!");
         }
 
         private void OnResBagInfo(Event e)
         {
-            var msg = GetCurMsg<ResBagInfo>(e.EventId);
+            var msg = GetCurMsg<ResBagInfo>(e.Data);
             var data = msg.ItemDic;
             StringBuilder str = new StringBuilder();
             str.Append("收到背包数据:");
@@ -142,7 +129,7 @@ namespace Logic
 
         private void OnResComposePet(Event e)
         {
-            var msg = GetCurMsg<ResComposePet>(e.EventId);
+            var msg = GetCurMsg<ResComposePet>(e.Data);
             var str = $"合成宠物成功{msg.PetId}";
             UnityEngine.Debug.Log(str);
             GameMain.Singleton.AppendLog(str);

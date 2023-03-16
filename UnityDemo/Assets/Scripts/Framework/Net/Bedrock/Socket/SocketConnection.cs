@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipelines;
@@ -13,17 +14,25 @@ namespace Bedrock.Framework
     {
         private readonly Socket _socket;
         private volatile bool _aborted;
-        private readonly EndPoint _endPoint;
+        private AddressFamily _addressFamily;
+        private string _host;
+        private int _port;
         private IDuplexPipe _application;
         private readonly SocketSender _sender;
         private readonly SocketReceiver _receiver;
         private readonly CancellationTokenSource _connectionClosedTokenSource = new CancellationTokenSource();
         private readonly TaskCompletionSource<bool> _waitForConnectionClosedTcs = new TaskCompletionSource<bool>();
 
-        public SocketConnection(EndPoint endPoint)
+        public override string ConnectionId { get; set; } = Guid.NewGuid().ToString();
+        public override IDictionary<object, object> Items { get; set; } = new ConcurrentDictionary<object, object>();
+
+        public SocketConnection(AddressFamily family, string host, int port)
         {
-            _socket = new Socket(endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            _endPoint = endPoint;
+            this._addressFamily = family;
+            this._host = host;
+            this._port = port;
+
+            _socket = new Socket(family, SocketType.Stream, ProtocolType.Tcp);
 
             _sender = new SocketSender(_socket, PipeScheduler.ThreadPool);
             _receiver = new SocketReceiver(_socket, PipeScheduler.ThreadPool);
@@ -32,8 +41,6 @@ namespace Bedrock.Framework
         }
 
         public override IDuplexPipe Transport { get; set; }
-        public override string ConnectionId { get; set; } = Guid.NewGuid().ToString();
-        public override IDictionary<object, object> Items { get; set; } = new ConnectionItems();
         public override async ValueTask DisposeAsync()
         {
             if (Transport != null)
@@ -45,9 +52,29 @@ namespace Bedrock.Framework
             // Completing these loops will cause ExecuteAsync to Dispose the socket.
         }
 
-        public async ValueTask<ConnectionContext> StartAsync()
+        public async ValueTask<ConnectionContext> StartAsync(int timeOut = 5000)
         {
-            await _socket.ConnectAsync(_endPoint).ConfigureAwait(false);
+            var task = _socket.ConnectAsync(_host, _port);
+            var tokenSource = new CancellationTokenSource();
+            var completeTask = await Task.WhenAny(task, Task.Delay(timeOut, tokenSource.Token));
+            if (completeTask != task)
+            {
+                try
+                {
+                    _socket.Close();
+                    _socket.Dispose();
+                }
+                catch (Exception)
+                {
+
+                }
+                return null;
+            }
+            else
+            {
+                tokenSource.Cancel();
+                await task;
+            }
 
             var pair = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);
 
@@ -141,8 +168,8 @@ namespace Bedrock.Framework
                 if (_aborted)
                 {
                     //error ??= new ConnectionAbortedException();
-                    if(error == null)
-                       error = new ConnectionAbortedException();
+                    if (error == null)
+                        error = new ConnectionAbortedException();
                 }
 
                 await _application.Output.CompleteAsync(error).ConfigureAwait(false);

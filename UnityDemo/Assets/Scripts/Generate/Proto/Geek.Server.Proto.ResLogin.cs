@@ -1,11 +1,12 @@
 //auto generated, do not modify it
 
+using Protocol;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ResLogin : Geek.Server.Message
+	public class ResLogin : Message
 	{
 		[IgnoreMember]
 		public const int Sid = 785960738;

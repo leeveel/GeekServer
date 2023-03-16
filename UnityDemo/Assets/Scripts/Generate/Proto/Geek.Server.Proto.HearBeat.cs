@@ -1,11 +1,12 @@
 //auto generated, do not modify it
 
+using Protocol;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class HearBeat : Geek.Server.Message
+	public class HearBeat : Message
 	{
 		[IgnoreMember]
 		public const int Sid = 1575482382;

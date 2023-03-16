@@ -1,7 +1,9 @@
-﻿using Geek.Client;
+﻿using Base.Net;
+using Geek.Client;
 using Geek.Client.Config;
 using Geek.Server;
 using Geek.Server.Proto;
+using Protocol;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,8 +28,8 @@ namespace Logic
         async void Start()
         {
             Txt = GameObject.Find("Text").GetComponent<Text>();
-            GameDataManager.ReloadAll();
-            GameClient.Singleton.Init();
+            //GameDataManager.ReloadAll();
+            GameClient.Singleton.Init(MsgFactory.GetType);
             DemoService.Singleton.RegisterEventListener();
             await ConnectServer();
             await Login();
@@ -37,7 +39,7 @@ namespace Logic
 
         private async Task ConnectServer()
         {
-            _ = GameClient.Singleton.Connect(serverIp, serverPort);
+            GameClient.Singleton.Connect(serverIp, serverPort);
             await MsgWaiter.StartWait(GameClient.ConnectEvt);
         }
 
@@ -75,7 +77,7 @@ namespace Logic
         private void OnApplicationQuit()
         {
             Debug.Log("OnApplicationQuit");
-            GameClient.Singleton.Close();
+            GameClient.Singleton.Close(false);
             MsgWaiter.DisposeAll();
         }
 
@@ -88,6 +90,11 @@ namespace Logic
                 temp += str;
                 Txt.text = temp;
             }
+        }
+
+        void Update()
+        {
+            GameClient.Singleton.Update(GED.NED);
         }
 
     }
