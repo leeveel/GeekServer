@@ -73,41 +73,50 @@
 
         public async Task<bool> StartWait(int uniId)
         {
-            if (!waitDic.ContainsKey(uniId))
+            Task<bool> task = null;
+            lock (waitDic)
             {
-                var waiter = new innerWaiter();
-                waitDic.Add(uniId, waiter);
-                waiter.Start();
-                return await waiter.Tcs.Task;
+                if (!waitDic.ContainsKey(uniId))
+                {
+                    var waiter = new innerWaiter();
+                    waitDic.Add(uniId, waiter);
+                    waiter.Start();
+                    task = waiter.Tcs.Task;
+                }
+                else
+                {
+                    Log.Error("发现重复消息id：" + uniId);
+                }
             }
-            else
-            {
-                Log.Error("发现重复消息id：" + uniId);
-            }
+            if (task != null)
+                await task;
             return true;
         }
 
         public void EndWait(int uniId, bool result = true)
         {
             if (!result) Log.Error("await失败：" + uniId);
-            if (waitDic.ContainsKey(uniId))
+            lock (waitDic)
             {
-                var waiter = waitDic[uniId];
-                waiter.End(result);
-                waitDic.Remove(uniId);
-                if (waitDic.Count <= 0)
+                if (waitDic.ContainsKey(uniId))
                 {
-                    if (allTcs != null)
+                    var waiter = waitDic[uniId];
+                    waiter.End(result);
+                    waitDic.Remove(uniId);
+                    if (waitDic.Count <= 0)
                     {
-                        allTcs.TrySetResult(true);
-                        allTcs = null;
+                        if (allTcs != null)
+                        {
+                            allTcs.TrySetResult(true);
+                            allTcs = null;
+                        }
                     }
                 }
-            }
-            else
-            {
-                if (uniId > 0)
-                    Log.Error("找不到EndWait：" + uniId + ">size：" + waitDic.Count);
+                else
+                {
+                    if (uniId > 0)
+                        Log.Error("找不到EndWait：" + uniId + ">size：" + waitDic.Count);
+                }
             }
         }
     }

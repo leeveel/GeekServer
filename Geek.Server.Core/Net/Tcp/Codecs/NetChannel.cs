@@ -39,7 +39,8 @@ namespace Geek.Server.Core.Net.Tcp.Codecs
 
                         var message = result.Message;
 
-                        onMessageAct?.Invoke(message);
+                        if (message != null)
+                            onMessageAct?.Invoke(message);
 
                         if (result.IsCompleted)
                             break;
