@@ -43,7 +43,10 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 
 # 文档&例子&Demo
 [十分钟上手教程](https://github.com/leeveel/GeekServer/blob/main/Docs/%E5%8D%81%E5%88%86%E9%92%9F.md)  
-[了解更多](https://github.com/leeveel/GeekServer/tree/master/Docs) 
+[了解更多](https://github.com/leeveel/GeekServer/tree/master/Docs)  
+
+群友分享：  
+[快速了解GeekServer(Space_Dark写)](https://blog.csdn.net/weixin_45394846/article/details/129265794?csdn_share_tail=%7B%22type%22%3A%22blog%22%2C%22rType%22%3A%22article%22%2C%22rId%22%3A%22129265794%22%2C%22source%22%3A%22weixin_45394846%22%7D) 
 
 # 代码片段
 ```c#
