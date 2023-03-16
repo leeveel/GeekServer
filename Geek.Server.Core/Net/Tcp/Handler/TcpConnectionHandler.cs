@@ -13,46 +13,9 @@ namespace Geek.Server.Core.Net.Tcp.Handler
         public override async Task OnConnectedAsync(ConnectionContext connection)
         {
             OnConnection(connection);
-            var channel = new NetChannel(connection, new LengthPrefixedProtocol());
-            var remoteInfo = channel.Context.RemoteEndPoint;
-            while (!channel.IsClose())
-            {
-                try
-                {
-                    var result = await channel.Reader.ReadAsync(channel.Protocol);
-                    var message = result.Message;
-
-                    if (result.IsCompleted)
-                        break;
-
-                    _ = Dispatcher(channel, MsgDecoder.Decode(connection, message));
-                }
-                catch (ConnectionResetException)
-                {
-                    LOGGER.Info($"{remoteInfo} ConnectionReset...");
-                    break;
-                }
-                catch (ConnectionAbortedException)
-                {
-                    LOGGER.Info($"{remoteInfo} ConnectionAborted...");
-                    break;
-                }
-                catch (Exception e)
-                {
-                    LOGGER.Error($"{remoteInfo} Exception:{e.Message}");
-                }
-
-                try
-                {
-                    channel.Reader.Advance();
-                }
-                catch (Exception e)
-                {
-                    LOGGER.Error($"{remoteInfo} channel.Reader.Advance Exception:{e.Message}");
-                    break;
-                }
-            }
-            OnDisconnection(channel);
+            NetChannel channel = null;
+            channel = new NetChannel(connection, new LengthPrefixedProtocol(), (msg) => _ = Dispatcher(channel, msg), () => OnDisconnection(channel));
+            await channel.StartReadMsgAsync();
         }
 
         protected virtual void OnConnection(ConnectionContext connection)

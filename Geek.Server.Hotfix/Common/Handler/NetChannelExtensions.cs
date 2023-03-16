@@ -11,7 +11,7 @@ public static class NetChannelExtensions
         if (msg != null)
         {
             msg.UniId = uniId;
-            channel.WriteAsync(new NMessage(msg));
+            channel.Write(msg);
         }
         if (uniId > 0)
         {
@@ -21,7 +21,7 @@ public static class NetChannelExtensions
                 ErrCode = (int)code,
                 Desc = desc
             };
-            channel.WriteAsync(new NMessage(res));
+            channel.Write(res);
         }
     }
 }

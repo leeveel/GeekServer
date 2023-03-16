@@ -1,10 +1,12 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Pipelines;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
-namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
+namespace Bedrock.Framework
 {
     internal class SocketSender
     {
@@ -25,9 +27,9 @@ namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
 
         public SocketAwaitable SendAsync(in ReadOnlySequence<byte> buffers)
         {
-            if (buffers.IsSingleSegment)
             {
-                return SendAsync(buffers.First);
+                if (buffers.IsSingleSegment)
+                    return SendAsync(buffers.First);
             }
 
 #if NETCOREAPP
@@ -89,7 +91,11 @@ namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
 
             foreach (var b in buffer)
             {
-                _bufferList.Add(b.GetArray());
+                if (!MemoryMarshal.TryGetArray(b, out var result))
+                {
+                    throw new InvalidOperationException("Buffer backed by array was expected");
+                }
+                _bufferList.Add(result);
             }
 
             return _bufferList;

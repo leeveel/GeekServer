@@ -1,7 +1,10 @@
-﻿using System.IO.Pipelines;
+﻿using System;
+using System.Collections.Generic;
+using System.IO.Pipelines;
 using System.Net.Sockets;
+using System.Text;
 
-namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
+namespace Bedrock.Framework
 {
     internal class SocketReceiver
     {
@@ -22,10 +25,11 @@ namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
 #if NETCOREAPP
             _eventArgs.SetBuffer(buffer);
 #else
-            var segment = buffer.GetArray();
+            var segment = ((ReadOnlyMemory<byte>)buffer).GetArray();
 
             _eventArgs.SetBuffer(segment.Array, segment.Offset, segment.Count);
-#endif
+#endif 
+
             if (!_socket.ReceiveAsync(_eventArgs))
             {
                 _awaitable.Complete(_eventArgs.BytesTransferred, _eventArgs.SocketError);

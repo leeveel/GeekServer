@@ -27,7 +27,7 @@ namespace Geek.Server.App.Common.Session
 
         public void WriteAsync(Message msg)
         {
-            Channel?.WriteAsync(msg);
+            Channel?.Write(msg);
         }
     }
 }

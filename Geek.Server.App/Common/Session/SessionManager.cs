@@ -61,7 +61,7 @@ namespace Geek.Server.App.Common.Session
                 }
                 // 新连接 or 顶号
                 oldSession.Channel.RemoveSessionId();
-                oldSession.Channel.Abort();
+                oldSession.Channel.Abort(false);
             }
             session.Channel.SetSessionId(session.Id);
             sessionMap[session.Id] = session;

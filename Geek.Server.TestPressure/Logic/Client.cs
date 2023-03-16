@@ -1,4 +1,9 @@
+using Bedrock.Framework.Protocols;
+using Bedrock.Framework;
+using Geek.Server.Core.Net.Tcp.Codecs;
+using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using System.Net.Sockets;
 
 namespace Geek.Server.TestPressure.Logic
 {
@@ -18,7 +23,7 @@ namespace Geek.Server.TestPressure.Logic
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         long id;
-        ClientNetChannel netChannel;
+        NetChannel netChannel;
         MsgWaiter msgWaiter = new();
         int msgUniId = 200;
 
@@ -29,17 +34,22 @@ namespace Geek.Server.TestPressure.Logic
 
         public async void Start()
         {
-            netChannel = new ClientNetChannel(this);
-            var connCode = await netChannel.Connect(TestSettings.Ins.serverIp, TestSettings.Ins.serverPort);
-            Log.Info($"客户端[{id}]链接:{connCode}");
-            if (connCode == NetCode.Success)
+            var context = await new SocketConnection(AddressFamily.InterNetwork, TestSettings.Ins.serverIp, TestSettings.Ins.serverPort).StartAsync(5000);
+
+            if (context != null)
             {
-                await ReqLogin();
+                Log.Info($"Connected to {context.LocalEndPoint}");
+                netChannel = new NetChannel(context, new ClientLengthPrefixedProtocol(), OnRevice, OnDisConnected);
+                _ = netChannel.StartReadMsgAsync();
             }
             else
             {
+                Log.Error($"连接服务器失败...");
                 return;
             }
+
+            await ReqLogin();
+
             for (int i = 0; i < 1; i++)
             {
                 await ReqBagInfo();
@@ -67,14 +77,14 @@ namespace Geek.Server.TestPressure.Logic
 
         private Task ReqComposePet()
         {
-            return SendMsgAndWaitBack(new ReqComposePet() { FragmentId=1000 });
+            return SendMsgAndWaitBack(new ReqComposePet() { FragmentId = 1000 });
         }
 
         void SendMsg(Message msg)
         {
             msg.UniId = msgUniId++;
             Log.Info($"{id} 发送消息:{JsonConvert.SerializeObject(msg)}");
-            netChannel.Write(new NMessage(msg));
+            netChannel.Write(msg);
         }
 
         Task<bool> SendMsgAndWaitBack(Message msg)
@@ -88,10 +98,6 @@ namespace Geek.Server.TestPressure.Logic
 
         }
 
-        public void OnConnected(NetCode code)
-        {
-            Log.Info($"客户端[{id}]链接:{code}");
-        }
 
         public void OnRevice(Message msg)
         {

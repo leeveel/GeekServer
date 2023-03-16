@@ -1,50 +1,45 @@
+using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Http.Features;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
 using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
-using Geek.Server.Core.Net.Bedrock.Infrastructure;
-using Microsoft.AspNetCore.Connections;
-using Microsoft.AspNetCore.Connections.Features;
-using Microsoft.AspNetCore.Http.Features;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
+namespace Bedrock.Framework
 {
-    internal class SocketConnection : ConnectionContext, IConnectionInherentKeepAliveFeature
+    public class SocketConnection : ConnectionContext
     {
         private readonly Socket _socket;
         private volatile bool _aborted;
-        private readonly EndPoint _endPoint;
+        private AddressFamily _addressFamily;
+        private string _host;
+        private int _port;
         private IDuplexPipe _application;
         private readonly SocketSender _sender;
         private readonly SocketReceiver _receiver;
         private readonly CancellationTokenSource _connectionClosedTokenSource = new CancellationTokenSource();
-        private readonly TaskCompletionSource _waitForConnectionClosedTcs = new TaskCompletionSource();
-        private readonly CancellationToken _connectTimeoutToken;
+        private readonly TaskCompletionSource<bool> _waitForConnectionClosedTcs = new TaskCompletionSource<bool>();
 
-        public SocketConnection(EndPoint endPoint, CancellationToken cancellationToken = default)
+        public SocketConnection(AddressFamily family, string host, int port)
         {
-            _socket = new Socket(endPoint.AddressFamily, SocketType.Stream, DetermineProtocolType(endPoint));
-            _connectTimeoutToken = cancellationToken;
-            _endPoint = endPoint;
+            this._addressFamily = family;
+            this._host = host;
+            this._port = port;
+
+            _socket = new Socket(family, SocketType.Stream, ProtocolType.Tcp);
 
             _sender = new SocketSender(_socket, PipeScheduler.ThreadPool);
             _receiver = new SocketReceiver(_socket, PipeScheduler.ThreadPool);
-
-            // Add IConnectionInherentKeepAliveFeature to the tcp connection impl since Kestrel doesn't implement
-            // the IConnectionHeartbeatFeature
-            Features.Set<IConnectionInherentKeepAliveFeature>(this);
 
             ConnectionClosed = _connectionClosedTokenSource.Token;
         }
 
         public override IDuplexPipe Transport { get; set; }
-
-        public override IFeatureCollection Features { get; } = new FeatureCollection();
-        public override string ConnectionId { get; set; } = Guid.NewGuid().ToString();
-        public override IDictionary<object, object> Items { get; set; } = new ConnectionItems();
-
-        // We claim to have inherent keep-alive so the client doesn't kill the connection when it hasn't seen ping frames.
-        public bool HasInherentKeepAlive { get; } = true;
-
         public override async ValueTask DisposeAsync()
         {
             if (Transport != null)
@@ -56,12 +51,29 @@ namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
             // Completing these loops will cause ExecuteAsync to Dispose the socket.
         }
 
-        public async ValueTask<ConnectionContext> StartAsync()
+        public async ValueTask<ConnectionContext> StartAsync(int timeOut = 5000)
         {
-            if (_connectTimeoutToken != default)
-                await _socket.ConnectAsync(_endPoint, _connectTimeoutToken).ConfigureAwait(false);
+            var task = _socket.ConnectAsync(_host, _port);
+            var tokenSource = new CancellationTokenSource();
+            var completeTask = await Task.WhenAny(task, Task.Delay(timeOut, tokenSource.Token));
+            if (completeTask != task)
+            {
+                try
+                {
+                    _socket.Close();
+                    _socket.Dispose();
+                }
+                catch (Exception)
+                {
+
+                }
+                return null;
+            }
             else
-                await _socket.ConnectAsync(_endPoint).ConfigureAwait(false);
+            {
+                tokenSource.Cancel();
+                await task;
+            }
 
             var pair = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);
 
@@ -154,7 +166,9 @@ namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
             {
                 if (_aborted)
                 {
-                    error ??= new ConnectionAbortedException();
+                    //error ??= new ConnectionAbortedException();
+                    if (error == null)
+                        error = new ConnectionAbortedException();
                 }
 
                 await _application.Output.CompleteAsync(error).ConfigureAwait(false);
@@ -172,18 +186,23 @@ namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
             {
                 return;
             }
-
             _connectionClosed = true;
-            ThreadPool.UnsafeQueueUserWorkItem(state =>
+            ThreadPool.UnsafeQueueUserWorkItem(OnConnectionClosed, this);
+        }
+
+        private void OnConnectionClosed(object state)
+        {
+            if (state is SocketConnection sc)
             {
-                state.CancelConnectionClosedToken();
-                state._waitForConnectionClosedTcs.TrySetResult();
-            },
-            this,
-            preferLocal: false);
+                sc.CancelConnectionClosedToken();
+                sc._waitForConnectionClosedTcs.TrySetResult(true);
+            }
         }
 
         public override CancellationToken ConnectionClosed { get; set; }
+        public override IFeatureCollection Features => throw new NotImplementedException();
+        public override string ConnectionId { get; set; } = Guid.NewGuid().ToString();
+        public override IDictionary<object, object> Items { get; set; } = new ConcurrentDictionary<object, object>();
 
         private void CancelConnectionClosedToken()
         {
@@ -292,15 +311,5 @@ namespace Geek.Server.Core.Net.Bedrock.Transports.Sockets
             }
         }
 
-        private static ProtocolType DetermineProtocolType(EndPoint endPoint)
-        {
-            switch (endPoint)
-            {
-                case UnixDomainSocketEndPoint _:
-                    return ProtocolType.Unspecified;
-                default:
-                    return ProtocolType.Tcp;
-            }
-        }
     }
 }
