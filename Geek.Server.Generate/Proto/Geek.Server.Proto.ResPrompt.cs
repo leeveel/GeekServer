@@ -1,11 +1,12 @@
 //auto generated, do not modify it
 
+using Protocol;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ResPrompt : Geek.Server.Message
+	public class ResPrompt : Message
 	{
 		[IgnoreMember]
 		public const int Sid = 537499886;

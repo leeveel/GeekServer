@@ -8,6 +8,7 @@ using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
 using PolymorphicMessagePack;
+using Protocol;
 
 namespace Geek.Server.App.Common
 {

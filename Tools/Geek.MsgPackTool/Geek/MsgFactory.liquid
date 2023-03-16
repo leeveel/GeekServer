@@ -1,7 +1,7 @@
 //auto generated, do not modify it
 
 using System;
-namespace Geek.Server.Proto
+namespace Protocol
 {
 	public class MsgFactory
 	{

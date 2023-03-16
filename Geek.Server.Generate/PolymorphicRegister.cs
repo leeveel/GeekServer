@@ -1,4 +1,4 @@
-﻿namespace Geek.Server.Proto
+﻿namespace Protocol
 {
     public partial class PolymorphicRegister
     {

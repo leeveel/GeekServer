@@ -2,6 +2,7 @@
 using Geek.Server.Core.Actors;
 using Geek.Server.TestPressure.Logic;
 using PolymorphicMessagePack;
+using Protocol;
 
 namespace Geek.Server.TestPressure
 {

@@ -10,6 +10,7 @@ using Geek.Server.Core.Timer;
 using Geek.Server.Core.Utils;
 using Microsoft.AspNetCore.Connections;
 using PolymorphicMessagePack;
+using Protocol;
 
 namespace Server.Logic.Common
 {

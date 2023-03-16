@@ -1,6 +1,7 @@
 ﻿using Bedrock.Framework;
 using Bedrock.Framework.Protocols;
 using MessagePack;
+using Protocol;
 using System.Buffers;
 using System.Diagnostics;
 
