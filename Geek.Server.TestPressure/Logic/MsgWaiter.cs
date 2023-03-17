@@ -1,116 +1,91 @@
-﻿namespace Geek.Server.TestPressure.Logic
+﻿using Quartz;
+using SharpCompress.Writers;
+using System.Runtime.CompilerServices;
+
+namespace Geek.Server.TestPressure.Logic
 {
     public class MsgWaiter
     {
-        class innerWaiter
+        public class Awaiter : INotifyCompletion
         {
-            public TaskCompletionSource<bool> Tcs { private set; get; }
+            private static readonly Action _callbackCompleted = () => { };
+            private Action _callback;
+            private bool result = false;
+            private Timer timer;
+            public bool IsCompleted => ReferenceEquals(_callback, _callbackCompleted);
+            public bool GetResult() => result;
+            public Awaiter GetAwaiter() => this;
 
-            public Timer Timer { private set; get; }
-            public void Start()
+            public Awaiter()
             {
-                Tcs = new TaskCompletionSource<bool>();
-                Timer = new Timer(TimeOut, null, 10000, -1);
+                timer = new Timer(TimeOut, null, 10000, -1);
             }
 
-            public void End(bool result)
+            public void OnCompleted(Action continuation)
             {
-                Timer.Dispose();
-                if (Tcs != null)
-                    Tcs.TrySetResult(result);
-                Tcs = null;
+                if (ReferenceEquals(_callback, _callbackCompleted) || ReferenceEquals(Interlocked.CompareExchange(ref _callback, continuation, null), _callbackCompleted))
+                {
+                    continuation();
+                }
             }
 
-            public void TimeOut(object state)
+            public void Complete(bool result)
             {
-                End(false);
+                this.result = result;
+                var continuation = Interlocked.Exchange(ref _callback, _callbackCompleted);
+
+                if (continuation != null)
+                {
+                    continuation();
+                    timer.Dispose();
+                }
+            }
+
+            void TimeOut(object state)
+            {
+                Complete(false);
                 Log.Error("等待消息超时");
             }
         }
+
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        private readonly Dictionary<int, innerWaiter> waitDic = new();
+        private readonly Dictionary<int, Awaiter> waitDic = new();
 
         public void Clear()
         {
             foreach (var kv in waitDic)
-                kv.Value.End(false);
+                kv.Value.Complete(false);
             waitDic.Clear();
         }
 
-        /// <summary>
-        /// 是否所有消息都回来了
-        /// </summary>
-        /// <returns></returns>
-        public bool IsAllBack()
+        public Awaiter StartWait(int uniId)
         {
-            return waitDic.Count <= 0;
-        }
-
-        private TaskCompletionSource<bool> allTcs;
-        /// <summary>
-        /// 等待所有消息回来
-        /// </summary>
-        /// <returns></returns>
-        public async Task<bool> WaitAllBack()
-        {
-            if (waitDic.Count > 0)
-            {
-                if (allTcs == null || allTcs.Task.IsCompleted)
-                    allTcs = new TaskCompletionSource<bool>();
-                await allTcs.Task;
-            }
-            return true;
-        }
-
-        public void DisposeAll()
-        {
-            if (waitDic.Count > 0)
-            {
-                foreach (var item in waitDic)
-                    item.Value.Timer?.Dispose();
-            }
-        }
-
-        public async Task<bool> StartWait(int uniId)
-        {
-            Task<bool> task = null;
+            Awaiter waiter = null;
             lock (waitDic)
             {
                 if (!waitDic.ContainsKey(uniId))
                 {
-                    var waiter = new innerWaiter();
+                    waiter = new Awaiter();
                     waitDic.Add(uniId, waiter);
-                    waiter.Start();
-                    task = waiter.Tcs.Task;
                 }
                 else
                 {
                     Log.Error("发现重复消息id：" + uniId);
                 }
             }
-            if (task != null)
-                await task;
-            return true;
+            return waiter;
         }
 
         public void EndWait(int uniId, bool result = true)
         {
             if (!result) Log.Error("await失败：" + uniId);
+            Awaiter waiter = null;
             lock (waitDic)
             {
                 if (waitDic.ContainsKey(uniId))
                 {
-                    var waiter = waitDic[uniId];
-                    waiter.End(result);
+                    waiter = waitDic[uniId];
                     waitDic.Remove(uniId);
-                    if (waitDic.Count <= 0)
-                    {
-                        if (allTcs != null)
-                        {
-                            allTcs.TrySetResult(true);
-                            allTcs = null;
-                        }
-                    }
                 }
                 else
                 {
@@ -118,6 +93,7 @@
                         Log.Error("找不到EndWait：" + uniId + ">size：" + waitDic.Count);
                 }
             }
+            waiter?.Complete(result);
         }
     }
 }

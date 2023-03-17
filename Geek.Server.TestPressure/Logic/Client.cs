@@ -87,10 +87,10 @@ namespace Geek.Server.TestPressure.Logic
             netChannel.Write(msg);
         }
 
-        Task<bool> SendMsgAndWaitBack(Message msg)
+        async Task<bool> SendMsgAndWaitBack(Message msg)
         {
             SendMsg(msg);
-            return msgWaiter.StartWait(msg.UniId);
+            return await msgWaiter.StartWait(msg.UniId);
         }
 
         public void OnDisConnected()
