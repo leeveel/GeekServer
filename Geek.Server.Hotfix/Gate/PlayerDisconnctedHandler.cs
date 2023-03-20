@@ -10,7 +10,7 @@ namespace Server.Logic.Gate
         public override Task ActionAsync()
         {
             //var msg = Msg as PlayerDisconnected;
-            //此处可以获得网关节点id, msg.GateNodeId
+            //此处可以获得网关节点id, msg.GateId
             SessionManager.RemoveByClientConnId(ClientConnId);
             LOGGER.Debug($"客户端掉线:{ClientConnId}");
             return Task.CompletedTask;

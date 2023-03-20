@@ -7,7 +7,7 @@ public static class SessionExtensions
         if (msg != null)
         {
             msg.UniId = uniId;
-            session.WriteAsync(msg);
+            session.Write(msg);
         }
         if (uniId > 0)
         {
@@ -17,7 +17,7 @@ public static class SessionExtensions
                 ErrCode = (int)code,
                 Desc = desc
             };
-            session.WriteAsync(res);
+            session.Write(res);
         }
     }
 }

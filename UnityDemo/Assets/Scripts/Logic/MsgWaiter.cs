@@ -51,6 +51,7 @@ namespace Geek.Client
 
         public static async Task<bool> StartWait(int uniId)
         {
+            UnityEngine.Debug.Log($"开始等待返回:{uniId}");
             if (!waitDic.ContainsKey(uniId))
             {
                 var waiter = new MsgWaiter();

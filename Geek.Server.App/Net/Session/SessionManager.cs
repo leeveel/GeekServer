@@ -24,7 +24,7 @@ namespace Geek.Server.App.Net.Session
         {
             if (sessionMap.TryRemove(id, out Session session))
             {
-                connIdMap.TryRemove(session.ClientConnId, out _);
+                connIdMap.TryRemove(session.NetId, out _);
                 if (ActorMgr.HasActor(id))
                     EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
             }
@@ -33,17 +33,17 @@ namespace Geek.Server.App.Net.Session
         public static void RemoveByClientConnId(long id)
         {
             var session = GetByClientConnId(id);
-            if(session != null)
-                Remove(session.Id);
+            if (session != null)
+                Remove(session.RoleId);
         }
 
         public static Task RemoveAll()
         {
             foreach (var session in sessionMap.Values)
             {
-                if (ActorMgr.HasActor(session.Id))
+                if (ActorMgr.HasActor(session.RoleId))
                 {
-                    EventDispatcher.Dispatch(session.Id, (int)EventID.SessionRemove);
+                    EventDispatcher.Dispatch(session.RoleId, (int)EventID.SessionRemove);
                 }
             }
             sessionMap.Clear();
@@ -69,7 +69,7 @@ namespace Geek.Server.App.Net.Session
 
         public static void Add(Session session)
         {
-            if (sessionMap.TryGetValue(session.Id, out Session old))
+            if (sessionMap.TryGetValue(session.RoleId, out Session old))
             {
                 if (old.Token != session.Token)
                 {
@@ -79,16 +79,16 @@ namespace Geek.Server.App.Net.Session
                         Type = 5,
                         Content = "你的账号已在其他设备上登陆"
                     };
-                    old.WriteAsync(msg);
+                    old.Write(msg);
                 }
-                else if (old.GateNodeId != session.GateNodeId)
+                else if (old.Channel != session.Channel)
                 {
                     //do nothing
                     //同一个设备从不同的网络服重连上来
                 }
             }
-            sessionMap[session.Id] = session;
-            connIdMap[session.ClientConnId] = session.Id;
+            sessionMap[session.RoleId] = session;
+            connIdMap[session.NetId] = session.RoleId;
         }
     }
 }

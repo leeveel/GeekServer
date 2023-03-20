@@ -4,52 +4,44 @@ using Geek.Server.Core.Net.Tcp.Inner;
 using Geek.Server.Core.Utils;
 using Geek.Server.Gateway.Net.Tcp.Handler;
 using Microsoft.AspNetCore.Connections;
+using System.Threading.Channels;
 
 namespace Geek.Server.Gateway.Net.Tcp.Inner
 {
-    public class InnerTcpConnectionHandler : TcpConnectionHandler
+    //服务器内部链接
+    public class InnerTcpConnectionHandler : ConnectionHandler
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        protected override Connection OnConnection(ConnectionContext context)
+        public override async Task OnConnectedAsync(ConnectionContext context)
         {
             LOGGER.Debug($"内部节点 {context.RemoteEndPoint?.ToString()} 链接成功");
-            var conn = new Connection
-            {
-                Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId),
-                Channel = new NetChannel(context, new InnerProtocol())
-            };
-            GateNetMgr.ServerConns.Add(conn);
-            return conn;
+            NetChannel channel = null;
+            channel = new NetChannel(context, new InnerProtocol(true), (msg) => Dispatcher(channel, msg), () => OnDisconnection(channel));
+            channel.Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId);
+            GateNetMgr.ServerConns.Add(channel);
+            await channel.StartReadMsgAsync();
         }
 
-        protected override void OnDisconnection(Connection conn)
+        protected void OnDisconnection(NetChannel channel)
         {
-            LOGGER.Debug($"{conn.Channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-            GateNetMgr.ServerConns.Remove(conn);
+            LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
+            GateNetMgr.ServerConns.Remove(channel);
         }
 
-
-        protected override void Dispatcher(Connection conn, NetMessage nmsg)
+        protected void Dispatcher(NetChannel conn, NetMessage nmsg)
         {
-            //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
             var handler = MsgHanderFactory.GetHander(nmsg.MsgId);
+            //如果是需要网关处理的消息
             if (handler != null)
             {
                 handler.Action(conn, MessagePack.MessagePackSerializer.Deserialize<Message>(nmsg.MsgRaw));
             }
-            else
+            else //否则转发
             {
-                //分发到客户端(客户端有可能已经断开，找不到)
-                var clientConn = GateNetMgr.ClientConns.Get(nmsg.ClientConnId);
-                clientConn?.WriteAsync(nmsg);
+                var clientConn = GateNetMgr.ClientConns.Get(nmsg.NetId);
+                clientConn?.Write(nmsg);
             }
         }
-
-        protected override void Decode(Connection conn, ref NetMessage nmsg)
-        {
-            InnerMsgDecoder.Decode(ref nmsg);
-        }
-
     }
 }

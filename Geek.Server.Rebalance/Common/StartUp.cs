@@ -6,6 +6,7 @@ using Geek.Server.Rebalance.Net.Http;
 using Geek.Server.Rebalance.Net.Rpc;
 using Newtonsoft.Json;
 using NLog.LayoutRenderers;
+using Protocol;
 
 namespace Geek.Server.Rebalance.Common
 {

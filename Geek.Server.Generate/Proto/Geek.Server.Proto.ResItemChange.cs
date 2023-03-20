@@ -1,12 +1,13 @@
 //auto generated, do not modify it
 
+using Protocol;
 using MessagePack;
 using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ResItemChange : Geek.Server.Message
+	public class ResItemChange : Message
 	{
 		[IgnoreMember]
 		public const int Sid = 901279609;

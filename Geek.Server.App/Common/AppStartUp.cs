@@ -1,4 +1,4 @@
-﻿using Consul;
+﻿
 using Geek.Server.App.Net;
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Center;
@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
+using Protocol;
 
 namespace Geek.Server.App.Common
 {

@@ -37,7 +37,7 @@ namespace Geek.Server.Hotfix.Login
             }
 
             //添加到session 
-            session.Id = roleId;
+            session.RoleId = roleId;
             session.Token = reqLogin.Device;
             SessionManager.Add(session);
 

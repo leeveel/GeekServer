@@ -10,7 +10,7 @@ namespace Geek.Server.Gateway.Handler.Tcp
     public class ReqConnectGateHandler : BaseHander
     {
 
-        public override void Action(Connection conn, Message msg)
+        public override void Action(NetChannel conn, Message msg)
         {
             var req = msg as ReqConnectGate;
             //分配网络节点(选择一个负载较小的节点)

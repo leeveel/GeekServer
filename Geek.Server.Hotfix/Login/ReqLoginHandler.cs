@@ -11,8 +11,8 @@ namespace Geek.Server.Hotfix.Login
         {
             var session = new Session
             {
-                ClientConnId = ClientConnId,
-                GateNodeId = GateNodeId
+                NetId = ClientConnId,
+                Channel = Channel
             };
             await Comp.OnLogin(session, Msg as ReqLogin);
         }

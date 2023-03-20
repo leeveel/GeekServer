@@ -10,6 +10,7 @@ using PolymorphicMessagePack;
 using Geek.Server.Core.Storage;
 using Geek.Server.Core.Timer;
 using Newtonsoft.Json;
+using Protocol;
 
 namespace Geek.Server.Hotfix
 {

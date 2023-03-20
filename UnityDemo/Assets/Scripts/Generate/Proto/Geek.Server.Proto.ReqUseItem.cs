@@ -1,12 +1,13 @@
 //auto generated, do not modify it
 
+using Protocol;
 using MessagePack;
 using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ReqUseItem : Geek.Server.Message
+	public class ReqUseItem : Message
 	{
 		[IgnoreMember]
 		public const int Sid = 1686846581;

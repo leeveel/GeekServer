@@ -5,45 +5,34 @@ namespace Geek.Server.App.Net.Session
     public class Session
     {
         /// <summary>
-        /// 全局标识符
+        /// 角色id
         /// </summary>
-        public long Id { set; get; }
+        public long RoleId { set; get; }
 
         /// <summary>
-        /// 在网关中的id
+        /// 在网关中的网络id
         /// </summary>
-        public long ClientConnId { get; set; }
+        public long NetId { get; set; }
 
         /// <summary>
-        /// 网关节点id
+        /// 与网关连接的channel
         /// </summary>
-        public int GateNodeId { get; set; }
-
-        /// <summary>
-        /// 连接时间
-        /// </summary>
-        public DateTime Time { set; get; }
+        public NetChannel Channel { get; set; }
 
         /// <summary>
         /// 连接标示，避免自己顶自己的号,客户端每次启动游戏生成一次/或者每个设备一个
         /// </summary>
         public string Token { get; set; }
 
-        public void WriteAsync(Message msg)
+        public void Write(Message msg)
         {
-            var channel = GetNetChannel();
-            var nmsg = new NetMessage(msg)
+            var nmsg = new NetMessage
             {
-                ClientConnId = ClientConnId
+                NetId = NetId,
+                Msg = msg,
+                MsgId = msg.MsgId
             };
-            channel?.WriteAsync(nmsg);
+            Channel?.Write(nmsg);
         }
-
-        public NetChannel GetNetChannel()
-        {
-            var session = AppNetMgr.GetClientByNodeId(GateNodeId);
-            return session?.Channel;
-        }
-
     }
 }

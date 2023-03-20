@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using NLog.Fluent;
 using System.Net;
+using Protocol;
 
 namespace Geek.Server.TestPressure
 {

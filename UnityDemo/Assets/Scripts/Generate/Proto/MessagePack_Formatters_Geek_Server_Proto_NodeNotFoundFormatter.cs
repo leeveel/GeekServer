@@ -20,8 +20,6 @@ namespace MessagePack.Formatters.Geek.Server.Proto
     {
         // NodeId
         private static global::System.ReadOnlySpan<byte> GetSpan_NodeId() => new byte[1 + 6] { 166, 78, 111, 100, 101, 73, 100 };
-        // UniId
-        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.NodeNotFound value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -31,11 +29,9 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteMapHeader(2);
+            writer.WriteMapHeader(1);
             writer.WriteRaw(GetSpan_NodeId());
             writer.Write(value.NodeId);
-            writer.WriteRaw(GetSpan_UniId());
-            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.NodeNotFound Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -62,11 +58,6 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                         if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 110266396471118UL) { goto FAIL; }
 
                         ____result.NodeId = reader.ReadInt32();
-                        continue;
-                    case 5:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
-
-                        ____result.UniId = reader.ReadInt32();
                         continue;
 
                 }

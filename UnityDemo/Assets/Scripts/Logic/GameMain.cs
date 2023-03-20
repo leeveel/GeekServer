@@ -1,9 +1,11 @@
-﻿using Geek.Client;
+﻿using Base.Net;
+using Geek.Client;
 using Geek.Client.Config;
 using Geek.Server;
 using Geek.Server.Proto;
 using MessagePack;
 using MessagePack.Resolvers;
+using Protocol;
 using Resolvers;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -18,7 +20,7 @@ namespace Logic
         public Text Txt;
 
         public string gateIp = "127.0.0.1";
-        public int gatePort = 8899;
+        public int gatePort = 9102;
         public int serverId = 1001;
         public string userName = "123456";
 
@@ -27,11 +29,17 @@ namespace Logic
             Singleton = this;
         }
 
+        private void OnGetLogMessage(string logString, string stackTrace, LogType type)
+        {
+            AppendLog(logString);
+        }
+
         async void Start()
         {
             Txt = GameObject.Find("Text").GetComponent<Text>();
-            GameDataManager.ReloadAll();
-            GameClient.Singleton.Init();
+            Application.logMessageReceived += OnGetLogMessage;
+            //GameDataManager.ReloadAll();
+            GameClient.Singleton.Init(MsgFactory.GetType);
             DemoService.Singleton.RegisterEventListener();
             await ConnectServer();
             await ReqRouter();
@@ -42,8 +50,7 @@ namespace Logic
 
         private async Task ConnectServer()
         {
-            //这里填写你的本机的内网ip地址,不要使用127.0.0.1（有可能由于hosts设置连不上）
-            _ = GameClient.Singleton.Connect(gateIp, gatePort);
+            GameClient.Singleton.Connect(gateIp, gatePort);
             await MsgWaiter.StartWait(GameClient.ConnectEvt);
         }
 
@@ -88,7 +95,7 @@ namespace Logic
         private void OnApplicationQuit()
         {
             Debug.Log("OnApplicationQuit");
-            GameClient.Singleton.Close();
+            GameClient.Singleton.Close(false);
             MsgWaiter.DisposeAll();
         }
 
@@ -101,6 +108,11 @@ namespace Logic
                 temp += str;
                 Txt.text = temp;
             }
+        }
+
+        void Update()
+        {
+            GameClient.Singleton.Update(GED.NED);
         }
 
     }

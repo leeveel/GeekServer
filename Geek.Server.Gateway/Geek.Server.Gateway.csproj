@@ -6,17 +6,17 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-	<PropertyGroup>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-	</PropertyGroup>
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>..\bin\app_debug</OutputPath>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\bin\app_debug</OutputPath>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>..\bin\app</OutputPath>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\bin\app</OutputPath>
+  </PropertyGroup>
 
   <ItemGroup>
     <None Update="Configs\gate_config.json">
@@ -30,12 +30,12 @@
   <ItemGroup>
     <PackageReference Include="NLog" Version="5.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="6.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="7.0.4" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="6.0.1" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
 
-    <PackageReference Include="MagicOnion.Abstractions" Version="4.5.2" />
-    <PackageReference Include="MagicOnion.Server" Version="4.5.2" />
+    <PackageReference Include="MagicOnion.Abstractions" Version="5.1.2" />
+    <PackageReference Include="MagicOnion.Server" Version="5.1.2" />
   </ItemGroup>
 
   <ItemGroup>
@@ -43,6 +43,10 @@
     <ProjectReference Include="..\Geek.Server.Generate\Geek.Server.Generate.csproj" />
   </ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties configs_4gate_3config_1json__JsonSchema="https://datahubproject.io/schemas/datahub_ingestion_schema.json" /></VisualStudio></ProjectExtensions>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties configs_4gate_3config_1json__JsonSchema="https://datahubproject.io/schemas/datahub_ingestion_schema.json" />
+    </VisualStudio>
+  </ProjectExtensions>
 
 </Project>

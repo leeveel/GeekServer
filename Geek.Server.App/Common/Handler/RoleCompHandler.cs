@@ -11,7 +11,7 @@ namespace Geek.Server.App.Common.Handler
             if (ActorId <= 0)
             {
                 var session = SessionManager.GetByClientConnId(ClientConnId);
-                ActorId = session.Id;
+                ActorId = session.RoleId;
             }
             return Task.CompletedTask;
         }

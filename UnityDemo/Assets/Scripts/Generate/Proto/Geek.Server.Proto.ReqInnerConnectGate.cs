@@ -1,11 +1,12 @@
 //auto generated, do not modify it
 
+using Protocol;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ReqInnerConnectGate : Geek.Server.Message
+	public class ReqInnerConnectGate : Message
 	{
 		[IgnoreMember]
 		public const int Sid = -1857713043;

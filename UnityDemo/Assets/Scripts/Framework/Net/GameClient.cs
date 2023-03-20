@@ -1,106 +1,176 @@
-﻿using Bedrock.Framework;
-using Geek.Server;
+﻿
+using Base;
+using Bedrock.Framework;
+using Bedrock.Framework.Protocols;
+using Geek.Client;
+using Protocol;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO.Pipelines;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using Debug = UnityEngine.Debug;
 
-namespace Geek.Client
+namespace Base.Net
 {
-
     public enum NetCode
     {
-        TimeOut = 100,     //超时
-        Success,               //连接成功
-        Disconnect,           //断开连接
-        Failed,                  //链接失败
+        Unknown = 0,
+        Success,
+        Fail,
+        Closed,
     }
 
     public class GameClient
     {
+        private const float DISPATCH_MAX_TIME = 0.06f;  //每一帧最大的派发事件时间，超过这个时间则停止派发，等到下一帧再派发
+        public const int ConnectEvt = 101; //连接成功
+        public const int DisconnectEvt = 102; //连接断开
         public static GameClient Singleton = new GameClient();
-        private readonly Queue<Message> msgQueue = new Queue<Message>();
-        private ClientNetChannel Channel { get; set; }
-        private UniActor receiveActor = null;
-        private GameClient() { }
+        private NetChannel channel { get; set; }
+        ConcurrentQueue<NetMessage> msgQueue = new ConcurrentQueue<NetMessage>();
+        public int Port { private set; get; }
+        public string Host { private set; get; }
+        IProtocal<Message> protocol;
 
-        public void Init()
+        public void Init(Func<int, Type> getMsgTypeFunc)
         {
-            string name = SynchronizationContext.Current.GetType().FullName;
-            if (name != "UnityEngine.UnitySynchronizationContext")
-                UnityEngine.Debug.LogError($"只能在UnitySynchronizationContext上下文中初始化GameClient:{name}");
-            else
-                UnityEngine.Debug.Log($"GameClient Init Success in {name}");
-            receiveActor = new UniActor();
+            protocol = new ClientProtocol(getMsgTypeFunc);
         }
 
-        public Message GetCurMsg()
+        public void Init(IProtocal<Message> protocol)
         {
-            return msgQueue.Peek();
-        }
-
-        public void Receive(Message msg)
-        {
-            receiveActor.SendAsync(() =>
-            {
-                msgQueue.Enqueue(msg);
-                GED.NED.dispatchEvent(msg.MsgId);
-                msgQueue.Dequeue();
-            });
+            this.protocol = protocol;
         }
 
         public void Send(Message msg)
         {
-            UnityEngine.Debug.LogFormat("发送网络消息{0}", MessagePack.MessagePackSerializer.SerializeToJson(msg));
-            Channel?.WriteAsync(new NMessage(msg));
+            channel?.Write(msg);
         }
 
-        public int Port { private set; get; }
-        public string Host { private set; get; }
-        public const int ConnectEvt = 101; //连接事件
-        public const int DisconnectEvt = 102; //连接断开
-
-        public async Task<ClientNetChannel> Connect(string host, int port)
+        public async void Connect(string host, int port, int timeOut = 5000)
         {
             Host = host;
             Port = port;
             try
             {
-                var connection = await ClientFactory.ConnectAsync(new IPEndPoint(IPAddress.Parse(Host), Port));
-                UnityEngine.Debug.Log($"Connected to {connection.LocalEndPoint}");
-                Channel = new ClientNetChannel(connection, new ClientLengthPrefixedProtocol());
-                OnConnected(NetCode.Success);
-                return Channel;
+                ClearAllMsg();
+                var ipType = AddressFamily.InterNetwork;
+                (ipType, host) = NetUtils.GetIPv6Address(host, port);
+
+                var context = await new SocketConnection(ipType, host, port).StartAsync(timeOut);
+
+                if (context != null)
+                {
+                    Debug.Log($"Connected to {context.RemoteEndPoint}");
+                    OnConnected(NetCode.Success);
+                    channel = new NetChannel(context, protocol, OnRevice, OnDisConnected);
+                    _ = channel.StartReadMsgAsync();
+                }
+                else
+                {
+                    OnConnected(NetCode.Fail);
+                }
+
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogError(e.ToString());
-                OnConnected(NetCode.Failed);
-                throw;
+                Debug.LogError(e.ToString());
+                OnConnected(NetCode.Fail);
             }
         }
 
+
         private void OnConnected(NetCode code)
         {
-            receiveActor.SendAsync(() =>
-            {
-                GED.NED.dispatchEvent(ConnectEvt, code);
-            });
+            var rMsg = new NetMessage();
+            rMsg.MsgId = ConnectEvt;
+            rMsg.Msg = code;
+            msgQueue.Enqueue(rMsg);
         }
 
         public void OnDisConnected()
         {
-            receiveActor.SendAsync(() =>
-            {
-                GED.NED.dispatchEvent(DisconnectEvt);
-            });
+            var rMsg = new NetMessage();
+            rMsg.MsgId = DisconnectEvt;
+            rMsg.Msg = NetCode.Closed;
+            msgQueue.Enqueue(rMsg);
         }
 
-        public void Close()
+        public void OnRevice(Message msg)
         {
-            Channel?.Abort();
+            msgQueue.Enqueue(new NetMessage(msg));
         }
 
+        public void Close(bool triggerCloseEvt)
+        {
+            channel?.Abort(triggerCloseEvt);
+            channel = null;
+            ClearAllMsg();
+        }
+
+        public void ClearAllMsg()
+        {
+            msgQueue = new ConcurrentQueue<NetMessage>();
+        }
+
+
+        public void Update(EventDispatcher evt, float maxTime = DISPATCH_MAX_TIME)
+        {
+            float curTime = UnityEngine.Time.realtimeSinceStartup;
+            float endTime = curTime + maxTime;
+            while (curTime < endTime)
+            {
+                if (msgQueue.IsEmpty)
+                    return;
+
+                if (!msgQueue.TryDequeue(out var msg))
+                    break;
+
+                if (msg == null)
+                    return;
+
+#if UNITY_EDITOR
+                var innerMsg = ((NetMessage)msg).Msg;
+                var msgName = innerMsg != null ? innerMsg.GetType().FullName : "";
+                Debug.Log($"开始处理网络事件 {msg.MsgId}  {msgName}");
+#endif
+
+                try
+                {
+                    evt.dispatchEvent(msg.MsgId, msg.Msg);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message);
+                }
+
+                curTime = UnityEngine.Time.realtimeSinceStartup;
+                if (!ignoreCodeList.Contains(msg.MsgId))
+                    ResCode++;
+            }
+        }
+
+        /// <summary>上次接收消失时间</summary>
+        public float HandMsgTime { get; private set; }
+        /// <summary>收到的消息计数 和服务器对不上则应该断线重连</summary>
+        public int ResCode { get; private set; }
+        List<int> ignoreCodeList = new List<int>();
+        public void ResetResCode(int code = 0)
+        {
+            ResCode = code;
+        }
+
+        /// <summary>
+        /// 心跳等无关逻辑的消息可忽略
+        /// </summary>
+        public void AddIgnoreCode(int msgId)
+        {
+            if (!ignoreCodeList.Contains(msgId))
+                ignoreCodeList.Add(msgId);
+        }
     }
 }

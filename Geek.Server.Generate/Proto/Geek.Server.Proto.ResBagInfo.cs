@@ -1,12 +1,13 @@
 //auto generated, do not modify it
 
+using Protocol;
 using MessagePack;
 using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class ResBagInfo : Geek.Server.Message
+	public class ResBagInfo : Message
 	{
 		[IgnoreMember]
 		public const int Sid = -1872884227;

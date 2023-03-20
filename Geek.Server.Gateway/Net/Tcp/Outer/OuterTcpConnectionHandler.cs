@@ -4,46 +4,48 @@ using Geek.Server.Core.Utils;
 using Geek.Server.Gateway.Net.Tcp.Handler;
 using Geek.Server.Proto;
 using Microsoft.AspNetCore.Connections;
+using MongoDB.Driver.Core.Bindings;
+using System.Threading.Channels;
 
 namespace Geek.Server.Gateway.Net.Tcp.Outer
 {
-    public class OuterTcpConnectionHandler : TcpConnectionHandler
+    //与客户端链接处理
+    public class OuterTcpConnectionHandler : ConnectionHandler
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        protected override Connection OnConnection(ConnectionContext context)
+        public override async Task OnConnectedAsync(ConnectionContext context)
         {
             LOGGER.Debug($"{context.RemoteEndPoint?.ToString()} 链接成功");
-            var conn = new Connection
-            {
-                Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId),
-                Channel = new NetChannel(context, new OuterProtocol())
-            };
-            GateNetMgr.ClientConns.Add(conn);
-            return conn;
+            NetChannel channel = null;
+            channel = new NetChannel(context, new OuterProtocol(), (msg) => Dispatcher(channel, msg), () => OnDisconnection(channel));
+            channel.Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId);
+            GateNetMgr.ClientConns.Add(channel);
+            await channel.StartReadMsgAsync();
         }
 
-        protected override void OnDisconnection(Connection conn)
+        protected void OnDisconnection(NetChannel conn)
         {
-            LOGGER.Debug($"{conn.Channel.Context.RemoteEndPoint?.ToString()} 断开链接");
+            LOGGER.Debug($"{conn.Context.RemoteEndPoint?.ToString()} 断开链接");
             GateNetMgr.ClientConns.Remove(conn);
             //TODO:通知游戏服客户端掉线
             var msg = new PlayerDisconnected
             {
                 GateNodeId = Settings.ServerId
             };
-            var nmsg = new NetMessage(msg)
+            var nmsg = new NetMessage
             {
-                ClientConnId = conn.Id
+                NetId = conn.Id,
+                Msg = msg,
+                MsgId = msg.MsgId
             };
             var serverConn = GateNetMgr.ServerConns.GetByNodeId(conn.NodeId);
-            nmsg.ClientConnId = conn.Id;
-            serverConn?.WriteAsync(nmsg);
+            serverConn?.Write(nmsg);
         }
 
-        protected override void Dispatcher(Connection conn, NetMessage nmsg)
+        protected void Dispatcher(NetChannel conn, NetMessage nmsg)
         {
-            //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
+            LOGGER.Debug($"-------------收到消息{nmsg.MsgId}");
             var handler = MsgHanderFactory.GetHander(nmsg.MsgId);
             if (handler != null)
             {
@@ -53,15 +55,9 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
             {
                 //分发到game server
                 var serverConn = GateNetMgr.ServerConns.GetByNodeId(conn.NodeId);
-                nmsg.ClientConnId = conn.Id;
-                serverConn?.WriteAsync(nmsg);
+                nmsg.NetId = conn.Id;
+                serverConn?.Write(nmsg);
             }
         }
-
-        protected override void Decode(Connection conn, ref NetMessage nmsg)
-        {
-            OuterMsgDecoder.Decode(conn.Channel.Context, ref nmsg);
-        }
-
     }
 }

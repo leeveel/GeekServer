@@ -1,6 +1,6 @@
 ﻿using MessagePack;
 
-namespace Geek.Server
+namespace Protocol
 {
     [MessagePackObject(false)]
     public abstract class Message
@@ -11,5 +11,6 @@ namespace Geek.Server
         public int UniId { get; set; }
         [IgnoreMember]
         public virtual int MsgId { get; }
+
     }
 }

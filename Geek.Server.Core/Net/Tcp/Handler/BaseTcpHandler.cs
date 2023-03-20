@@ -2,8 +2,7 @@
 {
     public abstract class BaseTcpHandler
     {
-        public int GateNodeId { get; set; }
-
+        public NetChannel Channel { get; set; }
         /// <summary>
         /// 客户端网络连接id
         /// </summary>

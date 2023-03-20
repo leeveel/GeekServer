@@ -5,15 +5,15 @@ namespace Geek.Server.Gateway.Net.Tcp.Handler
 {
     public abstract class BaseHander
     {
-        public virtual void Action(Connection conn, Message msg)
+        public virtual void Action(NetChannel conn, Message msg)
         {
 
         }
 
-        protected void WriteWithStatus(Connection conn, Message msg, int uniId)
+        protected void WriteWithStatus(NetChannel conn, Message msg, int uniId)
         {
             msg.UniId = uniId;
-            conn.WriteAsync(new NetMessage(msg));
+            conn.Write(msg);
             if (uniId > 0)
             {
                 var res = new ResErrorCode
@@ -22,7 +22,7 @@ namespace Geek.Server.Gateway.Net.Tcp.Handler
                     ErrCode = 0,
                     Desc = ""
                 };
-                conn.WriteAsync(new NetMessage(res));
+                conn.Write(res);
             }
         }
     }

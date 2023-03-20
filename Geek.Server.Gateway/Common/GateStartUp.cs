@@ -8,6 +8,7 @@ using Geek.Server.Proto;
 using MongoDB.Driver.Core.Servers;
 using Newtonsoft.Json;
 using NLog.LayoutRenderers;
+using Protocol;
 
 namespace Geek.Server.Gateway.Common
 {

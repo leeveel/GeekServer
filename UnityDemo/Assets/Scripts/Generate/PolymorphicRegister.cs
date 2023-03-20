@@ -1,9 +1,10 @@
 ﻿using MessagePack;
 using MessagePack.Resolvers;
 using PolymorphicMessagePack;
+using Protocol;
 using Resolvers;
 
-namespace Geek.Server.Proto
+namespace Protocol
 {
     public partial class PolymorphicRegister
     {
@@ -15,7 +16,7 @@ namespace Geek.Server.Proto
             {
                 PolymorphicResolver.AddInnerResolver(ConfigDataResolver.Instance);
                 PolymorphicResolver.AddInnerResolver(MessagePack.Resolvers.GeneratedResolver.Instance);
-                PolymorphicTypeMapper.Register<Geek.Server.Message>();
+                PolymorphicTypeMapper.Register<Message>();
                 PolymorphicResolver.Init();
                 serializerRegistered = true;
             }

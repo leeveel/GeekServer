@@ -7,6 +7,7 @@ using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Net;
 using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Core.Net.Tcp.Inner;
+using System.Net.Sockets;
 
 namespace Geek.Server.App.Net
 {
@@ -54,10 +55,13 @@ namespace Geek.Server.App.Net
         {
             try
             {
-                var connection = await ClientFactory.ConnectAsync(new IPEndPoint(IPAddress.Parse(netNode.Ip), netNode.InnerTcpPort));
-                OnConnection(connection);
-                _ = Task.Run(NetLooping);
-                return true;
+                var connection = await new SocketConnection(AddressFamily.InterNetwork, netNode.Ip, netNode.InnerTcpPort).StartAsync(10000);
+                if (connection != null)
+                {
+                    OnConnection(connection);
+                    return true;
+                }
+                return false;
             }
             catch (Exception e)
             {
@@ -68,84 +72,43 @@ namespace Geek.Server.App.Net
 
         public void Write(NetMessage msg)
         {
-            if (Channel != null && !Channel.IsClose())
-                Channel.WriteAsync(msg);
+            Channel?.Write(msg);
         }
 
         public void Write(Message msg)
         {
-            Write(new NetMessage(msg));
+            Write(new NetMessage { Msg = msg,MsgId = msg.MsgId });
         }
 
         protected void OnConnection(ConnectionContext connection)
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
-            Channel = new NetChannel(connection, new InnerProtocol());
+            Channel = new NetChannel(connection, new InnerProtocol(false), (netMsg) => _ = Dispatcher(netMsg), OnDisconnection);
             if (regMsgGetter != null)
             {
                 Write(regMsgGetter());
             }
+            _ = Channel.StartReadMsgAsync();
         }
 
-        protected void OnDisconnection(NetChannel channel)
+        protected void OnDisconnection()
         {
-            LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
+            LOGGER.Debug($"{Channel.Context.RemoteEndPoint?.ToString()} 断开链接");
             //尝试重连
             _ = reConn.ReConnect();
         }
 
-        async Task NetLooping()
+        async Task Dispatcher(NetMessage nMsg)
         {
-            var remoteInfo = Channel.Context.RemoteEndPoint;
-            while (!Channel.IsClose())
-            {
-                try
-                {
-                    var result = await Channel.Reader.ReadAsync(Channel.Protocol);
-                    var message = result.Message;
-
-                    if (result.IsCompleted)
-                        break;
-
-                    InnerMsgDecoder.Decode(ref message);
-                    _ = Dispatcher(message);
-                }
-                catch (ConnectionResetException)
-                {
-                    LOGGER.Info($"{remoteInfo} disconnected");
-                    break;
-                }
-                catch (Exception e)
-                {
-                    LOGGER.Info($"{remoteInfo} exception: {e.Message}");
-                }
-
-                try
-                {
-                    Channel.Reader.Advance();
-                }
-                catch (Exception e)
-                {
-                    LOGGER.Error($"{remoteInfo} channel.Reader.Advance Exception:{e.Message}");
-                    break;
-                }
-            }
-            OnDisconnection(Channel);
-        }
-
-
-        async Task Dispatcher(NetMessage msg)
-        {
-            //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
-            var handler = HotfixMgr.GetTcpHandler(msg.MsgId);
+            var handler = HotfixMgr.GetTcpHandler(nMsg.MsgId);
             if (handler == null)
             {
-                LOGGER.Error($"找不到[{msg.MsgId}][{msg.GetType()}]对应的handler");
+                LOGGER.Error($"找不到[{nMsg.MsgId}]对应的handler");
                 return;
             }
-            handler.ClientConnId = msg.ClientConnId;
-            handler.GateNodeId = netNode.NodeId;
-            handler.Msg = MessagePack.MessagePackSerializer.Deserialize<Message>(msg.MsgRaw);
+            handler.ClientConnId = nMsg.NetId;
+            handler.Channel = Channel;
+            handler.Msg = nMsg.Msg;
             await handler.Init();
             await handler.InnerAction();
         }

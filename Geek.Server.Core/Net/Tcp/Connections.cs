@@ -2,54 +2,36 @@
 
 namespace Geek.Server.Core.Net.Tcp
 {
-
-    public class Connection
-    {
-        public long Id { get; set; }
-        public long NodeId { get; set; }
-        public NetChannel Channel { get; set; }
-
-        public void WriteAsync(NetMessage msg)
-        {
-            Channel?.WriteAsync(msg);
-        }
-
-        public void WriteAsync(Message msg)
-        {
-            Channel?.WriteAsync(msg);
-        }
-    }
-
     public class Connections
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid
-        internal readonly ConcurrentDictionary<long, Connection> connMap = new();
+        internal readonly ConcurrentDictionary<long, NetChannel> connMap = new();
         //nodeId - connection.id
         internal readonly ConcurrentDictionary<long, long> nodeIdMap = new();
         //nodeId - list<connection.id>(TODO:分布式中一个大服的网络节点会存在多个)
         //internal readonly ConcurrentDictionary<long, long> nodeIdsMap = new();
 
-        public Connection Remove(long id)
+        public NetChannel Remove(long id)
         {
             if (connMap.TryRemove(id, out var node))
                 nodeIdMap.TryRemove(node.NodeId, out _);
             return node;
         }
 
-        public void Remove(Connection node)
+        public void Remove(NetChannel node)
         {
             if (connMap.TryRemove(node.Id, out var _))
                 nodeIdMap.TryRemove(node.NodeId, out _);
         }
 
-        public Connection Get(long id)
+        public NetChannel Get(long id)
         {
             connMap.TryGetValue(id, out var v);
             return v;
         }
 
-        public List<Connection> GetAllConnections()
+        public List<NetChannel> GetAllConnections()
         {
             return connMap.Values.ToList();
         }
@@ -59,24 +41,24 @@ namespace Geek.Server.Core.Net.Tcp
             return connMap.Count;
         }
 
-        public Connection Add(Connection node)
+        public NetChannel Add(NetChannel node)
         {
             Log.Debug($"新的网络节点:{node.Id}");
             var old = connMap.GetOrAdd(node.Id, node);
             return old != node ? old : null;
         }
 
-        public Connection GetByNodeId(long nodeId)
+        public NetChannel GetByNodeId(long nodeId)
         {
             if (nodeIdMap.TryGetValue(nodeId, out long id))
             {
-                connMap.TryGetValue(id, out Connection conn);
+                connMap.TryGetValue(id, out NetChannel conn);
                 return conn;
             }
             return null;
         }
 
-        public void SetNodeId(Connection conn, long nodeId)
+        public void SetNodeId(NetChannel conn, long nodeId)
         {
             if (conn == null)
                 return;

@@ -1,11 +1,12 @@
 //auto generated, do not modify it
 
+using Protocol;
 using MessagePack;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class PlayerDisconnected : Geek.Server.Message
+	public class PlayerDisconnected : Message
 	{
 		[IgnoreMember]
 		public const int Sid = 1739074562;
