@@ -311,5 +311,9 @@ namespace Bedrock.Framework
             }
         }
 
+        public override void Abort()
+        {
+            _ = DisposeAsync();
+        }
     }
 }
