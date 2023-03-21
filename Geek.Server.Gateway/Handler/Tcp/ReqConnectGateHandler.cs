@@ -17,8 +17,7 @@ namespace Geek.Server.Gateway.Handler.Tcp
             var nodeId = GateNetMgr.SelectAHealthNode(req.ServerId);
             if (nodeId > 0)
             {
-                //设置client connection的nodeId
-                conn.NodeId = nodeId;
+                conn.DefaultTargetNodeId = nodeId;
                 var res = new ResConnectGate
                 {
                     ServerId = req.ServerId,

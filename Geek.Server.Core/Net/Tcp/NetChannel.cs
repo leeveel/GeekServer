@@ -4,10 +4,9 @@ using System.Diagnostics;
 
 namespace Geek.Server.Core.Net.Tcp
 {
-    public partial class NetChannel
+    public class NetChannel
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public const string SESSIONID = "SESSIONID";
         public ConnectionContext Context { get; protected set; }
         public ProtocolReader Reader { get; protected set; }
         protected ProtocolWriter Writer { get; set; }
@@ -15,6 +14,8 @@ namespace Geek.Server.Core.Net.Tcp
         Action<NetMessage> onMessageAct;
         Action onConnectCloseAct;
         bool triggerCloseEvt = true;
+        public long NodeId { get; set; } = 0;
+        public long DefaultTargetNodeId { get; set; }
 
         public NetChannel(ConnectionContext context, IProtocal<NetMessage> protocal, Action<NetMessage> onMessage = null, Action onConnectClose = null)
         {
@@ -55,8 +56,6 @@ namespace Geek.Server.Core.Net.Tcp
             {
                 LOGGER.Error(e.Message);
             }
-
-
         }
 
         public void Write(NetMessage msg)
@@ -68,7 +67,6 @@ namespace Geek.Server.Core.Net.Tcp
         {
             Write(new NetMessage { Msg = msg, MsgId = msg.MsgId });
         }
-
 
         public bool IsClose()
         {
@@ -97,24 +95,5 @@ namespace Geek.Server.Core.Net.Tcp
 
             }
         }
-
-        public void RemoveSessionId()
-        {
-            Context.Items.Remove(SESSIONID);
-        }
-
-
-        public void SetSessionId(long id)
-        {
-            Context.Items[SESSIONID] = id;
-        }
-
-        public long GetSessionId()
-        {
-            if (Context.Items.TryGetValue(SESSIONID, out object idObj))
-                return (long)idObj;
-            return 0;
-        }
-
     }
 }

@@ -19,7 +19,7 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
             LOGGER.Debug($"{context.RemoteEndPoint?.ToString()} 链接成功");
             NetChannel channel = null;
             channel = new NetChannel(context, new OuterProtocol(), (msg) => Dispatcher(channel, msg), () => OnDisconnection(channel));
-            channel.Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId);
+            channel.NodeId = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId);
             GateNetMgr.ClientConns.Add(channel);
             await channel.StartReadMsgAsync();
         }
@@ -35,11 +35,11 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
             };
             var nmsg = new NetMessage
             {
-                NetId = conn.Id,
+                NetId = conn.NodeId,
                 Msg = msg,
                 MsgId = msg.MsgId
             };
-            var serverConn = GateNetMgr.ServerConns.GetByNodeId(conn.NodeId);
+            var serverConn = GateNetMgr.ServerConns.Get(conn.DefaultTargetNodeId);
             serverConn?.Write(nmsg);
         }
 
@@ -54,8 +54,8 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
             else
             {
                 //分发到game server
-                var serverConn = GateNetMgr.ServerConns.GetByNodeId(conn.NodeId);
-                nmsg.NetId = conn.Id;
+                var serverConn = GateNetMgr.ServerConns.Get(conn.DefaultTargetNodeId);
+                nmsg.NetId = conn.NodeId;
                 serverConn?.Write(nmsg);
             }
         }

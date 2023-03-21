@@ -18,8 +18,6 @@ namespace Geek.Server.Gateway.Net.Tcp.Inner
             LOGGER.Debug($"内部节点 {context.RemoteEndPoint?.ToString()} 链接成功");
             NetChannel channel = null;
             channel = new NetChannel(context, new InnerProtocol(true), (msg) => Dispatcher(channel, msg), () => OnDisconnection(channel));
-            channel.Id = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId);
-            GateNetMgr.ServerConns.Add(channel);
             await channel.StartReadMsgAsync();
         }
 

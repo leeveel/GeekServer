@@ -47,7 +47,7 @@ namespace Geek.Server.Gateway.Net
         {
             //TODO:分布式大服结构中网络节点会存在多个
             //TODO:选择一个负载最小的节点
-            var conn = ServerConns.GetByNodeId(serverId);
+            var conn = ServerConns.Get(serverId);
             if (conn != null)
                 return conn.NodeId;
             return -1;

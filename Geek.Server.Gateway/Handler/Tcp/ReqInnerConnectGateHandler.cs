@@ -12,7 +12,8 @@ namespace Geek.Server.Gateway.Handler.Tcp
         public override void Action(NetChannel channel, Message msg)
         {
             var req = msg as ReqInnerConnectGate;
-            GateNetMgr.ServerConns.SetNodeId(channel, req.NodeId);
+            channel.NodeId = req.NodeId;
+            GateNetMgr.ServerConns.Add(channel);
             var res = new ResInnerConnectGate
             {
                 IsSuccess = true
