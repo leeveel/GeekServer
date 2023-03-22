@@ -21,11 +21,12 @@ namespace Geek.Server.Core.Net.Tcp.Codecs
         public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out Message message)
         {
             message = default;
+            var bufEnd = input.End;
             var reader = new SequenceReader<byte>(input);
 
             if (!reader.TryReadBigEndian(out int msgLen))
             {
-                consumed = input.End; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据
+                consumed = bufEnd; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据
                 return false;
             }
 
@@ -36,7 +37,7 @@ namespace Geek.Server.Core.Net.Tcp.Codecs
 
             if (reader.Remaining < msgLen - 4)
             {
-                consumed = input.End;
+                consumed = bufEnd;
                 return false;
             }
 
