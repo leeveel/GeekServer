@@ -1,9 +1,7 @@
 ﻿using Geek.Server.Core.Serialize;
 using Geek.Server.Core.Utils;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using NLog;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Geek.Server.Core.Storage
 {
@@ -23,6 +21,10 @@ namespace Geek.Server.Core.Storage
         public MongoClient Client { get; private set; }
 
         public IMongoDatabase CurDB { get; private set; }
+
+        public static readonly ReplaceOptions REPLACE_OPTIONS = new() { IsUpsert = true };
+
+        public static readonly BulkWriteOptions BULK_WRITE_OPTIONS = new() { IsOrdered = false };
 
         public void Open(string url, string dbName)
         {
@@ -91,22 +93,10 @@ namespace Geek.Server.Core.Storage
             }
         }
 
-        public static readonly ReplaceOptions REPLACE_OPTIONS = new() { IsUpsert = true };
-
-        public static readonly BulkWriteOptions BULK_WRITE_OPTIONS = new() { IsOrdered = false };
-
-        public Task CreateIndex<TState>(string indexKey)
-        {
-            var col = CurDB.GetCollection<TState>();
-            var key = Builders<TState>.IndexKeys.Ascending(indexKey);
-            var model = new CreateIndexModel<TState>(key);
-            return col.Indexes.CreateOneAsync(model);
-        }
 
         public void Close()
         {
             Client.Cluster.Dispose();
         }
-
     }
 }
