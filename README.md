@@ -33,7 +33,7 @@ Actor模型本身是存在死锁的情况，且不容易被发现。GeekServer�
 [GeekDB.GUI](https://github.com/leeveel/GeekDB.GUI)是一个数据库客户端，GeekServer支持内嵌(RocksDB)和直连MongoDB的模式，但是存放的数据都是通过MessagePack序列化之后的二进制，此工具用于对这些二进制数据进行浏览。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/2.Actor%26Component%26State.md)      
 
 # 运行
-1. 安装[.NetCore6.0](https://dotnet.microsoft.com/download/dotnet/6.0)
+1. 安装[.NetCore6.0或更新的SDK](https://dotnet.microsoft.com/download/dotnet/6.0)，**协议工具需要安装.Net5.0**(MessagePack代码生成工具依赖了此版本)
 2. 安装[mongodb4.x](https://www.mongodb.com/try/download/community)
 3. 打开git clone本项目https://github.com/leeveel/GeekServer.git
 4. 运行Tools/ExcelGen/ExcelToCode.exe 点击[服务器-ALL]导出配置表
