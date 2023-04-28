@@ -355,3 +355,5 @@ MigrationBackup/
 /UnityDemo/Temp
 /.idea
 /database
+
+UnityDemo/.vscode/
