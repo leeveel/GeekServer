@@ -59,7 +59,6 @@ namespace Geek.Server.Gateway.Net.Tcp.Inner
             span.WriteInt(nmsg.MsgId, ref offset);
             bytes.CopyTo(span.Slice(16));
             output.Advance(len);
-            nmsg.ReturnRawMenory();
         }
 
         public bool CheckMsgLen(int msgLen)

@@ -84,7 +84,6 @@ public class OuterProtocol : IProtocal<NetMessage>
         span.WriteInt(nmsg.MsgId, ref offset);
         bytes.CopyTo(span.Slice(8));
         output.Advance(len);
-        nmsg.ReturnRawMenory();
     }
 
     public bool CheckMagicNumber(int order, int msgLen)

@@ -48,7 +48,6 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
             if (handler != null)
             {
                 handler.Action(conn, nmsg.Deserialize());
-                nmsg.ReturnRawMenory();
             }
             else
             {
@@ -60,6 +59,7 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
                 if (serverConn != null)
                     await serverConn.Write(nmsg);
             }
+            nmsg.ReturnRawMenory();
         }
     }
 }

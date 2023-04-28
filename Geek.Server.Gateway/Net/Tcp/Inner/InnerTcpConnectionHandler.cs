@@ -32,7 +32,6 @@ namespace Geek.Server.Gateway.Net.Tcp.Inner
             if (handler != null)
             {
                 handler.Action(conn, MessagePack.MessagePackSerializer.Deserialize<Message>(nmsg.MsgRaw));
-                nmsg.ReturnRawMenory();
             }
             else //否则转发
             {
@@ -41,6 +40,7 @@ namespace Geek.Server.Gateway.Net.Tcp.Inner
                 if (clientConn != null)
                     await clientConn.Write(nmsg);
             }
+            nmsg.ReturnRawMenory();
         }
     }
 }
