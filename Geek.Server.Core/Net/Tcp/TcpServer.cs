@@ -21,10 +21,6 @@ namespace Geek.Server.Core.Net.Tcp
             {
                 options.ListenAnyIP(port, configure);
             })
-            .ConfigureLogging(logging =>
-            {
-                logging.SetMinimumLevel(LogLevel.Error);
-            })
             .UseNLog();
 
             app = builder.Build();

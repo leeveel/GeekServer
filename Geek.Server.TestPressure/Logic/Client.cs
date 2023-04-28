@@ -96,7 +96,7 @@ namespace Geek.Server.TestPressure.Logic
         void SendMsg(Message msg)
         {
             msg.UniId = msgUniId++;
-            //Log.Info($"{id} 发送消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
+            Log.Info($"{id} 发送消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
             netChannel.Write(msg);
         }
 
@@ -113,8 +113,7 @@ namespace Geek.Server.TestPressure.Logic
 
         public Task OnRevice(Message msg)
         {
-            //  Log.Info($"{id} 收到消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
-            //Log.Error($"收到消息:{msg.MsgId} {MsgFactory.GetType(msg.MsgId)}");
+            Log.Info($"{id} 收到消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
             if (msg.MsgId == ResErrorCode.MsgID)
             {
                 ResErrorCode errMsg = (ResErrorCode)msg;
