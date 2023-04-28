@@ -35,7 +35,7 @@ namespace Geek.Server.Gateway.Net.Tcp.Inner
             }
             else //否则转发
             {
-                //LOGGER.Debug($"转发消息:{nmsg.MsgId}到{nmsg.NetId}");
+                //LOGGER.Debug($"转发消息:{nmsg.MsgId}到{nmsg.SrcNetId}");
                 var clientConn = GateNetMgr.GetClientNode(nmsg.NetId);
                 if (clientConn != null)
                     await clientConn.Write(nmsg);

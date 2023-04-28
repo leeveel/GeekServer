@@ -13,7 +13,7 @@ namespace Geek.Server.Gateway.Handler.Tcp
         public override void Action(INetChannel channel, Message msg)
         {
             var req = msg as ReqDisconnectClient;
-            var node = GateNetMgr.GetClientNode(req.NetId);
+            var node = GateNetMgr.GetClientNode(req.TargetNetId);
             if (node != null)
             {
                 GateNetMgr.RemoveClientNode(node.NetId);

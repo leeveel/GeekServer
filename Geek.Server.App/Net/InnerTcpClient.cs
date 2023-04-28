@@ -162,10 +162,10 @@ namespace Geek.Server.App.Net
                 return;
             }
 
-            netProxies.TryGetValue(msg.NetId, out var proxy);
+            netProxies.TryGetValue(msg.SrcNetId, out var proxy);
             handler.Channel = proxy;
             handler.Msg = msg;
-            handler.ClientNetId = msg.NetId;
+            handler.ClientNetId = msg.SrcNetId;
 
             if (handler is BaseGatewayHandler gatehandler)
             {
@@ -177,7 +177,7 @@ namespace Geek.Server.App.Net
             if (proxy == null)
             {
                 LOGGER.Error($"handler proxy 为空 {msg.MsgId} {handler.GetType()}");
-                await Channel.Write(new ReqDisconnectClient { NetId = msg.NetId });
+                Channel.Close();
                 return;
             }
 
@@ -187,7 +187,7 @@ namespace Geek.Server.App.Net
                 if (proxy.GetData<GameSession>(SessionManager.SESSION) == null)
                 {
                     LOGGER.Error($"handler game session 为空 {msg.MsgId} {handler.GetType()}");
-                    await Channel.Write(new ReqDisconnectClient { NetId = msg.NetId });
+                    Channel.Close();
                     return;
                 }
             }

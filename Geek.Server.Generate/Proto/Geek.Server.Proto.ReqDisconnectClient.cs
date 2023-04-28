@@ -17,6 +17,6 @@ namespace Geek.Server.Proto
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-        public long NetId { get; set; }
+        public long TargetNetId { get; set; }
 	}
 }

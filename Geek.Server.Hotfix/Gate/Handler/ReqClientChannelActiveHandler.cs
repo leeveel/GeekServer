@@ -10,7 +10,7 @@ namespace Geek.Server.Hotfix.Gate.Handler
         public override Task ActionAsync()
         {
             var req = (ReqClientChannelActive)Msg;
-            innerTcpClient.AddProxy(req.NetId, new NetChannelProxy(innerTcpClient, req.NetId, req.Address));
+            innerTcpClient.AddProxy(req.SrcNetId, new NetChannelProxy(innerTcpClient, req.SrcNetId, req.Address));
             Log.Info($"客户端连接:{req.Address}");
             return Task.CompletedTask;
         }

@@ -41,7 +41,7 @@ namespace Geek.Server.App.Net
 
             var payload = input.Slice(reader.Position, msgLen - 16);
             message = MessagePackSerializer.Deserialize<Message>(payload);
-            message.NetId = netId;
+            message.SrcNetId = netId;
 
             consumed = payload.End;
             examined = consumed;
@@ -55,7 +55,7 @@ namespace Geek.Server.App.Net
             var span = output.GetSpan(len);
             int offset = 0;
             span.WriteInt(len, ref offset);
-            span.WriteLong(msg.NetId, ref offset);
+            span.WriteLong(msg.SrcNetId, ref offset);
             span.WriteInt(msg.MsgId, ref offset);
             bytes.CopyTo(span.Slice(16));
             output.Advance(len);

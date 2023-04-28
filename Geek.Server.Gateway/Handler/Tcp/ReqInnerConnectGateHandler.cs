@@ -17,14 +17,14 @@ namespace Geek.Server.Gateway.Handler.Tcp
         public override void Action(INetChannel channel, Message msg)
         {
             var req = msg as ReqInnerConnectGate;
-            channel.NetId = req.NodeId;
+            channel.NetId = req.SelfNetId;
             var old = GateNetMgr.AddServerNode(channel);
             if (old != null)
             {
-                Log.Info($"内部服务器{req.NodeId} {channel.RemoteAddress}请求连接网关，断开老的连接：{channel.RemoteAddress}");
+                Log.Info($"内部服务器{req.SelfNetId} {channel.RemoteAddress}请求连接网关，断开老的连接：{channel.RemoteAddress}");
                 old.Close();
             }
-            var ids = GateNetMgr.GetAllClientNodeWithTargetId(req.NodeId);
+            var ids = GateNetMgr.GetAllClientNodeWithTargetId(req.SelfNetId);
             var res = new ResInnerConnectGate
             {
                 IsSuccess = true,

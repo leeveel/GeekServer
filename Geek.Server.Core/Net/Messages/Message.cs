@@ -9,6 +9,6 @@ namespace Geek.Server
         [IgnoreMember]
         public virtual int MsgId { get; }
         [IgnoreMember]
-        public long NetId { get; set; }
+        public long SrcNetId { get; set; }
     }
 }

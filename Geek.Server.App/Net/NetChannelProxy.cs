@@ -36,7 +36,7 @@ namespace Geek.Server.App.Net
                 LOGGER.Error($"写入Message消息类型错误,{msg.GetType().FullName}");
                 return;
             }
-            realMsg.NetId = NetId;
+            realMsg.SrcNetId = NetId;
             var channel = innerTcpClient.Channel;
             if (channel != null)
                 await channel.Write(realMsg);
@@ -58,9 +58,9 @@ namespace Geek.Server.App.Net
 
         public async void Close()
         {
-            LOGGER.Debug($"关闭net proxy,NetId:{NetId}");
+            LOGGER.Debug($"关闭net proxy,SrcNetId:{NetId}");
             innerTcpClient.RemoveProxy(NetId);
-            await Write(new ReqDisconnectClient { NetId = NetId });
+            await Write(new ReqDisconnectClient { TargetNetId = NetId });
             closed = true;
             var session = GetData<GameSession>(SessionManager.SESSION);
             SetData(SessionManager.SESSION, null);

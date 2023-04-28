@@ -20,7 +20,7 @@ namespace Geek.Server.Proto
     [MessagePackObject(true)]
     public class ReqInnerConnectGate : Message
     {
-        public int NetId { get; set; }
+        public int SelfNetId { get; set; }
     }
 
     [MessagePackObject(true)]
@@ -48,7 +48,7 @@ namespace Geek.Server.Proto
     [MessagePackObject(true)]
     public class ReqDisconnectClient : Message
     {
-        public long NetId { get; set; }
+        public long TargetNetId { get; set; }
     }
 
 }
