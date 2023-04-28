@@ -18,8 +18,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ReqInnerConnectGateFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ReqInnerConnectGate>
     {
-        // NetId
-        private static global::System.ReadOnlySpan<byte> GetSpan_NetId() => new byte[1 + 5] { 165, 78, 101, 116, 73, 100 };
+        // SelfNetId
+        private static global::System.ReadOnlySpan<byte> GetSpan_SelfNetId() => new byte[1 + 9] { 169, 83, 101, 108, 102, 78, 101, 116, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ReqInnerConnectGate value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -30,8 +30,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             writer.WriteMapHeader(1);
-            writer.WriteRaw(GetSpan_NetId());
-            writer.Write(value.NetId);
+            writer.WriteRaw(GetSpan_SelfNetId());
+            writer.Write(value.SelfNetId);
         }
 
         public global::Geek.Server.Proto.ReqInnerConnectGate Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -54,10 +54,10 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                     FAIL:
                       reader.Skip();
                       continue;
-                    case 5:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430729094478UL) { goto FAIL; }
+                    case 9:
+                        if (!global::System.MemoryExtensions.SequenceEqual(stringKey, GetSpan_SelfNetId().Slice(1))) { goto FAIL; }
 
-                        ____result.NetId = reader.ReadInt32();
+                        ____result.SelfNetId = reader.ReadInt32();
                         continue;
 
                 }

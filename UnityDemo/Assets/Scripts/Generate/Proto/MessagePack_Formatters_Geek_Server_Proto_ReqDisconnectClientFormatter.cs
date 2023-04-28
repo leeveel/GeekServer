@@ -18,8 +18,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ReqDisconnectClientFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ReqDisconnectClient>
     {
-        // NetId
-        private static global::System.ReadOnlySpan<byte> GetSpan_NetId() => new byte[1 + 5] { 165, 78, 101, 116, 73, 100 };
+        // TargetNetId
+        private static global::System.ReadOnlySpan<byte> GetSpan_TargetNetId() => new byte[1 + 11] { 171, 84, 97, 114, 103, 101, 116, 78, 101, 116, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ReqDisconnectClient value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -30,8 +30,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             writer.WriteMapHeader(1);
-            writer.WriteRaw(GetSpan_NetId());
-            writer.Write(value.NetId);
+            writer.WriteRaw(GetSpan_TargetNetId());
+            writer.Write(value.TargetNetId);
         }
 
         public global::Geek.Server.Proto.ReqDisconnectClient Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -54,10 +54,10 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                     FAIL:
                       reader.Skip();
                       continue;
-                    case 5:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430729094478UL) { goto FAIL; }
+                    case 11:
+                        if (!global::System.MemoryExtensions.SequenceEqual(stringKey, GetSpan_TargetNetId().Slice(1))) { goto FAIL; }
 
-                        ____result.NetId = reader.ReadInt64();
+                        ____result.TargetNetId = reader.ReadInt64();
                         continue;
 
                 }
