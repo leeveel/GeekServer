@@ -16,12 +16,12 @@
 
 namespace MessagePack.Formatters.Geek.Server.Proto
 {
-    public sealed class NodeNotFoundFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.NodeNotFound>
+    public sealed class ReqClientChannelActiveFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ReqClientChannelActive>
     {
-        // NodeId
-        private static global::System.ReadOnlySpan<byte> GetSpan_NodeId() => new byte[1 + 6] { 166, 78, 111, 100, 101, 73, 100 };
+        // Address
+        private static global::System.ReadOnlySpan<byte> GetSpan_Address() => new byte[1 + 7] { 167, 65, 100, 100, 114, 101, 115, 115 };
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.NodeNotFound value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ReqClientChannelActive value, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (value is null)
             {
@@ -29,12 +29,13 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
+            var formatterResolver = options.Resolver;
             writer.WriteMapHeader(1);
-            writer.WriteRaw(GetSpan_NodeId());
-            writer.Write(value.NodeId);
+            writer.WriteRaw(GetSpan_Address());
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.Address, options);
         }
 
-        public global::Geek.Server.Proto.NodeNotFound Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::Geek.Server.Proto.ReqClientChannelActive Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -42,8 +43,9 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
+            var formatterResolver = options.Resolver;
             var length = reader.ReadMapHeader();
-            var ____result = new global::Geek.Server.Proto.NodeNotFound();
+            var ____result = new global::Geek.Server.Proto.ReqClientChannelActive();
 
             for (int i = 0; i < length; i++)
             {
@@ -54,10 +56,10 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                     FAIL:
                       reader.Skip();
                       continue;
-                    case 6:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 110266396471118UL) { goto FAIL; }
+                    case 7:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 32496501869798465UL) { goto FAIL; }
 
-                        ____result.NodeId = reader.ReadInt32();
+                        ____result.Address = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
                         continue;
 
                 }

@@ -38,7 +38,7 @@ namespace Geek.Server.App.Net
 
             if (!tcpClientDic.TryGetValue(node.NodeId, out InnerTcpClient tcpClient))
             {
-                tcpClient = new InnerTcpClient(node);
+                tcpClient = new InnerTcpClient(node.InnerIp, node.InnerTcpPort);
                 var res = await tcpClient.Connect();
                 if (res)
                 {

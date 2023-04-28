@@ -21,6 +21,7 @@ namespace Geek.Server.Core.Center
         public NodeType Type { get; set; }
         public string Ip { get; set; }
         public int TcpPort { get; set; }
+        public string InnerIp { get; set; }
         public int InnerTcpPort { get; set; }
         public int HttpPort { get; set; }
         public int RpcPort { get; set; }
@@ -34,7 +35,5 @@ namespace Geek.Server.Core.Center
         public int MaxLoad = int.MaxValue;
         //当前承载
         public int CurrentLoad = 0;
-        //是否可以提供服务
-        public bool CanServe = true;
     }
 }

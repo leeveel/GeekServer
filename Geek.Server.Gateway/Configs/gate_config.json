@@ -1,6 +1,7 @@
 {
   "isDebug": true,
   "ServerId": 9101, //[9101,9200]
+  "InnerIp": "127.0.0.1",
   "InnerTcpPort": 9101,
   "TcpPort": 9102,
   "HttpPort": 9103,

@@ -20,6 +20,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
     {
         // IsSuccess
         private static global::System.ReadOnlySpan<byte> GetSpan_IsSuccess() => new byte[1 + 9] { 169, 73, 115, 83, 117, 99, 99, 101, 115, 115 };
+        // ClientIds
+        private static global::System.ReadOnlySpan<byte> GetSpan_ClientIds() => new byte[1 + 9] { 169, 67, 108, 105, 101, 110, 116, 73, 100, 115 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResInnerConnectGate value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -29,9 +31,12 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteMapHeader(1);
+            var formatterResolver = options.Resolver;
+            writer.WriteMapHeader(2);
             writer.WriteRaw(GetSpan_IsSuccess());
             writer.Write(value.IsSuccess);
+            writer.WriteRaw(GetSpan_ClientIds());
+            global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.List<long>>(formatterResolver).Serialize(ref writer, value.ClientIds, options);
         }
 
         public global::Geek.Server.Proto.ResInnerConnectGate Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -42,6 +47,7 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             options.Security.DepthStep(ref reader);
+            var formatterResolver = options.Resolver;
             var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.ResInnerConnectGate();
 
@@ -55,10 +61,22 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                       reader.Skip();
                       continue;
                     case 9:
-                        if (!global::System.MemoryExtensions.SequenceEqual(stringKey, GetSpan_IsSuccess().Slice(1))) { goto FAIL; }
+                        switch (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey))
+                        {
+                            default: goto FAIL;
+                            case 8315161565830804297UL:
+                                if (stringKey[0] != 115) { goto FAIL; }
 
-                        ____result.IsSuccess = reader.ReadBoolean();
-                        continue;
+                                ____result.IsSuccess = reader.ReadBoolean();
+                                continue;
+
+                            case 7226435094589303875UL:
+                                if (stringKey[0] != 115) { goto FAIL; }
+
+                                ____result.ClientIds = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::System.Collections.Generic.List<long>>(formatterResolver).Deserialize(ref reader, options);
+                                continue;
+
+                        }
 
                 }
             }

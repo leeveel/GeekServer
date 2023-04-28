@@ -20,10 +20,11 @@ namespace Protocol
 			PolymorphicTypeMapper.Register<Geek.Server.Proto.ResItemChange>();
 			PolymorphicTypeMapper.Register<Geek.Server.Proto.ReqConnectGate>();
 			PolymorphicTypeMapper.Register<Geek.Server.Proto.ResConnectGate>();
-			PolymorphicTypeMapper.Register<Geek.Server.Proto.NodeNotFound>();
 			PolymorphicTypeMapper.Register<Geek.Server.Proto.ReqInnerConnectGate>();
 			PolymorphicTypeMapper.Register<Geek.Server.Proto.ResInnerConnectGate>();
-			PolymorphicTypeMapper.Register<Geek.Server.Proto.PlayerDisconnected>();
+			PolymorphicTypeMapper.Register<Geek.Server.Proto.ReqClientChannelActive>();
+			PolymorphicTypeMapper.Register<Geek.Server.Proto.ReqClientChannelInactive>();
+			PolymorphicTypeMapper.Register<Geek.Server.Proto.ReqDisconnectClient>();
 			PolymorphicTypeMapper.Register<Geek.Server.Proto.A>();
 			PolymorphicTypeMapper.Register<Geek.Server.Proto.B>();
 			PolymorphicTypeMapper.Register<Geek.Server.Proto.ReqLogin>();

@@ -7,11 +7,11 @@ using Protocol;
 
 namespace Geek.Server.TestPressure.Logic
 {
-    public class ClientProtocol : IProtocal<NetMessage>
+    public class ClientProtocol : IProtocal<Message>
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
-        public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out NetMessage message)
+        public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out Message message)
         {
             message = default;
             var reader = new SequenceReader<byte>(input);
@@ -38,7 +38,7 @@ namespace Geek.Server.TestPressure.Logic
             }
             else
             {
-                message = new NetMessage { Msg = MessagePackSerializer.Deserialize<Message>(payload.Slice(4)), MsgId = msgId };
+                message = MessagePackSerializer.Deserialize<Message>(payload.Slice(4));
                 if (message.MsgId != msgId)
                 {
                     throw new ProtocalParseErrorException($"解析消息错误，注册消息id和消息无法对应.real:{message.MsgId}, register:{msgId}");
@@ -49,10 +49,10 @@ namespace Geek.Server.TestPressure.Logic
 
         private const int Magic = 0x1234;
         int count = 0;
-        public void WriteMessage(NetMessage msg, IBufferWriter<byte> output)
+        public void WriteMessage(Message msg, IBufferWriter<byte> output)
         {
             //length + timestamp + magic + msgid
-            var bytes = msg.Serialize();
+            var bytes = MessagePackSerializer.Serialize(msg);
             int len = 4 + 8 + 4 + 4 + bytes.Length;
             var span = output.GetSpan(len);
 

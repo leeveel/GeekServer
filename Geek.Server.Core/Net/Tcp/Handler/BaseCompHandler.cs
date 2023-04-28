@@ -12,12 +12,9 @@ namespace Geek.Server.Core.Net.Tcp.Handler
 
         public ICompAgent CacheComp { get; set; }
 
-        protected abstract Task InitActor();
-
-        public override async Task Init()
+        public virtual async Task InitActor()
         {
-            await InitActor();
-            if (CacheComp == null)
+            if (CacheComp == null && ActorId > 0)
                 CacheComp = await ActorMgr.GetCompAgent(ActorId, CompAgentType);
         }
 

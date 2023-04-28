@@ -13,7 +13,7 @@ namespace Geek.Server.Gateway.Handler.Http
         /// </summary> 
         public override Task<string> Action(string ip, string url, Dictionary<string, string> parameters)
         {
-            var res = new HttpResult(HttpResult.Stauts.Success, $"当前在线节点数量:{GateNetMgr.GetConnectionCount()}").ToString();
+            var res = new HttpResult(HttpResult.Stauts.Success, $"当前在线节点数量:{GateNetMgr.GetClientConnectionCount()}").ToString();
             return Task.FromResult(res);
         }
     }

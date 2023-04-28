@@ -12,7 +12,7 @@ namespace Geek.Server.Hotfix.Login
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public async Task OnLogin(Session session, ReqLogin reqLogin)
+        public async Task OnLogin(GameSession session, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {

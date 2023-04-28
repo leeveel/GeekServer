@@ -1,10 +1,7 @@
-﻿using Geek.Server.Core.Actors;
+﻿using Common.Net.Tcp;
 using Geek.Server.Core.Net.Tcp;
-using Geek.Server.Core.Net.Tcp.Inner;
-using Geek.Server.Core.Utils;
 using Geek.Server.Gateway.Net.Tcp.Handler;
 using Microsoft.AspNetCore.Connections;
-using System.Threading.Channels;
 
 namespace Geek.Server.Gateway.Net.Tcp.Inner
 {
@@ -16,29 +13,33 @@ namespace Geek.Server.Gateway.Net.Tcp.Inner
         public override async Task OnConnectedAsync(ConnectionContext context)
         {
             LOGGER.Debug($"内部节点 {context.RemoteEndPoint?.ToString()} 链接成功");
-            NetChannel channel = null;
-            channel = new NetChannel(context, new InnerProtocol(true), (msg) => Dispatcher(channel, msg), () => OnDisconnection(channel));
+            NetChannel<NetMessage> channel = null;
+            channel = new NetChannel<NetMessage>(context, new InnerProtocol(), async (msg) => await Dispatcher(channel, msg));
             await channel.StartReadMsgAsync();
+            OnDisconnection(channel);
         }
 
-        protected void OnDisconnection(NetChannel channel)
+        protected void OnDisconnection(INetChannel channel)
         {
-            LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
-            GateNetMgr.ServerConns.Remove(channel);
+            LOGGER.Debug($"{channel.RemoteAddress} 断开链接");
+            GateNetMgr.RemoveServerNode(channel.NetId);
         }
 
-        protected void Dispatcher(NetChannel conn, NetMessage nmsg)
+        protected async ValueTask Dispatcher(INetChannel conn, NetMessage nmsg)
         {
             var handler = MsgHanderFactory.GetHander(nmsg.MsgId);
             //如果是需要网关处理的消息
             if (handler != null)
             {
                 handler.Action(conn, MessagePack.MessagePackSerializer.Deserialize<Message>(nmsg.MsgRaw));
+                nmsg.ReturnRawMenory();
             }
             else //否则转发
             {
-                var clientConn = GateNetMgr.ClientConns.Get(nmsg.NetId);
-                clientConn?.Write(nmsg);
+                //LOGGER.Debug($"转发消息:{nmsg.MsgId}到{nmsg.NetId}");
+                var clientConn = GateNetMgr.GetClientNode(nmsg.NetId);
+                if (clientConn != null)
+                    await clientConn.Write(nmsg);
             }
         }
     }

@@ -1,29 +1,20 @@
-﻿using Geek.Server.Core.Net.Tcp;
+﻿using Common.Net.Tcp;
+using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Proto;
 
 namespace Geek.Server.Gateway.Net.Tcp.Handler
 {
     public abstract class BaseHander
     {
-        public virtual void Action(NetChannel conn, Message msg)
+        public virtual void Action(INetChannel conn, Message msg)
         {
 
         }
 
-        protected void WriteWithStatus(NetChannel conn, Message msg, int uniId)
+        protected void Write(INetChannel conn, Message msg, int uniId)
         {
             msg.UniId = uniId;
-            conn.Write(msg);
-            if (uniId > 0)
-            {
-                var res = new ResErrorCode
-                {
-                    UniId = uniId,
-                    ErrCode = 0,
-                    Desc = ""
-                };
-                conn.Write(res);
-            }
+            conn.Write(new NetMessage(msg, 0));
         }
     }
 }

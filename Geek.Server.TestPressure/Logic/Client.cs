@@ -1,3 +1,4 @@
+using Common.Net.Tcp;
 using Geek.Server.Core.Net.Tcp;
 using Newtonsoft.Json;
 using System.Net.Sockets;
@@ -20,7 +21,7 @@ namespace Geek.Server.TestPressure.Logic
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         readonly long id;
-        NetChannel netChannel;
+        INetChannel netChannel;
         readonly MsgWaiter msgWaiter = new();
         int msgUniId = 200;
 
@@ -34,9 +35,10 @@ namespace Geek.Server.TestPressure.Logic
             var context = await new SocketConnection(AddressFamily.InterNetwork, ip, port).StartAsync(10000);
             if (context != null)
             {
-                Log.Info($"Connected to {context.LocalEndPoint}");
-                netChannel = new NetChannel(context, new ClientProtocol(), OnRevice, OnDisConnected);
-                _ = netChannel.StartReadMsgAsync();
+                //Log.Info($"Connected to {context.LocalEndPoint}");
+                var net = new NetChannel<Message>(context, new ClientProtocol(), OnRevice, OnDisConnected);
+                netChannel = net;
+                _ = net.StartReadMsgAsync();
             }
             else
             {
@@ -44,10 +46,17 @@ namespace Geek.Server.TestPressure.Logic
                 return;
             }
             await ReqRouter();
-            await ReqLogin();
-            await Task.Delay(100);
-            await ReqBagInfo();
-            await Task.Delay(100);
+
+            if (!await ReqLogin())
+            {
+                return;
+            }
+
+            if (!await ReqBagInfo())
+            {
+                return;
+            }
+
             await ReqComposePet();
         }
 
@@ -74,7 +83,7 @@ namespace Geek.Server.TestPressure.Logic
             return SendMsgAndWaitBack(req);
         }
 
-        private Task ReqBagInfo()
+        private Task<bool> ReqBagInfo()
         {
             return SendMsgAndWaitBack(new ReqBagInfo());
         }
@@ -87,7 +96,7 @@ namespace Geek.Server.TestPressure.Logic
         void SendMsg(Message msg)
         {
             msg.UniId = msgUniId++;
-            Log.Info($"{id} 发送消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
+            //Log.Info($"{id} 发送消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
             netChannel.Write(msg);
         }
 
@@ -102,9 +111,9 @@ namespace Geek.Server.TestPressure.Logic
             Log.Info($"客户端[{id}]断开");
         }
 
-        public void OnRevice(NetMessage nmsg)
+        public Task OnRevice(Message msg)
         {
-            var msg = nmsg.Msg;
+            //  Log.Info($"{id} 收到消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
             //Log.Error($"收到消息:{msg.MsgId} {MsgFactory.GetType(msg.MsgId)}");
             if (msg.MsgId == ResErrorCode.MsgID)
             {
@@ -125,7 +134,12 @@ namespace Geek.Server.TestPressure.Logic
                 if (!string.IsNullOrEmpty(errMsg.Desc))
                     Log.Info("服务器提示:" + errMsg.Desc);
             }
-            Log.Info($"{id} 收到消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
+
+            if (msg.MsgId == ResConnectGate.MsgID)
+            {
+                msgWaiter.EndWait(msg.UniId, (msg as ResConnectGate).Result);
+            }
+            return Task.CompletedTask;
         }
     }
 }

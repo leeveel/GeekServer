@@ -49,6 +49,8 @@ namespace Geek.Server.Core.Storage
         /// <param name="state"></param>
         public Task SaveState<TState>(TState state) where TState : CacheState
         {
+            if (state == null)
+                return Task.CompletedTask;
             var (isChanged, data) = state.IsChanged();
             if (isChanged)
             {
@@ -59,6 +61,6 @@ namespace Geek.Server.Core.Storage
             }
             return Task.CompletedTask;
         }
-        
+
     }
 }

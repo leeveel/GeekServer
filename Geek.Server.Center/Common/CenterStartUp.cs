@@ -23,7 +23,6 @@ namespace Geek.Server.Center.Common
 
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");
-                await RpcServer.Start(Settings.RpcPort);
                 await WebServer.Start(Settings.InsAs<CenterSetting>().WebServerUrl);
 
                 Settings.LauchTime = DateTime.Now;
@@ -37,6 +36,8 @@ namespace Geek.Server.Center.Common
                     Type = Core.Center.NodeType.Center,
                     RpcPort = Settings.RpcPort,
                 });
+
+                await RpcServer.Start(Settings.RpcPort);
 
                 TimeSpan delay = TimeSpan.FromSeconds(1);
                 while (Settings.AppRunning)

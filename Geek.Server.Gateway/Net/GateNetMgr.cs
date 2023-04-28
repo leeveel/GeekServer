@@ -1,4 +1,4 @@
-﻿using Geek.Server.Core.Center;
+﻿using Common.Net.Tcp;
 using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Gateway.Common;
 using Geek.Server.Gateway.Net.Rpc;
@@ -10,9 +10,10 @@ namespace Geek.Server.Gateway.Net
 {
     internal class GateNetMgr
     {
-        public static Connections ClientConns { get; private set; } = new Connections();
-
-        public static Connections ServerConns { get; private set; } = new Connections();
+        static Connections ClientConns { get; set; } = new Connections();
+        static Connections ServerConns { get; set; } = new Connections();
+        static TcpServer outerTcpServer;
+        static TcpServer innerTcpServer;
 
         public static GateCenterRpcClient CenterRpcClient { get; set; }
 
@@ -22,9 +23,6 @@ namespace Geek.Server.Gateway.Net
             return CenterRpcClient.Connect();
         }
 
-
-        private static TcpServer outerTcpServer;
-        private static TcpServer innerTcpServer;
         public static async Task StartTcpServer()
         {
             outerTcpServer = new TcpServer();
@@ -43,17 +41,61 @@ namespace Geek.Server.Gateway.Net
                 await CenterRpcClient.Stop();
         }
 
-        public static long SelectAHealthNode(int serverId)
+        public static INetChannel AddServerNode(INetChannel channel)
         {
-            //TODO:分布式大服结构中网络节点会存在多个
-            //TODO:选择一个负载最小的节点
-            var conn = ServerConns.Get(serverId);
-            if (conn != null)
-                return conn.NodeId;
-            return -1;
+            return ServerConns.Add(channel);
         }
 
-        public static int GetConnectionCount()
+        public static void AddClientNode(INetChannel channel)
+        {
+            ClientConns.Add(channel);
+        }
+
+        public static void RemoveClientNode(long id)
+        {
+            var node = ClientConns.Remove(id);
+            if (node != null && !node.IsClose())
+            {
+                node.Close();
+            }
+        }
+
+        public static void RemoveServerNode(long id)
+        {
+            var node = ServerConns.Remove(id);
+            if (node != null && !node.IsClose())
+            {
+                node.Close();
+            }
+        }
+
+        public static INetChannel GetClientNode(long id)
+        {
+            var node = ClientConns.Get(id);
+            if (node != null && !node.IsClose())
+                return node;
+            return null;
+        }
+
+        public static INetChannel GetServerNode(long id)
+        {
+            var node = ServerConns.Get(id);
+            if (node != null && !node.IsClose())
+                return node;
+            return null;
+        }
+
+        public static List<long> GetAllServerNodeIds(List<long> result = null)
+        {
+            return ServerConns.GetAllNodeIds(result);
+        }
+
+        public static List<long> GetAllClientNodeWithTargetId(long target)
+        {
+            return ClientConns.GetAllNodeWithTargetId(target);
+        }
+
+        public static int GetClientConnectionCount()
         {
             return ClientConns.GetConnectionCount();
         }

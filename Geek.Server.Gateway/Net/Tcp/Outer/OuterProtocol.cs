@@ -3,6 +3,7 @@ using Bedrock.Framework;
 using Bedrock.Framework.Protocols;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Utils;
+using Geek.Server.Gateway.Net.Tcp;
 using MessagePack;
 
 namespace Geek.Server.Gateway;
@@ -16,6 +17,12 @@ public class OuterProtocol : IProtocal<NetMessage>
     long lastReviceTime = 0;
     int lastOrder = 0;
     const int MAX_RECV_SIZE = 1024 * 1024 * 2; /// 从客户端接收的包大小最大值（单位：字节 5M）
+    long NetId;
+
+    public OuterProtocol(long NetId)
+    {
+        this.NetId = NetId;
+    }
 
     public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out NetMessage message)
     {
@@ -55,7 +62,11 @@ public class OuterProtocol : IProtocal<NetMessage>
 
         reader.TryReadBigEndian(out int msgId);  //4
 
-        message = new NetMessage { MsgId = msgId, MsgRaw = payload.Slice(16).ToArray() };
+        payload = payload.Slice(16);
+        var dataLen = (int)payload.Length;
+        var data = ArrayPool<byte>.Shared.Rent(dataLen);
+        payload.CopyTo(data);
+        message = new NetMessage(msgId, NetId, data, dataLen);
 
         consumed = payload.End;
         examined = consumed;
@@ -65,14 +76,15 @@ public class OuterProtocol : IProtocal<NetMessage>
 
     public void WriteMessage(NetMessage nmsg, IBufferWriter<byte> output)
     {
-        byte[] bytes = nmsg.Serialize();
+        var bytes = nmsg.Serialize();
         int len = 8 + bytes.Length;
         var span = output.GetSpan(len);
         int offset = 0;
         span.WriteInt(len, ref offset);
         span.WriteInt(nmsg.MsgId, ref offset);
-        span.WriteBytesWithoutLength(bytes, ref offset);
+        bytes.CopyTo(span.Slice(8));
         output.Advance(len);
+        nmsg.ReturnRawMenory();
     }
 
     public bool CheckMagicNumber(int order, int msgLen)

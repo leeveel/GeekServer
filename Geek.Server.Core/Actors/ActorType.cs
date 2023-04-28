@@ -10,9 +10,10 @@
     {
         //ID全服唯一类型
         None,
-        Role = 1, // 角色
-        Guild = 2, //公会 
+        Role = 1,
+        Guild = 2,
         Logger = 4,
+        Gate = 5,
 
         Separator = 128, /*分割线(勿调整,勿用于业务逻辑)*/
 

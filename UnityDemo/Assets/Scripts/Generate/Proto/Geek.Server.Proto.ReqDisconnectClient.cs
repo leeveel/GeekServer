@@ -2,20 +2,21 @@
 
 using Protocol;
 using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class NodeNotFound : Message
+	public class ReqDisconnectClient : Message
 	{
 		[IgnoreMember]
-		public const int Sid = -498188700;
+		public const int Sid = -1408529503;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-        public int NodeId { get; set; }
+        public long NetId { get; set; }
 	}
 }

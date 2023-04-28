@@ -15,13 +15,13 @@ namespace Geek.Server.Core.Net
         private readonly int retryDelay = 15000;
 
         /// <summary>
-        /// 三分钟
+        /// 两分钟
         /// </summary>
-        const int MAX_DELAY = 180_000;
+        const int MAX_DELAY = 120_000;
 
         private readonly string connInfo;
 
-        public ReConnecter(Func<Task<bool>> connFun, string connInfo="", int retryTimes=-1, int retryDelay=15000)
+        public ReConnecter(Func<Task<bool>> connFun, string connInfo = "", int retryTimes = -1, int retryDelay = 5000)
         {
             this.connFun = connFun;
             this.connInfo = connInfo;
@@ -33,9 +33,11 @@ namespace Geek.Server.Core.Net
         {
             if (connFun != null)
             {
-                bool success = await connFun.Invoke();
-                if(!success)
+                bool success = await connFun();
+                if (!success)
                     await ReConnect();
+                else
+                    retryed = 0;
                 return success;
             }
             else
@@ -44,6 +46,11 @@ namespace Geek.Server.Core.Net
             }
         }
 
+        public void Close()
+        {
+            cancel?.Cancel();
+            cancel = null;
+        }
 
         /// <summary>
         /// 尝试立即重连
@@ -53,17 +60,14 @@ namespace Geek.Server.Core.Net
         {
             try
             {
-                if (cancel != null)
-                {
-                    cancel.Cancel();
-                    cancel.Token.ThrowIfCancellationRequested();
-                }
+                cancel?.Cancel();
+                cancel = null;
+                retryed = Math.Max(0, retryed - 1);
+                await Connect();
             }
             catch (Exception)
             {
-                LOGGER.Error($"取消当前重连,尝试立即重连");
-                retryed--;
-                await Connect();  
+
             }
         }
 
@@ -84,7 +88,9 @@ namespace Geek.Server.Core.Net
                     LOGGER.Error($"连接断开,{delay}ms后尝试重连");
                     cancel = new CancellationTokenSource();
                     await Task.Delay(delay, cancel.Token);
-                    await Connect();
+                    if (!cancel.IsCancellationRequested)
+                        await Connect();
+                    cancel = null;
                 }
                 else
                 {
@@ -104,13 +110,7 @@ namespace Geek.Server.Core.Net
 
         private int GetNextDelayTime()
         {
-            int res = retryDelay;
-            for (int i = 0; i < retryed; i++)
-            {
-                res = retryDelay * 2;
-            }
-            res = Math.Min(res, MAX_DELAY);
-            return res;
+            return Math.Min(retryDelay + retryed * 5000, MAX_DELAY);
         }
 
     }

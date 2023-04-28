@@ -2,6 +2,7 @@
 
 using Protocol;
 using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
@@ -16,6 +17,6 @@ namespace Geek.Server.Proto
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-        public int NodeId { get; set; }
+        public int NetId { get; set; }
 	}
 }

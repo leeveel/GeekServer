@@ -2,6 +2,7 @@
 
 using Protocol;
 using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
@@ -17,5 +18,7 @@ namespace Geek.Server.Proto
 		public override int MsgId => MsgID;
 
         public bool IsSuccess { get; set; }
+        //当前逻辑服的客户端id ，当逻辑服断线重连的时候，需要同步此数据给逻辑服
+        public List<long> ClientIds { get; set; }
 	}
 }

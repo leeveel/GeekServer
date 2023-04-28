@@ -2,6 +2,7 @@
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Events;
 using Geek.Server.Proto;
+using NLog;
 using System.Collections.Concurrent;
 
 namespace Geek.Server.App.Net.Session
@@ -11,31 +12,37 @@ namespace Geek.Server.App.Net.Session
     /// </summary>
     public static class SessionManager
     {
-        internal static ConcurrentDictionary<long, Session> sessionMap = new();
-        //connId - session.id
-        internal static readonly ConcurrentDictionary<long, long> connIdMap = new();
+        static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        public static readonly string SESSION = "SESSION";
+        public static readonly string ROLE_ID = "R_ID";
+        internal static ConcurrentDictionary<long, GameSession> sessionMap = new();
 
         public static int Count()
         {
             return sessionMap.Count;
         }
 
-        public static void Remove(long id)
+        public static void Remove(GameSession session)
         {
-            if (sessionMap.TryRemove(id, out Session session))
+            var id = session.RoleId;
+            if (sessionMap.TryRemove(id, out GameSession curSession) && session == curSession)
             {
-                connIdMap.TryRemove(session.NetId, out _);
+                session.Channel.SetData(SESSION, null);
                 if (ActorMgr.HasActor(id))
                     EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
             }
         }
 
-        public static void RemoveByClientConnId(long id)
+        public static void Remove(long id)
         {
-            var session = GetByClientConnId(id);
-            if (session != null)
-                Remove(session.RoleId);
+            if (sessionMap.TryRemove(id, out GameSession session))
+            {
+                session.Channel.SetData(SESSION, null);
+                if (ActorMgr.HasActor(id))
+                    EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
+            }
         }
+
 
         public static Task RemoveAll()
         {
@@ -47,32 +54,22 @@ namespace Geek.Server.App.Net.Session
                 }
             }
             sessionMap.Clear();
-            connIdMap.Clear();
             return Task.CompletedTask;
         }
 
-        public static Session Get(long id)
+        public static GameSession Get(long id)
         {
-            sessionMap.TryGetValue(id, out Session session);
+            sessionMap.TryGetValue(id, out GameSession session);
             return session;
         }
 
-        public static Session GetByClientConnId(long connId)
+        public static void Add(GameSession session)
         {
-            if (connIdMap.TryGetValue(connId, out long id))
-            {
-                sessionMap.TryGetValue(id, out Session session);
-                return session;
-            }
-            return null;
-        }
-
-        public static void Add(Session session)
-        {
-            if (sessionMap.TryGetValue(session.RoleId, out Session old))
+            if (sessionMap.TryGetValue(session.RoleId, out GameSession old))
             {
                 if (old.Token != session.Token)
                 {
+                    Log.Debug("old.Token != session.Token，被顶号");
                     //顶号
                     var msg = new ResPrompt
                     {
@@ -83,12 +80,16 @@ namespace Geek.Server.App.Net.Session
                 }
                 else if (old.Channel != session.Channel)
                 {
+                    Log.Debug("old.Channel != session.Channel，断开老连接");
                     //do nothing
-                    //同一个设备从不同的网络服重连上来
+                    //同一个设备从不同的网络服重连上来 
                 }
+                old.Channel.Close();
             }
+
+            session.Channel.SetData(SESSION, session);
+            session.Channel.SetData(ROLE_ID, session.RoleId);
             sessionMap[session.RoleId] = session;
-            connIdMap[session.NetId] = session.RoleId;
         }
     }
 }

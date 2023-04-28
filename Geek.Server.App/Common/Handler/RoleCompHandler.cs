@@ -1,19 +1,19 @@
 ﻿using Geek.Server.App.Net.Session;
 using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Core.Net.Tcp.Handler;
 
 namespace Geek.Server.App.Common.Handler
 {
     public abstract class BaseRoleCompHandler : BaseCompHandler
     {
-        protected override Task InitActor()
+        public override async Task InitActor()
         {
             if (ActorId <= 0)
             {
-                var session = SessionManager.GetByClientConnId(ClientConnId);
-                ActorId = session.RoleId;
+                ActorId = Channel.GetData<long>(SessionManager.ROLE_ID);
             }
-            return Task.CompletedTask;
+            await base.InitActor();
         }
     }
 

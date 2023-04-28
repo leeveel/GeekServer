@@ -1,19 +1,15 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using Bedrock.Framework;
 using Bedrock.Framework.Protocols;
-using Geek.Server.Core.Utils;
 
-namespace Geek.Server.Core.Net.Tcp.Inner
+namespace Geek.Server.Gateway.Net.Tcp.Inner
 {
     public class InnerProtocol : IProtocal<NetMessage>
     {
-        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+        static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        const int MAX_RECV_SIZE = 1024 * 1024 * 2;
+        const int MAX_RECV_SIZE = 1024 * 1024 * 20;
 
-        private bool useRawMsgData;
-        public InnerProtocol(bool useRawMsgData) { this.useRawMsgData = useRawMsgData; }
         public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out NetMessage message)
         {
             message = default;
@@ -21,7 +17,7 @@ namespace Geek.Server.Core.Net.Tcp.Inner
 
             if (!reader.TryReadBigEndian(out int msgLen))
             {
-                consumed = input.End; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据
+                consumed = input.End;
                 return false;
             }
 
@@ -36,18 +32,16 @@ namespace Geek.Server.Core.Net.Tcp.Inner
                 return false;
             }
 
-            reader.TryReadBigEndian(out long netId); // 8 
-            reader.TryReadBigEndian(out int msgId);     //4  
+            reader.TryReadBigEndian(out long netId);
+            reader.TryReadBigEndian(out int msgId);
 
             var payload = input.Slice(reader.Position, msgLen - 16);
-            if (useRawMsgData)
-            {
-                message = new NetMessage { MsgId = msgId, NetId = netId, MsgRaw = payload.ToArray() };
-            }
-            else
-            {
-                message = new NetMessage { MsgId = msgId, NetId = netId, Msg = MessagePack.MessagePackSerializer.Deserialize<Message>(payload) };
-            }
+
+            var dataLen = (int)payload.Length;
+            var data = ArrayPool<byte>.Shared.Rent(dataLen);
+            payload.CopyTo(data);
+
+            message = new NetMessage(msgId, netId, data, dataLen);
 
             consumed = payload.End;
             examined = consumed;
@@ -56,15 +50,16 @@ namespace Geek.Server.Core.Net.Tcp.Inner
 
         public void WriteMessage(NetMessage nmsg, IBufferWriter<byte> output)
         {
-            byte[] bytes = nmsg.Serialize();
-            int len = 16 + bytes.Length; //len(4) + clientConnId(8) + msgid(4)
+            var bytes = nmsg.Serialize();
+            int len = 16 + bytes.Length;
             var span = output.GetSpan(len);
             int offset = 0;
             span.WriteInt(len, ref offset);
             span.WriteLong(nmsg.NetId, ref offset);
             span.WriteInt(nmsg.MsgId, ref offset);
-            span.WriteBytesWithoutLength(bytes, ref offset);
+            bytes.CopyTo(span.Slice(16));
             output.Advance(len);
+            nmsg.ReturnRawMenory();
         }
 
         public bool CheckMsgLen(int msgLen)

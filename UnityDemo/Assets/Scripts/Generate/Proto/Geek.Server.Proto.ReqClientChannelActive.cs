@@ -2,23 +2,21 @@
 
 using Protocol;
 using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
 	[MessagePackObject(true)]
-	public class PlayerDisconnected : Message
+	public class ReqClientChannelActive : Message
 	{
 		[IgnoreMember]
-		public const int Sid = 1739074562;
+		public const int Sid = -1734875143;
 
 		[IgnoreMember]
 		public const int MsgID = Sid;
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-        /// <summary>
-        /// 网关网络节点
-        /// </summary>
-        public int GateNodeId { get; set; }
+        public string Address { get; set; }
 	}
 }

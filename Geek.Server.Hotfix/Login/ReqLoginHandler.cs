@@ -9,10 +9,9 @@ namespace Geek.Server.Hotfix.Login
     {
         public override async Task ActionAsync()
         {
-            var session = new Session
+            var session = new GameSession
             {
-                NetId = ClientConnId,
-                Channel = Channel
+                Channel = this.Channel
             };
             await Comp.OnLogin(session, Msg as ReqLogin);
         }

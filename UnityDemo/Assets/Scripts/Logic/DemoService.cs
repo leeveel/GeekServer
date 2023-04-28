@@ -63,6 +63,13 @@ namespace Logic
             AddListener(ResBagInfo.MsgID, OnResBagInfo);
             AddListener(ResComposePet.MsgID, OnResComposePet);
             AddListener(ResErrorCode.MsgID, OnResErrorCode);
+            AddListener(ResConnectGate.MsgID, OnResConnectGate);
+        }
+
+        private void OnResConnectGate(Event e)
+        {
+            ResConnectGate res = GetCurMsg<ResConnectGate>(e.Data);
+            MsgWaiter.EndWait(res.UniId, res.Result);
         }
 
         private void OnResErrorCode(Event e)

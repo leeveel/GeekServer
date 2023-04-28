@@ -18,10 +18,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ResConnectGateFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ResConnectGate>
     {
-        // ServerId
-        private static global::System.ReadOnlySpan<byte> GetSpan_ServerId() => new byte[1 + 8] { 168, 83, 101, 114, 118, 101, 114, 73, 100 };
-        // NodeId
-        private static global::System.ReadOnlySpan<byte> GetSpan_NodeId() => new byte[1 + 6] { 166, 78, 111, 100, 101, 73, 100 };
+        // Result
+        private static global::System.ReadOnlySpan<byte> GetSpan_Result() => new byte[1 + 6] { 166, 82, 101, 115, 117, 108, 116 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResConnectGate value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -31,11 +29,9 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteMapHeader(2);
-            writer.WriteRaw(GetSpan_ServerId());
-            writer.Write(value.ServerId);
-            writer.WriteRaw(GetSpan_NodeId());
-            writer.Write(value.NodeId);
+            writer.WriteMapHeader(1);
+            writer.WriteRaw(GetSpan_Result());
+            writer.Write(value.Result);
         }
 
         public global::Geek.Server.Proto.ResConnectGate Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -58,15 +54,10 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                     FAIL:
                       reader.Skip();
                       continue;
-                    case 8:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 7226432857197143379UL) { goto FAIL; }
-
-                        ____result.ServerId = reader.ReadInt32();
-                        continue;
                     case 6:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 110266396471118UL) { goto FAIL; }
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 128009175786834UL) { goto FAIL; }
 
-                        ____result.NodeId = reader.ReadInt64();
+                        ____result.Result = reader.ReadBoolean();
                         continue;
 
                 }

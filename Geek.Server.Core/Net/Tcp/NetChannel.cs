@@ -1,23 +1,27 @@
 ﻿using Bedrock.Framework.Protocols;
+using Common.Net.Tcp;
 using Microsoft.AspNetCore.Connections;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace Geek.Server.Core.Net.Tcp
 {
-    public class NetChannel
+    public class NetChannel<IMessage> : INetChannel where IMessage : class
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public ConnectionContext Context { get; protected set; }
-        public ProtocolReader Reader { get; protected set; }
-        protected ProtocolWriter Writer { get; set; }
-        public IProtocal<NetMessage> Protocol { get; protected set; }
-        Action<NetMessage> onMessageAct;
-        Action onConnectCloseAct;
-        bool triggerCloseEvt = true;
-        public long NodeId { get; set; } = 0;
+        public ConnectionContext Context { get; set; }
+        public ProtocolReader Reader { get; set; }
+        IProtocal<IMessage> Protocol { get; set; }
+        ProtocolWriter Writer { get; set; }
+        public long NetId { get; set; } = 0;
         public long DefaultTargetNodeId { get; set; }
+        public long ResCode { get; set; }
+        public string RemoteAddress { get => Context?.RemoteEndPoint.ToString(); }
+        ConcurrentDictionary<string, object> Datas { get; set; } = new();
+        Func<IMessage, Task> onMessageAct;
+        Action onConnectCloseAct;
 
-        public NetChannel(ConnectionContext context, IProtocal<NetMessage> protocal, Action<NetMessage> onMessage = null, Action onConnectClose = null)
+        public NetChannel(ConnectionContext context, IProtocal<IMessage> protocal, Func<IMessage, Task> onMessage = null, Action onConnectClose = null)
         {
             Context = context;
             Reader = context.CreateReader();
@@ -30,42 +34,36 @@ namespace Geek.Server.Core.Net.Tcp
 
         public async Task StartReadMsgAsync()
         {
-            try
+            while (Reader != null && Writer != null)
             {
-                while (Reader != null && Writer != null)
+                try
                 {
-                    try
+                    var result = await Reader.ReadAsync(Protocol);
+                    if (result.HaveMsg)
                     {
-                        var result = await Reader.ReadAsync(Protocol);
-                        if (result.HaveMsg)
-                        {
-                            onMessageAct?.Invoke(result.Message);
-                        }
+                        if (onMessageAct != null)
+                            await onMessageAct(result.Message);
+                    }
 
-                        if (result.IsCompleted)
-                            break;
-                    }
-                    catch (Exception e)
-                    {
-                        LOGGER.Error(e.Message);
+                    if (result.IsCompleted)
                         break;
-                    }
+                }
+                catch (Exception e)
+                {
+                    LOGGER.Error(e.Message);
+                    break;
                 }
             }
-            catch (Exception e)
+        }
+
+        public async ValueTask Write(object msg)
+        {
+            var realMsg = msg as IMessage;
+            if (realMsg == null)
             {
-                LOGGER.Error(e.Message);
+                LOGGER.Error($"写入错误的消息类型,需要:{typeof(IMessage).FullName},实际是:{msg.GetType().FullName}");
             }
-        }
-
-        public void Write(NetMessage msg)
-        {
-            _ = Writer.WriteAsync(Protocol, msg);
-        }
-
-        public void Write(Message msg)
-        {
-            Write(new NetMessage { Msg = msg, MsgId = msg.MsgId });
+            await Writer.WriteAsync(Protocol, realMsg);
         }
 
         public bool IsClose()
@@ -75,15 +73,13 @@ namespace Geek.Server.Core.Net.Tcp
 
         protected void ConnectionClosed()
         {
-            if (triggerCloseEvt)
-                onConnectCloseAct?.Invoke();
+            onConnectCloseAct?.Invoke();
             Reader = null;
             Writer = null;
         }
 
-        public void Abort(bool triggerCloseEvt)
+        public void Close()
         {
-            this.triggerCloseEvt = triggerCloseEvt;
             Reader = null;
             Writer = null;
             try
@@ -94,6 +90,20 @@ namespace Geek.Server.Core.Net.Tcp
             {
 
             }
+        }
+
+        public T GetData<T>(string key)
+        {
+            if (Datas.TryGetValue(key, out var v))
+            {
+                return (T)v;
+            }
+            return default(T);
+        }
+
+        public void SetData(string key, object v)
+        {
+            Datas[key] = v;
         }
     }
 }

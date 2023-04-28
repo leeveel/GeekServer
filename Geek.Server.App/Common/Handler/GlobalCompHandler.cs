@@ -8,7 +8,7 @@ namespace Geek.Server.App.Common.Handler
 {
     public abstract class BaseGlobalCompHandler : BaseCompHandler
     {
-        protected override Task InitActor()
+        public override async Task InitActor()
         {
             if (ActorId <= 0)
             {
@@ -16,7 +16,7 @@ namespace Geek.Server.App.Common.Handler
                 ActorType actorType = CompRegister.GetActorType(compType);
                 ActorId = IdGenerator.GetActorID(actorType);
             }
-            return Task.CompletedTask;
+            await base.InitActor();
         }
     }
 

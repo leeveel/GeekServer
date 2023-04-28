@@ -1,19 +1,12 @@
-﻿namespace Geek.Server.Core.Net.Tcp.Handler
+﻿using Common.Net.Tcp;
+
+namespace Geek.Server.Core.Net.Tcp.Handler
 {
     public abstract class BaseTcpHandler
     {
-        public NetChannel Channel { get; set; }
-        /// <summary>
-        /// 客户端网络连接id
-        /// </summary>
-        public long ClientConnId { get; set; }
-
+        public INetChannel Channel { get; set; }
+        public long ClientNetId { get; set; }
         public Message Msg { get; set; }
-
-        public virtual Task Init()
-        {
-            return Task.CompletedTask;
-        }
 
         public abstract Task ActionAsync();
 

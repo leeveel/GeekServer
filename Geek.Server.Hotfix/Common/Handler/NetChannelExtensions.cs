@@ -2,7 +2,7 @@ using Geek.Server.App.Net.Session;
 
 public static class SessionExtensions
 {
-    public static void WriteAsync(this Session session, Message msg, int uniId, StateCode code = StateCode.Success, string desc = "")
+    public static void WriteAsync(this GameSession session, Message msg, int uniId, StateCode code = StateCode.Success, string desc = "")
     {
         if (msg != null)
         {

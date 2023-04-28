@@ -45,6 +45,7 @@ namespace Geek.Server.Gateway.Common
                             NodeId = Settings.ServerId,
                             Ip = Settings.LocalIp,
                             TcpPort = Settings.TcpPort,
+                            InnerIp = Settings.InsAs<GateSettings>().InnerIp,
                             InnerTcpPort = Settings.InsAs<GateSettings>().InnerTcpPort,
                             HttpPort = Settings.HttpPort,
                             Type = NodeType.Gateway,
@@ -54,8 +55,7 @@ namespace Geek.Server.Gateway.Common
                         {
                             var state = new NetNodeState();
                             state.MaxLoad = Settings.InsAs<GateSettings>().MaxClientCount;
-                            state.CurrentLoad = GateNetMgr.GetConnectionCount();
-                            state.CanServe = true;
+                            state.CurrentLoad = GateNetMgr.GetClientConnectionCount();
                             return state;
                         };
 

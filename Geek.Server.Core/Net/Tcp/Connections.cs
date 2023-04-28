@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Common.Net.Tcp;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Xml.Linq;
 
@@ -8,24 +9,24 @@ namespace Geek.Server.Core.Net.Tcp
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid
-        internal readonly ConcurrentDictionary<long, NetChannel> connMap = new();
+        internal readonly ConcurrentDictionary<long, INetChannel> connMap = new();
 
-        public NetChannel Remove(long id)
+        public INetChannel Remove(long id)
         {
             connMap.TryRemove(id, out var node);
             return node;
         }
 
-        public void Remove(NetChannel channel)
+        public void Remove(INetChannel channel)
         {
-            connMap.TryRemove(channel.NodeId, out var _);
+            connMap.TryRemove(channel.NetId, out var _);
         }
 
-        public NetChannel Get(long id)
+        public INetChannel Get(long id)
         {
             connMap.TryGetValue(id, out var c);
-            if (c == null)
-                Log.Warn($"不能发现节点:{id}");
+            //if (c == null)
+            //    Log.Debug($"不能发现节点:{id},可能已经断开连接");
             return c;
         }
 
@@ -34,14 +35,38 @@ namespace Geek.Server.Core.Net.Tcp
             return connMap.Count;
         }
 
-        public NetChannel Add(NetChannel node)
+        public INetChannel Add(INetChannel node)
         {
             if (node.IsClose())
                 return node;
-            Log.Debug($"新的网络节点:{node.NodeId}");
-            connMap.TryRemove(node.NodeId, out var old);
-            connMap.TryAdd(node.NodeId, node);
+            Log.Debug($"新的网络节点:{node.NetId}");
+            connMap.TryRemove(node.NetId, out var old);
+            connMap.TryAdd(node.NetId, node);
             return old != node ? old : null;
+        }
+
+        public List<long> GetAllNodeWithTargetId(long target)
+        {
+            var list = new List<long>();
+            foreach (var kv in connMap)
+            {
+                if (kv.Key == target)
+                {
+                    list.Add(kv.Key);
+                }
+            }
+            return list;
+        }
+
+        public List<long> GetAllNodeIds(List<long> list = null)
+        {
+            if (list == null)
+                list = new List<long>();
+            foreach (var kv in connMap)
+            {
+                list.Add(kv.Key);
+            }
+            return list;
         }
     }
 }

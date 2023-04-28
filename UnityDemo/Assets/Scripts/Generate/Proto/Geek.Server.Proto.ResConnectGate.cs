@@ -2,6 +2,7 @@
 
 using Protocol;
 using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
@@ -16,13 +17,6 @@ namespace Geek.Server.Proto
 		[IgnoreMember]
 		public override int MsgId => MsgID;
 
-        /// <summary>
-        /// 服务器id
-        /// </summary>
-        public int ServerId { get; set; }
-        /// <summary>
-        /// 节点id(单服结构时==ServerId)
-        /// </summary>
-        public long NodeId { get; set; }
+        public bool Result { get; set; }
 	}
 }

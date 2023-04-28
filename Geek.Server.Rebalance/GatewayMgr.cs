@@ -33,7 +33,7 @@ namespace Geek.Server.Rebalance
             foreach (var n in gatewayMap)
             {
                 var state = n.Value.State;
-                if (state != null && state.CanServe && state.MaxLoad > state.CurrentLoad && state.CurrentLoad <= curLoadCount)
+                if (state != null && state.MaxLoad > state.CurrentLoad && state.CurrentLoad <= curLoadCount)
                 {
                     curLoadCount = state.CurrentLoad;
                     node = n.Value;

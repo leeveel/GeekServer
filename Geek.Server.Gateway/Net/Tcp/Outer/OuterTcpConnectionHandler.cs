@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Actors;
+﻿using Common.Net.Tcp;
+using Geek.Server.Core.Actors;
 using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Core.Utils;
 using Geek.Server.Gateway.Net.Tcp.Handler;
@@ -16,47 +17,48 @@ namespace Geek.Server.Gateway.Net.Tcp.Outer
 
         public override async Task OnConnectedAsync(ConnectionContext context)
         {
+            context.ConfigureAwait(false);
             LOGGER.Debug($"{context.RemoteEndPoint?.ToString()} 链接成功");
-            NetChannel channel = null;
-            channel = new NetChannel(context, new OuterProtocol(), (msg) => Dispatcher(channel, msg), () => OnDisconnection(channel));
-            channel.NodeId = IdGenerator.GetActorID(ActorType.Role, Settings.ServerId);
-            GateNetMgr.ClientConns.Add(channel);
+            NetChannel<NetMessage> channel = null;
+            var id = IdGenerator.GetActorID(ActorType.Gate, Settings.ServerId);
+            channel = new NetChannel<NetMessage>(context, new OuterProtocol(id), async (msg) => await Dispatcher(channel, msg));
+            channel.NetId = id;
+            GateNetMgr.AddClientNode(channel);
             await channel.StartReadMsgAsync();
+            OnDisconnection(channel);
         }
 
-        protected void OnDisconnection(NetChannel conn)
+        protected void OnDisconnection(INetChannel conn)
         {
-            LOGGER.Debug($"{conn.Context.RemoteEndPoint?.ToString()} 断开链接");
-            GateNetMgr.ClientConns.Remove(conn);
-            //TODO:通知游戏服客户端掉线
-            var msg = new PlayerDisconnected
+            if (conn.NetId > 0)
             {
-                GateNodeId = Settings.ServerId
-            };
-            var nmsg = new NetMessage
-            {
-                NetId = conn.NodeId,
-                Msg = msg,
-                MsgId = msg.MsgId
-            };
-            var serverConn = GateNetMgr.ServerConns.Get(conn.DefaultTargetNodeId);
-            serverConn?.Write(nmsg);
+                GateNetMgr.RemoveClientNode(conn.NetId);
+                var nmsg = new NetMessage(new ReqClientChannelInactive(), conn.NetId);
+                var serverConn = GateNetMgr.GetServerNode(conn.DefaultTargetNodeId);
+                serverConn?.Write(nmsg);
+                conn.NetId = 0;
+                LOGGER.Debug($"{conn.RemoteAddress} 断开链接");
+            }
         }
 
-        protected void Dispatcher(NetChannel conn, NetMessage nmsg)
+        protected async ValueTask Dispatcher(INetChannel conn, NetMessage nmsg)
         {
-            LOGGER.Debug($"-------------收到消息{nmsg.MsgId}");
+            //LOGGER.Debug($"-------------收到消息{nmsg.MsgId}");
             var handler = MsgHanderFactory.GetHander(nmsg.MsgId);
             if (handler != null)
             {
-                handler.Action(conn, MessagePack.MessagePackSerializer.Deserialize<Message>(nmsg.MsgRaw));
+                handler.Action(conn, nmsg.Deserialize());
+                nmsg.ReturnRawMenory();
             }
             else
             {
+
+                //LOGGER.Debug($"-------------分发消息{nmsg.MsgId}到{conn.DefaultTargetNodeId}");
                 //分发到game server
-                var serverConn = GateNetMgr.ServerConns.Get(conn.DefaultTargetNodeId);
-                nmsg.NetId = conn.NodeId;
-                serverConn?.Write(nmsg);
+                var serverConn = GateNetMgr.GetServerNode(conn.DefaultTargetNodeId);
+                nmsg.NetId = conn.NetId;
+                if (serverConn != null)
+                    await serverConn.Write(nmsg);
             }
         }
     }
