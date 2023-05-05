@@ -1,6 +1,8 @@
-﻿using NLog;
+﻿using Geek.Server.Core.Storage;
+using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
+using PolymorphicMessagePack;
 
 namespace Geek.Server.RemoteBackup.Logic
 {
@@ -19,6 +21,9 @@ namespace Geek.Server.RemoteBackup.Logic
                 Console.WriteLine("***进入游戏主循环***");
                 Settings.LauchTime = DateTime.Now;
                 Settings.AppRunning = true;
+
+                PolymorphicTypeMapper.Register(typeof(SaveTimestamp).Assembly);
+                PolymorphicResolver.Init();
 
                 //打开本地备份数据库
                 BackupDB.Open();
