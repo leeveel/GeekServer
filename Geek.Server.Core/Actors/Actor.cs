@@ -40,7 +40,7 @@ namespace Geek.Server.Core.Actors
         {
             var compType = agentType.BaseType.GetGenericArguments()[0];
             var comp = compDic.GetOrAdd(compType, k => CompRegister.NewComp(this, k));
-            var agent = comp.GetAgent();
+            var agent = comp.GetAgent(agentType);
             if (!comp.IsActive)
             {
                 await SendAsyncWithoutCheck(async () =>
