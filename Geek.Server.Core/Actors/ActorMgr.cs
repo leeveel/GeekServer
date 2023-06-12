@@ -140,7 +140,7 @@ namespace Geek.Server.Core.Actors
             return Task.CompletedTask;
         }
 
-       
+
         public static async Task SaveAll()
         {
             try
@@ -186,9 +186,13 @@ namespace Geek.Server.Core.Actors
                     {
                         await Task.WhenAll(taskList);
                         await Task.Delay(1000);
-                        taskList = new List<Task>();
+                        taskList.Clear();
                         count = 0;
                     }
+                }
+                if (taskList.Count > 0)
+                {
+                    await Task.WhenAll(taskList);
                 }
             }
             catch (Exception e)
