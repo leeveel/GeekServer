@@ -1,8 +1,10 @@
-﻿using MessagePack;
+﻿using FormatterExtension;
+using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace PolymorphicMessagePack
 {
@@ -11,9 +13,11 @@ namespace PolymorphicMessagePack
         static IFormatterResolver InnerResolver;
         static List<IFormatterResolver> innerResolver = new()
         {
-               BuiltinResolver.Instance,
-               StandardResolver.Instance,
-               ContractlessStandardResolver.Instance
+            FormatterExtensionResolver.Instance,
+            BuiltinResolver.Instance,
+            StandardResolver.Instance,
+            ContractlessStandardResolver.Instance,
+            PrimitiveObjectResolver.Instance,
         };
 
         //先调用此函数注册需要的resolver，然后再调用init，比如客户端需要注册proto和配置表的resolver

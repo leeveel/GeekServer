@@ -1,5 +1,4 @@
-﻿using Geek.Server.Core.Serialize.PolymorphicMessagePack;
-using Geek.Server.Core.Utils;
+﻿using Geek.Server.Core.Utils;
 using NLog;
 using System.Collections.Concurrent;
 using System.Reflection;
@@ -11,6 +10,7 @@ namespace PolymorphicMessagePack
         static readonly Logger Log = LogManager.GetCurrentClassLogger();
         internal static ConcurrentDictionary<Type, int> TypeToId = new();
         internal static ConcurrentDictionary<int, Type> IdToType = new();
+        internal static ConcurrentDictionary<string, List<Type>> classBaseBaneToType = new();
 
         public static void Clear()
         {
@@ -31,6 +31,24 @@ namespace PolymorphicMessagePack
         {
             return TypeToId.TryGetValue(t, out id);
         }
+        public static bool TryGet(string tname, Type baseType, out Type type)
+        {
+            type = null;
+            classBaseBaneToType.TryGetValue(tname, out var tlsit);
+            if (tlsit != null)
+            {
+                foreach (var t in tlsit)
+                {
+                    if (t.IsSubclassOf(baseType) || t == baseType)
+                    {
+                        type = t;
+                        return true;
+                    }
+
+                }
+            }
+            return false;
+        }
 
         public static void Register<T>()
         {
@@ -47,14 +65,31 @@ namespace PolymorphicMessagePack
                     Log.Error($"typemapper注册错误,不同类型,id相同{t.FullName}  {type.FullName}");
                 }
             }
+
             IdToType[id] = type;
             TypeToId[type] = id;
+
+            //这里是为了兼容mongodb转换后的数据
+            if (!classBaseBaneToType.TryGetValue(type.Name, out var tlist))
+            {
+                tlist = new();
+                classBaseBaneToType[type.Name] = tlist;
+            }
+            for (int i = tlist.Count - 1; i >= 0; i--)
+            {
+                var t1 = tlist[i];
+                if (t1.FullName == type.FullName)
+                {
+                    tlist.RemoveAt(i);
+                }
+            }
+            tlist.Add(type);
         }
 
         public static void Register(Assembly assembly)
         {
             var types = from h in assembly.GetTypes()
-                        where h.IsClass && !(h.IsSealed && h.IsAbstract) && !h.ContainsGenericParameters && !h.FullName.Contains("<") && !h.IsSubclassOf(typeof(Attribute)) && h.GetCustomAttribute<PolymorphicIgnore>() == null
+                        where h.IsClass && !h.ContainsGenericParameters && !h.FullName.Contains("<") && !h.FullName.EndsWith("Handler") && !h.IsSubclassOf(typeof(Attribute)) && h.GetCustomAttribute<PolymorphicIgnore>() == null
                         select h;
             foreach (var t in types)
             {

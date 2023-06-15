@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Geek.Server.Core.Serialize.PolymorphicMessagePack
+namespace PolymorphicMessagePack
 {
     public class PolymorphicIgnore : Attribute
     {
