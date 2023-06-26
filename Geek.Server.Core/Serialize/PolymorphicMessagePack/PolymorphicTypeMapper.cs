@@ -10,7 +10,7 @@ namespace PolymorphicMessagePack
         static readonly Logger Log = LogManager.GetCurrentClassLogger();
         internal static ConcurrentDictionary<Type, int> TypeToId = new();
         internal static ConcurrentDictionary<int, Type> IdToType = new();
-        internal static ConcurrentDictionary<string, List<Type>> classBaseBaneToType = new();
+        internal static ConcurrentDictionary<string, List<Type>> classBaseNameToType = new();
 
         public static void Clear()
         {
@@ -34,7 +34,7 @@ namespace PolymorphicMessagePack
         public static bool TryGet(string tname, Type baseType, out Type type)
         {
             type = null;
-            classBaseBaneToType.TryGetValue(tname, out var tlsit);
+            classBaseNameToType.TryGetValue(tname, out var tlsit);
             if (tlsit != null)
             {
                 foreach (var t in tlsit)
@@ -70,10 +70,10 @@ namespace PolymorphicMessagePack
             TypeToId[type] = id;
 
             //这里是为了兼容mongodb转换后的数据
-            if (!classBaseBaneToType.TryGetValue(type.Name, out var tlist))
+            if (!classBaseNameToType.TryGetValue(type.Name, out var tlist))
             {
                 tlist = new();
-                classBaseBaneToType[type.Name] = tlist;
+                classBaseNameToType[type.Name] = tlist;
             }
             for (int i = tlist.Count - 1; i >= 0; i--)
             {
@@ -97,13 +97,42 @@ namespace PolymorphicMessagePack
             }
         }
 
-        public static void Register(List<Assembly> assemblies)
+        public static void UnRegister(Type type)
         {
-            foreach (var assembly in assemblies)
+            var id = (int)MurmurHash3.Hash(type.FullName);
+            if (!IdToType.TryGetValue(id, out _))
             {
-                Register(assembly);
+                return;
+            }
+            PolymorphicResolver.Instance.RemoveFormatterDelegateCache(type);
+
+            IdToType.Remove(id, out _);
+            TypeToId.Remove(type, out _);
+
+            if (!classBaseNameToType.TryGetValue(type.Name, out var tlist))
+            {
+                return;
+            }
+
+            for (int i = tlist.Count - 1; i >= 0; i--)
+            {
+                var t1 = tlist[i];
+                if (t1 == type)
+                {
+                    tlist.RemoveAt(i);
+                }
             }
         }
+
+        public static void UnRegister(Assembly assembly)
+        {
+            var types = assembly.GetTypes();
+            foreach (var t in types)
+            {
+                UnRegister(t);
+            }
+        }
+
         public static void RegisterCore()
         {
             Register(typeof(PolymorphicTypeMapper).Assembly);

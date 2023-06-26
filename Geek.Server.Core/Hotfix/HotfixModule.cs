@@ -4,6 +4,7 @@ using Geek.Server.Core.Actors;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Events;
 using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.BaseHandler;
 using Geek.Server.Core.Net.Http;
 using Geek.Server.Core.Net.Tcp.Handler;
 using Geek.Server.Core.Utils;
@@ -235,12 +236,12 @@ namespace Geek.Server.Core.Hotfix
             return true;
         }
 
-        internal BaseTcpHandler GetTcpHandler(int msgId)
+        internal BaseMessageHandler GetTcpHandler(int msgId)
         {
             if (tcpHandlerMap.TryGetValue(msgId, out var handlerType))
             {
                 var ins = Activator.CreateInstance(handlerType);
-                if (ins is BaseTcpHandler handler)
+                if (ins is BaseMessageHandler handler)
                 {
                     return handler;
                 }

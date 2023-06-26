@@ -1,13 +1,12 @@
-﻿
-using Geek.Server.Core.Actors;
+﻿using Geek.Server.Core.Actors;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.Tcp.Handler;
 using Geek.Server.Core.Utils;
 
-namespace Geek.Server.Core.Net.Tcp.Handler
+namespace Geek.Server.Core.Net.BaseHandler
 {
-
-    public abstract class BaseCompHandler : BaseTcpHandler
+    public abstract class BaseCompHandler : BaseMessageHandler
     {
         protected long ActorId { get; set; }
 
@@ -41,7 +40,7 @@ namespace Geek.Server.Core.Net.Tcp.Handler
         protected override Task InitActor()
         {
             if (ActorId <= 0)
-                ActorId = Channel.GetSessionId();
+                ActorId = Channel.GetData<long>("SESSION_ID");
             return Task.CompletedTask;
         }
     }

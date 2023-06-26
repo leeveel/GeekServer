@@ -1,9 +1,11 @@
-using Bedrock.Framework.Protocols;
+
 using Bedrock.Framework;
-using Geek.Server.Core.Net.Tcp.Codecs;
-using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using System.Net.Sockets;
+using Geek.Server.Core.Net.BaseHandler;
+using Geek.Server.Core.Net.Tcp;
+using Geek.Server.Core.Net.Websocket;
+using System.Net.WebSockets;
 
 namespace Geek.Server.TestPressure.Logic
 {
@@ -23,7 +25,7 @@ namespace Geek.Server.TestPressure.Logic
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         long id;
-        NetChannel netChannel;
+        INetChannel netChannel;
         MsgWaiter msgWaiter = new();
         int msgUniId = 200;
 
@@ -34,19 +36,39 @@ namespace Geek.Server.TestPressure.Logic
 
         public async void Start()
         {
-            var context = await new SocketConnection(AddressFamily.InterNetwork, TestSettings.Ins.serverIp, TestSettings.Ins.serverPort).StartAsync(5000);
-
-            if (context != null)
+            if (TestSettings.Ins.useWebSocket)
             {
-                Log.Info($"Connected to {context.LocalEndPoint}");
-                netChannel = new NetChannel(context, new ClientLengthPrefixedProtocol(), OnRevice, OnDisConnected);
-                _ = netChannel.StartReadMsgAsync();
+                var ws = new ClientWebSocket();
+                await ws.ConnectAsync(new Uri(TestSettings.Ins.webSocketServerUrl), CancellationToken.None);
+
+                if (ws.State == WebSocketState.Open)
+                {
+                    Log.Info($"Connected to {TestSettings.Ins.webSocketServerUrl}");
+                    netChannel = new WebSocketChannel(ws, new ClientLengthPrefixedProtocol(), OnRevice, OnDisConnected);
+                    _ = netChannel.StartAsync();
+                }
+                else
+                {
+                    Log.Error($"连接服务器失败...");
+                    return;
+                }
             }
             else
             {
-                Log.Error($"连接服务器失败...");
-                return;
+                var context = await new SocketConnection(AddressFamily.InterNetwork, TestSettings.Ins.serverIp, TestSettings.Ins.serverPort).StartAsync(5000);
+                if (context != null)
+                {
+                    Log.Info($"Connected to {context.LocalEndPoint}");
+                    netChannel = new TcpChannel(context, new ClientLengthPrefixedProtocol(), OnRevice, OnDisConnected);
+                    _ = netChannel.StartAsync();
+                }
+                else
+                {
+                    Log.Error($"连接服务器失败...");
+                    return;
+                }
             }
+
 
             await ReqLogin();
 

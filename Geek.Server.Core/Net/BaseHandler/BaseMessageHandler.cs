@@ -1,11 +1,11 @@
 ﻿
-using Geek.Server.Core.Net.Tcp.Codecs;
+using Geek.Server.Core.Net.BaseHandler;
 
 namespace Geek.Server.Core.Net.Tcp.Handler
 {
-    public abstract class BaseTcpHandler
+    public abstract class BaseMessageHandler
     {
-        public NetChannel Channel { get; set; }
+        public INetChannel Channel { get; set; }
 
         public Message Msg { get; set; }
 

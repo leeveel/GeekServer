@@ -1,14 +1,15 @@
 ﻿using Bedrock.Framework;
 using Bedrock.Framework.Protocols;
 using Geek.Server.Core.Hotfix;
+using Geek.Server.Core.Net.BaseHandler;
 using MessagePack;
 using Microsoft.AspNetCore.Connections;
 using System.Buffers;
 using System.Diagnostics;
 
-namespace Geek.Server.Core.Net.Tcp.Codecs
+namespace Geek.Server.Core.Net.Tcp
 {
-    public class LengthPrefixedProtocol : IProtocal<Message>
+    public class DefaultMessageProtocol : IProtocal<Message>
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
 
@@ -83,7 +84,7 @@ namespace Geek.Server.Core.Net.Tcp.Codecs
 
         public void WriteMessage(Message msg, IBufferWriter<byte> output)
         {
-            var bytes = MessagePack.MessagePackSerializer.Serialize(msg);
+            var bytes = MessagePackSerializer.Serialize(msg);
             int len = 8 + bytes.Length;
             var span = output.GetSpan(len);
             int offset = 0;
@@ -95,7 +96,7 @@ namespace Geek.Server.Core.Net.Tcp.Codecs
 
         public bool CheckMagicNumber(int order, int msgLen)
         {
-            order ^= (0x1234 << 8);
+            order ^= 0x1234 << 8;
             order ^= msgLen;
 
             if (lastOrder != 0 && order != lastOrder + 1)

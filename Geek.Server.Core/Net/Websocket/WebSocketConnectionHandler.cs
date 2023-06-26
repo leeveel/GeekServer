@@ -1,21 +1,25 @@
 ﻿using Geek.Server.Core.Hotfix;
-using Geek.Server.Core.Net.Tcp.Codecs;
+using Geek.Server.Core.Net.BaseHandler;
+using Geek.Server.Core.Net.Tcp;
 using Microsoft.AspNetCore.Connections;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.WebSockets;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Geek.Server.Core.Net.Tcp.Handler
+namespace Geek.Server.Core.Net.Websocket
 {
-    public class TcpConnectionHandler : ConnectionHandler
+    public class WebSocketConnectionHandler
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-
-        public TcpConnectionHandler() { }
-
-        public override async Task OnConnectedAsync(ConnectionContext connection)
+        public virtual Task OnConnectedAsync(WebSocket socket)
         {
-            OnConnection(connection);
-            NetChannel channel = null;
-            channel = new NetChannel(connection, new LengthPrefixedProtocol(), (msg) => _ = Dispatcher(channel, msg), () => OnDisconnection(channel));
-            await channel.StartReadMsgAsync();
+            LOGGER.Info("new websocket connect...");
+            WebSocketChannel channel = null;
+            channel = new WebSocketChannel(socket, new DefaultMessageProtocol(), (msg) => _ = Dispatcher(channel, msg), () => OnDisconnection(channel));
+            return channel.StartAsync();
         }
 
         protected virtual void OnConnection(ConnectionContext connection)
@@ -23,12 +27,12 @@ namespace Geek.Server.Core.Net.Tcp.Handler
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
         }
 
-        protected virtual void OnDisconnection(NetChannel channel)
+        protected virtual void OnDisconnection(INetChannel channel)
         {
-            LOGGER.Debug($"{channel.Context.RemoteEndPoint?.ToString()} 断开链接");
+            LOGGER.Debug($"{channel.RemoteAddress} 断开链接");
         }
 
-        protected async Task Dispatcher(NetChannel channel, Message msg)
+        protected async Task Dispatcher(INetChannel channel, Message msg)
         {
             if (msg == null)
                 return;

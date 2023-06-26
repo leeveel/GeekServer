@@ -1,4 +1,3 @@
-using Geek.Server.Core.Net.Tcp.Handler;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Hosting;
@@ -54,6 +53,7 @@ namespace Geek.Server.Core.Net.Tcp
             .UseNLog();
 
             app = builder.Build();
+            Log.Info("启动tcp服务...");
             return app.StartAsync();
         }
 

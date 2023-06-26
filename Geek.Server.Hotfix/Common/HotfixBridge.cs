@@ -6,6 +6,7 @@ using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Net.Http;
 using Geek.Server.Core.Net.Tcp;
+using Geek.Server.Core.Net.Websocket;
 using Geek.Server.Core.Timer;
 using Geek.Server.Core.Utils;
 using Microsoft.AspNetCore.Connections;
@@ -29,10 +30,11 @@ namespace Server.Logic.Common
             }
             PolymorphicTypeMapper.Register(this.GetType().Assembly);
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
-            //await TcpServer.Start(Settings.TcpPort);
+
             await TcpServer.Start(Settings.TcpPort, builder => builder.UseConnectionHandler<AppTcpConnectionHandler>());
-            Log.Info("tcp 服务启动完成...");
+            await WebsocketServer.Start(Settings.WebSocketUrl, new AppWebSocketConnectionHandler());
             await HttpServer.Start(Settings.HttpPort);
+
             Log.Info("load config data");
             (bool success, string msg) = GameDataManager.ReloadAll();
             if (!success)
@@ -54,6 +56,7 @@ namespace Server.Logic.Common
             // 关闭网络服务
             await HttpServer.Stop();
             await TcpServer.Stop();
+            await WebsocketServer.Stop();
             // 存储所有数据
             await GlobalTimer.Stop();
             await ActorMgr.RemoveAll();

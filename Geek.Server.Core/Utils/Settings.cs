@@ -68,6 +68,8 @@ public static class Settings
 
     public static int GrpcPort => Ins.GrpcPort;
 
+    public static string WebSocketUrl => Ins.WebSocketUrl;
+
     public static string MongoUrl => Ins.MongoUrl;
 
     public static string MongoDBName => Ins.MongoDBName;
@@ -118,6 +120,8 @@ public class BaseSetting
     public int TcpPort { get; init; }
 
     public int GrpcPort { get; init; }
+
+    public string WebSocketUrl { get; init; }
 
     public string MongoUrl { get; init; }
 

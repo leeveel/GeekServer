@@ -4,6 +4,7 @@ using Geek.Server.Core.Actors;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Events;
 using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.BaseHandler;
 using Geek.Server.Core.Net.Http;
 using Geek.Server.Core.Net.Tcp.Handler;
 
@@ -93,7 +94,7 @@ namespace Geek.Server.Core.Hotfix
             return module.GetAgent<T>(comp);
         }
 
-        public static BaseTcpHandler GetTcpHandler(int msgId)
+        public static BaseMessageHandler GetTcpHandler(int msgId)
         {
             return module.GetTcpHandler(msgId);
         }

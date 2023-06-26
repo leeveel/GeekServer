@@ -3,7 +3,7 @@ using Geek.Server.App.Common.Session;
 using Geek.Server.App.Logic.Login;
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Hotfix.Agent;
-using Geek.Server.Core.Net.Tcp.Codecs;
+using Geek.Server.Core.Net.BaseHandler;
 using Geek.Server.Core.Utils;
 using Server.Logic.Common.Handler;
 using Server.Logic.Logic.Role.Base;
@@ -15,18 +15,18 @@ namespace Server.Logic.Logic.Login
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public async Task OnLogin(NetChannel channel, ReqLogin reqLogin)
+        public async Task OnLogin(INetChannel channel, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {
-                channel.WriteAsync(null, reqLogin.UniId, StateCode.AccountCannotBeNull);
+                channel.Write(null, reqLogin.UniId, StateCode.AccountCannotBeNull);
                 return;
             }
 
             if (reqLogin.Platform != "android" && reqLogin.Platform != "ios" && reqLogin.Platform != "unity")
             {
                 //验证平台合法性
-                channel.WriteAsync(null, reqLogin.UniId, StateCode.UnknownPlatform);
+                channel.Write(null, reqLogin.UniId, StateCode.UnknownPlatform);
                 return;
             }
 
@@ -55,7 +55,7 @@ namespace Server.Logic.Logic.Login
             var roleComp = await ActorMgr.GetCompAgent<RoleCompAgent>(roleId);
             //从登录线程-->调用Role线程 所以需要入队
             var resLogin = await roleComp.OnLogin(reqLogin, isNewRole);
-            channel.WriteAsync(resLogin, reqLogin.UniId, StateCode.Success);
+            channel.Write(resLogin, reqLogin.UniId, StateCode.Success);
 
             //加入在线玩家
             var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();

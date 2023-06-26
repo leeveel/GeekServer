@@ -13,6 +13,8 @@ namespace Bedrock.Framework.Protocols
     {
         public static ProtocolReader CreateReader(this ConnectionContext connection)
              => new ProtocolReader(connection.Transport.Input);
+        public static ProtocolReader CreateReader(this IDuplexPipe pipe)
+            => new ProtocolReader(pipe.Input);
     }
     public class ProtocolReader //: IAsyncDisposable
     {

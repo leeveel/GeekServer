@@ -2,10 +2,11 @@
 
 using Protocol;
 using MessagePack;
+using Geek.Server.Core.Net.BaseHandler;
 
 namespace Geek.Server.Proto
 {
-	[MessagePackObject(true)]
+    [MessagePackObject(true)]
 	public class ResErrorCode : Message
 	{
 		[IgnoreMember]

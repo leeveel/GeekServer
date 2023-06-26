@@ -2,7 +2,7 @@
 using Geek.Server.App.Common.Event;
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Events;
-using Geek.Server.Core.Net.Tcp.Codecs;
+using Geek.Server.Core.Net.BaseHandler;
 using Geek.Server.Proto;
 
 namespace Geek.Server.App.Common.Session
@@ -13,7 +13,7 @@ namespace Geek.Server.App.Common.Session
     public sealed class SessionManager
     {
         internal static readonly ConcurrentDictionary<long, Session> sessionMap = new();
-
+        public const string SESSIONID = "SESSION_ID";
         public static int Count()
         {
             return sessionMap.Count;
@@ -40,7 +40,7 @@ namespace Geek.Server.App.Common.Session
             return Task.CompletedTask;
         }
 
-        public static NetChannel GetChannel(long id)
+        public static INetChannel GetChannel(long id)
         {
             sessionMap.TryGetValue(id, out Session session);
             return session?.Channel;
@@ -60,12 +60,11 @@ namespace Geek.Server.App.Common.Session
                     oldSession.WriteAsync(msg);
                 }
                 // 新连接 or 顶号
-                oldSession.Channel.RemoveSessionId();
-                oldSession.Channel.Abort(false);
+                oldSession.Channel.RemoveData(SESSIONID);
+                oldSession.Channel.Close(false);
             }
-            session.Channel.SetSessionId(session.Id);
+            session.Channel.SetData(SESSIONID, session.Id);
             sessionMap[session.Id] = session;
         }
-
     }
 }

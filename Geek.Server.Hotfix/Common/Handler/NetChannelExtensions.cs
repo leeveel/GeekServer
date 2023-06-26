@@ -1,12 +1,12 @@
 
 using Geek.Server.App.Common;
-using Geek.Server.Core.Net.Tcp.Codecs;
+using Geek.Server.Core.Net.BaseHandler;
 
 namespace Server.Logic.Common.Handler;
 
 public static class NetChannelExtensions
 {
-    public static void WriteAsync(this NetChannel channel, Message msg, int uniId, StateCode code = StateCode.Success, string desc = "")
+    public static void Write(this INetChannel channel, Message msg, int uniId, StateCode code = StateCode.Success, string desc = "")
     {
         if (msg != null)
         {

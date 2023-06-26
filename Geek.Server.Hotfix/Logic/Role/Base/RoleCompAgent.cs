@@ -6,6 +6,7 @@ using Geek.Server.App.Logic.Role.Base;
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Events;
 using Geek.Server.Core.Hotfix.Agent;
+using Geek.Server.Core.Net.BaseHandler;
 using Geek.Server.Core.Timer;
 using Server.Logic.Common.Handler;
 using Server.Logic.Logic.Role.Bag;
@@ -89,12 +90,12 @@ namespace Server.Logic.Logic.Role.Base
             return Task.CompletedTask;
         }
 
-        public void NotifyClient(Message msg, int uniId=0, StateCode code = StateCode.Success)
+        public void NotifyClient(Message msg, int uniId = 0, StateCode code = StateCode.Success)
         {
             var channel = SessionManager.GetChannel(ActorId);
             if (channel != null && !channel.IsClose())
             {
-                channel.WriteAsync(msg, uniId, code);
+                channel.Write(msg, uniId, code);
             }
         }
 

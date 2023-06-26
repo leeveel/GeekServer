@@ -25,7 +25,7 @@ namespace Geek.Server.RemoteBackup.Logic
                 Settings.AppRunning = true;
 
                 PolymorphicTypeMapper.Register(typeof(SaveTimestamp).Assembly);
-                PolymorphicResolver.Init();
+                PolymorphicResolver.Instance.Init();
 
                 //打开本地备份数据库
                 BackupDB.Open();

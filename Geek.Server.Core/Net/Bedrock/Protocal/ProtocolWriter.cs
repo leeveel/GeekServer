@@ -13,6 +13,9 @@ namespace Bedrock.Framework.Protocols
     {
         public static ProtocolWriter CreateWriter(this ConnectionContext connection)
             => new ProtocolWriter(connection.Transport.Output);
+
+        public static ProtocolWriter CreateWriter(this IDuplexPipe pipe)
+            => new ProtocolWriter(pipe.Output);
     }
 
     public class ProtocolWriter //: IAsyncDisposable

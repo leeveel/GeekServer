@@ -1,6 +1,6 @@
 ﻿using MessagePack;
 
-namespace Geek.Server
+namespace Geek.Server.Core.Net.BaseHandler
 {
     [MessagePackObject(true)]
     public abstract class Message
