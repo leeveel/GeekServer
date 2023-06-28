@@ -19,7 +19,7 @@ namespace Geek.Server.Center.Common
                 var flag = Start();
                 if (!flag) return; //启动服务器失败
 
-                PolymorphicResolver.Init();
+                PolymorphicResolver.Instance.Init();
 
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");

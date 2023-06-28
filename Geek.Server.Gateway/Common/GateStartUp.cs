@@ -26,7 +26,7 @@ namespace Geek.Server.Gateway.Common
                 Console.WriteLine("***进入游戏主循环***");
 
                 PolymorphicRegister.Load();
-                PolymorphicResolver.Init();
+                PolymorphicResolver.Instance.Init();
 
                 MsgHanderFactory.Init();
                 HttpHanderFactory.Init();

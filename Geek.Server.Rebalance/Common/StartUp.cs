@@ -22,7 +22,7 @@ namespace Geek.Server.Rebalance.Common
                 if (!flag) return; //启动服务器失败
 
                 PolymorphicRegister.Load();
-                PolymorphicResolver.Init();
+                PolymorphicResolver.Instance.Init();
 
                 Log.Info("进入主循环...");
                 Console.WriteLine("***进入主循环***");

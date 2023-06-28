@@ -96,7 +96,7 @@ namespace Geek.Server.App.Common
 
                 PolymorphicTypeMapper.Register(typeof(AppStartUp).Assembly); //app
                 PolymorphicRegister.Load();
-                PolymorphicResolver.Init();
+                PolymorphicResolver.Instance.Init();
                 //GeekServerAppPolymorphicDBStateRegister.Load();
 
                 return true;
