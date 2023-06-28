@@ -1,4 +1,5 @@
-﻿using MessagePack;
+﻿using FormatterExtension;
+using MessagePack;
 using MessagePack.Formatters;
 using MessagePack.Resolvers;
 using System;
@@ -9,10 +10,13 @@ namespace PolymorphicMessagePack
 {
     public sealed class PolymorphicResolver : IFormatterResolver
     {
+        public static PolymorphicResolver Instance { get; private set; } = new PolymorphicResolver();
+
         static IFormatterResolver InnerResolver;
-        static List<IFormatterResolver> innerResolver = new List<IFormatterResolver>()
+        static List<IFormatterResolver> innerResolver = new List<IFormatterResolver>
         {
-                //MessagePack.Resolvers.BuiltinResolver.Instance,
+               FormatterExtensionResolver.Instance,
+               BuiltinResolver.Instance,
                StandardResolver.Instance,
                ContractlessStandardResolver.Instance
         };
@@ -26,14 +30,16 @@ namespace PolymorphicMessagePack
             }
         }
 
-        public static void Init()
+        public void Init()
         {
             StaticCompositeResolver.Instance.Register(innerResolver.ToArray());
             InnerResolver = StaticCompositeResolver.Instance;
-            MessagePackSerializer.DefaultOptions = new MessagePackSerializerOptions(new PolymorphicResolver());
+            MessagePackSerializer.DefaultOptions = new MessagePackSerializerOptions(PolymorphicResolver.Instance);
         }
 
         private readonly ConcurrentDictionary<Type, PolymorphicDelegate> _innerFormatterCache = new ConcurrentDictionary<Type, PolymorphicDelegate>();
+
+        private PolymorphicResolver() { }
 
         public IMessagePackFormatter<T> GetFormatter<T>()
         {
@@ -43,6 +49,11 @@ namespace PolymorphicMessagePack
             }
 
             return InnerResolver.GetFormatter<T>();
+        }
+
+        public void RemoveFormatterDelegateCache(Type type)
+        {
+            _innerFormatterCache.TryRemove(type, out _);
         }
 
         //Bottleneck
@@ -79,9 +90,6 @@ namespace PolymorphicMessagePack
             {
                 Formatter = new PolymorphicFormatter<T>();
             }
-
         }
-
     }
-
 }

@@ -17,7 +17,7 @@ namespace Protocol
                 PolymorphicResolver.AddInnerResolver(ConfigDataResolver.Instance);
                 PolymorphicResolver.AddInnerResolver(MessagePack.Resolvers.GeneratedResolver.Instance);
                 PolymorphicTypeMapper.Register<Message>();
-                PolymorphicResolver.Init();
+                PolymorphicResolver.Instance.Init();
                 serializerRegistered = true;
             }
         }

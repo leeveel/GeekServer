@@ -36,7 +36,7 @@ namespace Geek.Server.Core.Net.Tcp
                 {
                     using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
                     {
-                        context
+                      //  context
                         await hander.OnConnectedAsync(webSocket);
                     }
                 }

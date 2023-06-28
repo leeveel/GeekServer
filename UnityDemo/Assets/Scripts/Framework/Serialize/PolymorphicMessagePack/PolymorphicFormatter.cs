@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace PolymorphicMessagePack
 {
-
     public class PolymorphicFormatter<T> : IMessagePackFormatter<T>
     {
         private object lockObj = new object();
@@ -43,7 +42,6 @@ namespace PolymorphicMessagePack
 
         public T Deserialize(ref MessagePackReader reader, MessagePackSerializerOptions options)
         {
-
             if (reader.TryReadNil())
                 return default;
 
@@ -51,26 +49,39 @@ namespace PolymorphicMessagePack
 
             try
             {
-                var count = reader.ReadArrayHeader();
-
-                if (count != 2)
-                    throw new MessagePackSerializationException("Invalid polymorphic array count");
-
-                var typeId = reader.ReadInt32();
-
-                if (!PolymorphicTypeMapper.TryGet(typeId, out var type))
-                    throw new MessagePackSerializationException($"Cannot find Type Id: {typeId} registered in {nameof(PolymorphicTypeMapper)}");
-
-                //Bottleneck
+                Type type = null;
+                switch (reader.NextMessagePackType)
+                {
+                    //如果是数组，说明里面存了类型id
+                    case MessagePackType.Array:
+                        var count = reader.ReadArrayHeader();
+                        if (count != 2)
+                            throw new MessagePackSerializationException("Invalid polymorphic array count");
+                        switch (reader.NextMessagePackType)
+                        {
+                            case MessagePackType.Integer:
+                                var typeId = reader.ReadInt32();
+                                if (!PolymorphicTypeMapper.TryGet(typeId, out type))
+                                    throw new MessagePackSerializationException($"Cannot find Type Id: {typeId} registered in {nameof(PolymorphicTypeMapper)}");
+                                break;
+                            case MessagePackType.String:
+                                var typeStr = reader.ReadString();
+                                if (!PolymorphicTypeMapper.TryGet(typeStr, typeof(T), out type))
+                                    throw new MessagePackSerializationException($"Cannot find Type Id: {typeStr} registered in {nameof(PolymorphicTypeMapper)}");
+                                break;
+                        }
+                        break;
+                    default:
+                        type = typeof(T);
+                        break;
+                }
                 return (T)(options.Resolver as PolymorphicResolver).InnerDeserialize(type, ref reader, options);
             }
             finally
             {
                 reader.Depth--;
             }
-
         }
-
     }
 
 }
