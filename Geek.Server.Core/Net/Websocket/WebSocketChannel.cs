@@ -79,7 +79,7 @@ namespace Geek.Server.Core.Net.Websocket
             }
         }
 
-        async ValueTask sendMultiSegmentAsync(ReadOnlySequence<byte> buffer)
+        async ValueTask SendMultiSegmentAsync(ReadOnlySequence<byte> buffer)
         {
             var position = buffer.Start;
             buffer.TryGet(ref position, out var prevSegment);
@@ -97,7 +97,7 @@ namespace Geek.Server.Core.Net.Websocket
         {
             return buffer.IsSingleSegment
                 ? webSocket.SendAsync(buffer.First, WebSocketMessageType.Binary, true, CancellationToken.None)
-                : sendMultiSegmentAsync(buffer);
+                : SendMultiSegmentAsync(buffer);
         }
 
         async Task DoSend()

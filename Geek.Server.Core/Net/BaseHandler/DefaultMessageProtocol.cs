@@ -17,7 +17,7 @@ namespace Geek.Server.Core.Net.Tcp
 
         long lastReviceTime = 0;
         int lastOrder = 0;
-        const int MAX_RECV_SIZE = 1024 * 1024 * 2; /// 从客户端接收的包大小最大值（单位：字节 5M）
+        const int MAX_RECV_SIZE = 1024 * 1024 * 5; /// 从客户端接收的包大小最大值（单位：字节 5M）
 
         public bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out Message message)
         {

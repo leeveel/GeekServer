@@ -22,11 +22,6 @@ namespace Geek.Server.Core.Net.Websocket
             return channel.StartAsync();
         }
 
-        protected virtual void OnConnection(ConnectionContext connection)
-        {
-            LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
-        }
-
         protected virtual void OnDisconnection(INetChannel channel)
         {
             LOGGER.Debug($"{channel.RemoteAddress} 断开链接");

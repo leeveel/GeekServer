@@ -32,7 +32,7 @@ namespace Server.Logic.Common
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
 
             await TcpServer.Start(Settings.TcpPort, builder => builder.UseConnectionHandler<AppTcpConnectionHandler>());
-            await WebsocketServer.Start(Settings.WebSocketUrl, new AppWebSocketConnectionHandler());
+            await WebSocketServer.Start(Settings.WebSocketUrl, new AppWebSocketConnectionHandler());
             await HttpServer.Start(Settings.HttpPort);
 
             Log.Info("load config data");
@@ -56,7 +56,7 @@ namespace Server.Logic.Common
             // 关闭网络服务
             await HttpServer.Stop();
             await TcpServer.Stop();
-            await WebsocketServer.Stop();
+            await WebSocketServer.Stop();
             // 存储所有数据
             await GlobalTimer.Stop();
             await ActorMgr.RemoveAll();

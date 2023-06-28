@@ -33,6 +33,7 @@ namespace Bedrock.Framework.Protocols
                 throw new ObjectDisposedException(GetType().Name);
             }
 
+
             var result = await _reader.ReadAsync();
             var buffer = result.Buffer;
 

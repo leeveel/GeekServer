@@ -14,7 +14,7 @@ namespace Geek.Server.Core.Net.Tcp
     /// <summary>
     /// TCP server
     /// </summary>
-    public static class WebsocketServer
+    public static class WebSocketServer
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         static WebApplication app { get; set; }
@@ -36,6 +36,7 @@ namespace Geek.Server.Core.Net.Tcp
                 {
                     using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
                     {
+                        context
                         await hander.OnConnectedAsync(webSocket);
                     }
                 }
