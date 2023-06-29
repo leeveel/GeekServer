@@ -21,11 +21,11 @@ namespace PolymorphicMessagePack
         };
 
         //先调用此函数注册需要的resolver，然后再调用init，比如客户端需要注册proto和配置表的resolver
-        public static void AddInnerResolver(IFormatterResolver resolver)
+        public static void AddInnerResolver(IFormatterResolver resolver, int index = 0)
         {
             if (innerResolver.IndexOf(resolver) < 0)
             {
-                innerResolver.Add(resolver);
+                innerResolver.Insert(index, resolver);
             }
         }
 

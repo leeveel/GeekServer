@@ -9,7 +9,7 @@ namespace Protocol
 
         static MsgFactory()
         {
-            lookup = new System.Collections.Generic.Dictionary<int, Type>(17)
+            lookup = new System.Collections.Generic.Dictionary<int, Type>(19)
             {
 			    { 1435193915, typeof(Geek.Server.Proto.ReqBagInfo) },
 			    { -1872884227, typeof(Geek.Server.Proto.ResBagInfo) },
@@ -28,6 +28,8 @@ namespace Protocol
 			    { 1575482382, typeof(Geek.Server.Proto.HearBeat) },
 			    { 1179199001, typeof(Geek.Server.Proto.ResErrorCode) },
 			    { 537499886, typeof(Geek.Server.Proto.ResPrompt) },
+			    { -1343898071, typeof(Geek.Server.Proto.Place) },
+			    { 696796597, typeof(Geek.Server.Proto.MoveMessage) },
             };
         }
 

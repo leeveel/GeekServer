@@ -3,11 +3,10 @@
 using Protocol;
 using MessagePack;
 using System.Collections.Generic;
-using Geek.Server.Core.Net.BaseHandler;
 
 namespace Geek.Server.Proto
 {
-    [MessagePackObject(true)]
+	[MessagePackObject(true)]
 	public class ReqBagInfo : Message
 	{
 		[IgnoreMember]

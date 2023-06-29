@@ -1,7 +1,6 @@
 ﻿using Bedrock.Framework.Protocols;
 using Geek.Server.Core.Net.BaseHandler;
 using Microsoft.AspNetCore.Connections;
-using System.Diagnostics;
 
 namespace Geek.Server.Core.Net.Tcp
 {

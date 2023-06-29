@@ -1,5 +1,6 @@
 ﻿using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Net.BaseHandler;
+using MessagePack;
 using Microsoft.AspNetCore.Connections;
 
 namespace Geek.Server.Core.Net.Tcp

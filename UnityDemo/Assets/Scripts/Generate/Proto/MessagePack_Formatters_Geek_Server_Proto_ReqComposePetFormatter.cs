@@ -20,6 +20,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
     {
         // FragmentId
         private static global::System.ReadOnlySpan<byte> GetSpan_FragmentId() => new byte[1 + 10] { 170, 70, 114, 97, 103, 109, 101, 110, 116, 73, 100 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ReqComposePet value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -29,9 +31,11 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteMapHeader(1);
+            writer.WriteMapHeader(2);
             writer.WriteRaw(GetSpan_FragmentId());
             writer.Write(value.FragmentId);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ReqComposePet Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -58,6 +62,11 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                         if (!global::System.MemoryExtensions.SequenceEqual(stringKey, GetSpan_FragmentId().Slice(1))) { goto FAIL; }
 
                         ____result.FragmentId = reader.ReadInt32();
+                        continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
                         continue;
 
                 }
