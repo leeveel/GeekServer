@@ -1,7 +1,7 @@
 ﻿using MessagePack;
 
 [MessagePackObject(true)]
-public abstract class Message
+public class Message
 {
     /// <summary>
     /// 消息唯一id
