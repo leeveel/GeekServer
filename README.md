@@ -73,8 +73,8 @@ public class RoleCompAgent : StateComponentAgent<RoleComp, RoleState>{}
 # 最佳实践
 GeekServer有严格的书写规范检查，如不符合规范编译直接报错  
 1.CompAgent不能被二次继承，Agent继承的需求理论上很少，如果有请采用组合模式  
-2.为CompAgent中需要被外部提供服务的接口，添加【Api】注解  
-3.CompAgent中非【Threadsafe】的【Api】接口只能是异步函数    
+2.为CompAgent中需要被外部提供服务的接口，添加【Service】注解  
+3.CompAgent中非【Threadsafe】的【Service】接口只能是异步函数    
 4.CompAgent中不要书写构造函数,重写Active函数来完成初始化工作  
 5.大部分情况下你都应该使用await等待来书写逻辑，不需要等待的方法请加上【Discard】注解，如：通知全服玩家，就没必要等待一个通知完成后再通知下一个。  同时[Source Generator](https://docs.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview)在编译期间对标记了【Discard】的函数做了处理，内部直接返回了Task.CompletedTask，所以外部使用下划线丢弃或是用await都是等价的，为了规范统一，可以全部使用await。**这样有个好处，就是可以在编译期间检查所有Agent中的代码，如有发现使用了弃元运算符(_ = DoSomething())则提示代码编写不符合规范。**
 ```c#
@@ -88,7 +88,7 @@ public Task NotifyAllClient()
    }
 }
 
-[Api]
+[Service]
 [Discard]
 public virtual Task NotifyOneClient(long roleId)
 {
@@ -96,7 +96,8 @@ public virtual Task NotifyOneClient(long roleId)
    //...
 }
 ```
-5.CompAgent中为需要提供给外部访问接口，标记[Api]注解，如果不加外部又有访问，**则会有线程安全问题**，除非此接口本身就是线程安全的(标记了[ThreadSafe]注解)。 
+5.CompAgent中为需要提供给外部访问接口，标记![image](https://github.com/leeveel/GeekServer/assets/29307897/2f9d9e0c-d6ae-4637-92be-67855e54fec4)![image](https://github.com/leeveel/GeekServer/assets/29307897/553eed04-a577-4dab-8ad9-4753322e3c6e)
+注解，如果不加外部又有访问，**则会有线程安全问题**，除非此接口本身就是线程安全的(标记了[ThreadSafe]注解)。 
 ```c#
 public class ServerCompAgent : StateCompAgent<ServerComp, ServerState>
 {
@@ -107,10 +108,10 @@ public class ServerCompAgent : StateCompAgent<ServerComp, ServerState>
     }
 
     /// <summary>
-    /// 由于此接口会提供给其他Actor访问，所以需要标记为[Api]
+    /// 由于此接口会提供给其他Actor访问，所以需要标记为[Service]
     /// </summary>
     /// <returns></returns>
-    [Api]
+    [Service]
     public virtual Task<int> GetWorldLevel()
     {
         return Task.FromResult(State.WorldLevel);
