@@ -34,7 +34,7 @@ namespace PolymorphicMessagePack
             PolymorphicTypeMapper.RegisterCore();
             StaticCompositeResolver.Instance.Register(innerResolver.ToArray());
             InnerResolver = StaticCompositeResolver.Instance;
-            MessagePackSerializer.DefaultOptions = new MessagePackSerializerOptions(PolymorphicResolver.Instance);
+            MessagePackSerializer.DefaultOptions = new MessagePackSerializerOptions(PolymorphicResolver.Instance).WithCompression(MessagePackCompression.Lz4Block);
         }
 
         private readonly ConcurrentDictionary<Type, PolymorphicDelegate> _innerFormatterCache = new ConcurrentDictionary<Type, PolymorphicDelegate>();
