@@ -96,8 +96,7 @@ public virtual Task NotifyOneClient(long roleId)
    //...
 }
 ```
-5.CompAgent中为需要提供给外部访问接口，标记![image](https://github.com/leeveel/GeekServer/assets/29307897/2f9d9e0c-d6ae-4637-92be-67855e54fec4)![image](https://github.com/leeveel/GeekServer/assets/29307897/553eed04-a577-4dab-8ad9-4753322e3c6e)
-注解，如果不加外部又有访问，**则会有线程安全问题**，除非此接口本身就是线程安全的(标记了[ThreadSafe]注解)。 
+5.CompAgent中为需要提供给外部访问接口，标记注解，如果不加外部又有访问，**则会有线程安全问题**，除非此接口本身就是线程安全的(标记了[ThreadSafe]注解)。 
 ```c#
 public class ServerCompAgent : StateCompAgent<ServerComp, ServerState>
 {
