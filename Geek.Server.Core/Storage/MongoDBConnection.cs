@@ -98,5 +98,10 @@ namespace Geek.Server.Core.Storage
         {
             Client.Cluster.Dispose();
         }
+
+        public void Flush(bool wait)
+        {
+
+        }
     }
 }

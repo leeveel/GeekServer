@@ -11,32 +11,40 @@ namespace Geek.Server.Core.Storage.DB
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public RocksDb InnerDB { get; private set; }
+        protected FlushOptions flushOption;
+        public ColumnFamilyOptions cfOption;
         public string DbPath { get; private set; } = "";
         public string SecondPath { get; private set; } = "";
-        public bool ReadOnly { get; private set; } = false; 
-        protected FlushOptions flushOption;
+        public bool ReadOnly { get; private set; } = false;
         protected ConcurrentDictionary<string, ColumnFamilyHandle> columnFamilie = new ConcurrentDictionary<string, ColumnFamilyHandle>();
-  
-        public EmbeddedDB(string path, bool readOnly = false, string readonlyPath=null)
+
+        public EmbeddedDB(string path, bool readOnly = false, string readonlyPath = null, int maxOpenFileNum = 100)
         {
             this.ReadOnly = readOnly;
             var dir = Path.GetDirectoryName(path);
-            if(!Directory.Exists(dir))
+            if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             DbPath = path;
             var option = new DbOptions();
+            var bbtOpt = new BlockBasedTableOptions();
+            bbtOpt.SetNoBlockCache(true); //没有block缓存 
+            //bbtOpt.SetCacheIndexAndFilterBlocks(false);//不缓存索引
+            option.SetBlockBasedTableFactory(bbtOpt);
+            option.SetMaxOpenFiles(maxOpenFileNum);
             RocksDb.TryListColumnFamilies(option, DbPath, out var cfList);
-            var cfs = new ColumnFamilies();
 
+            cfOption = new ColumnFamilyOptions();
+            cfOption.SetDbWriteBufferSize(readOnly ? 1024ul : 1024 * 512); //每个列族memtable大小
+
+            var cfs = new ColumnFamilies();
             foreach (var cf in cfList)
             {
-                cfs.Add(cf, new ColumnFamilyOptions());
+                cfs.Add(cf, cfOption);
                 columnFamilie[cf] = null;
             }
 
             if (readOnly)
             {
-                option.SetMaxOpenFiles(-1);
                 if (string.IsNullOrEmpty(readonlyPath))
                     SecondPath = DbPath + "_$$$";
                 else
@@ -49,7 +57,6 @@ namespace Geek.Server.Core.Storage.DB
                 option.SetCreateIfMissing(true).SetCreateMissingColumnFamilies(true);
                 InnerDB = RocksDb.Open(option, DbPath, cfs);
             }
-
         }
 
         ColumnFamilyHandle GetOrCreateColumnFamilyHandle(string name)
@@ -66,8 +73,7 @@ namespace Geek.Server.Core.Storage.DB
                 }
                 else if (!ReadOnly)
                 {
-                    var option = new ColumnFamilyOptions();
-                    handle = InnerDB.CreateColumnFamily(option, name);
+                    handle = InnerDB.CreateColumnFamily(cfOption, name);
                     columnFamilie[name] = handle;
                     return handle;
                 }
@@ -82,7 +88,7 @@ namespace Geek.Server.Core.Storage.DB
                 InnerDB.TryCatchUpWithPrimary();
             }
         }
- 
+
         public Table<T> GetTable<T>() where T : class
         {
             var name = typeof(T).FullName;
@@ -90,6 +96,14 @@ namespace Geek.Server.Core.Storage.DB
             if (handle == null)
                 return null;
             return new Table<T>(this, name, handle);
+        }
+
+        public Table<T> GetTable<T>(string tableName) where T : class
+        {
+            var handle = GetOrCreateColumnFamilyHandle(tableName);
+            if (handle == null)
+                return null;
+            return new Table<T>(this, tableName, handle);
         }
 
         public Table<byte[]> GetRawTable(string fullName)
@@ -127,7 +141,7 @@ namespace Geek.Server.Core.Storage.DB
                             LOGGER.Fatal($"rocksdb flush 错误:{errStr}");
                         }
                     }
-                } 
+                }
             }
         }
 
@@ -135,7 +149,6 @@ namespace Geek.Server.Core.Storage.DB
         {
             Flush(true);
             Native.Instance.rocksdb_cancel_all_background_work(InnerDB.Handle, true);
-            //Native.Instance.rocksdb_free(flushOption.Handle);
             InnerDB.Dispose();
         }
     }

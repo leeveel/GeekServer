@@ -20,11 +20,6 @@ namespace Geek.Server.Core.Storage.DB
             this.cfHandle = cfHandle;
             this.isRawTable = isRawTable;
             tableName = name;
-            if (!db.InnerDB.TryGetColumnFamily(tableName, out cfHandle))
-            {
-                var option = new ColumnFamilyOptions();
-                cfHandle = db.InnerDB.CreateColumnFamily(option, tableName);
-            }
         }
 
         public void Set<IDType>(IDType id, T value, Transaction trans = null)
@@ -38,7 +33,7 @@ namespace Geek.Server.Core.Storage.DB
             var mainId = GetDBKey(id);
             if (trans != null)
             {
-                trans.Set(tableName, mainId, data, cfHandle);
+                trans.Set(mainId, data, cfHandle);
             }
             else
             {
@@ -83,13 +78,14 @@ namespace Geek.Server.Core.Storage.DB
                 }
                 else
                 {
-                    trans.Set(tableName, mainId, data, cfHandle);
+                    trans.Set(mainId, data, cfHandle);
                 }
             }
 
             if (trans == null)
             {
                 db.InnerDB.Write(batch);
+                batch.Dispose();
             }
         }
 
@@ -99,11 +95,33 @@ namespace Geek.Server.Core.Storage.DB
 
             if (trans != null)
             {
-                trans.Delete(tableName, mainId, cfHandle);
+                trans.Delete(mainId, cfHandle);
             }
             else
             {
                 db.InnerDB.Remove(Encoding.UTF8.GetBytes(mainId), cfHandle);
+            }
+        }
+
+        public void DeleteBatch<IDType>(List<IDType> ids, Transaction trans = null)
+        {
+            var batch = trans == null ? new WriteBatch() : null;
+            foreach (var id in ids)
+            {
+                var mainId = GetDBKey(id);
+                if (batch != null)
+                {
+                    batch.Delete(Encoding.UTF8.GetBytes(mainId), cfHandle);
+                }
+                else
+                {
+                    trans.Delete(mainId, cfHandle);
+                }
+            }
+            if (trans == null)
+            {
+                db.InnerDB.Write(batch);
+                batch.Dispose();
             }
         }
 

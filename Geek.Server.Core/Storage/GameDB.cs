@@ -19,6 +19,7 @@ namespace Geek.Server.Core.Storage
     {
         public void Open(string url, string dbName);
         public void Close();
+        public void Flush(bool wait);
         public Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new();
         public Task SaveState<TState>(TState state) where TState : CacheState;
     }
@@ -44,6 +45,11 @@ namespace Geek.Server.Core.Storage
             {
                 LOGGER.Error($"未知的数据库模式:{Settings.DBModel}");
             }
+        }
+
+        public static void Flush(bool wait)
+        {
+            dbImpler.Flush(wait);
         }
 
         public static T As<T>() where T : IGameDB

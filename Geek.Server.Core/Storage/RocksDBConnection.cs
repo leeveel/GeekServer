@@ -18,6 +18,11 @@ namespace Geek.Server.Core.Storage
             CurDataBase.Close();
         }
 
+        public void Flush(bool wait)
+        {
+            CurDataBase.Flush(wait);
+        }
+
         public Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new()
         {
             try
@@ -59,6 +64,6 @@ namespace Geek.Server.Core.Storage
             }
             return Task.CompletedTask;
         }
-        
+
     }
 }

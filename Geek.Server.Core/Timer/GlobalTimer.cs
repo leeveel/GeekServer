@@ -34,6 +34,8 @@ namespace Geek.Server.Core.Timer
                 var startTime = DateTime.Now;
                 await GameDB.TimerSave();
                 var cost = (DateTime.Now - startTime).TotalMilliseconds;
+
+                GameDB.Flush(false);
                 Log.Info($"定时回存完成 耗时: {cost:f4}ms");
 
                 await ActorMgr.CheckIdle();
