@@ -8,6 +8,10 @@ using System.Net.WebSockets;
 using System.Net;
 using System.Text;
 using Geek.Server.Core.Net.Websocket;
+using NLog.Fluent;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Http;
 
 namespace Geek.Server.Core.Net.Tcp
 {
@@ -23,6 +27,11 @@ namespace Geek.Server.Core.Net.Tcp
         {
             var builder = WebApplication.CreateBuilder();
 
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
+
             builder.WebHost.UseUrls(url).UseNLog();
             app = builder.Build();
 
@@ -30,14 +39,17 @@ namespace Geek.Server.Core.Net.Tcp
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
             });
+
+            app.UseForwardedHeaders();
+
             app.Map("/ws", async context =>
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
                     using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
                     {
-                      //  context
-                        await hander.OnConnectedAsync(webSocket);
+                        var clientAddress = $"{context.Connection?.RemoteIpAddress}:{context.Connection?.RemotePort}";
+                        await hander.OnConnectedAsync(webSocket, clientAddress);
                     }
                 }
                 else

@@ -44,7 +44,7 @@ namespace Geek.Server.TestPressure.Logic
                 if (ws.State == WebSocketState.Open)
                 {
                     Log.Info($"Connected to {TestSettings.Ins.webSocketServerUrl}");
-                    netChannel = new WebSocketChannel(ws, new ClientLengthPrefixedProtocol(), OnRevice, OnDisConnected);
+                    netChannel = new WebSocketChannel(ws, TestSettings.Ins.webSocketServerUrl, new ClientLengthPrefixedProtocol(), OnRevice, OnDisConnected);
                     _ = netChannel.StartAsync();
                 }
                 else
@@ -72,7 +72,7 @@ namespace Geek.Server.TestPressure.Logic
 
             await ReqLogin();
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 5; i++)
             {
                 await ReqBagInfo();
                 await Task.Delay(1000);

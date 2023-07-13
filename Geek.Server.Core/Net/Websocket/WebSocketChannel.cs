@@ -28,10 +28,11 @@ namespace Geek.Server.Core.Net.Websocket
         public ProtocolReader Reader { get; protected set; }
         protected ProtocolWriter Writer { get; set; }
         IDuplexPipe appPipe;
-        public string RemoteAddress => "";
+        public string RemoteAddress { get; private set; }
 
-        public WebSocketChannel(WebSocket webSocket, IProtocal<Message> protocal, Action<Message> onMessage = null, Action onConnectClose = null)
+        public WebSocketChannel(WebSocket webSocket, string remoteAddress, IProtocal<Message> protocal, Action<Message> onMessage = null, Action onConnectClose = null)
         {
+            this.RemoteAddress = remoteAddress;
             this.webSocket = webSocket;
             this.protocal = protocal;
             var pair = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);

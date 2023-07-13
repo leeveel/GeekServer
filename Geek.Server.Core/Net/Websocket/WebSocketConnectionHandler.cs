@@ -8,11 +8,11 @@ namespace Geek.Server.Core.Net.Websocket
     public class WebSocketConnectionHandler
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public virtual Task OnConnectedAsync(WebSocket socket)
+        public virtual Task OnConnectedAsync(WebSocket socket, string clientAddress)
         {
-            LOGGER.Info("new websocket connect...");
+            LOGGER.Info($"new websocket {clientAddress} connect...");
             WebSocketChannel channel = null;
-            channel = new WebSocketChannel(socket, new DefaultMessageProtocol(), (msg) => _ = Dispatcher(channel, msg), () => OnDisconnection(channel));
+            channel = new WebSocketChannel(socket, clientAddress, new DefaultMessageProtocol(), (msg) => _ = Dispatcher(channel, msg), () => OnDisconnection(channel));
             return channel.StartAsync();
         }
 
