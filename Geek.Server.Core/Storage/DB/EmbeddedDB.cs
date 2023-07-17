@@ -27,6 +27,8 @@ namespace Geek.Server.Core.Storage.DB
             DbPath = path;
             var option = new DbOptions();
             var bbtOpt = new BlockBasedTableOptions();
+            option.SetKeepLogFileNum(3);  //日志文件保留个数 LOG.old...数量
+            option.SetMaxTotalWalSize(1024 * 1024 * 70); //日志文件最大size  70m
             bbtOpt.SetNoBlockCache(true); //没有block缓存 
             //bbtOpt.SetCacheIndexAndFilterBlocks(false);//不缓存索引
             option.SetBlockBasedTableFactory(bbtOpt);
@@ -34,7 +36,7 @@ namespace Geek.Server.Core.Storage.DB
             RocksDb.TryListColumnFamilies(option, DbPath, out var cfList);
 
             cfOption = new ColumnFamilyOptions();
-            cfOption.SetDbWriteBufferSize(readOnly ? 1024ul : 1024 * 512); //每个列族memtable大小
+            //cfOption.SetDbWriteBufferSize(readOnly ? 1024ul : 1024 * 512); //每个列族memtable大小
 
             var cfs = new ColumnFamilies();
             foreach (var cf in cfList)
