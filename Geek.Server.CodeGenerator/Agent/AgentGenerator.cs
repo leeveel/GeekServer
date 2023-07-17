@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
+using System.Diagnostics;
 
 namespace Geek.Server.CodeGenerator.Agent
 {
@@ -11,7 +12,7 @@ namespace Geek.Server.CodeGenerator.Agent
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-            //Debugger.Launch();
+            //  Debugger.Launch();
             ResLoader.LoadDll();
             context.RegisterForSyntaxNotifications(() => new AgentFilter());
         }
@@ -61,12 +62,14 @@ namespace Geek.Server.CodeGenerator.Agent
                                 }
                                 else
                                 {
-                                    mth.Modify = m.Text + " ";
+                                    mth.Modify += m.Text + " ";
                                 }
                                 if (m.Text.Equals("public"))
                                     mth.IsPublic = true;
                                 if (m.Text.Equals("static"))
                                     mth.IsStatic = true;
+                                if (m.Text.Equals("async"))
+                                    mth.Isasync = true;
                             }
 
                             if (mth.IsStatic)
@@ -118,7 +121,7 @@ namespace Geek.Server.CodeGenerator.Agent
                                 continue;
 
                             if (mth.IsApi && !mth.Threadsafe && !mth.Returntype.Contains("Task"))
-                                context.LogError($"{fullName}.{method.Identifier.Text}, 非【Threadsafe】的【Api】接口只能是异步函数"); 
+                                context.LogError($"{fullName}.{method.Identifier.Text}, 非【Threadsafe】的【Api】接口只能是异步函数");
 
                             if ((mth.IsApi || mth.Discard || mth.Threadsafe) && !mth.IsVirtual)
                                 context.LogError($"{fullName}.{method.Identifier.Text}标记了【AsyncApi】【Threadsafe】【Discard】注解的函数必须申明为virtual");

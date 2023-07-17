@@ -40,6 +40,8 @@ namespace Geek.Server.CodeGenerator.Agent
 
         public bool IsVirtual { get; set; }
 
+        public bool Isasync { get; set; }
+
         public List<string> Params { get; private set; } = new List<string>();
 
         public List<string> AttributeList { get; private set; } = new List<string>();
@@ -66,9 +68,9 @@ namespace Geek.Server.CodeGenerator.Agent
         /// </summary>
         public string ParamDeclare { get; set; }
 
-        public string Paramstr 
-        { 
-            get 
+        public string Paramstr
+        {
+            get
             {
                 if (Params.Count > 0)
                 {
@@ -76,7 +78,7 @@ namespace Geek.Server.CodeGenerator.Agent
                     for (int i = 0; i < Params.Count; i++)
                     {
                         sb.Append(Params[i]);
-                        if(i != Params.Count-1)
+                        if (i != Params.Count - 1)
                             sb.Append(",");
                     }
                     return sb.ToString();

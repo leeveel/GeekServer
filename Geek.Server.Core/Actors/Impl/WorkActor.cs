@@ -51,7 +51,7 @@ namespace Geek.Server.Core.Actors.Impl
         }
 
         #region 勿调用(仅供代码生成器调用)
-        public Task Enqueue(Action work, long callChainId, bool discard=false, int timeOut = TIME_OUT)
+        public Task Enqueue(Action work, long callChainId, bool discard = false, int timeOut = TIME_OUT)
         {
             if (!discard && Settings.IsDebug && !ActorLimit.AllowCall(Id))
                 return default;
