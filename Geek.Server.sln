@@ -21,10 +21,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Gateway", "Geek
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Center", "Geek.Server.Center\Geek.Server.Center.csproj", "{C649C525-B946-4C31-8B4C-7AF9840A653D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.RemoteBackup", "Geek.Server.RemoteBackup\Geek.Server.RemoteBackup.csproj", "{68DCB685-17FD-4DB3-A456-99CC4E28C219}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Rebalance", "Geek.Server.Rebalance\Geek.Server.Rebalance.csproj", "{86F402AD-656C-4BCA-A2B1-CBD52F84C278}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -67,14 +63,6 @@ Global
 		{C649C525-B946-4C31-8B4C-7AF9840A653D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C649C525-B946-4C31-8B4C-7AF9840A653D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C649C525-B946-4C31-8B4C-7AF9840A653D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{68DCB685-17FD-4DB3-A456-99CC4E28C219}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{68DCB685-17FD-4DB3-A456-99CC4E28C219}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{68DCB685-17FD-4DB3-A456-99CC4E28C219}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{68DCB685-17FD-4DB3-A456-99CC4E28C219}.Release|Any CPU.Build.0 = Release|Any CPU
-		{86F402AD-656C-4BCA-A2B1-CBD52F84C278}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{86F402AD-656C-4BCA-A2B1-CBD52F84C278}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{86F402AD-656C-4BCA-A2B1-CBD52F84C278}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{86F402AD-656C-4BCA-A2B1-CBD52F84C278}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

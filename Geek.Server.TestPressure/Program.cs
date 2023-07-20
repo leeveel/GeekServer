@@ -26,26 +26,16 @@ namespace Geek.Server.TestPressure
             //通过网关选择服，获得网关地址
             try
             {
-                HttpClient client = new HttpClient();
-                var response = await client.GetAsync(TestSettings.Ins.gateSelectUrl);
-                string responseBody = await response.Content.ReadAsStringAsync();
-                var result = JsonConvert.DeserializeObject<HttpResult>(responseBody);
+                //HttpClient client = new HttpClient();
+                //var response = await client.GetAsync(TestSettings.Ins.gateSelectUrl);
+                //string responseBody = await response.Content.ReadAsStringAsync();
+                //var result = JsonConvert.DeserializeObject<HttpResult>(responseBody);
 
-                if (result.Msg != "")
+                for (int i = 0; i < TestSettings.Ins.clientCount; i++)
                 {
-                    var maxCount = TestSettings.Ins.clientCount;
-                    var ipEnd = IPEndPoint.Parse(result.Msg);
-                    for (int i = 0; i < maxCount; i++)
-                    {
-                        _ = new Client(CreateRoleId(i)).Start(ipEnd.Address.ToString(), ipEnd.Port);
-                        await Task.Delay(5);
-                    }
+                    _ = new Client(CreateRoleId(i)).Start(TestSettings.Ins.gateIP, TestSettings.Ins.gatePort);
+                    await Task.Delay(5);
                 }
-                else
-                {
-                    Log.Error("从网关选择服获取网关失败!");
-                }
-
             }
             catch (Exception e)
             {

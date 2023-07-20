@@ -3,5 +3,6 @@
   "ServerOutPath": "../../Geek.Server.Generate/Proto",
   "ClientOutPath": "../../UnityDemo/Assets/Scripts/Generate/Proto",
   "BaseMessageName": "Message",
+  "NoExportList": ["Message"],
   "GeneratedFirst": false
 }

@@ -6,8 +6,9 @@ namespace Geek.Server.TestPressure.Logic
     {
         public static TestSettings Ins;
         public int serverId;
-        public string gateSelectUrl;
         public int clientCount;
+        public string gateIP;
+        public int gatePort;
         public static void Load(string path)
         {
             var configJson = File.ReadAllText(path);
