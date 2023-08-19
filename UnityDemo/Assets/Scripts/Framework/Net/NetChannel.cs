@@ -44,7 +44,8 @@ namespace Base.Net
 
                     var message = result.Message;
 
-                    onMessageAct(message);
+                    if(message!=null)
+                        onMessageAct(message);
 
                     if (result.IsCompleted)
                         break;
