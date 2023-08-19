@@ -1,10 +1,9 @@
 ﻿using MessagePack;
 using MessagePack.Resolvers;
 using PolymorphicMessagePack;
-using Protocol;
 using Resolvers;
 
-namespace Protocol
+namespace Geek.Server.Proto
 {
     public partial class PolymorphicRegister
     {

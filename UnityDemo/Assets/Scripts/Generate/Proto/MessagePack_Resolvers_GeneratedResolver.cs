@@ -47,7 +47,7 @@ namespace MessagePack.Resolvers
 
         static GeneratedResolverGetFormatterHelper()
         {
-            lookup = new global::System.Collections.Generic.Dictionary<global::System.Type, int>(23)
+            lookup = new global::System.Collections.Generic.Dictionary<global::System.Type, int>(22)
             {
                 { typeof(global::System.Collections.Generic.Dictionary<int, long>), 0 },
                 { typeof(global::System.Collections.Generic.List<global::Geek.Server.Proto.Place>), 1 },
@@ -71,7 +71,6 @@ namespace MessagePack.Resolvers
                 { typeof(global::Geek.Server.Proto.ResPrompt), 19 },
                 { typeof(global::Geek.Server.Proto.TestStruct), 20 },
                 { typeof(global::Geek.Server.Proto.UserInfo), 21 },
-                { typeof(global::Message), 22 },
             };
         }
 
@@ -107,7 +106,6 @@ namespace MessagePack.Resolvers
                 case 19: return new MessagePack.Formatters.Geek.Server.Proto.ResPromptFormatter();
                 case 20: return new MessagePack.Formatters.Geek.Server.Proto.TestStructFormatter();
                 case 21: return new MessagePack.Formatters.Geek.Server.Proto.UserInfoFormatter();
-                case 22: return new MessagePack.Formatters.MessageFormatter();
                 default: return null;
             }
         }

@@ -1,7 +1,7 @@
 ﻿using Geek.Server.Proto;
 using MessagePack;
 using MessagePack.Resolvers;
-using Protocol;
+
 using UnityEngine;
 
 namespace Logic
@@ -12,7 +12,7 @@ namespace Logic
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Initialize()
         {
-            Protocol.PolymorphicRegister.Load();
+            PolymorphicRegister.Load();
             new GameObject("GameMain").AddComponent<GameMain>();
         }
     }

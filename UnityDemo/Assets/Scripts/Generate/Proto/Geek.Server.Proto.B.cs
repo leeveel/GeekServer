@@ -1,6 +1,5 @@
 //auto generated, do not modify it
 
-using Protocol;
 using MessagePack;
 
 namespace Geek.Server.Proto

@@ -3,7 +3,6 @@ using Geek.Client;
 using Geek.Client.Config;
 using Geek.Server;
 using Geek.Server.Proto;
-using Protocol;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
