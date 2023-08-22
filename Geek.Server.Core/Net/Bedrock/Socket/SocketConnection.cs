@@ -56,23 +56,24 @@ namespace Bedrock.Framework
             var task = _socket.ConnectAsync(_host, _port);
             var tokenSource = new CancellationTokenSource();
             var completeTask = await Task.WhenAny(task, Task.Delay(timeOut, tokenSource.Token));
-            if (completeTask != task)
+            try
             {
-                try
-                {
-                    _socket.Close();
-                    _socket.Dispose();
-                }
-                catch (Exception)
+                if (completeTask != task || !_socket.Connected)
                 {
 
+                    _socket.Close();
+                    _socket.Dispose(); 
+                    return null;
                 }
-                return null;
+                else
+                {
+                    tokenSource.Cancel();
+                    await task;
+                }
             }
-            else
-            {
-                tokenSource.Cancel();
-                await task;
+            catch (Exception)
+            { 
+                return null;
             }
 
             var pair = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);
@@ -227,7 +228,7 @@ namespace Bedrock.Framework
 
                 if (bytesReceived == 0)
                 {
-                    // FIN
+                    // GATE_CLOSE
                     break;
                 }
 

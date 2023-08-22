@@ -18,6 +18,9 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 {
     public sealed class ReqBagInfoFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.ReqBagInfo>
     {
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
+
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ReqBagInfo value, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (value is null)
@@ -26,7 +29,9 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteMapHeader(0);
+            writer.WriteMapHeader(1);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ReqBagInfo Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -36,8 +41,29 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return null;
             }
 
-            reader.Skip();
+            options.Security.DepthStep(ref reader);
+            var length = reader.ReadMapHeader();
             var ____result = new global::Geek.Server.Proto.ReqBagInfo();
+
+            for (int i = 0; i < length; i++)
+            {
+                var stringKey = global::MessagePack.Internal.CodeGenHelpers.ReadStringSpan(ref reader);
+                switch (stringKey.Length)
+                {
+                    default:
+                    FAIL:
+                      reader.Skip();
+                      continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
+                        continue;
+
+                }
+            }
+
+            reader.Depth--;
             return ____result;
         }
     }

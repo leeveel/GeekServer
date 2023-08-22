@@ -1,7 +1,7 @@
 //auto generated, do not modify it
 
-using Protocol;
 using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {

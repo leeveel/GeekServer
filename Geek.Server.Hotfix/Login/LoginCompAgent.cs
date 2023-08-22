@@ -35,10 +35,14 @@ namespace Geek.Server.Hotfix.Login
                 CreateRoleToPlayer(reqLogin.UserName, reqLogin.SdkType, roleId);
                 Log.Info("创建新号:" + roleId);
             }
+            else
+            {
+                Log.Info("老号登录:" + roleId);
+            }
 
             //添加到session 
             session.RoleId = roleId;
-            session.Token = reqLogin.Device;
+            session.Sign = reqLogin.Sign;
             SessionManager.Add(session);
 
             //登陆流程

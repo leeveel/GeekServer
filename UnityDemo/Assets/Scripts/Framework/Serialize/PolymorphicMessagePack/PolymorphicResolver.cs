@@ -4,18 +4,22 @@ using MessagePack.Resolvers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using FormatterExtension;
 
 namespace PolymorphicMessagePack
 {
     public sealed class PolymorphicResolver : IFormatterResolver
     {
+        public static PolymorphicResolver Instance { get; private set; } = new PolymorphicResolver();
+
         static IFormatterResolver InnerResolver;
         static List<IFormatterResolver> innerResolver = new List<IFormatterResolver>()
-        {
-                //MessagePack.Resolvers.BuiltinResolver.Instance,
-               StandardResolver.Instance,
-               ContractlessStandardResolver.Instance
-        };
+      {
+             FormatterExtensionResolver.Instance,
+             BuiltinResolver.Instance,
+             StandardResolver.Instance,
+             ContractlessStandardResolver.Instance
+      };
 
         //先调用此函数注册需要的resolver，然后再调用init，比如客户端需要注册proto和配置表的resolver
         public static void AddInnerResolver(IFormatterResolver resolver)
@@ -26,14 +30,17 @@ namespace PolymorphicMessagePack
             }
         }
 
-        public static void Init()
+        public void Init()
         {
+            PolymorphicTypeMapper.RegisterCore();
             StaticCompositeResolver.Instance.Register(innerResolver.ToArray());
             InnerResolver = StaticCompositeResolver.Instance;
-            MessagePackSerializer.DefaultOptions = new MessagePackSerializerOptions(new PolymorphicResolver());
+            MessagePackSerializer.DefaultOptions = new MessagePackSerializerOptions(PolymorphicResolver.Instance).WithCompression(MessagePackCompression.Lz4Block);
         }
 
         private readonly ConcurrentDictionary<Type, PolymorphicDelegate> _innerFormatterCache = new ConcurrentDictionary<Type, PolymorphicDelegate>();
+
+        private PolymorphicResolver() { }
 
         public IMessagePackFormatter<T> GetFormatter<T>()
         {
@@ -43,6 +50,11 @@ namespace PolymorphicMessagePack
             }
 
             return InnerResolver.GetFormatter<T>();
+        }
+
+        public void RemoveFormatterDelegateCache(Type type)
+        {
+            _innerFormatterCache.TryRemove(type, out _);
         }
 
         //Bottleneck
@@ -79,9 +91,6 @@ namespace PolymorphicMessagePack
             {
                 Formatter = new PolymorphicFormatter<T>();
             }
-
         }
-
     }
-
 }

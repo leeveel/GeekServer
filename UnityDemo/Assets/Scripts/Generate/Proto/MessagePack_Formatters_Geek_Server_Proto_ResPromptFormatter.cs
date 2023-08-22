@@ -22,6 +22,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
         private static global::System.ReadOnlySpan<byte> GetSpan_Type() => new byte[1 + 4] { 164, 84, 121, 112, 101 };
         // Content
         private static global::System.ReadOnlySpan<byte> GetSpan_Content() => new byte[1 + 7] { 167, 67, 111, 110, 116, 101, 110, 116 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResPrompt value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -32,11 +34,13 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             var formatterResolver = options.Resolver;
-            writer.WriteMapHeader(2);
+            writer.WriteMapHeader(3);
             writer.WriteRaw(GetSpan_Type());
             writer.Write(value.Type);
             writer.WriteRaw(GetSpan_Content());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Serialize(ref writer, value.Content, options);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ResPrompt Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -69,6 +73,11 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                         if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 32772479322582851UL) { goto FAIL; }
 
                         ____result.Content = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<string>(formatterResolver).Deserialize(ref reader, options);
+                        continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
                         continue;
 
                 }

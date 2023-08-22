@@ -7,6 +7,7 @@ using Geek.Server.Core.Hotfix.Agent;
 using Geek.Server.Core.Timer;
 using Geek.Server.Hotfix.Role.Bag;
 using Geek.Server.Hotfix.Server;
+using NLog.Fluent;
 
 namespace Geek.Server.Hotfix.Role.Base
 {
@@ -88,13 +89,8 @@ namespace Geek.Server.Hotfix.Role.Base
         }
 
         public void NotifyClient(Message msg, int uniId = 0, StateCode code = StateCode.Success)
-        {
-            var session = SessionManager.Get(ActorId);
-            if (session != null)
-            {
-                session.WriteAsync(msg, uniId, code);
-            }
-        }
-
+        { 
+            SessionManager.Get(ActorId)?.WriteAsync(msg, uniId, code);
+        } 
     }
 }

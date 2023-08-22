@@ -6,8 +6,7 @@ using Geek.Server.TestPressure.Logic;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using NLog.Fluent;
-using System.Net;
-using Protocol;
+using System.Net; 
 
 namespace Geek.Server.TestPressure
 {
@@ -31,16 +30,42 @@ namespace Geek.Server.TestPressure
                 //string responseBody = await response.Content.ReadAsStringAsync();
                 //var result = JsonConvert.DeserializeObject<HttpResult>(responseBody);
 
+                var clientList = new List<Client>();
+
+                _ = Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        lock (clientList)
+                        {
+                            foreach (var c in clientList)
+                            {
+                                c.Update();
+                            }
+                        }
+                        await Task.Delay(3);
+                    }
+                });
+
                 for (int i = 0; i < TestSettings.Ins.clientCount; i++)
                 {
-                    _ = new Client(CreateRoleId(i)).Start(TestSettings.Ins.gateIP, TestSettings.Ins.gatePort);
-                    await Task.Delay(5);
+                    // _ = new Client(CreateRoleId(i)).Start(TestSettings.Ins.gateIP, TestSettings.Ins.gatePort);
+                    var client = new Client(i); //
+                    lock (clientList)
+                    {
+                        _ = client.Start(TestSettings.Ins.gateIP, 7899);
+                        clientList.Add(client);
+                    }
+                    await Task.Delay(1);
                 }
+
+
             }
             catch (Exception e)
             {
                 Log.Error(e.Message);
             }
+            Console.ReadLine();
             Console.ReadLine();
         }
         private static long CreateRoleId(int index)

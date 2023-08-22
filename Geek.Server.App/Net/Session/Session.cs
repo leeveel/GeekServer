@@ -1,4 +1,4 @@
-﻿using Common.Net.Tcp;
+﻿using Geek.Server.Core.Net;
 
 namespace Geek.Server.App.Net.Session
 {
@@ -12,12 +12,12 @@ namespace Geek.Server.App.Net.Session
         /// <summary>
         /// 与网关连接的channel
         /// </summary>
-        public INetChannel Channel { get; set; }
+        public BaseNetChannel Channel { get; set; }
 
         /// <summary>
         /// 连接标示，避免自己顶自己的号,客户端每次启动游戏生成一次/或者每个设备一个
         /// </summary>
-        public string Token { get; set; }
+        public string Sign { get; set; }
 
         public void Write(Message msg)
         {

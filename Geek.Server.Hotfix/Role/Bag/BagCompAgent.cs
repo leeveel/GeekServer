@@ -28,7 +28,7 @@ namespace Geek.Server.Hotfix.Role.Bag
         }
 
         public async Task GetBagInfo(ReqBagInfo reqMsg)
-        {
+        { 
             var ret = BuildInfoMsg();
             await this.NotifyClient(ret, reqMsg.UniId);
         }

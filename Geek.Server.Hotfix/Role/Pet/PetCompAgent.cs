@@ -33,7 +33,7 @@ namespace Geek.Server.Hotfix.Role.Pet
             var serverComp = await ActorMgr.GetCompAgent<ServerCompAgent>();
             //var level = await serverComp.SendAsync(() => serverComp.GetWorldLevel()); //手动入队的写法
             var level = await serverComp.GetWorldLevel();
-            LOGGER.Debug($"PetCompAgent.OnGotNewPet监听到了获得宠物的事件,宠物ID:{param.value}当前世界等级:{level}");
+            //LOGGER.Debug($"PetCompAgent.OnGotNewPet监听到了获得宠物的事件,宠物ID:{param.value}当前世界等级:{level}");
         }
 
     }

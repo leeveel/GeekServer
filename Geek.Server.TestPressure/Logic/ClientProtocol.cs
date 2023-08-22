@@ -2,8 +2,7 @@
 using System.Buffers;
 using Bedrock.Framework.Protocols;
 using Geek.Server.Core.Utils;
-using MessagePack;
-using Protocol;
+using MessagePack; 
 
 namespace Geek.Server.TestPressure.Logic
 {
@@ -61,10 +60,10 @@ namespace Geek.Server.TestPressure.Logic
             magic ^= len;
 
             int offset = 0;
-            span.WriteInt(len, ref offset);
-            span.WriteLong(DateTime.Now.Ticks, ref offset);
-            span.WriteInt(magic, ref offset);
-            span.WriteInt(msg.MsgId, ref offset);
+            span.Write(len, ref offset);
+            span.Write(DateTime.Now.Ticks, ref offset);
+            span.Write(magic, ref offset);
+            span.Write(msg.MsgId, ref offset);
             span.WriteBytesWithoutLength(bytes, ref offset);
             output.Advance(len);
         }

@@ -51,7 +51,7 @@ namespace Geek.Client
 
         public static async Task<bool> StartWait(int uniId)
         {
-            UnityEngine.Debug.Log($"开始等待返回:{uniId}");
+            //UnityEngine.Debug.Log($"开始等待返回:{uniId}");
             if (!waitDic.ContainsKey(uniId))
             {
                 var waiter = new MsgWaiter();
@@ -91,7 +91,6 @@ namespace Geek.Client
         }
 
         public TaskCompletionSource<bool> Tcs { private set; get; }
-
 
         public Timer Timer { private set; get; }
         void Start()

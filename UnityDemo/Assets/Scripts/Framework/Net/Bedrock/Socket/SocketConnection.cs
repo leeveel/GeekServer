@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Pipelines;
 using System.Net;
@@ -57,23 +58,24 @@ namespace Bedrock.Framework
             var task = _socket.ConnectAsync(_host, _port);
             var tokenSource = new CancellationTokenSource();
             var completeTask = await Task.WhenAny(task, Task.Delay(timeOut, tokenSource.Token));
-            if (completeTask != task)
+            try
             {
-                try
+                if (completeTask != task)
                 {
                     _socket.Close();
                     _socket.Dispose();
+                    return null;
                 }
-                catch (Exception)
+                else
                 {
-
+                    tokenSource.Cancel();
+                    await task;
                 }
-                return null;
             }
-            else
+            catch (Exception e)
             {
-                tokenSource.Cancel();
-                await task;
+                UnityEngine.Debug.LogError(e.Message);
+                return null;
             }
 
             var pair = DuplexPipe.CreateConnectionPair(PipeOptions.Default, PipeOptions.Default);

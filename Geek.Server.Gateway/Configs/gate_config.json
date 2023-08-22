@@ -2,8 +2,8 @@
   "isDebug": true,
   "ServerId": 9101, //[9101,9200]
   "InnerIp": "127.0.0.1",
-  "InnerTcpPort": 9101,
-  "TcpPort": 9102,
+  "InnerUdpPort": 7919,
+  "OuterPort": 7899,
   "HttpPort": 9103,
   "MaxClientCount": 20000,
   "SyncStateToCenterInterval": 5, //单位秒，小于等于0 表示不同步

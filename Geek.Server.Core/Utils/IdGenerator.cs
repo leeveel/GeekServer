@@ -74,7 +74,8 @@ namespace Geek.Server.Core.Utils
         {
             if (id <= 0)
             {
-                throw new ArgumentException($"input id error:{id}");
+                //throw new ArgumentException($"input id error:{id}");
+                return ActorType.None;
             }
 
             if (id < MAX_GLOBAL_ID)

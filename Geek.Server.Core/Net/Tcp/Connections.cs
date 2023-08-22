@@ -1,5 +1,4 @@
-﻿using Common.Net.Tcp;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Concurrent;
 using System.Xml.Linq;
 
@@ -9,20 +8,20 @@ namespace Geek.Server.Core.Net.Tcp
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid
-        internal readonly ConcurrentDictionary<long, INetChannel> connMap = new();
+        internal readonly ConcurrentDictionary<long, BaseNetChannel> connMap = new();
 
-        public INetChannel Remove(long id)
+        public BaseNetChannel Remove(long id)
         {
             connMap.TryRemove(id, out var node);
             return node;
         }
 
-        public void Remove(INetChannel channel)
+        public void Remove(BaseNetChannel channel)
         {
             connMap.TryRemove(channel.NetId, out var _);
         }
 
-        public INetChannel Get(long id)
+        public BaseNetChannel Get(long id)
         {
             connMap.TryGetValue(id, out var c);
             //if (c == null)
@@ -35,7 +34,7 @@ namespace Geek.Server.Core.Net.Tcp
             return connMap.Count;
         }
 
-        public INetChannel Add(INetChannel node)
+        public BaseNetChannel Add(BaseNetChannel node)
         {
             if (node.IsClose())
                 return node;

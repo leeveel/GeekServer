@@ -29,11 +29,10 @@ namespace Geek.Server.Center.Common
                 Settings.AppRunning = true;
 
                 //服务节点添加自己
-                ServiceManager.NamingService.Add(new Core.Center.NetNode
-                {
-                    NodeId = Settings.ServerId,
+                ServiceManager.NamingService.Add(new Core.Center.ServerInfo
+                { 
                     ServerId = Settings.ServerId,
-                    Type = Core.Center.NodeType.Center,
+                    Type = ServerType.Center,
                     RpcPort = Settings.RpcPort,
                 });
 

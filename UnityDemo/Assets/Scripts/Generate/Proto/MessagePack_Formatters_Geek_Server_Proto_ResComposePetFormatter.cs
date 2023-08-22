@@ -20,6 +20,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
     {
         // PetId
         private static global::System.ReadOnlySpan<byte> GetSpan_PetId() => new byte[1 + 5] { 165, 80, 101, 116, 73, 100 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResComposePet value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -29,9 +31,11 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteMapHeader(1);
+            writer.WriteMapHeader(2);
             writer.WriteRaw(GetSpan_PetId());
             writer.Write(value.PetId);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ResComposePet Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -55,10 +59,16 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                       reader.Skip();
                       continue;
                     case 5:
-                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430729094480UL) { goto FAIL; }
-
-                        ____result.PetId = reader.ReadInt32();
-                        continue;
+                        switch (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey))
+                        {
+                            default: goto FAIL;
+                            case 430729094480UL:
+                                ____result.PetId = reader.ReadInt32();
+                                continue;
+                            case 430728375893UL:
+                                ____result.UniId = reader.ReadInt32();
+                                continue;
+                        }
 
                 }
             }

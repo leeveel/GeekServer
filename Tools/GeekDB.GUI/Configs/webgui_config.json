@@ -1,0 +1,13 @@
+﻿{
+  "IsDebug": true,
+  "ServerId": 9001, //[9001,9100]
+  "ServerName": "",
+  "RpcPort": 9001,
+  "HttpPort": 9104,
+  //"WebServerUrl": "https://*:5004",
+  "WebServerUrl": "https://*:5004",
+  "LocalDBPrefix": "gamedb_",
+  "LocalDBPath": "../../database/game/",
+  "InitUserName": "admin",
+  "InitPassword": "123456"
+}

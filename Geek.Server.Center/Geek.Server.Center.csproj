@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <NoDefaultLaunchSettingsFile>true</NoDefaultLaunchSettingsFile>
@@ -29,7 +29,6 @@
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="7.0.0" />
 
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.25.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="MudBlazor" Version="6.1.2" />
   </ItemGroup>
 

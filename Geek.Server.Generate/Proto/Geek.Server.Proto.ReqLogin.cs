@@ -1,7 +1,7 @@
 //auto generated, do not modify it
 
-using Protocol;
 using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
@@ -21,5 +21,9 @@ namespace Geek.Server.Proto
         public int SdkType { get; set; }
         public string SdkToken { get; set; }
         public string Device { get; set; }
+        /// <summary>
+        /// 连接标示，避免自己顶自己的号,客户端每次启动游戏生成一次/或者每个设备一个
+        /// </summary>
+        public string Sign { get; set; } 
 	}
 }

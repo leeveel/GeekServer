@@ -25,24 +25,18 @@ namespace Geek.Server.App.Net.Session
         public static void Remove(GameSession session)
         {
             var id = session.RoleId;
-            if (sessionMap.TryRemove(id, out GameSession curSession) && session == curSession)
+            lock(sessionMap)
             {
-                session.Channel.SetData(SESSION, null);
-                if (ActorMgr.HasActor(id))
-                    EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
-            }
-        }
-
-        public static void Remove(long id)
-        {
-            if (sessionMap.TryRemove(id, out GameSession session))
-            {
-                session.Channel.SetData(SESSION, null);
-                if (ActorMgr.HasActor(id))
-                    EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
-            }
-        }
-
+                if (sessionMap.TryGetValue(id, out GameSession curSession) && session == curSession)
+                {
+                    sessionMap.TryRemove(id, out _);
+                    Log.Info($"移除session:{id} ,channel Id:{session.Channel?.NetId}");
+                    session.Channel.SetData(SESSION, null);
+                    if (ActorMgr.HasActor(id))
+                        EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
+                }
+            } 
+        } 
 
         public static Task RemoveAll()
         {
@@ -67,7 +61,7 @@ namespace Geek.Server.App.Net.Session
         {
             if (sessionMap.TryGetValue(session.RoleId, out GameSession old))
             {
-                if (old.Token != session.Token)
+                if (old.Sign != session.Sign)
                 {
                     Log.Debug("old.Token != session.Token，被顶号");
                     //顶号

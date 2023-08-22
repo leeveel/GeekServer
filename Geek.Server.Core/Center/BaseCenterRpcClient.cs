@@ -11,8 +11,8 @@ namespace Geek.Server.Core.Center
         public ICenterRpcHub ServerAgent { private set; get; }
         protected string connUrl;
         protected ReConnecter reConn;
-        protected Func<NetNodeState> selfNodeStateGetter;
-        protected Func<NetNode> selfNodeGetter;
+        protected Func<ServerState> selfNodeStateGetter;
+        protected Func<ServerInfo> selfNodeGetter;
         CancellationTokenSource cancelStateSyncSrc;
 
         public BaseCenterRpcClient(string ip, int port)
@@ -27,12 +27,13 @@ namespace Geek.Server.Core.Center
             reConn = new ReConnecter(ConnectImpl, $"中心服:{connUrl}");
         }
 
-        public async Task<bool> Register(Func<NetNode> selfNodeGetter, Func<NetNodeState> selfNodeStateGetter = null)
+        public async Task<bool> Register(Func<ServerInfo> selfNodeGetter, Func<ServerState> selfNodeStateGetter = null)
         {
             this.selfNodeGetter = selfNodeGetter;
             this.selfNodeStateGetter = selfNodeStateGetter;
             var ret = await ServerAgent.Register(selfNodeGetter());
             StartSyncState();
+            ServerChanged(await ServerAgent.GetAllNodes());
             return ret;
         }
 
@@ -141,7 +142,7 @@ namespace Geek.Server.Core.Center
 
         public abstract void ConfigChanged(ConfigInfo data);
 
-        public abstract void NodesChanged(List<NetNode> nodes);
+        public abstract void ServerChanged(List<ServerInfo> nodes);
 
         public abstract void HaveMessage(string eid, byte[] msg);
     }

@@ -12,13 +12,12 @@
     <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Refresh" OnClick="@(Refresh)" />
 </MudPaper>
 
-<MudTable Items="@netNodeList" Dense="false" Hover="true" Bordered="false" Striped="false" Filter="new Func<NetNode,bool>(FilterFunc)">
+<MudTable Items="@netNodeList" Dense="false" Hover="true" Bordered="false" Striped="false" Filter="new Func<ServerInfo,bool>(FilterFunc)">
     <ToolBarContent>
         <MudSpacer />
         <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
     </ToolBarContent>
     <HeaderContent>
-        <MudTh>NodeId</MudTh>
         <MudTh>ServerId</MudTh>
         <MudTh>Type</MudTh>
         <MudTh>Ip</MudTh>
@@ -30,7 +29,6 @@
         <MudTh>当前承载</MudTh>
     </HeaderContent>
     <RowTemplate>
-        <MudTd DataLabel="NodeId">@context.NodeId</MudTd>
         <MudTd DataLabel="ServerId">@context.ServerId</MudTd>
         <MudTd DataLabel="Type">@context.Type</MudTd>
         <MudTd DataLabel="Ip">@context.Ip</MudTd>
@@ -49,7 +47,7 @@
 @code {
 
     private string searchString = "";
-    private List<NetNode> netNodeList = new List<NetNode>();
+    private List<ServerInfo> netNodeList = new List<ServerInfo>();
     Timer refreshTimer;
 
     protected override void OnInitialized()
@@ -64,11 +62,9 @@
          }), null, 0, 1000);
     }
 
-    private bool FilterFunc(NetNode item)
+    private bool FilterFunc(ServerInfo item)
     {
         if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (item.NodeId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (item.ServerId.ToString().Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;

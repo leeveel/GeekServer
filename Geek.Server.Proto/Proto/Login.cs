@@ -1,37 +1,8 @@
 ﻿using MessagePack;
+using System.Collections.Generic;
 
 namespace Geek.Server.Proto
 {
-    public enum TestEnum
-    {
-        A, B, C, D, E, F, G, H, I, J, K, L,
-    }
-
-
-    [MessagePackObject(true)]
-    public struct TestStruct
-    {
-        public int Age { get; set; }
-        public string Name { get; set; }
-    }
-
-    [MessagePackObject(true)]
-    public class A
-    {
-        public int Age { get; set; }
-        public TestEnum E { get; set; } = TestEnum.B;
-        public TestStruct TS { get; set; }
-    }
-
-    [MessagePackObject(true)]
-    public class B : A
-    {
-        public string Name { get; set; }
-        [IgnoreMember]
-        public string Test { get; set; }
-    }
-
-
     /// <summary>
     /// 玩家基础信息
     /// </summary>
@@ -71,6 +42,10 @@ namespace Geek.Server.Proto
         public int SdkType { get; set; }
         public string SdkToken { get; set; }
         public string Device { get; set; }
+        /// <summary>
+        /// 连接标示，避免自己顶自己的号,客户端每次启动游戏生成一次/或者每个设备一个
+        /// </summary>
+        public string Sign { get; set; } 
     }
 
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using Amazon.Runtime.Internal.Util;
 using Geek.Server.Core.Actors.Impl;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix.Agent;
@@ -62,7 +63,7 @@ namespace Geek.Server.Core.Actors
 
             if (type == ActorType.Role)
             {
-                Tell(() => SetAutoRecycle(true));
+                 SetAutoRecycle(true);
             }
             else
             {

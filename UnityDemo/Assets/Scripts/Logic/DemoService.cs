@@ -1,8 +1,6 @@
 ﻿using Base.Net;
 using Geek.Client;
-using Geek.Server;
 using Geek.Server.Proto;
-using Protocol;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
@@ -57,19 +55,12 @@ namespace Logic
 
         public void RegisterEventListener()
         {
-            AddListener(GameClient.ConnectEvt, OnConnectServer);
-            AddListener(GameClient.DisconnectEvt, OnDisconnectServer);
+            AddListener(NetConnectMessage.MsgID, OnConnectServer);
+            AddListener(NetDisConnectMessage.MsgID, OnDisconnectServer);
             AddListener(ResLogin.MsgID, OnResLogin);
             AddListener(ResBagInfo.MsgID, OnResBagInfo);
             AddListener(ResComposePet.MsgID, OnResComposePet);
             AddListener(ResErrorCode.MsgID, OnResErrorCode);
-            AddListener(ResConnectGate.MsgID, OnResConnectGate);
-        }
-
-        private void OnResConnectGate(Event e)
-        {
-            ResConnectGate res = GetCurMsg<ResConnectGate>(e.Data);
-            MsgWaiter.EndWait(res.UniId, res.Result);
         }
 
         private void OnResErrorCode(Event e)
@@ -95,17 +86,15 @@ namespace Logic
 
         private void OnConnectServer(Event e)
         {
-            UnityEngine.Debug.Log("-------OnConnectServer-->>>" + (NetCode)e.Data);
-            int code = (int)e.Data;
-            if ((NetCode)code == NetCode.Success)
+            var msg = GetCurMsg<NetConnectMessage>(e.Data);
+            UnityEngine.Debug.Log("-------OnConnectServer-->>>" + msg.Code);
+            if (msg.Code == NetCode.Success)
             {
-                UnityEngine.Debug.Log("连接服务器成功!");
-                MsgWaiter.EndWait(GameClient.ConnectEvt);
+                MsgWaiter.EndWait(NetConnectMessage.MsgID);
             }
             else
             {
-                UnityEngine.Debug.Log("连接服务器失败!");
-                MsgWaiter.EndWait(GameClient.ConnectEvt, false);
+                MsgWaiter.EndWait(NetConnectMessage.MsgID, false);
             }
         }
 

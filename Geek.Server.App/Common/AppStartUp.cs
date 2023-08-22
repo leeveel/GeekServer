@@ -10,8 +10,10 @@ using Geek.Server.Proto;
 using Newtonsoft.Json;
 using NLog;
 using NLog.Config;
-using NLog.LayoutRenderers;
-using Protocol;
+using NLog.LayoutRenderers; 
+using Geek.Server.Core.Net.Kcp;
+using Geek.Server.App.Net.GatewayKcp;
+using Geek.Server.Core.Extensions;
 
 namespace Geek.Server.App.Common
 {
@@ -28,25 +30,24 @@ namespace Geek.Server.App.Common
                 await Task.Run(async () =>
                 {
                     //连接中心rpc
-                    if (await AppNetMgr.ConnectCenter())
+                    AppCenterRpcClient centerRpc = new AppCenterRpcClient(Settings.CenterUrl);
+                    if (await centerRpc.Connect())
                     {
                         var getNode = () =>
                         {
-                            return new NetNode
+                            return new ServerInfo
                             {
-                                NodeId = Settings.ServerId,
+                                ServerId = Settings.ServerId,
                                 Ip = Settings.LocalIp,
+                                InnerIp = Settings.LocalIp,
                                 TcpPort = Settings.TcpPort,
                                 HttpPort = Settings.HttpPort,
-                                Type = NodeType.Game
+                                Type = ServerType.Game
                             };
                         };
 
-                        if (!await AppNetMgr.CenterRpcClient.Register(getNode))
+                        if (!await centerRpc.Register(getNode))
                             throw new Exception($"中心服注册失败... {JsonConvert.SerializeObject(getNode())}");
-
-                        //到中心服拉取通用配置
-                        await AppNetMgr.GetGlobalConfig();
 
                         Log.Info($"launch embedded db...");
                         GameDB.Init();
@@ -58,7 +59,9 @@ namespace Geek.Server.App.Common
                         await HotfixMgr.LoadHotfixModule();
 
                         Settings.InsAs<AppSetting>().ServerReady = true;
-                        _ = AppNetMgr.ConnectGateway();
+
+                        //kcp test
+                        _ = new KcpServer(Settings.TcpPort, KcpHander.OnMessage,KcpHander.OnChannelRemove).Start();
                     }
                 });
 
@@ -66,11 +69,7 @@ namespace Geek.Server.App.Common
                 Console.WriteLine("***进入游戏主循环***");
                 Settings.LauchTime = DateTime.Now;
                 Settings.AppRunning = true;
-                TimeSpan delay = TimeSpan.FromSeconds(1);
-                while (Settings.AppRunning)
-                {
-                    await Task.Delay(delay);
-                }
+                await Settings.AppExitToken;
             }
             catch (Exception e)
             {

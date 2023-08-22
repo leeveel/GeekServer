@@ -18,7 +18,7 @@ namespace Geek.Server.Center.Logic
 
         private ConcurrentDictionary<string, bool> SubscribeEvts = new();
 
-        public long CurNodeId { private set; get; }
+        public long CurServerId { private set; get; }
 
         protected override async ValueTask OnConnecting()
         {
@@ -29,7 +29,7 @@ namespace Geek.Server.Center.Logic
         protected override ValueTask OnDisconnected()
         {
             LOGGER.Debug($"rpc客户端断开连接:{Context.CallContext.Peer}");
-            ServiceManager.NamingService.Remove(CurNodeId);
+            ServiceManager.NamingService.Remove(CurServerId);
             if (group != null)
                 group.RemoveAsync(Context);
             //group = null;
@@ -45,10 +45,11 @@ namespace Geek.Server.Center.Logic
 
         private void NodesChanged()
         {
-            Task.Run(() =>
+            Task.Run(async () =>
             {
+                await Task.Delay(2000);
                 var list = ServiceManager.NamingService.GetAllNodes();
-                Broadcast(group).NodesChanged(list);
+                Broadcast(group).ServerChanged(list);
             });
         }
 
@@ -57,9 +58,9 @@ namespace Geek.Server.Center.Logic
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public Task<bool> Register(NetNode node)
+        public Task<bool> Register(ServerInfo node)
         {
-            CurNodeId = node.NodeId;
+            CurServerId = node.ServerId;
             ServiceManager.NamingService.Add(node);
             NodesChanged();
             return Task.FromResult(true);
@@ -73,13 +74,13 @@ namespace Geek.Server.Center.Logic
             return Task.FromResult(cfg);
         }
 
-        public Task<List<NetNode>> GetAllNodes()
+        public Task<List<ServerInfo>> GetAllNodes()
         {
             var nodes = ServiceManager.NamingService.GetAllNodes();
             return Task.FromResult(nodes);
         }
 
-        public Task<List<NetNode>> GetNodesByType(NodeType type)
+        public Task<List<ServerInfo>> GetNodesByType(ServerType type)
         {
             var nodes = ServiceManager.NamingService.GetNodesByType(type);
             return Task.FromResult(nodes);
@@ -114,9 +115,9 @@ namespace Geek.Server.Center.Logic
         }
 
         //节点主动同步状态
-        public Task SyncState(NetNodeState state)
+        public Task SyncState(ServerState state)
         {
-            ServiceManager.NamingService.SetNodeState(CurNodeId, state);
+            ServiceManager.NamingService.SetNodeState(CurServerId, state);
             return Task.CompletedTask;
         }
     }

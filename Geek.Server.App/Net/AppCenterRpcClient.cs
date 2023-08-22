@@ -24,17 +24,12 @@ namespace Geek.Server.App.Net
             Console.WriteLine("ConfigChanged:" + data);
         }
 
-        public override void NodesChanged(List<NetNode> nodes)
+        public override void ServerChanged(List<ServerInfo> nodes)
         {
             LOGGER.Debug("---------------------------------");
             foreach (var node in nodes)
             {
-                LOGGER.Debug("NodeId:" + node.NodeId);
-                if (Settings.InsAs<AppSetting>().ServerReady  //服务器处于ready状态再连接网关
-                    && node.Type == NodeType.Gateway)
-                {
-                    _ = AppNetMgr.ConnectGateway(node);
-                }
+                LOGGER.Debug("ServerId:" + node.ServerId);
             }
             LOGGER.Debug("---------------------------------");
         }

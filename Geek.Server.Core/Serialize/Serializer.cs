@@ -1,4 +1,5 @@
 using MessagePack;
+using System.Buffers;
 
 namespace Geek.Server.Core.Serialize
 {
@@ -9,6 +10,11 @@ namespace Geek.Server.Core.Serialize
             return MessagePackSerializer.Serialize(value);
         }
         public static T Deserialize<T>(byte[] data)
+        {
+            return MessagePackSerializer.Deserialize<T>(data);
+        }
+
+        public static T Deserialize<T>(Memory<byte> data)
         {
             return MessagePackSerializer.Deserialize<T>(data);
         }

@@ -1,10 +1,8 @@
-﻿using Common.Net.Tcp;
-
-namespace Geek.Server.Core.Net.Tcp.Handler
+﻿namespace Geek.Server.Core.Net.Tcp.Handler
 {
     public abstract class BaseTcpHandler
     {
-        public INetChannel Channel { get; set; }
+        public BaseNetChannel Channel { get; set; }
         public long ClientNetId { get; set; }
         public Message Msg { get; set; }
 

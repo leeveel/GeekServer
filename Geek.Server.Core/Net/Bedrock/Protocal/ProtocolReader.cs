@@ -41,7 +41,7 @@ namespace Bedrock.Framework.Protocols
             if (buffer.Length > 0)
             {
                 haveMsg = protocal.TryParseMessage(buffer, ref consumed, ref examined, out msg);
-                _reader.AdvanceTo(examined, consumed);
+                _reader.AdvanceTo(consumed, examined);
             }
 
             return new ProtocolReadResult<TMessage>(haveMsg, msg, result.IsCompleted);

@@ -22,6 +22,8 @@ namespace MessagePack.Formatters.Geek.Server.Proto
         private static global::System.ReadOnlySpan<byte> GetSpan_Code() => new byte[1 + 4] { 164, 67, 111, 100, 101 };
         // UserInfo
         private static global::System.ReadOnlySpan<byte> GetSpan_UserInfo() => new byte[1 + 8] { 168, 85, 115, 101, 114, 73, 110, 102, 111 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
         public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.ResLogin value, global::MessagePack.MessagePackSerializerOptions options)
         {
@@ -32,11 +34,13 @@ namespace MessagePack.Formatters.Geek.Server.Proto
             }
 
             var formatterResolver = options.Resolver;
-            writer.WriteMapHeader(2);
+            writer.WriteMapHeader(3);
             writer.WriteRaw(GetSpan_Code());
             writer.Write(value.Code);
             writer.WriteRaw(GetSpan_UserInfo());
             global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Geek.Server.Proto.UserInfo>(formatterResolver).Serialize(ref writer, value.UserInfo, options);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
         public global::Geek.Server.Proto.ResLogin Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
@@ -69,6 +73,11 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                         if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 8027224647565407061UL) { goto FAIL; }
 
                         ____result.UserInfo = global::MessagePack.FormatterResolverExtensions.GetFormatterWithVerify<global::Geek.Server.Proto.UserInfo>(formatterResolver).Deserialize(ref reader, options);
+                        continue;
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
                         continue;
 
                 }

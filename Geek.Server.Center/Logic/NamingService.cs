@@ -7,7 +7,7 @@ namespace Geek.Server.Center.Logic
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid
-        internal readonly ConcurrentDictionary<long, NetNode> nodeMap = new();
+        internal readonly ConcurrentDictionary<long, ServerInfo> nodeMap = new();
         private SubscribeService subscribeService;
 
         public NamingService(SubscribeService subscribeService)
@@ -20,18 +20,18 @@ namespace Geek.Server.Center.Logic
             return nodeMap.Count;
         }
 
-        public NetNode Remove(long id)
+        public ServerInfo Remove(long id)
         {
             nodeMap.TryRemove(id, out var node);
             return node;
         }
 
-        public void Remove(NetNode node)
+        public void Remove(ServerInfo node)
         {
-            nodeMap.TryRemove(node.NodeId, out var _);
+            nodeMap.TryRemove(node.ServerId, out var _);
         }
 
-        public NetNode Get(long id)
+        public ServerInfo Get(long id)
         {
             nodeMap.TryGetValue(id, out var v);
             return v;
@@ -43,7 +43,7 @@ namespace Geek.Server.Center.Logic
             return list;
         }
 
-        public List<NetNode> GetAllNodes()
+        public List<ServerInfo> GetAllNodes()
         {
             return nodeMap.Values.ToList();
         }
@@ -53,16 +53,16 @@ namespace Geek.Server.Center.Logic
             return nodeMap.Count;
         }
 
-        public NetNode Add(NetNode node)
+        public ServerInfo Add(ServerInfo node)
         {
-            Log.Debug($"新的网络节点:{node.NodeId} {node.Type}");
-            var old = nodeMap.GetOrAdd(node.NodeId, node);
+            Log.Debug($"新的网络节点:{node.ServerId} {node.Type}");
+            var old = nodeMap.GetOrAdd(node.ServerId, node);
             return old != node ? old : null;
         }
 
-        public List<NetNode> GetNodesByType(NodeType type)
+        public List<ServerInfo> GetNodesByType(ServerType type)
         {
-            var list = new List<NetNode>();
+            var list = new List<ServerInfo>();
             foreach (var node in nodeMap)
             {
                 if (node.Value.Type == type)
@@ -73,7 +73,7 @@ namespace Geek.Server.Center.Logic
             return list;
         }
 
-        public void SetNodeState(long nodeId, NetNodeState state)
+        public void SetNodeState(long nodeId, ServerState state)
         {
             //Log.Debug($"设置节点{nodeId}状态");
             if (nodeMap.TryGetValue(nodeId, out var node))

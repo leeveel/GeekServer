@@ -6,7 +6,7 @@ namespace Geek.Server.Core.Center
     {
         public const string ConfigChange = "ConfigChange";
         public const string NetNodeStateChangeSuffix = "StateChange";
-        public static string NetNodeStateChange(NodeType type)
+        public static string NetNodeStateChange(ServerType type)
         {
             return $"{type}{NetNodeStateChangeSuffix}";
         }

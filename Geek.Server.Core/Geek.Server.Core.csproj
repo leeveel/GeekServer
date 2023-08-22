@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -19,18 +19,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MagicOnion" Version="5.1.5" />
-    <PackageReference Include="MessagePack" Version="2.5.108" />
-    <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="7.0.5" />
+    <Compile Remove="Net\Kcp\Core\**" />
+    <EmbeddedResource Remove="Net\Kcp\Core\**" />
+    <None Remove="Net\Kcp\Core\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Kcp" Version="2.6.3" />
+    <PackageReference Include="MagicOnion" Version="5.1.8" />
+    <PackageReference Include="MessagePack" Version="2.5.124" />
+    <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="7.0.10" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.15.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="NLog" Version="5.1.3" />
-    <PackageReference Include="Quartz" Version="3.6.2" />
+    <PackageReference Include="MongoDB.Driver" Version="2.21.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NLog" Version="5.2.3" />
+    <PackageReference Include="Quartz" Version="3.7.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
 
-    <PackageReference Include="NLog.Web.AspNetCore" Version="5.2.3" />
-    <PackageReference Include="RocksDB" Version="8.1.1.38086" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.3" />
+    <PackageReference Include="RocksDB" Version="8.3.2.39829" />
     <PackageReference Include="Standart.Hash.xxHash" Version="4.0.5" />
 
   </ItemGroup>

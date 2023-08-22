@@ -7,6 +7,8 @@
   "HttpPort": 20000,
   "CenterUrl": "http://127.0.0.1:9001",
   "DBModel": 0, //0:内嵌 1:mongodb
+  "LocalDBPath": "../gamedb",
   "MongoUrl": "mongodb://127.0.0.1:27017/?authSource=admin",
-  "MongoDBName": "geek_server"
+  "MongoDBName": "geek_server",
+  "LocalIp": "127.0.0.1"
 }

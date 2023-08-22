@@ -1,12 +1,7 @@
 ﻿using Base.Net;
 using Geek.Client;
-using Geek.Client.Config;
-using Geek.Server;
 using Geek.Server.Proto;
-using MessagePack;
-using MessagePack.Resolvers;
-using Protocol;
-using Resolvers;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,27 +33,26 @@ namespace Logic
         {
             Txt = GameObject.Find("Text").GetComponent<Text>();
             Application.logMessageReceived += OnGetLogMessage;
-            //GameDataManager.ReloadAll();
-            GameClient.Singleton.Init(MsgFactory.GetType);
+            //GameDataManager.ReloadAll(); 
             DemoService.Singleton.RegisterEventListener();
-            await ConnectServer();
-            await ReqRouter();
+            if (await ConnectServer())
+            {
+                Debug.Log("连接服务器成功...");
+            }
+            else
+            {
+                Debug.Log("连接服务器失败...");
+                return;
+            }
             await Login();
             await ReqBagInfo();
             await ReqComposePet();
         }
 
-        private async Task ConnectServer()
+        private async Task<bool> ConnectServer()
         {
-            GameClient.Singleton.Connect(gateIp, gatePort);
-            await MsgWaiter.StartWait(GameClient.ConnectEvt);
-        }
-
-        private Task ReqRouter()
-        {
-            var req = new ReqConnectGate();
-            req.ServerId = serverId;
-            return DemoService.Singleton.SendMsg(req);
+            GameClient.Singleton.Connect(new GateList { serverIps = new List<string> { "127.0.0.1" }, ports = new List<int> { 7899 } }, 1001);
+            return await MsgWaiter.StartWait(NetConnectMessage.MsgID);
         }
 
         private Task Login()
@@ -68,7 +62,8 @@ namespace Logic
             req.SdkType = 0;
             req.SdkToken = "";
             req.UserName = userName;
-            req.Device = SystemInfo.deviceUniqueIdentifier;
+            req.Sign = SystemInfo.deviceUniqueIdentifier;
+            req.Device = SystemInfo.deviceName;
             if (Application.platform == RuntimePlatform.Android)
                 req.Platform = "android";
             else if (Application.platform == RuntimePlatform.IPhonePlayer)
@@ -95,7 +90,7 @@ namespace Logic
         private void OnApplicationQuit()
         {
             Debug.Log("OnApplicationQuit");
-            GameClient.Singleton.Close(false);
+            GameClient.Singleton.Close();
             MsgWaiter.DisposeAll();
         }
 

@@ -19,7 +19,7 @@ namespace Geek.Server.Core.Net.Http
         /// <summary>
         /// 根据服务器id获取服务器http地址
         /// </summary>
-        //public static async Task<string> GetServerHttpUrl(NetNode node)
+        //public static async Task<string> GetServerHttpUrl(ServerInfo node)
         //{
         //    if (node == null)
         //        return "";

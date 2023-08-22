@@ -9,7 +9,7 @@ namespace Geek.Server.Hotfix.Http
         public override bool CheckSign => true;
 
         /// <summary>
-        /// http://192.168.0.163:20000/game/api?command=online_num_query
+        /// http://127.0.0.1:20000/game/api?command=online_num_query
         /// </summary>
         /// <param name="ip"></param>
         /// <param name="url"></param>
@@ -17,7 +17,6 @@ namespace Geek.Server.Hotfix.Http
         /// <returns></returns>
         public override Task<string> Action(string ip, string url, Dictionary<string, string> parameters)
         {
-
             var res = new HttpResult(HttpResult.Stauts.Success, $"当前在线人数:{SessionManager.Count()}").ToString();
             return Task.FromResult(res);
         }

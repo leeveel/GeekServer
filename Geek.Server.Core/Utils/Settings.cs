@@ -1,5 +1,7 @@
-﻿using Geek.Server.Core.Utils;
+﻿
+using Geek.Server.Core.Utils;
 using Newtonsoft.Json;
+using NLog;
 
 public enum ServerType
 {
@@ -18,6 +20,7 @@ public enum ServerType
 
 public static class Settings
 {
+    static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
     private static BaseSetting Ins;
 
     public static void Load<T>(string path, ServerType serverType) where T : BaseSetting
@@ -44,10 +47,21 @@ public static class Settings
         set => Ins.LauchTime = value;
     }
 
+    static CancellationTokenSource AppExitSource = new CancellationTokenSource();
+    public static CancellationToken AppExitToken => AppExitSource.Token;
+
     public static bool AppRunning
     {
         get => Ins.AppRunning;
-        set => Ins.AppRunning = value;
+        set
+        {
+            Ins.AppRunning = value;
+            if (!value && !AppExitSource.IsCancellationRequested)
+            {
+                LOGGER.Info("AppRunning... false");
+                AppExitSource.Cancel();
+            }
+        }
     }
 
     public static ServerType ServerType => Ins.ServerType;
@@ -74,7 +88,7 @@ public static class Settings
 
     public static string MongoDBName => Ins.MongoDBName;
 
-    public static string LocalDBPrefix => Ins.LocalDBPrefix;
+    public static string LocalDBPrefix => Ins.LocalDBPrefix ?? "";
 
     public static string LocalDBPath => Ins.LocalDBPath;
 
