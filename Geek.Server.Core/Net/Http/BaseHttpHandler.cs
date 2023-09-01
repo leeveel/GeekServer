@@ -33,7 +33,7 @@ namespace Geek.Server.Core.Net.Http
 
         public string CheckSgin(Dictionary<string, string> paramMap)
         {
-            if (!CheckSign || Settings.IsDebug)
+            if (!CheckSign || Settings.Ins.IsDebug)
                 return "";
 
             //内部验证
@@ -52,7 +52,7 @@ namespace Geek.Server.Core.Net.Http
                 return new HttpResult(HttpResult.Stauts.Illegal, "http命令已过期");
             }
 
-            var str = Settings.HttpCode + time;
+            var str = Settings.Ins.HttpCode + time;
             if (sign == GetStringSign(str))
                 return "";
             else

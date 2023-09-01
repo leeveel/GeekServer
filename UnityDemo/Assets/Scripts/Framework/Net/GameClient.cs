@@ -21,52 +21,66 @@ namespace Base.Net
         private const float DISPATCH_MAX_TIME = 0.06f;  //每一帧最大的派发事件时间，超过这个时间则停止派发，等到下一帧再派发
 
         public static GameClient Singleton = new GameClient();
-        private KcpChannel channel { get; set; }
+        KcpChannel channel;
+        AKcpSocket clientSocket = null;
         ConcurrentQueue<Message> msgQueue = new ConcurrentQueue<Message>();
-        public int Port { private set; get; }
-        public string Host { private set; get; }
         public void Send(Message msg)
         {
             channel?.Write(msg);
         }
 
-        public async void Connect(GateList gateList, int serverId, int timeOut = 5000)
+        public async Task<bool> Connect(GateList gateList, int serverId, int timeOut = 5000)
         {
             long netId = 0;
-            KcpChannel kcpChannel = null;
-            async Task Connect(int delay = 0)
+            async Task<bool> InnerConnect(int delay = 0)
             {
                 if (!Application.isPlaying)
-                    return;
+                    return false;
                 if (delay > 0)
                 {
                     await Task.Delay(delay);
                 }
-                Debug.Log("选择网关...");
+                //Debug.Log("选择网关...");
                 var index = UnityEngine.Random.Range(0, gateList.serverIps.Count);
                 var ip = gateList.serverIps[index];
                 var port = gateList.ports[index];
 
-                IKcpSocket clientSocket = null;
+                clientSocket = null;
 
                 var serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
                 //clientSocket = new KcpUdpClientSocket(serverId);
-                clientSocket = new KcpTcpClientSocket(serverId);
+                clientSocket = UnityEngine.Random.Range(0, 100) >= 50 ? new KcpTcpClientSocket(serverId) : new KcpUdpClientSocket(serverId);
 
-                if (!await clientSocket.Connect(ip, port, netId))
+#if UNITY_EDITOR
+                Debug.Log($"当前准备连接网关类:{clientSocket.GetType().Name}");
+#endif
+
+                var result = await clientSocket.Connect(ip, port, netId);
+                if (result.resetNetId)
                 {
-                    Debug.LogError("连接服务器失败...");
-                    await Task.Delay(20);
-
-                    //TODO:限制连接次数
-                    await Connect(100);
-                    return;
+                    netId = 0;
                 }
-                if (kcpChannel == null)
+
+                int reconnectDelay = 900;
+                if (!result.isSuccess)
+                {
+                    if (result.allowReconnect)
+                    {
+                        Debug.LogError("连接服务器失败...");
+                        //TODO:限制连接次数
+                        await InnerConnect(reconnectDelay);
+                    }
+                    else
+                    {
+                        OnDisConnected();
+                    }
+                    return false;
+                }
+                if (channel == null)
                 {
                     netId = clientSocket.NetId;
-                    kcpChannel = new KcpChannel(false, netId, serverId, serverEndPoint, (chann, data) =>
+                    channel = new KcpChannel(false, netId, serverId, serverEndPoint, (chann, data) =>
                     {
                         var package = new TempNetPackage(NetPackageFlag.MSG, chann.NetId, serverId, data);
                         clientSocket?.Send(package);
@@ -74,20 +88,40 @@ namespace Base.Net
                     {
                         OnRevice(msg);
                     });
-                    channel = kcpChannel;
                     OnConnected(NetCode.Success);
                 }
 
-                _ = clientSocket.StartRecv(kcpChannel.HandleRecv, () =>
-                 {
-                     _ = Connect(100);
-                 }, () =>
-                 {
-                     Debug.LogError("服务器断开连接....");
-                     OnDisConnected();
-                 });
+                _ = clientSocket.StartRecv(channel.HandleRecv, () =>
+                {
+                    if ((bool)!channel?.IsClose())
+                        _ = InnerConnect(reconnectDelay);
+                }, () =>
+                {
+                    Debug.LogError("服务器断开连接....");
+                    OnDisConnected();
+                });
+                return true;
             }
-            await Connect();
+            return await InnerConnect();
+        }
+
+        public async Task CheckNetAsync()
+        {
+            if (clientSocket == null)
+                return;
+            if (!await clientSocket.HeartCheckImmediate())
+            {
+                try
+                {
+                    clientSocket.Close();
+                    channel.Close();
+                }
+                catch
+                {
+
+                }
+                OnDisConnected();
+            }
         }
 
         private void OnConnected(NetCode code)
@@ -108,6 +142,7 @@ namespace Base.Net
         public void Close()
         {
             channel?.Close();
+            channel = null;
             ClearAllMsg();
         }
 
@@ -133,7 +168,7 @@ namespace Base.Net
                 if (msg == null)
                     return;
 
-#if UNITY_EDITOR  
+#if UNITY_EDITOR
                 //Debug.Log($"开始处理网络事件 {msg.MsgId}  {msg.GetType().FullName}");
 #endif
                 try

@@ -25,7 +25,7 @@ namespace Geek.Server.App.Net.Session
         public static void Remove(GameSession session)
         {
             var id = session.RoleId;
-            lock(sessionMap)
+            lock (sessionMap)
             {
                 if (sessionMap.TryGetValue(id, out GameSession curSession) && session == curSession)
                 {
@@ -35,8 +35,8 @@ namespace Geek.Server.App.Net.Session
                     if (ActorMgr.HasActor(id))
                         EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
                 }
-            } 
-        } 
+            }
+        }
 
         public static Task RemoveAll()
         {

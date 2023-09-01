@@ -1,6 +1,6 @@
 {
   "serverId": 1001, //serverid ready to connect 
-  "clientCount": 1,
+  "clientCount": 4000,
   "gateIP": "127.0.0.1",
   "gatePort": 9102
 }

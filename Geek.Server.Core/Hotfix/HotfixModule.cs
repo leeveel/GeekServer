@@ -92,7 +92,7 @@ namespace Geek.Server.Core.Hotfix
             if (DllLoader != null)
             {
                 var weak = DllLoader.Unload();
-                if (Settings.IsDebug)
+                if (Settings.Ins.IsDebug)
                 {
                     //检查hotfix dll是否已经释放
                     Task.Run(async () =>
@@ -138,7 +138,7 @@ namespace Geek.Server.Core.Hotfix
                     if (HotfixBridge == null && type.GetInterface(typeof(IHotfixBridge).FullName) != null)
                     {
                         var bridge = (IHotfixBridge)Activator.CreateInstance(type);
-                        if (bridge.BridgeType == Settings.ServerType)
+                        if (bridge.BridgeType == Settings.Ins.ServerType)
                             HotfixBridge = bridge;
                     }
                 }

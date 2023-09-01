@@ -9,23 +9,15 @@ namespace Geek.Server.Core.Net
         private readonly Func<Task<bool>> connFun;
         private readonly int retryTimes;
         private int retryed = 0;
-        /// <summary>
-        /// 重试延迟(毫秒)
-        /// </summary>
-        private readonly int retryDelay = 15000;
-
-        /// <summary>
-        /// 两分钟
-        /// </summary>
-        const int MAX_DELAY = 120_000;
+        private readonly int retryDelay = 5000;
+        const int MAX_DELAY = 60_000;
 
         private readonly string connInfo;
 
-        public ReConnecter(Func<Task<bool>> connFun, string connInfo = "", int retryTimes = -1, int retryDelay = 5000)
+        public ReConnecter(Func<Task<bool>> connFun, string connInfo = "", int retryTimes = -1)
         {
             this.connFun = connFun;
             this.connInfo = connInfo;
-            this.retryDelay = retryDelay;
             this.retryTimes = retryTimes;
         }
 
@@ -76,7 +68,7 @@ namespace Geek.Server.Core.Net
         {
             try
             {
-                if (!Settings.AppRunning)
+                if (!Settings.Ins.AppRunning)
                     return;
                 if (retryTimes < 0 || retryed < retryTimes)
                 {
@@ -85,7 +77,7 @@ namespace Geek.Server.Core.Net
                         NotifyDingTalk();
                     int delay = GetNextDelayTime();
                     retryed++;
-                    LOGGER.Error($"连接断开,{delay}ms后尝试重连");
+                    LOGGER.Error($"rpc连接断开,{delay}ms后尝试重连");
                     cancel = new CancellationTokenSource();
                     await Task.Delay(delay, cancel.Token);
                     if (!cancel.IsCancellationRequested)

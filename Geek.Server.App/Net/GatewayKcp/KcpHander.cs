@@ -44,8 +44,8 @@ namespace Geek.Server.App.Net.GatewayKcp
         {
             if (channel == null)
                 return;
-           var session =  channel.GetData<GameSession>(SessionManager.SESSION);
-            if(session!=null)
+            var session = channel.GetData<GameSession>(SessionManager.SESSION);
+            if (session != null)
             {
                 SessionManager.Remove(session);
             }

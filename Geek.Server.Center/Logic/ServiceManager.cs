@@ -2,10 +2,7 @@
 {
     internal class ServiceManager
     {
-        public static NamingService NamingService { get; set; }
-
-        public static ConfigService ConfigService { get; set; }
-
-        public static SubscribeService SubscribeService { get; set; }
+        public static NamingService NamingService { get; set; } = new NamingService();
+        public static SubscribeService SubscribeService { get; set; } = new SubscribeService();
     }
 }

@@ -83,7 +83,7 @@ namespace Geek.Server.Core.Comps
 
         static StateComp()
         {
-            if (Settings.DBModel == (int)DBModel.Mongodb)
+            if (Settings.Ins.DBModel == (int)DBModel.Mongodb)
                 StateComp.AddShutdownSaveFunc(SaveAll);
         }
 
@@ -97,7 +97,7 @@ namespace Geek.Server.Core.Comps
 
         public override Task Deactive()
         {
-            if (Settings.DBModel == (int)DBModel.Mongodb)
+            if (Settings.Ins.DBModel == (int)DBModel.Mongodb)
                 stateDic.TryRemove(ActorId, out _);
             return base.Deactive();
         }
@@ -120,7 +120,7 @@ namespace Geek.Server.Core.Comps
         public async Task ReadStateAsync()
         {
             State = await GameDB.LoadState<TState>(ActorId);
-            if (Settings.DBModel == (int)DBModel.Mongodb)
+            if (Settings.Ins.DBModel == (int)DBModel.Mongodb)
             {
                 stateDic.TryRemove(State.Id, out _);
                 stateDic.TryAdd(State.Id, State);

@@ -16,9 +16,9 @@ namespace Geek.Server.TestPressure.Logic
             public bool GetResult() => result;
             public Awaiter GetAwaiter() => this;
 
-            public Awaiter()
+            public Awaiter(float timeoutSeconds)
             {
-                timer = new Timer(TimeOut, null, 10000, -1);
+                timer = new Timer(TimeOut, null, (int)(timeoutSeconds * 1000), -1);
             }
 
             public void OnCompleted(Action continuation)
@@ -58,14 +58,14 @@ namespace Geek.Server.TestPressure.Logic
             waitDic.Clear();
         }
 
-        public Awaiter StartWait(int uniId)
+        public Awaiter StartWait(int uniId, float timeoutSeconds = 15)
         {
             Awaiter waiter = null;
             lock (waitDic)
             {
                 if (!waitDic.ContainsKey(uniId))
                 {
-                    waiter = new Awaiter();
+                    waiter = new Awaiter(timeoutSeconds);
                     waitDic.Add(uniId, waiter);
                 }
                 else

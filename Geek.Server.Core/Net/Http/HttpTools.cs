@@ -34,7 +34,7 @@ namespace Geek.Server.Core.Net.Http
             if (inner)
             {
                 var time = DateTime.Now.Ticks;
-                json[TOKEN_KEY] = GetStringSign(Settings.HttpCode + time);
+                json[TOKEN_KEY] = GetStringSign(Settings.Ins.HttpCode + time);
                 json[TIME_KEY] = time;
             }
 
@@ -80,7 +80,7 @@ namespace Geek.Server.Core.Net.Http
             if (inner)
             {
                 var time = DateTime.Now.Ticks;
-                string sign = GetStringSign(Settings.HttpCode + time);
+                string sign = GetStringSign(Settings.Ins.HttpCode + time);
                 url += $"&{TOKEN_KEY}={sign}&{TIME_KEY}={time}";
             }
             try

@@ -1,7 +1,6 @@
-﻿using System.Diagnostics;
+﻿using Geek.Server.Gateway.Common;
+using System.Diagnostics;
 using System.Text;
-using Geek.Server.Core.Utils;
-using Geek.Server.Gateway.Common;
 
 namespace Geek.Server.Gateway
 {
@@ -26,7 +25,7 @@ namespace Geek.Server.Gateway
             catch (Exception e)
             {
                 string error;
-                if (Settings.AppRunning)
+                if (Settings.Ins.AppRunning)
                 {
                     error = $"服务器运行时异常 e:{e}";
                     Console.WriteLine(error);
@@ -48,7 +47,7 @@ namespace Geek.Server.Gateway
             Log.Info($"监听到退出程序消息");
             ShutDownTask = Task.Run(() =>
             {
-                Settings.AppRunning = false;
+                Settings.Ins.AppRunning = false;
                 GameLoopTask?.Wait();
                 LogManager.Shutdown();
                 Console.WriteLine($"退出程序");

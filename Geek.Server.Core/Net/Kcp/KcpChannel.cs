@@ -1,5 +1,4 @@
-﻿using Bedrock.Framework;
-using Geek.Server.Core.Serialize;
+﻿using Geek.Server.Core.Serialize;
 using Geek.Server.Core.Utils;
 using MessagePack;
 using NLog;
@@ -19,17 +18,18 @@ namespace Geek.Server.Core.Net.Kcp
         public EndPoint routerEndPoint { get; set; }
 
         private KcpOutPutFunc kcpDataSendFunc;
-        private Func<BaseNetChannel, Message, Task> onMessageAct;
-        private Action onConnectCloseAct;
+        private Func<KcpChannel, Message, Task> onMessageAct;
         private Action onClose;
         private SimpleSegManager.Kcp kcp;
         private bool isColose = false;
         private Pipe dataPipe;
 
+        CancellationTokenSource closeToenSrc = new();
+
         const int MAX_RECV_SIZE = 1024 * 1024 * 20;
         object writeLockObj = new object();
 
-        public KcpChannel(bool isInner, long id, int serverId, EndPoint routerEndPoint, KcpOutPutFunc kcpSocketSendAct, Func<BaseNetChannel, Message, Task> onMessageAct, Action onClose = null)
+        public KcpChannel(bool isInner, long id, int serverId, EndPoint routerEndPoint, KcpOutPutFunc kcpSocketSendAct, Func<KcpChannel, Message, Task> onMessageAct, Action onClose = null)
         {
             NetId = id;
             var ipep = routerEndPoint as IPEndPoint;
@@ -41,7 +41,7 @@ namespace Geek.Server.Core.Net.Kcp
             dataPipe = new Pipe(PipeOptions.Default);
             kcpDataSendFunc = kcpSocketSendAct;
             this.onMessageAct = onMessageAct;
-            this.TargetServerId = serverId;
+            TargetServerId = serverId;
             this.onClose = onClose;
             UpdateRecvMessageTime(TimeSpan.FromSeconds(5).Ticks);
             _ = StartProcessMsgAsync();
@@ -61,11 +61,11 @@ namespace Geek.Server.Core.Net.Kcp
 
             if (msgLen <= 8)//(消息长度已经被读取)
             {
-                throw new ProtocalParseErrorException($"从客户端接收的包大小异常,{msgLen} {reader.Remaining}:至少大于8个字节");
+                throw new Exception($"从客户端接收的包大小异常,{msgLen} {reader.Remaining}:至少大于8个字节");
             }
             else if (msgLen > MAX_RECV_SIZE)
             {
-                throw new ProtocalParseErrorException("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值：" + MAX_RECV_SIZE / 1024 + "字节");
+                throw new Exception("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值：" + MAX_RECV_SIZE / 1024 + "字节");
             }
 
             //验证token...
@@ -88,12 +88,13 @@ namespace Geek.Server.Core.Net.Kcp
 
         async Task StartProcessMsgAsync()
         {
+            var cancelToken = closeToenSrc.Token;
             while (!isColose)
             {
                 try
                 {
                     var reader = dataPipe.Reader;
-                    var result = await reader.ReadAsync();
+                    var result = await reader.ReadAsync(cancelToken);
                     var buffer = result.Buffer;
 
                     if (buffer.Length > 0)
@@ -104,7 +105,9 @@ namespace Geek.Server.Core.Net.Kcp
                         reader.AdvanceTo(consumed, examined);
                         if (msg != null)
                         {
-                            LOGGER.Info($"收到消息:{msg.GetType().Name}:{MessagePack.MessagePackSerializer.SerializeToJson(msg)}");
+#if DEBUG
+                            LOGGER.Info($"收到消息:{msg.GetType().Name}:{MessagePackSerializer.SerializeToJson(msg)}");
+#endif
                             if (onMessageAct != null)
                                 await onMessageAct(this, msg);
                         }
@@ -125,9 +128,13 @@ namespace Geek.Server.Core.Net.Kcp
         public override void Close()
         {
             //LOGGER.Warn($"kcpchannel close:{NetId}"); 
-            isColose = true;
-            onClose?.Invoke();
-            onClose = null;
+            lock (this)
+            {
+                isColose = true;
+                closeToenSrc?.Cancel();
+                onClose?.Invoke();
+                onClose = null;
+            }
         }
 
         public override bool IsClose()
@@ -139,7 +146,9 @@ namespace Geek.Server.Core.Net.Kcp
         {
             if (isColose)
                 return;
-            LOGGER.Info($"发送{msg.GetType()}:{MessagePack.MessagePackSerializer.SerializeToJson(msg)}");
+#if DEBUG
+            LOGGER.Info($"发送{msg.GetType()}:{MessagePackSerializer.SerializeToJson(msg)}");
+#endif
             var bytes = Serializer.Serialize(msg);
 
             var headSize = 8;
@@ -148,7 +157,7 @@ namespace Geek.Server.Core.Net.Kcp
             int offset = 0;
             span.Write(len, ref offset);
             span.Write(msg.MsgId, ref offset);
-            bytes.CopyTo(span.Slice(headSize));
+            bytes.CopyTo(span[headSize..]);
             lock (writeLockObj)
             {
                 kcp?.Send(span);

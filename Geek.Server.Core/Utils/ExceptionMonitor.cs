@@ -34,14 +34,14 @@ namespace Geek.Server.Core.Utils
                 LOGGER.Info($"提交监控 exp={exp} msg={msg}");
             }
             catch (Exception) { }
-            string content = $"【{Settings.ServerId}+{Settings.ServerName}】 发生异常：" + exp.ToString() + "\n" + msg;
+            string content = $"【{Settings.Ins.ServerId}+{Settings.Ins.ServerName}】 发生异常：" + exp.ToString() + "\n" + msg;
             await Send(content);
         }
 
         public static async Task Send(string content)
         {
-            var monitorUrl = Settings.MonitorUrl;
-            var secret = Settings.MonitorKey;
+            var monitorUrl = Settings.Ins.MonitorUrl;
+            var secret = Settings.Ins.MonitorKey;
 
             if (string.IsNullOrEmpty(monitorUrl) || string.IsNullOrEmpty(secret))
             {

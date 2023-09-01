@@ -1,0 +1,6 @@
+﻿{
+  "IsDebug": true,
+  "ServerId": 9001, //[9001,9100]
+  "ServerName": "Geek Server",
+  "RpcPort": 9001
+}

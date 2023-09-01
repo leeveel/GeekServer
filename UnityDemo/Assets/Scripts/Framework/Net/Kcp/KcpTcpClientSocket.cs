@@ -1,119 +1,203 @@
 ﻿
+using Base;
+using MessagePack;
 using System;
 using System.Buffers;
+using System.Buffers.Binary;
 using System.IO.Pipelines;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using Bedrock.Framework;
-using MessagePack;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
-public class KcpTcpClientSocket : IKcpSocket
+public class KcpTcpClientSocket : AKcpSocket
 {
     public delegate void ReceiveFunc(TempNetPackage package);
-    CancellationTokenSource cancelSrc = new CancellationTokenSource();
-    ConnectionContext context;
-    PipeWriter netWriter;
-    PipeReader netReader;
-    public long NetId { get; set; }
-    public int ServerId { get; set; }
+    //ConnectionContext context;
+    private TcpClient socket;
+    Pipe dataPipe;
 
     public KcpTcpClientSocket(int serverId)
     {
         this.ServerId = serverId;
     }
 
-    public async Task<bool> Connect(string ip, int port, long netId = 0)
+
+
+    TcpClient createSockect(ref string ip, int port)
     {
-        this.NetId = netId;
-        context = await new SocketConnection(AddressFamily.InterNetwork, ip, port).StartAsync();
-        if (context == null)
-            return false;
-
-        netReader = context.Transport.Input;
-        netWriter = context.Transport.Output;
-        Send(new TempNetPackage(NetPackageFlag.SYN, NetId, ServerId));
-
-        bool connectResult = false;
-
-        //等待连接消息
-        while (!IsClose())
-        {
-            try
-            {
-                var result = await netReader.ReadAsync();
-                if (TryParseNetPack(result.Buffer, (pack) =>
-                {
-                    connectResult = false;
-                    if (pack.flag == NetPackageFlag.ACK)
-                    {
-                        Debug.Log($"连接成功..{pack.netId}");
-                        connectResult = true;
-                        NetId = pack.netId;
-                    }
-                    if (pack.flag == NetPackageFlag.NO_GATE_CONNECT && pack.innerServerId == 0)
-                    {
-                        Debug.LogError($"内部服务器{ServerId}已关闭或者不存在，连接失败...");
-                    }
-                }))
-                    break;
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-            }
-        }
-
-        return connectResult;
+        return new TcpClient(AddressFamily.InterNetwork);
+        // AddressFamily ipType = AddressFamily.InterNetwork;
+        // try
+        // {
+        //     string ipv6 = GetIPv6(ip, port.ToString());
+        //     if (!string.IsNullOrEmpty(ipv6))
+        //     {
+        //         string[] tmp = System.Text.RegularExpressions.Regex.Split(ipv6, "&&");
+        //         if (tmp != null && tmp.Length >= 2)
+        //         {
+        //             string type = tmp[1];
+        //             if (type == "ipv6")
+        //             {
+        //                 ip = tmp[0];
+        //                 ipType = AddressFamily.InterNetworkV6;
+        //             }
+        //         }
+        //     }
+        //     return new TcpClient(ipType);
+        // }
+        // catch (Exception e)
+        // {
+        //     Debug.LogError(e.Message + "\n" + e.StackTrace);
+        //     return null;
+        // }
     }
 
-    void StartGateHeart()
+    public override async Task<ConnectResult> Connect(string ip, int port, long netId = 0)
     {
-        Task.Run(async () =>
+        Debug.Log($"开始连接:{ip} {port}");
+        isConnecting = true;
+        this.NetId = netId;
+        //context = await new SocketConnection(AddressFamily.InterNetwork, ip, port).StartAsync();
+        socket = createSockect(ref ip, port);
+        if (socket == null)
+            return new(false, true, false);
+
+        try
         {
+            var task = socket.ConnectAsync(ip, port);
+            var tokenSource = new CancellationTokenSource();
+            var completeTask = await Task.WhenAny(task, Task.Delay(TimeSpan.FromSeconds(5), tokenSource.Token));
+            if (completeTask != task)
+            {
+                Close();
+                return new(false, true, false);
+            }
+            else
+            {
+                tokenSource.Cancel();
+                await task;
+            }
+        }
+        catch (Exception e)
+        {
+            Close();
+            return new(false, true, false);
+        }
+
+        dataPipe = new Pipe();
+        _ = readSocketData();
+
+        Send(new TempNetPackage(NetPackageFlag.SYN, NetId, ServerId));
+
+        ConnectResult retResult = new()
+        {
+            allowReconnect = true
+        };
+
+        //等待连接消息
+        if (!cancelSrc.IsCancellationRequested)
+        {
+            var cancelToken = cancelSrc.Token;
             while (!cancelSrc.IsCancellationRequested)
             {
                 try
                 {
-                    Send(new TempNetPackage(NetPackageFlag.GATE_HEART, NetId, ServerId));
-                    await Task.Delay(2000, cancelSrc.Token);
+                    var result = await dataPipe.Reader.ReadAsync(cancelToken);
+                    if (TryParseNetPack(result.Buffer, (pack) =>
+                    {
+                        NetId = pack.netId;
+                        if (pack.flag == NetPackageFlag.ACK)
+                        {
+                            retResult.isSuccess = true;
+                        }
+                        if (pack.flag == NetPackageFlag.NO_GATE_CONNECT)
+                        {
+                        }
+                        if (pack.flag == NetPackageFlag.NO_INNER_SERVER) //不能发现服务器
+                        {
+                            retResult.allowReconnect = false;
+                            retResult.resetNetId = true;
+                        }
+                        if (pack.flag == NetPackageFlag.CLOSE) //服务器已关闭连接
+                        {
+                            retResult.resetNetId = true;
+                        }
+                    }))
+                        break;
                 }
                 catch
+                {
+                }
+            }
+        }
+
+        isConnecting = false;
+        return retResult;
+    }
+
+    async Task readSocketData()
+    {
+        byte[] readBuffer = new byte[1024 * 20];
+        var dataPipeWriter = dataPipe.Writer;
+        var cancelToken = cancelSrc.Token;
+        while (!cancelSrc.IsCancellationRequested && !IsClose())
+        {
+            try
+            {
+                var length = await socket.GetStream().ReadAsync(readBuffer, 0, readBuffer.Length, cancelToken);
+                if (length > 0)
+                {
+                    dataPipeWriter.Write(readBuffer.AsSpan()[..length]);
+                    var flushTask = dataPipeWriter.FlushAsync();
+                    if (!flushTask.IsCompleted)
+                    {
+                        await flushTask.ConfigureAwait(false);
+                    }
+                }
+                else
                 {
                     break;
                 }
             }
-        });
+            catch
+            {
+                break;
+            }
+        }
+        Debug.Log("readSocketData...end ...");
+        Close();
     }
 
     async Task ReadPackAsync(ReceiveFunc onPack)
     {
-        while (!IsClose())
+        var readCancelToken = cancelSrc.Token;
+        while (!cancelSrc.IsCancellationRequested)
         {
             try
             {
-                var result = await netReader.ReadAsync();
+                var result = await dataPipe.Reader.ReadAsync(readCancelToken);
                 //Debug.Log($"read tcp len:{result.Buffer.Length}");
                 if (result.Buffer.Length > 0)
                 {
                     TryParseNetPack(result.Buffer, onPack);
                 }
             }
-            catch (Exception e)
+            catch
             {
                 break;
             }
         }
-        Close();
+        Debug.Log($"ReadPackAsync exit.....");
     }
 
     bool TryParseNetPack(in ReadOnlySequence<byte> input, ReceiveFunc onPack)
     {
         SequencePosition examined = input.Start;
         SequencePosition consumed = examined;
-        var reader = new SequenceReader<byte>(input);
+        var netReader = dataPipe.Reader;
+        var reader = new MessagePack.SequenceReader<byte>(input);
 
         if (!reader.TryReadBigEndian(out int msgLen))
         {
@@ -122,13 +206,13 @@ public class KcpTcpClientSocket : IKcpSocket
             return false;
         }
 
-        if (msgLen < 13)
+        if (msgLen < TempNetPackage.headLen)
         {
-            throw new ProtocalParseErrorException($"从客户端接收的包大小异常,{msgLen} {reader.Remaining}:至少大于8个字节");
+            throw new Exception($"从客户端接收的包大小异常,{msgLen} {reader.Remaining}:至少大于8个字节");
         }
         else if (msgLen > 1500)
         {
-            throw new ProtocalParseErrorException("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值1500字节");
+            throw new Exception("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值1500字节");
         }
 
         if (reader.Remaining < msgLen)
@@ -141,7 +225,7 @@ public class KcpTcpClientSocket : IKcpSocket
         reader.TryRead(out byte flag);
         reader.TryReadBigEndian(out long netId);
         reader.TryReadBigEndian(out int serverId);
-        var dataLen = msgLen - 13;
+        var dataLen = msgLen - TempNetPackage.headLen;
         if (dataLen > 0)
         {
             var payload = input.Slice(reader.Position, dataLen);
@@ -159,55 +243,116 @@ public class KcpTcpClientSocket : IKcpSocket
         return true;
     }
 
-    public bool IsClose()
+    public override bool IsClose()
     {
-        return context == null || !Application.isPlaying;
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            return true;
+        }
+#endif
+        if (isConnecting)
+            return false;
+        if (socket == null)
+        {
+            return true;
+        }
+        if (!socket.Connected)
+            return true;
+        try
+        {
+            if (socket.Client.Poll(1000, SelectMode.SelectRead) && socket.Client.Available == 0)
+            {
+                Debug.LogError("Poll.... ................end");
+                return true;
+            }
+        }
+        catch
+        {
+            return true;
+        }
+
+        return false;
     }
 
-    public void Close()
+    public override void Close()
     {
-        context.Abort();
-        cancelSrc?.Cancel();
-        context = null;
+        lock (this)
+        {
+            try
+            {
+                if (socket != null)
+                {
+                    base.Close();
+                    socket.Close();
+                    socket.Dispose();
+                }
+            }
+            catch { }
+            finally
+            {
+                dataPipe = null;
+                socket = null;
+            }
+        }
     }
 
-    public void Send(TempNetPackage package)
+    public override void Send(TempNetPackage package)
     {
         Span<byte> target = stackalloc byte[package.Length + 4];
         int offset = 0;
         target.Write(package.Length, ref offset);
         target.Write(package, ref offset);
-        netWriter.Write(target);
-        //Debug.Log($"写tcp pack:{package.ToString()}");
-        netWriter.FlushAsync();
+        //netWriter.Write(target);
+        Debug.Log($"写tcp pack:{package.ToString()}");
+        //netWriter.FlushAsync();
+
+        if (IsClose())
+            return;
+        socket.GetStream().Write(target);
     }
 
-    public async Task StartRecv(OnReceiveNetPackFunc onRecv, Action onGateClose, Action onServerClose)
+    public override async Task StartRecv(OnReceiveNetPackFunc onRecv, Action onGateClose, Action onServerClose)
     {
-        StartGateHeart();
+        _ = StartGateHeartAsync();
         await ReadPackAsync((package) =>
         {
+#if UNITY_EDITOR
+            //Debuger.Log($"收到包...{package.ToString()}");
+#endif
             if (package.netId != NetId)
                 return;
             switch (package.flag)
             {
                 case NetPackageFlag.NO_GATE_CONNECT:
                     Debug.LogError("gate 断开连接...");
+                    Close();
                     onGateClose?.Invoke();
                     onGateClose = null;
-                    Close();
                     break;
                 case NetPackageFlag.CLOSE:
+                case NetPackageFlag.NO_INNER_SERVER:
                     Debug.LogError("server 断开连接...");
-                    onServerClose?.Invoke();
                     Close();
+                    onServerClose?.Invoke();
+                    break;
+                case NetPackageFlag.HEART:
+                    if (package.body.Length > 0)
+                    {
+                        var id = BinaryPrimitives.ReadInt32BigEndian(package.body);
+#if UNITY_EDITOR
+                        Debug.Log($"收到心跳回复包...{id}");
+#endif 
+                        EndWaitHeartId(id);
+                    }
                     break;
                 case NetPackageFlag.MSG:
                     onRecv?.Invoke(package.body);
                     break;
             }
         });
-        //网络连接主动断开，则认为是网关断开
+        //网络连接主动断开，则认为是网关断开 
         onGateClose?.Invoke();
     }
+
 }

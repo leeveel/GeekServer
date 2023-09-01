@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Center;
+﻿
+using Core.Discovery;
 using System.Collections.Concurrent;
 
 namespace Geek.Server.Center.Logic
@@ -8,13 +9,7 @@ namespace Geek.Server.Center.Logic
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid
         internal readonly ConcurrentDictionary<long, ServerInfo> nodeMap = new();
-        private SubscribeService subscribeService;
-
-        public NamingService(SubscribeService subscribeService)
-        {
-            this.subscribeService = subscribeService;
-        }
-
+         
         public int NodeCount()
         {
             return nodeMap.Count;
@@ -79,7 +74,7 @@ namespace Geek.Server.Center.Logic
             if (nodeMap.TryGetValue(nodeId, out var node))
             {
                 node.State = state;
-                subscribeService.Publish(SubscribeEvent.NetNodeStateChange(node.Type), MessagePack.MessagePackSerializer.Serialize(node));
+                ServiceManager.SubscribeService.Publish(SubscribeEvent.NetNodeStateChange(node.Type), MessagePack.MessagePackSerializer.Serialize(node));
             }
         }
     }

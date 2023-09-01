@@ -4,6 +4,7 @@ using NLog;
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net;
+using System.Text;
 
 namespace Geek.Server.Core.Net.Kcp
 {
@@ -12,11 +13,11 @@ namespace Geek.Server.Core.Net.Kcp
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
         private readonly ConcurrentDictionary<long, KcpChannel> channels = new();
-        private Func<BaseNetChannel, Message, Task> onMessageAct;
+        private Func<KcpChannel, Message, Task> onMessageAct;
         private Action<KcpChannel> onChannelRemove;
         private UdpServer udpServer;
 
-        public KcpServer(int port, Func<BaseNetChannel, Message, Task> onMessageAct, Action<KcpChannel> onChannelRemove)
+        public KcpServer(int port, Func<KcpChannel, Message, Task> onMessageAct, Action<KcpChannel> onChannelRemove)
         {
             LOGGER.Info($"开始kcp server...{port}");
             this.onMessageAct = onMessageAct;
@@ -24,15 +25,15 @@ namespace Geek.Server.Core.Net.Kcp
             udpServer = new UdpServer(port, OnRecv);
         }
 
-        public Task Start()
+        public void Start()
         {
             _ = udpServer.Start();
-            return Task.Factory.StartNew(UpdateChannel, CancellationToken.None, TaskCreationOptions.LongRunning);
+            _ = UpdateChannel();
         }
 
         public void Stop()
         {
-            foreach (long channelId in this.channels.Keys.ToArray())
+            foreach (long channelId in channels.Keys.ToArray())
             {
                 channels.TryRemove(channelId, out var channel);
                 if (channel != null)
@@ -41,48 +42,48 @@ namespace Geek.Server.Core.Net.Kcp
             udpServer.Close();
         }
 
-        async Task UpdateChannel(object o)
+        async Task UpdateChannel()
         {
-            List<long> removeList = new List<long>();
+            List<KcpChannel> channelList = new();
+            var paraOpt = new ParallelOptions { MaxDegreeOfParallelism = 3 };
             while (true)
             {
                 var time = DateTime.UtcNow;
+                channelList.Clear();
                 foreach (var kv in channels)
                 {
-                    var channel = kv.Value;
-                    channel.Update(time);
+                    channelList.Add(kv.Value);
+                }
+                Parallel.ForEach(channelList, paraOpt, (channel) =>
+                {
+                    try
+                    {
+                        channel.Update(time);
+                    }
+                    catch (Exception e)
+                    {
+                        LOGGER.Error("kcp channel update error:" + e.Message);
+                    }
                     if (channel.IsClose())
                     {
-                        removeList.Add(kv.Key);
+                        LOGGER.Info($"移除channel...{channel.NetId}");
+                        channels.Remove(channel.NetId, out _);
+                        onChannelRemove?.Invoke(channel);
                     }
-                }
-
-                foreach (var id in removeList)
-                {
-                   // LOGGER.Info($"移除kcpchannel：{id}");
-                    channels.Remove(id, out var channel);
-                    onChannelRemove?.Invoke(channel);
-                }
-                removeList.Clear();
+                });
                 await Task.Delay(10);
             }
         }
 
         void OnRecv(TempNetPackage package, EndPoint ipEndPoint)
         {
-            //LOGGER.Warn($"kcp server 收到包:{package.flag} {package.netId} {package.innerServerId}");
+            //LOGGER.Info($"kcp server 收到包:{package.ToString()}");
             long netId = package.netId;
             int innerServerNetId = package.innerServerId;
-
-            //检查网络id是否合格 
-            if (IdGenerator.GetActorType(netId) != ActorType.Gate)
-            {
-                LOGGER.Warn($"不正确的gate net id:{netId}");
-                return;
-            }
+            var curServerId = Settings.Ins.ServerId;
 
             //检查内网服务器id
-            if (innerServerNetId == 0 || innerServerNetId != Settings.ServerId)
+            if (innerServerNetId == 0 || innerServerNetId != curServerId)
             {
                 LOGGER.Warn($"kcp消息错误,不正确的内网服id:{innerServerNetId}");
                 return;
@@ -90,11 +91,12 @@ namespace Geek.Server.Core.Net.Kcp
 
             KcpChannel channel = null;
             channels.TryGetValue(netId, out channel);
-            if(channel==null ||channel.IsClose())
+            if (channel == null || channel.IsClose())
             {
                 channel = null;
-            }else
-            { 
+            }
+            else
+            {
                 channel.UpdateRecvMessageTime();
             }
 
@@ -103,50 +105,64 @@ namespace Geek.Server.Core.Net.Kcp
                 switch (package.flag)
                 {
                     case NetPackageFlag.SYN:
-                        LOGGER.Info($"kcp server 收到连接请求包:{package.ToString()}");
+                        //LOGGER.Info($"kcp server 收到连接请求包:{package.ToString()}");
                         if (channel == null || channel.IsClose())
                         {
-                            channel = new KcpChannel(true, netId, Settings.ServerId, ipEndPoint, (chann, data) =>
+                            channel = new KcpChannel(true, netId, curServerId, ipEndPoint, (chann, data) =>
                             {
                                 var tmpPackage = new TempNetPackage(NetPackageFlag.MSG, chann.NetId, chann.TargetServerId, data);
                                 //LOGGER.Info($"kcp发送udp数据到gate:{(chann as KcpChannel).routerEndPoint?.ToString()}");
                                 udpServer.SendTo(tmpPackage, (chann as KcpChannel).routerEndPoint);
                             }, onMessageAct);
                             channels[channel.NetId] = channel;
+                            channel.RemoteAddress = Encoding.UTF8.GetString(package.body);
                         }
                         //更新最新路由地址
                         var ipep = ipEndPoint as IPEndPoint;
                         channel.routerEndPoint = new IPEndPoint(ipep.Address, ipep.Port);
                         channel.UpdateRecvMessageTime(TimeSpan.FromSeconds(5).Ticks);
 
-                        udpServer.SendTo(new TempNetPackage(NetPackageFlag.ACK, netId, Settings.ServerId), ipEndPoint);
+                        udpServer.SendTo(new TempNetPackage(NetPackageFlag.ACK, netId, curServerId), ipEndPoint);
                         break;
 
+                    case NetPackageFlag.SYN_OLD_NET_ID:
+                        if (channel == null || channel.IsClose())
+                        {
+                            udpServer.SendTo(new TempNetPackage(NetPackageFlag.CLOSE, netId, curServerId), ipEndPoint);
+                        }
+                        else
+                        {
+                            udpServer.SendTo(new TempNetPackage(NetPackageFlag.ACK, netId, curServerId), ipEndPoint);
+                            channel.UpdateRecvMessageTime(TimeSpan.FromSeconds(5).Ticks);
+                        }
+                        break;
 
                     case NetPackageFlag.MSG:
                         if (channel == null)
                         {
                             LOGGER.Info($"kcpservice recv msg, channel 不存在: {netId}");
-                            udpServer.SendTo(new TempNetPackage(NetPackageFlag.CLOSE, netId, Settings.ServerId), ipEndPoint); 
-                        }else
-                        { 
+                            udpServer.SendTo(new TempNetPackage(NetPackageFlag.CLOSE, netId, curServerId), ipEndPoint);
+                        }
+                        else
+                        {
                             channel.HandleRecv(package.body);
                         }
                         break;
 
-                    case NetPackageFlag.GATE_HEART:
-                        if (channel == null )
+                    case NetPackageFlag.HEART:
+                        if (channel == null || channel.IsClose())
                         {
                             LOGGER.Info($"kcpservice recv gate_heart, channel 不存在: {netId}");
-                            udpServer.SendTo(new TempNetPackage(NetPackageFlag.CLOSE, netId, Settings.ServerId), ipEndPoint);
-                        }else
+                            udpServer.SendTo(new TempNetPackage(NetPackageFlag.CLOSE, netId, curServerId), ipEndPoint);
+                        }
+                        else
                         {
                             channel.UpdateRecvMessageTime();
                         }
                         break;
 
-                    case NetPackageFlag.NO_GATE_CONNECT: 
-                            channel?.UpdateRecvMessageTime(TimeSpan.FromSeconds(-8).Ticks); 
+                    case NetPackageFlag.NO_GATE_CONNECT:
+                        channel?.UpdateRecvMessageTime(TimeSpan.FromSeconds(-5).Ticks);
                         break;
 
                     case NetPackageFlag.CLOSE:

@@ -1,15 +1,10 @@
-﻿using Geek.Server.App.Common;
-using Geek.Server.App.Net;
-using Geek.Server.App.Net.Session;
+﻿using Geek.Server.App.Net.Session;
 using Geek.Server.Core.Actors;
-using Geek.Server.Core.Center;
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Net.Http;
-using PolymorphicMessagePack;
-using Geek.Server.Core.Storage;
 using Geek.Server.Core.Timer;
-using Newtonsoft.Json; 
+using PolymorphicMessagePack;
 
 namespace Geek.Server.Hotfix
 {
@@ -30,7 +25,7 @@ namespace Geek.Server.Hotfix
             PolymorphicTypeMapper.Register(this.GetType().Assembly);
 
             HotfixMgr.SetMsgGetter(MsgFactory.GetType);
-            await HttpServer.Start(Settings.HttpPort);
+            await HttpServer.Start(Settings.Ins.HttpPort);
             Log.Info("load config data");
             (bool success, string msg) = GameDataManager.ReloadAll();
             if (!success)

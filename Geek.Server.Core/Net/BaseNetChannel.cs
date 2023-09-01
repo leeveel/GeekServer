@@ -1,5 +1,4 @@
 ﻿using Geek.Server.Core.Net.Kcp;
-using Microsoft.AspNetCore.Components.Web.Virtualization;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,8 +6,8 @@ namespace Geek.Server.Core.Net
 {
     public abstract class BaseNetChannel
     {
-        public virtual string RemoteAddress { get; }
-        public long NetId { get; set; }
+        public virtual string RemoteAddress { get; set; } = "";
+        public long NetId { get; set; } = 0;
         public int TargetServerId { get; set; }
         private ConcurrentDictionary<string, object> Datas { get; set; } = new();
         public T GetData<T>(string key)
@@ -17,12 +16,18 @@ namespace Geek.Server.Core.Net
             {
                 return (T)v;
             }
-            return default(T);
+            return default;
         }
         public void SetData(string key, object v)
         {
             Datas[key] = v;
         }
+
+        public void RemoveData(string key)
+        {
+            Datas.TryRemove(key, out _);
+        }
+
         public virtual void Write([NotNull] Message msg) => throw new NotImplementedException();
         public virtual void Write(TempNetPackage package) => throw new NotImplementedException();
         public virtual void Close() => throw new NotImplementedException();

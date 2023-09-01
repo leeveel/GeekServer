@@ -1,16 +1,9 @@
-using Geek.Server.Core.Net;
 using Geek.Server.Core.Net.Kcp;
-using Geek.Server.Core.Net.Tcp;
-using Geek.Server.Core.Utils;
 using Geek.Server.TestPressure.Net;
-using Microsoft.AspNetCore.DataProtection;
-using Newtonsoft.Json;
-using System;
-using System.Buffers;
 using System.Diagnostics;
 using System.Net;
-using System.Net.Sockets;
-using System.Security.Cryptography;
+using static System.Net.Mime.MediaTypeNames;
+using System.Threading.Channels;
 
 namespace Geek.Server.TestPressure.Logic
 {
@@ -28,9 +21,10 @@ namespace Geek.Server.TestPressure.Logic
 
     public class Client
     {
-        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger(); 
+        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         readonly long id;
-        KcpChannel netChannel;
+        private KcpChannel channel { get; set; }
+        AKcpSocket clientSocket = null;
         readonly MsgWaiter msgWaiter = new();
         int msgUniId = 200;
 
@@ -39,30 +33,52 @@ namespace Geek.Server.TestPressure.Logic
             this.id = id;
         }
 
-        public async Task Start(string ip, int port)
+        async Task<bool> Connect(string ip, int port, int serverId)
         {
-            var serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-            var serverId = TestSettings.Ins.serverId;
-            IKcpSocket clientSocket = null;
-
             long netId = 0;
             KcpChannel kcpChannel = null;
-            async Task Connect(int delay = 0)
+            async Task<bool> Connect(int delay = 0)
             {
                 if (delay > 0)
                 {
                     await Task.Delay(delay);
                 }
-                LOGGER.Info("开始连接服务器...TODO...选择网关...");
-                //clientSocket = new KcpUdpClientSocket(serverId);
+                //Debug.Log("选择网关...");
+                //var index = UnityEngine.Random.Range(0, gateList.serverIps.Count);
+                //var ip = gateList.serverIps[index];
+                //var port = gateList.ports[index];
+
+                clientSocket = null;
+
+                var serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+
+                //clientSocket = new KcpTcpClientSocket(serverId);
                 clientSocket = new KcpUdpClientSocket(serverId);
-                if (!await clientSocket.Connect(ip, port, netId))
+#if UNITY_EDITOR
+                Debug.Log($"当前准备连接网关类:{clientSocket.GetType().Name}");
+#endif
+
+                var result = await clientSocket.Connect(ip, port, netId);
+                if (result.resetNetId)
                 {
-                    LOGGER.Error("连接服务器失败...");
-                    await Connect(100);
-                    return;
+                    netId = 0;
                 }
 
+                int reconnectDelay = 900;
+                if (!result.isSuccess)
+                {
+                    if (result.allowReconnect)
+                    {
+                        LOGGER.Error("连接服务器失败...");
+                        //TODO:限制连接次数
+                        await Connect(reconnectDelay);
+                    }
+                    else
+                    {
+                        OnDisConnected();
+                    }
+                    return false;
+                }
                 if (kcpChannel == null)
                 {
                     netId = clientSocket.NetId;
@@ -70,23 +86,33 @@ namespace Geek.Server.TestPressure.Logic
                     {
                         var package = new TempNetPackage(NetPackageFlag.MSG, chann.NetId, serverId, data);
                         clientSocket?.Send(package);
-                    }, async (chann, msg) =>
+                    }, (chann, msg) =>
                     {
-                        await OnRevice(msg);
+                        return OnRevice(msg);
                     });
-                    netChannel = kcpChannel;
+                    channel = kcpChannel;
                 }
 
                 _ = clientSocket.StartRecv(kcpChannel.HandleRecv, () =>
-                 {
-                     _ = Connect(100);
-                 }, () =>
-                 {
-                     LOGGER.Error("服务器断开连接....");
-                 });
+                {
+                    if ((bool)!kcpChannel?.IsClose())
+                        _ = Connect(reconnectDelay);
+                }, () =>
+                {
+                    LOGGER.Error("服务器断开连接....");
+                    OnDisConnected();
+                });
+                return true;
             }
-            await Connect();
+            return await Connect();
+        }
 
+        public async Task Start(string ip, int port)
+        {
+            var serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+            var serverId = TestSettings.Ins.serverId;
+
+            await Connect(ip, port, serverId);
 
             if (!await ReqLogin())
             {
@@ -109,7 +135,7 @@ namespace Geek.Server.TestPressure.Logic
 
         public void Update()
         {
-            netChannel?.Update(DateTime.UtcNow);
+            channel?.Update(DateTime.UtcNow);
         }
 
         private Task<bool> ReqRouter()
@@ -127,13 +153,13 @@ namespace Geek.Server.TestPressure.Logic
             var req = new ReqLogin
             {
                 SdkType = 0,
-                SdkToken = "555sdasfda"+id,
+                SdkToken = "555sdasfda" + id,
                 UserName = "name" + id,
                 Device = "test device",
                 Platform = "android",
                 Sign = "test device"
             };
-             
+
             return SendMsgAndWaitBack(req);
         }
 
@@ -151,7 +177,7 @@ namespace Geek.Server.TestPressure.Logic
         {
             msg.UniId = msgUniId++;
             //LOGGER.Info($"{id} 发送消息:{msg.GetType().Name},{JsonConvert.SerializeObject(msg)}");
-            netChannel.Write(msg);
+            channel.Write(msg);
         }
 
         async Task<bool> SendMsgAndWaitBack(Message msg)

@@ -78,7 +78,7 @@ namespace Geek.Server.Core.Net.Kcp
             {
                 socket?.SendTo(target, point);
             }
-            catch (Exception e)
+            catch
             {
 
             }
@@ -87,10 +87,10 @@ namespace Geek.Server.Core.Net.Kcp
         public void SendTo(ReadOnlySpan<byte> span, EndPoint point)
         {
             try
-            { 
+            {
                 socket?.SendTo(span, point);
             }
-            catch(Exception e)
+            catch
             {
 
             }

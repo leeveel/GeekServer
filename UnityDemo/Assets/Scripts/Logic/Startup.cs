@@ -1,4 +1,5 @@
 ﻿
+using Base;
 using UnityEngine;
 
 namespace Logic
@@ -9,8 +10,12 @@ namespace Logic
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         static void Initialize()
         {
+            SyncContextUtil.Init();
             Geek.Server.Proto.PolymorphicRegister.Load();
-            new GameObject("GameMain").AddComponent<GameMain>();
+            var gameMain = new GameObject("GameMain");
+            GameObject.DontDestroyOnLoad(gameMain);
+            gameMain.AddComponent<GameMain>();
+            gameMain.AddComponent<CoroutineManager>();
         }
     }
 }

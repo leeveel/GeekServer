@@ -87,7 +87,7 @@ namespace Geek.Server.Core.Net.Http
                     return;
                 }
 
-                if (!Settings.AppRunning)
+                if (!Settings.Ins.AppRunning)
                 {
                     await context.Response.WriteAsync(new HttpResult(HttpResult.Stauts.ActionFailed, "服务器状态错误[正在起/关服]"));
                     return;

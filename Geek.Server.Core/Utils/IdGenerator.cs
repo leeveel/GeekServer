@@ -105,7 +105,7 @@ namespace Geek.Server.Core.Utils
             }
             else if (serverId == 0)
             {
-                serverId = Settings.ServerId;
+                serverId = Settings.Ins.ServerId;
             }
 
             if (type < ActorType.Separator)
@@ -124,7 +124,7 @@ namespace Geek.Server.Core.Utils
             {
                 throw new ArgumentException($"input actor type error: {type}");
             }
-            var id = (long)Settings.ServerId << SERVERID_OR_MODULEID_MASK;
+            var id = (long)Settings.Ins.ServerId << SERVERID_OR_MODULEID_MASK;
             id |= (long)type << ACTORTYPE_MASK;
             return id;
         }

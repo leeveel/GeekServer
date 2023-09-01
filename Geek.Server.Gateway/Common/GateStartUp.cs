@@ -1,14 +1,10 @@
-﻿using NLog.LayoutRenderers;
-using Geek.Server.Core.Extensions;
-using Geek.Server.GatewayKcp;
-using PolymorphicMessagePack;
-using NLog;
+﻿using PolymorphicMessagePack;
 
 namespace Geek.Server.Gateway.Common
 {
     internal class GateStartUp
     {
-        static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         public static async Task Enter()
         {
             try
@@ -16,31 +12,17 @@ namespace Geek.Server.Gateway.Common
                 var flag = Start();
                 if (!flag) return; //启动服务器失败
 
-                Log.Info("进入游戏主循环...");
-                Console.WriteLine("***进入游戏主循环***");
+                LOGGER.Info("启动...");
 
-                await GateServer.Instance.Start();
+                Settings.Ins.AppRunning = true;
+                GateServer.Instance.Start(); 
 
-                Settings.LauchTime = DateTime.Now;
-                Settings.AppRunning = true;
-
-                await Settings.AppExitToken;
-                //try
-                //{
-                //    while (!Settings.AppExitToken.IsCancellationRequested)
-                //    {
-                //        GC.Collect();
-                //        await Task.Delay(TimeSpan.FromMinutes(10), Settings.AppExitToken);
-                //    }
-                //}
-                //catch
-                //{
-                //}
+                await Settings.Ins.AppExitToken;
             }
             catch (Exception e)
             {
                 Console.WriteLine($"服务器执行异常，e:{e}");
-                Log.Fatal(e);
+                LOGGER.Fatal(e);
             }
 
             Console.WriteLine($"退出服务器开始");
@@ -53,9 +35,8 @@ namespace Geek.Server.Gateway.Common
             try
             {
                 Settings.Load<GateSettings>("Configs/gate_config.json", ServerType.Gate);
-                Console.WriteLine("init NLog config..."); 
-                LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
-                LogManager.Configuration = new XmlLoggingConfiguration("Configs/gate_log.config");
+                Console.WriteLine("init NLog config...");
+                LogManager.Configuration = new XmlLoggingConfiguration("Configs/NLog.config");
                 LogManager.AutoShutdown = false;
 
                 PolymorphicResolver.Instance.Init();
@@ -64,7 +45,7 @@ namespace Geek.Server.Gateway.Common
             }
             catch (Exception e)
             {
-                Log.Error($"启动服务器失败,异常:{e}");
+                LOGGER.Error($"启动服务器失败,异常:{e}");
                 return false;
             }
         }

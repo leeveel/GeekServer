@@ -1,6 +1,4 @@
-﻿using Bedrock.Framework;
-using MessagePack;
-using PolymorphicMessagePack;
+﻿using MessagePack;
 using System;
 using System.Buffers;
 using System.IO.Pipelines;
@@ -17,13 +15,13 @@ public class KcpChannel : BaseNetChannel, IKcpCallback
 
     private KcpOutPutFunc kcpDataSendFunc;
     private Action<BaseNetChannel, Message> onMessageAct;
-    private Action onConnectCloseAct;
     private Kcp kcp;
     private bool isColose = false;
     private Pipe dataPipe;
 
     const int MAX_RECV_SIZE = 1024 * 1024 * 20;
     object writeLockObj = new object();
+    bool isInner = false;
 
     public KcpChannel(bool isInner, long id, int serverId, EndPoint routerEndPoint, KcpOutPutFunc kcpSocketSendAct, Action<BaseNetChannel, Message> onMessageAct)
     {
@@ -33,6 +31,7 @@ public class KcpChannel : BaseNetChannel, IKcpCallback
         kcp = new Kcp((uint)id, this);
         kcp.NoDelay(1, 10, 2, 1);
         kcp.WndSize(128, 128);
+        this.isInner = isInner;
         kcp.SetMtu(isInner ? 1400 : 520);
         dataPipe = new Pipe(PipeOptions.Default);
         kcpDataSendFunc = kcpSocketSendAct;
@@ -46,7 +45,7 @@ public class KcpChannel : BaseNetChannel, IKcpCallback
     bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out Message message)
     {
         message = default;
-        var reader = new SequenceReader<byte>(input);
+        var reader = new MessagePack.SequenceReader<byte>(input);
 
         if (!reader.TryReadBigEndian(out int msgLen))
         {
@@ -56,11 +55,11 @@ public class KcpChannel : BaseNetChannel, IKcpCallback
 
         if (msgLen <= 8)//(消息长度已经被读取)
         {
-            throw new ProtocalParseErrorException($"从客户端接收的包大小异常,{msgLen} {reader.Remaining}:至少大于8个字节");
+            throw new Exception($"从客户端接收的包大小异常,{msgLen} {reader.Remaining}:至少大于8个字节");
         }
         else if (msgLen > MAX_RECV_SIZE)
         {
-            throw new ProtocalParseErrorException("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值：" + MAX_RECV_SIZE / 1024 + "字节");
+            throw new Exception("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值：" + MAX_RECV_SIZE / 1024 + "字节");
         }
 
         //验证token...
@@ -164,16 +163,19 @@ public class KcpChannel : BaseNetChannel, IKcpCallback
     {
         if (isColose)
             return;
-        var lastMsgTime = GetLastMessageTimeSecond(time);
-        if (lastMsgTime > 60_0)  //10分钟没数据则关闭  kcp需要保留一段时间channel，客户端重连后如果老channel还在，会尝试继续通信
+        if (isInner)
         {
-            Close();
-            return;
-        }
+            var lastMsgTime = GetLastMessageTimeSecond(time);
+            if (lastMsgTime > 60_0)  //10分钟没数据则关闭  kcp需要保留一段时间channel，客户端重连后如果老channel还在，会尝试继续通信
+            {
+                Close();
+                return;
+            }
 
-        if (lastMsgTime > 10)
-        {
-            return;
+            if (lastMsgTime > 10)
+            {
+                return;
+            }
         }
         var (buffer, avalidLength) = kcp.TryRecv();
         if (buffer != null && avalidLength > 0)

@@ -1,30 +1,19 @@
-﻿using Geek.Server.Core.Center;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 
 namespace Geek.Server.Center.Logic
 {
     public class SubscribeService
     {
-        ConcurrentDictionary<string, ConcurrentDictionary<CenterRpcHub, CenterRpcHub>> subClients = new();
-        public void Subscribe(string id, CenterRpcHub hub)
+        ConcurrentDictionary<string, ConcurrentDictionary<DiscoveryHub, DiscoveryHub>> subClients = new();
+        public void Subscribe(string id, DiscoveryHub hub)
         {
             var dic = GetOrAddSubscribeMap(id);
             dic[hub] = hub;
         }
-        public void Unsubscribe(string id, CenterRpcHub hub)
+        public void Unsubscribe(string id, DiscoveryHub hub)
         {
             GetOrAddSubscribeMap(id).TryRemove(hub, out _);
-        }
-
-        public void Publish(string eid, ConfigInfo msg)
-        {
-            var dic = GetOrAddSubscribeMap(eid);
-            foreach (var v in dic)
-            {
-                v.Value.GetRpcClientAgent().ConfigChanged(msg);
-            }
-        }
+        } 
 
         public void Publish(string eid, byte[] msg)
         {
@@ -35,13 +24,13 @@ namespace Geek.Server.Center.Logic
             }
         }
 
-        ConcurrentDictionary<CenterRpcHub, CenterRpcHub> GetOrAddSubscribeMap(string id)
+        ConcurrentDictionary<DiscoveryHub, DiscoveryHub> GetOrAddSubscribeMap(string id)
         {
             if (subClients.TryGetValue(id, out var dic))
             {
                 return dic;
             }
-            dic = new ConcurrentDictionary<CenterRpcHub, CenterRpcHub>();
+            dic = new ConcurrentDictionary<DiscoveryHub, DiscoveryHub>();
             subClients.TryAdd(id, dic);
             return dic;
         }

@@ -53,7 +53,7 @@ namespace Geek.Server.Core.Timer
                 t = t.AddMilliseconds(SAVE_INTERVAL_IN_MilliSECONDS);
             }
 
-            int serverId = Settings.ServerId;
+            int serverId = Settings.Ins.ServerId;
             int a = serverId % 1000;
             int b = a % MAGIC;
             int c = SAVE_INTERVAL_IN_MilliSECONDS / MAGIC;

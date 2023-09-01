@@ -49,7 +49,7 @@ namespace PolymorphicMessagePack
             options.Security.DepthStep(ref reader);
 
             try
-            {
+            { 
                 Type type = null;
                 switch (reader.NextMessagePackType)
                 {

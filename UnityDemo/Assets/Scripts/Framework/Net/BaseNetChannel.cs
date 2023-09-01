@@ -13,7 +13,7 @@ public abstract class BaseNetChannel
         {
             return (T)v;
         }
-        return default(T);
+        return default;
     }
     public void SetData(string key, object v)
     {

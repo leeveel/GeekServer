@@ -54,7 +54,7 @@ namespace Geek.Server.Config
 			list.Clear();
 			Loaded = true;
 			
-            string useField = Settings.Language==null?"t_chinese":Settings.Language; 
+            string useField = Settings.Ins.Language??"t_chinese"; 
             
 			string binPath = System.Environment.CurrentDirectory + $"/Bytes/t_language{useField.Replace("t_", "")}Bean.bytes";
             byte[] data;

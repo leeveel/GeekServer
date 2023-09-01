@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Buffers.Binary;
+using System.Buffers;
 
 namespace System.Net.Sockets.Kcp
 {
@@ -149,7 +150,7 @@ namespace System.Net.Sockets.Kcp
             byte[] cache;
             public Seg(int blockSize)
             {
-                cache = Buffers.ArrayPool<byte>.Shared.Rent(blockSize);
+                cache = ArrayPool<byte>.Shared.Rent(blockSize);
             }
 
             ///以下为需要网络传输的参数

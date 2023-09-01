@@ -1,13 +1,8 @@
-﻿using Amazon.Runtime.Endpoints;
-using Geek.Server.Core.Net;
+﻿using Geek.Server.Core.Net;
 using Geek.Server.Core.Net.Kcp;
-using Geek.Server.Core.Net.Tcp;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Net.Sockets.Kcp;
-using System.Threading.Channels;
 
-namespace Geek.Server.GatewayKcp.Outer
+namespace Geek.Server.Gateway.Outer
 {
     internal class UdpChannel : BaseNetChannel
     {

@@ -27,7 +27,7 @@ namespace Geek.Server.App
             catch (Exception e)
             {
                 string error;
-                if (Settings.AppRunning)
+                if (Settings.Ins.AppRunning)
                 {
                     error = $"服务器运行时异常 e:{e}";
                     Console.WriteLine(error);
@@ -51,7 +51,7 @@ namespace Geek.Server.App
             Log.Info($"监听到退出程序消息");
             ShutDownTask = Task.Run(() =>
             {
-                Settings.AppRunning = false;
+                Settings.Ins.AppRunning = false;
                 GameLoopTask?.Wait();
                 LogManager.Shutdown();
                 Console.WriteLine($"退出程序");

@@ -8,5 +8,5 @@
   "MaxClientCount": 20000,
   "SyncStateToCenterInterval": 5, //单位秒，小于等于0 表示不同步
   "LocalIp": "127.0.0.1",
-  "CenterUrl": "http://127.0.0.1:9001"
+  "DiscoveryServerUrl": "http://127.0.0.1:9001"
 }

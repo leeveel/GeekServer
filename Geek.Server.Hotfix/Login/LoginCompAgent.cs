@@ -61,7 +61,7 @@ namespace Geek.Server.Hotfix.Login
             var playerId = $"{sdkType}_{userName}";
             if (State.PlayerMap.TryGetValue(playerId, out var state))
             {
-                if (state.RoleMap.TryGetValue(Settings.ServerId, out var roleId))
+                if (state.RoleMap.TryGetValue(Settings.Ins.ServerId, out var roleId))
                     return roleId;
                 return 0;
             }
@@ -80,7 +80,7 @@ namespace Geek.Server.Hotfix.Login
                 info.UserName = userName;
                 State.PlayerMap[playerId] = info;
             }
-            info.RoleMap[Settings.ServerId] = roleId;
+            info.RoleMap[Settings.Ins.ServerId] = roleId;
         }
 
     }

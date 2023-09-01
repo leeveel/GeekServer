@@ -32,17 +32,17 @@ namespace Geek.Server.Core.Storage
 
         public static void Init()
         {
-            if (Settings.DBModel == (int)DBModel.Embeded)
+            if (Settings.Ins.DBModel == (int)DBModel.Embeded)
             {
                 dbImpler = new RocksDBConnection();
             }
-            else if (Settings.DBModel == (int)DBModel.Mongodb)
+            else if (Settings.Ins.DBModel == (int)DBModel.Mongodb)
             {
                 dbImpler = new MongoDBConnection();
             }
             else
             {
-                LOGGER.Error($"未知的数据库模式:{Settings.DBModel}");
+                LOGGER.Error($"未知的数据库模式:{Settings.Ins.DBModel}");
             }
         }
 
@@ -53,13 +53,13 @@ namespace Geek.Server.Core.Storage
 
         public static void Open()
         {
-            if (Settings.DBModel == (int)DBModel.Embeded)
+            if (Settings.Ins.DBModel == (int)DBModel.Embeded)
             {
-                dbImpler.Open(Settings.LocalDBPath, Settings.LocalDBPrefix + Settings.ServerId);
+                dbImpler.Open(Settings.Ins.LocalDBPath, Settings.Ins.LocalDBPrefix + Settings.Ins.ServerId);
             }
-            else if (Settings.DBModel == (int)DBModel.Mongodb)
+            else if (Settings.Ins.DBModel == (int)DBModel.Mongodb)
             {
-                dbImpler.Open(Settings.MongoUrl, Settings.MongoDBName);
+                dbImpler.Open(Settings.Ins.MongoUrl, Settings.Ins.MongoDBName);
             }
         }
 
@@ -81,11 +81,11 @@ namespace Geek.Server.Core.Storage
 
         public static async Task SaveAll()
         {
-            if (Settings.DBModel == (int)DBModel.Embeded)
+            if (Settings.Ins.DBModel == (int)DBModel.Embeded)
             {
                 await ActorMgr.SaveAll();
             }
-            else if (Settings.DBModel == (int)DBModel.Mongodb)
+            else if (Settings.Ins.DBModel == (int)DBModel.Mongodb)
             {
                 await StateComp.SaveAll();
             }
@@ -93,11 +93,11 @@ namespace Geek.Server.Core.Storage
 
         public static async Task TimerSave()
         {
-            if (Settings.DBModel == (int)DBModel.Embeded)
+            if (Settings.Ins.DBModel == (int)DBModel.Embeded)
             {
                 await ActorMgr.TimerSave();
             }
-            else if (Settings.DBModel == (int)DBModel.Mongodb)
+            else if (Settings.Ins.DBModel == (int)DBModel.Mongodb)
             {
                 await StateComp.TimerSave();
             }

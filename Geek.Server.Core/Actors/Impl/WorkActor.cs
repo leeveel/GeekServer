@@ -121,7 +121,7 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                if (Settings.Ins.IsDebug && !ActorLimit.AllowCall(Id))
                     return default;
 
                 var at = new ActionWrapper(work)
@@ -145,7 +145,7 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                if (Settings.Ins.IsDebug && !ActorLimit.AllowCall(Id))
                     return default;
 
                 var at = new FuncWrapper<T>(work)
@@ -168,7 +168,7 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (checkLock && Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                if (checkLock && Settings.Ins.IsDebug && !ActorLimit.AllowCall(Id))
                     return default;
 
                 var wrapper = new ActionAsyncWrapper(work)
@@ -191,7 +191,7 @@ namespace Geek.Server.Core.Actors.Impl
             (bool needEnqueue, long chainId) = IsNeedEnqueue();
             if (needEnqueue)
             {
-                if (Settings.IsDebug && !ActorLimit.AllowCall(Id))
+                if (Settings.Ins.IsDebug && !ActorLimit.AllowCall(Id))
                     return default;
 
                 var wrapper = new FuncAsyncWrapper<T>(work)

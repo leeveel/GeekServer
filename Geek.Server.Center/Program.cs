@@ -1,6 +1,6 @@
-﻿using Geek.Server.Center.Common;
-using Geek.Server.Core.Utils;
+﻿using Geek.Server.Core.Utils;
 using NLog;
+using Server.Discovery;
 using System.Diagnostics;
 using System.Text;
 
@@ -25,7 +25,7 @@ namespace Geek.Server.Center
             try
             {
                 AppExitHandler.Init(HandleExit);
-                GameLoopTask = CenterStartUp.Enter();
+                GameLoopTask = StartUp.Enter();
                 await GameLoopTask;
                 if (ShutDownTask != null)
                     await ShutDownTask;
@@ -33,7 +33,7 @@ namespace Geek.Server.Center
             catch (Exception e)
             {
                 string error;
-                if (Settings.AppRunning)
+                if (Settings.Ins.AppRunning)
                 {
                     error = $"服务器运行时异常 e:{e}";
                     Console.WriteLine(error);
@@ -55,7 +55,7 @@ namespace Geek.Server.Center
             Log.Info($"监听到退出程序消息");
             ShutDownTask = Task.Run(() =>
             {
-                Settings.AppRunning = false;
+                Settings.Ins.AppRunning = false;
                 GameLoopTask?.Wait();
                 LogManager.Shutdown();
                 Console.WriteLine($"退出程序");

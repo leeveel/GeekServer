@@ -1,19 +1,17 @@
-﻿using Bedrock.Framework;
-using Geek.Server.Core.Net;
+﻿using Geek.Server.Core.Net;
 using Geek.Server.Core.Net.Kcp;
-using Geek.Server.Core.Utils;
 using MessagePack;
 using Microsoft.AspNetCore.Connections;
 using System.Buffers;
 using System.IO.Pipelines;
 
-namespace Geek.Server.GatewayKcp.Outer
+namespace Geek.Server.Gateway.Outer
 {
     public class TcpChannel : BaseNetChannel
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        public delegate void ReceiveFunc(TempNetPackage package);
+        public delegate void ReceiveFunc(TcpChannel channel, TempNetPackage package);
         public ConnectionContext Context { get; protected set; }
         protected PipeReader Reader { get; set; }
         protected PipeWriter Writer { get; set; }
@@ -34,7 +32,7 @@ namespace Geek.Server.GatewayKcp.Outer
         }
 
         public async Task StartAsync()
-        { 
+        {
             while (!cancelSrc.IsCancellationRequested)
             {
                 try
@@ -48,14 +46,14 @@ namespace Geek.Server.GatewayKcp.Outer
                         SequencePosition consumed = examined;
                         TryParseMessage(buffer, ref consumed, ref examined);
                         Reader.AdvanceTo(consumed, examined);
-                    }else if(result.IsCanceled || result.IsCompleted)
+                    }
+                    else if (result.IsCanceled || result.IsCompleted)
                     {
                         break;
                     }
                 }
-                catch (Exception e)
+                catch
                 {
-                    LOGGER.Error(e);
                     break;
                 }
             }
@@ -74,11 +72,11 @@ namespace Geek.Server.GatewayKcp.Outer
 
             if (msgLen < 13)//(消息长度已经被读取)
             {
-                throw new ProtocalParseErrorException($"从客户端接收的包大小异常,{msgLen} {reader.Remaining}:至少大于8个字节");
+                throw new Exception($"从客户端接收的包大小异常,{msgLen} {reader.Remaining}:至少大于8个字节");
             }
             else if (msgLen > 1500)
             {
-                throw new ProtocalParseErrorException("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值：" + 1500 + "字节");
+                throw new Exception("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值：" + 1500 + "字节");
             }
 
             if (reader.Remaining < msgLen)
@@ -97,12 +95,12 @@ namespace Geek.Server.GatewayKcp.Outer
                 Span<byte> data = stackalloc byte[dataLen];
                 payload.CopyTo(data);
                 consumed = examined = payload.End;
-                onRecvPack(new TempNetPackage(flag, netId, serverId, data));
+                onRecvPack(this, new TempNetPackage(flag, netId, serverId, data));
             }
             else
             {
                 consumed = examined = reader.Position;
-                onRecvPack(new TempNetPackage(flag, netId, serverId));
+                onRecvPack(this, new TempNetPackage(flag, netId, serverId));
             }
         }
 
@@ -113,19 +111,25 @@ namespace Geek.Server.GatewayKcp.Outer
 
         public override void Close()
         {
-            try
+            lock (this)
             {
-                if (Context == null)
-                    return;
-                cancelSrc.Cancel();
-                Context?.Abort();
-                Reader = null;
-                Writer = null;
-                Context = null;
-            }
-            catch 
-            {
+                try
+                {
+                    if (Context == null)
+                        return;
+                    cancelSrc.Cancel();
+                    Context?.Abort();
+                }
+                catch
+                {
 
+                }
+                finally
+                {
+                    Reader = null;
+                    Writer = null;
+                    Context = null;
+                }
             }
         }
 
@@ -137,8 +141,8 @@ namespace Geek.Server.GatewayKcp.Outer
             int offset = 0;
             target.Write(package.Length, ref offset);
             target.Write(package, ref offset);
-            Writer.Write(target); 
-            Writer.FlushAsync();
+            Writer.Write(target);
+            Writer.FlushAsync(cancelSrc.Token);
         }
     }
 }

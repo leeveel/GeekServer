@@ -15,7 +15,7 @@ namespace Geek.Server
             if (!string.IsNullOrEmpty(logConfig))
                 return logConfig;
 
-            logConfig = Settings.IsDebug ? "debug" : "release";
+            logConfig = Settings.Ins.IsDebug ? "debug" : "release";
             return logConfig;
         }
 

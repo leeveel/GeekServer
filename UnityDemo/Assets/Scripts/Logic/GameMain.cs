@@ -91,7 +91,14 @@ namespace Logic
         {
             Debug.Log("OnApplicationQuit");
             GameClient.Singleton.Close();
-            MsgWaiter.DisposeAll();
+        }
+
+        void OnApplicationFocus(bool hasFocus)
+        {
+            if (hasFocus)
+            {
+                _ = GameClient.Singleton.CheckNetAsync();
+            }
         }
 
 

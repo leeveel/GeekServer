@@ -1,9 +1,7 @@
-﻿using System.Buffers.Binary;
-using System;
-using System.Text;
+﻿using Geek.Server.Core.Net.Kcp;
+using System.Buffers.Binary;
 using System.Runtime.InteropServices;
-using Geek.Server.Core.Net.Kcp;
-using NLog.Targets;
+using System.Text;
 
 namespace Geek.Server.Core.Utils
 {

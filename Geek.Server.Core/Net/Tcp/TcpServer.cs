@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-using NLog.Web;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Connections;
+using Microsoft.AspNetCore.Hosting;
+using NLog.Web;
 
 namespace Geek.Server.Core.Net.Tcp
 {

@@ -1,33 +1,23 @@
 ﻿using Geek.Server.Core.Net.Kcp;
 using Geek.Server.Core.Utils;
-using Microsoft.AspNetCore.DataProtection;
-using NLog;
-using NLog.Targets;
-using System.Drawing;
-using System.Net;
+using System.Buffers.Binary;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 
 namespace Geek.Server.TestPressure.Net
 {
-    public class KcpUdpClientSocket : IKcpSocket
+    public class KcpUdpClientSocket : AKcpSocket
     {
-        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         UdpClient socket;
-        //IPEndPoint serverEndPoint;
-        CancellationTokenSource cancelSrc;
-        OnReceiveNetPackFunc onRecv;
         Action onGateClose;
         Action onServerClose;
-        public long NetId { get; set; }
-        public int ServerId { get; set; }
         public KcpUdpClientSocket(int serverId)
         {
-            this.ServerId = serverId;
+            ServerId = serverId;
         }
 
-        public async Task<bool> Connect(string ip, int port, long netId = 0)
+        public override async Task<ConnectResult> Connect(string ip, int port, long netId = 0)
         {
+            isConnecting = true;
             try
             {
                 socket = new UdpClient(ip, port);
@@ -36,110 +26,108 @@ namespace Geek.Server.TestPressure.Net
             catch (Exception e)
             {
                 LOGGER.Error(e);
-                return false;
+                return new(false, true, false);
             }
-            this.NetId = netId;
-            cancelSrc = new CancellationTokenSource();
-            // serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-            var data = new byte[13];
+            NetId = netId;
+            //serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+            var data = new byte[TempNetPackage.headLen];
             data.Write(NetPackageFlag.SYN, 0);
             data.Write(NetId, 1);
             data.Write(ServerId, 9);
-
-            socket.Send(data);
+            //Debug.Log($"开始udp连接....{NetId}");  
+            socket.Send(data, data.Length);
             try
             {
-                var task = socket.ReceiveAsync(cancelSrc.Token).AsTask();
+                var task = socket.ReceiveAsync();
                 if (task == await Task.WhenAny(task, Task.Delay(400)))
                 {
-                    var rcvBuffer = task.Result.Buffer;
-                    if (task.Result.Buffer.Length >= 13)
+                    var buffer = task.Result.Buffer;
+                    if (buffer.Length >= TempNetPackage.headLen)
                     {
-                        var flag = rcvBuffer[0];
-                        NetId = rcvBuffer.ReadLong(1);
-                        var serId = rcvBuffer.ReadInt(9);
+                        var flag = buffer[0];
+                        NetId = buffer.ReadLong(1);
+                        var serId = buffer.ReadInt(9);
+                        //LOGGER.Info($"收到连接包:{flag}");
                         if (flag == NetPackageFlag.ACK)
                         {
-                            LOGGER.Info($"连接成功..");
-                            return true;
+                            return new(true, true, false);
                         }
-                        if (flag == NetPackageFlag.NO_GATE_CONNECT && serId == 0)
+                        if (flag == NetPackageFlag.NO_GATE_CONNECT)
                         {
-                            LOGGER.Error($"内部服务器{ServerId}已关闭或者不存在，连接失败...");
                             Close();
-                            return false;
+                            return new(false, true, false);
+                        }
+                        if (flag == NetPackageFlag.NO_INNER_SERVER) //不能发现服务器
+                        {
+                            Close();
+                            return new(false, false, true);
+                        }
+                        if (flag == NetPackageFlag.CLOSE) //服务器已关闭连接
+                        {
+                            return new(false, true, true);
                         }
                     }
                 }
                 else
                 {
-                    cancelSrc.Cancel();
-                    LOGGER.Info("接收udp消息失败....");
+                    Close();
+                    LOGGER.Error("接收udp消息失败....");
                 }
             }
             catch (Exception e)
             {
                 LOGGER.Error(e.Message);
-                return false;
+                return new(false, true, false);
             }
-
+            finally
+            {
+                isConnecting = false;
+            }
             Close();
-            return false;
+            return new(false, true, false);
         }
 
-        public void Close()
+        public override void Close()
         {
-            LOGGER.Error("关闭udp client...");
-            cancelSrc?.Cancel();
-            socket?.Close();
-            cancelSrc = null;
-            socket = null;
+            lock (this)
+            {
+                base.Close();
+                cancelSrc.Cancel();
+                socket?.Close();
+                socket = null;
+            }
         }
 
-        public void Send(TempNetPackage package)
+        public override bool IsClose()
+        {
+            return !isConnecting && socket == null;
+        }
+
+        readonly byte[] sendBuffer = new byte[2000];
+        public override void Send(TempNetPackage package)
         {
             if (socket == null)
                 return;
-            Span<byte> target = stackalloc byte[package.Length];
+            var target = new Span<byte>(sendBuffer);
             target[0] = package.flag;
             int offset = 1;
             target.Write(package.netId, ref offset);
             target.Write(package.innerServerId, ref offset);
             if (!package.body.IsEmpty)
             {
-                package.body.CopyTo(target[13..]);
+                package.body.CopyTo(target.Slice(TempNetPackage.headLen));
             }
-            socket.Send(target);
+            socket.Send(sendBuffer, package.Length);
         }
 
-        void StartGateHeart()
-        { 
-            Task.Run(async () =>
-            {
-                while (!cancelSrc.IsCancellationRequested)
-                {
-                    try
-                    { 
-                        Send(new TempNetPackage(NetPackageFlag.GATE_HEART, NetId, ServerId));
-                        await Task.Delay(3000, cancelSrc.Token);
-                    }
-                    catch (Exception e)
-                    { 
-                        break;
-                    }
-                }
-            });
-        }
-
-        public async Task StartRecv(OnReceiveNetPackFunc onRecv, Action onGateClose, Action onServerClose)
+        public override async Task StartRecv(OnReceiveNetPackFunc onRecv, Action onGateCloseAct, Action onServerCloseAct)
         {
-            LOGGER.Error("StartRecv...");
-            this.onRecv = onRecv;
-            this.onGateClose = onGateClose;
-            this.onServerClose = onServerClose;
-            EndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            onGateClose = onGateCloseAct;
+            onServerClose = onServerCloseAct;
 
-            void onRecvUdpData(Span<byte> data)
+            _ = StartGateHeartAsync();
+
+            void onRecvUdpData(byte[] data)
             {
                 var package = new TempNetPackage(data);
                 if (package.netId != NetId)
@@ -147,14 +135,20 @@ namespace Geek.Server.TestPressure.Net
                 switch (package.flag)
                 {
                     case NetPackageFlag.NO_GATE_CONNECT:
-                        LOGGER.Error("gate 断开连接...");
                         onGateClose?.Invoke();
                         Close();
                         break;
                     case NetPackageFlag.CLOSE:
-                        LOGGER.Error("server 断开连接...");
+                    case NetPackageFlag.NO_INNER_SERVER:
                         onServerClose?.Invoke();
                         Close();
+                        break;
+                    case NetPackageFlag.HEART:
+                        if (package.body.Length > 0)
+                        {
+                            var id = BinaryPrimitives.ReadInt32BigEndian(package.body);
+                            EndWaitHeartId(id);
+                        }
                         break;
                     case NetPackageFlag.MSG:
                         onRecv?.Invoke(package.body);
@@ -162,30 +156,28 @@ namespace Geek.Server.TestPressure.Net
                 }
             }
 
-            StartGateHeart();
-
             await Task.Delay(1);
 
             while (!cancelSrc.IsCancellationRequested)
             {
                 try
                 {
-                    var result = await socket.ReceiveAsync(cancelSrc.Token);
-                    //LOGGER.Warn($"收到udp数据：{result.ReceivedBytes}");
+                    var result = await socket.ReceiveAsync();
+                    // Debuger.Log($"收到udp数据：{result.Buffer.Length}");
                     var buffer = result.Buffer;
-                    if (buffer.Length >= 13)
+                    if (buffer.Length >= TempNetPackage.headLen)
                     {
                         onRecvUdpData(buffer);
                     }
                 }
                 catch (Exception e)
                 {
-                    LOGGER.Warn(e.Message);
-                    onGateClose?.Invoke();
                     Close();
+                    onGateClose?.Invoke();
                     break;
                 }
             }
         }
     }
+
 }
