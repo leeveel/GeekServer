@@ -86,8 +86,7 @@ namespace Geek.Server.Gateway
                                     if (cacheChannel != channel)
                                     {
                                         cacheChannel?.Close();
-                                        outerChannelMap.TryRemove(netId, out _);
-                                        channel = null;
+                                        outerChannelMap.TryRemove(netId, out _); 
                                     }
                                 }
                             }
@@ -219,10 +218,13 @@ namespace Geek.Server.Gateway
             }
 
             outerChannelMap.TryGetValue(netId, out var clientChannel);
-            if (clientChannel == null || clientChannel.IsClose() || clientChannel.TargetServerId != serverId)
+            if (clientChannel == null)
             {
-                //LOGGER.Warn($"客户端channel关闭或者服务器id不匹配:{netId} {clientChannel?.TargetServerId} {serverId}");
-                clientChannel?.Close();
+                innerUdpServer.SendTo(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, netId, serverId), endPoint);
+                return;
+            }
+            else if (clientChannel.IsClose())
+            {
                 outerChannelMap.TryRemove(netId, out _);
                 innerUdpServer.SendTo(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, netId, serverId), endPoint);
                 return;
@@ -230,16 +232,13 @@ namespace Geek.Server.Gateway
 
             switch (package.flag)
             {
-                case NetPackageFlag.ACK: //响应客户端连接
-                    {
-                        //通知内部服务器 
-                        //LOGGER.Info($"向客户端发送消息长度:{package.body.Length}");
+                case NetPackageFlag.ACK:
+                    { 
                         clientChannel.Write(package);
                         break;
                     }
 
-                case NetPackageFlag.MSG:
-                    // LOGGER.Info($"转发内网数据到客户端:{package.body.Length}");
+                case NetPackageFlag.MSG: 
                     clientChannel.Write(package);
                     break;
 
@@ -349,7 +348,7 @@ namespace Geek.Server.Gateway
                 case NetPackageFlag.HEART:
                     //LOGGER.Info($"kcpservice recv GATE_HEART: {netId}");
                     channel.UpdateRecvMessageTime();
-                    outerUdpServer.SendTo(package, endPoint);
+                    channel.Write(package);
                     innerUdpServer.SendTo(package, server.InnerEndPoint);
                     break;
 
@@ -358,8 +357,7 @@ namespace Geek.Server.Gateway
                     innerUdpServer.SendTo(package, server.InnerEndPoint);
                     break;
 
-                case NetPackageFlag.CLOSE:
-                    outerChannelMap.TryRemove(netId, out channel);
+                case NetPackageFlag.CLOSE: 
                     if (channel is UdpChannel)
                     {
                         channel.Close();
