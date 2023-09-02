@@ -2,14 +2,14 @@
 using Core.Discovery;
 using System.Collections.Concurrent;
 
-namespace Geek.Server.Center.Logic
+namespace Geek.Server.Discovery.Logic
 {
     public class NamingService
     {
         static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid
         internal readonly ConcurrentDictionary<long, ServerInfo> nodeMap = new();
-         
+
         public int NodeCount()
         {
             return nodeMap.Count;

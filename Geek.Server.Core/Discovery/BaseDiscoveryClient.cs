@@ -14,7 +14,6 @@ namespace Geek.Server.Core.Discovery
         protected Func<ServerState> selfNodeStateGetter;
         protected Func<ServerInfo> selfNodeGetter;
         CancellationTokenSource cancelStateSyncSrc;
-        private string discoveryServerUrl;
 
         public BaseDiscoveryClient(string url, Func<ServerInfo> selfNodeGetter, Func<ServerState> selfNodeStateGetter = null)
         {
@@ -24,16 +23,11 @@ namespace Geek.Server.Core.Discovery
             reConn = new ReConnecter(ConnectImpl, $"中心服:{connUrl}");
         }
 
-        protected BaseDiscoveryClient(string discoveryServerUrl)
-        {
-            this.discoveryServerUrl = discoveryServerUrl;
-        }
-
         async Task<bool> Register()
         {
             var ret = await ServerAgent.Register(selfNodeGetter());
             _ = StartSyncStateAsync();
-            ServerChanged(await ServerAgent.GetAllNodes());
+            //ServerChanged(await ServerAgent.GetAllNodes());
             return ret;
         }
 
@@ -59,7 +53,7 @@ namespace Geek.Server.Core.Discovery
                 }
                 catch (Exception ex)
                 {
-                    LOGGER.Error($"rpc.同步状态到中心服异常:{ex.Message}");
+                    //LOGGER.Error($"rpc.同步状态到中心服异常:{ex.Message}");
                 }
                 await Task.Delay(1000_0);
             };

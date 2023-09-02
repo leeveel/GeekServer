@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace Geek.Server.Center.Logic
+namespace Geek.Server.Discovery.Logic
 {
     public class SubscribeService
     {
@@ -13,7 +13,7 @@ namespace Geek.Server.Center.Logic
         public void Unsubscribe(string id, DiscoveryHub hub)
         {
             GetOrAddSubscribeMap(id).TryRemove(hub, out _);
-        } 
+        }
 
         public void Publish(string eid, byte[] msg)
         {

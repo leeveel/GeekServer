@@ -1,10 +1,9 @@
 ﻿using Geek.Server.Core.Utils;
 using NLog;
-using Server.Discovery;
 using System.Diagnostics;
 using System.Text;
 
-namespace Geek.Server.Center
+namespace Geek.Server.Discovery
 {
     /// <summary>
     /// 核心功能:

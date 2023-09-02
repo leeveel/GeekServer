@@ -3,7 +3,7 @@ using NLog;
 using NLog.Config;
 using PolymorphicMessagePack;
 
-namespace Server.Discovery
+namespace Geek.Server.Discovery
 {
     internal class StartUp
     {

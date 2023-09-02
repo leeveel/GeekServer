@@ -1,10 +1,10 @@
-using Core.Discovery; 
+using Core.Discovery;
 using MagicOnion.Server.Hubs;
 using NLog;
 using System.Collections.Concurrent;
 
-namespace Geek.Server.Center.Logic
-{ 
+namespace Geek.Server.Discovery.Logic
+{
     public class DiscoveryHub : StreamingHubBase<IDiscoveryHub, IDiscoveryClient>, IDiscoveryHub
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
@@ -23,16 +23,14 @@ namespace Geek.Server.Center.Logic
             group = await Group.AddAsync(globalGroupName);
         }
 
-        protected override ValueTask OnDisconnected()
+        protected override async ValueTask OnDisconnected()
         {
             LOGGER.Debug($"rpc客户端断开连接:{Context.CallContext.Peer}");
             ServiceManager.NamingService.Remove(CurServerId);
             if (group != null)
-                group.RemoveAsync(Context);
-            //group = null;
-            UnsubscribeAll();
-            NodesChanged();
-            return ValueTask.CompletedTask;
+                await group.RemoveAsync(Context);
+            await UnsubscribeAll();
+            await NodesChanged();
         }
 
         public IDiscoveryClient GetRpcClientAgent()
@@ -40,14 +38,11 @@ namespace Geek.Server.Center.Logic
             return BroadcastToSelf(group);
         }
 
-        private void NodesChanged()
+        private async Task NodesChanged()
         {
-            Task.Run(async () =>
-            {
-                await Task.Delay(2000);
-                var list = ServiceManager.NamingService.GetAllNodes();
-                Broadcast(group).ServerChanged(list);
-            });
+            await Task.Delay(10);
+            var list = ServiceManager.NamingService.GetAllNodes();
+            Broadcast(group).ServerChanged(list);
         }
 
         /// <summary>
@@ -55,14 +50,14 @@ namespace Geek.Server.Center.Logic
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public Task<bool> Register(ServerInfo node)
+        public async Task<bool> Register(ServerInfo node)
         {
             CurServerId = node.ServerId;
             ServiceManager.NamingService.Add(node);
-            NodesChanged();
-            return Task.FromResult(true);
+            await NodesChanged();
+            return true;
         }
-         
+
 
         public Task<List<ServerInfo>> GetAllNodes()
         {
