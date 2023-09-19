@@ -24,6 +24,20 @@ namespace Geek.Server.Gateway
             {
                 string remoteAdd = connection.RemoteEndPoint.ToString();
                 LOGGER.Info($"tcp连接:{remoteAdd}");
+                 
+                try
+                {
+                    if (!CheckLoad(connection))
+                    {
+                        await Task.Delay(2000);
+                        return;
+                    }
+                }
+                catch
+                {
+                    return;
+                }
+
                 TcpChannel channel = null;
                 try
                 {
