@@ -4,6 +4,7 @@ using MessagePack;
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.IO.Pipelines;
 using System.Net.Sockets;
 using System.Threading;
@@ -23,44 +24,13 @@ public class KcpTcpClientSocket : AKcpSocket
         this.ServerId = serverId;
     }
 
-
-
-    TcpClient createSockect(ref string ip, int port)
-    {
-        return new TcpClient(AddressFamily.InterNetwork);
-        // AddressFamily ipType = AddressFamily.InterNetwork;
-        // try
-        // {
-        //     string ipv6 = GetIPv6(ip, port.ToString());
-        //     if (!string.IsNullOrEmpty(ipv6))
-        //     {
-        //         string[] tmp = System.Text.RegularExpressions.Regex.Split(ipv6, "&&");
-        //         if (tmp != null && tmp.Length >= 2)
-        //         {
-        //             string type = tmp[1];
-        //             if (type == "ipv6")
-        //             {
-        //                 ip = tmp[0];
-        //                 ipType = AddressFamily.InterNetworkV6;
-        //             }
-        //         }
-        //     }
-        //     return new TcpClient(ipType);
-        // }
-        // catch (Exception e)
-        // {
-        //     Debug.LogError(e.Message + "\n" + e.StackTrace);
-        //     return null;
-        // }
-    }
-
     public override async Task<ConnectResult> Connect(string ip, int port, long netId = 0)
     {
         Debug.Log($"开始连接:{ip} {port}");
         isConnecting = true;
         this.NetId = netId;
         //context = await new SocketConnection(AddressFamily.InterNetwork, ip, port).StartAsync();
-        socket = createSockect(ref ip, port);
+        socket = new TcpClient(AddressFamily.InterNetwork);
         if (socket == null)
             return new(false, true, false);
 
@@ -108,8 +78,16 @@ public class KcpTcpClientSocket : AKcpSocket
                     if (TryParseNetPack(result.Buffer, (pack) =>
                     {
                         NetId = pack.netId;
+                        try
+                        {
+                            var dic = MessagePackSerializer.Deserialize<Dictionary<string, string>>(pack.body.ToArray());
+                            retResult.newGateIp = dic["ip"];
+                            retResult.newGatePort = int.Parse(dic["port"]);
+                        }
+                        catch { }
                         if (pack.flag == NetPackageFlag.ACK)
                         {
+                            Debug.Log($"连接成功..");
                             retResult.isSuccess = true;
                         }
                         if (pack.flag == NetPackageFlag.NO_GATE_CONNECT)
@@ -132,7 +110,6 @@ public class KcpTcpClientSocket : AKcpSocket
                 }
             }
         }
-
         isConnecting = false;
         return retResult;
     }
@@ -149,6 +126,7 @@ public class KcpTcpClientSocket : AKcpSocket
                 var length = await socket.GetStream().ReadAsync(readBuffer, 0, readBuffer.Length, cancelToken);
                 if (length > 0)
                 {
+                    //Debug.Log($"收到网络包：{length}");
                     dataPipeWriter.Write(readBuffer.AsSpan()[..length]);
                     var flushTask = dataPipeWriter.FlushAsync();
                     if (!flushTask.IsCompleted)
@@ -166,7 +144,6 @@ public class KcpTcpClientSocket : AKcpSocket
                 break;
             }
         }
-        Debug.Log("readSocketData...end ...");
         Close();
     }
 
@@ -351,8 +328,8 @@ public class KcpTcpClientSocket : AKcpSocket
                     break;
             }
         });
-        //网络连接主动断开，则认为是网关断开 
+        //网络连接主动断开，则认为是网关断开
+        Debug.Log("tcp StartRecv end....");
         onGateClose?.Invoke();
     }
-
 }

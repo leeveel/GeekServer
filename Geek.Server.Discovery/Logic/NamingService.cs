@@ -1,5 +1,6 @@
 ﻿
 using Core.Discovery;
+using Geek.Server.Core.Discovery;
 using System.Collections.Concurrent;
 
 namespace Geek.Server.Discovery.Logic

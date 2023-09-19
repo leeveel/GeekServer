@@ -1,4 +1,5 @@
-﻿using MagicOnion;
+﻿using Geek.Server.Core.Discovery;
+using MagicOnion;
 
 namespace Core.Discovery
 {

@@ -1,5 +1,4 @@
-﻿using Core.Discovery;
-using Geek.Server.Core.Discovery;
+﻿using Geek.Server.Core.Discovery;
 
 namespace Geek.Server.App.Discovery
 {
@@ -13,7 +12,7 @@ namespace Geek.Server.App.Discovery
                 return new ServerInfo
                 {
                     ServerId = Settings.Ins.ServerId,
-                    localIp = Settings.Ins.LocalIp,
+                    LocalIp = Settings.Ins.LocalIp,
                     InnerPort = Settings.Ins.InnerPort,
                     OuterPort = Settings.Ins.OuterPort,
                     HttpPort = Settings.Ins.HttpPort,

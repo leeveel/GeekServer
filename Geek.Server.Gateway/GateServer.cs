@@ -13,9 +13,7 @@ namespace Geek.Server.Gateway
 {
     public class GateServer : Singleton<GateServer>
     {
-        static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
-
-        public const int ModuleId = 123;
+        static readonly Logger LOGGER = LogManager.GetCurrentClassLogger(); 
 
         internal class GateTcpConnectHander : ConnectionHandler
         {
@@ -44,6 +42,31 @@ namespace Geek.Server.Gateway
                 }
             }
 
+            private bool CheckLoad(ConnectionContext context)
+            {
+                if (Instance.CurActiveChannelCount < Settings.InsAs<GateSettings>().MaxClientCount)
+                {
+                    return true;
+                }
+
+                var writer = context.Transport.Output;
+                var newGate = GatewayDiscoveryClient.Instance.GetIdleGateway();
+                if (newGate != null && !string.IsNullOrEmpty(newGate.PublicIp))
+                {
+                    var data = MessagePack.MessagePackSerializer.Serialize(new Dictionary<string, string>
+                    {
+                        { "ip",newGate.PublicIp},
+                        { "port",newGate.OuterPort.ToString()}
+                    });
+                    writer.WritePipe(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, 0, 0, data));
+                }
+                else
+                {
+                    writer.WritePipe(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, 0, 0));
+                }
+                return false;
+            }
+
             void onRecv(TcpChannel channel, TempNetPackage package)
             {
                 LOGGER.Info($"收到tcp:package.flag :{package.ToString()}");
@@ -65,6 +88,13 @@ namespace Geek.Server.Gateway
                 if (server == null)
                 {
                     LOGGER.Warn($"不能发现内部服务id:{package.innerServerId}");
+                    package.flag = NetPackageFlag.NO_INNER_SERVER;
+                    channel.Write(package);
+                    return;
+                }
+                else if (server.InnerEndPoint == null)
+                {
+                    LOGGER.Warn($"服务器InnerEndPoint为空:{package.innerServerId}");
                     package.flag = NetPackageFlag.NO_INNER_SERVER;
                     channel.Write(package);
                     return;
@@ -115,8 +145,7 @@ namespace Geek.Server.Gateway
                         innerUdpServer.SendTo(package, server.InnerEndPoint);
                         break;
 
-                    case NetPackageFlag.CLOSE:
-                        outerChannelMap.TryRemove(netId, out _);
+                    case NetPackageFlag.CLOSE: 
                         channel.Close();
                         break;
                 }
@@ -128,7 +157,7 @@ namespace Geek.Server.Gateway
         UdpServer innerUdpServer;
 
         readonly ConcurrentDictionary<long, BaseNetChannel> outerChannelMap = new();
-        public int curActiveChannelCount { get; private set; } = 0;
+        public int CurActiveChannelCount { get; private set; } = 0; 
         GateServer() { }
 
         public void Start()
@@ -147,52 +176,77 @@ namespace Geek.Server.Gateway
 
         async Task PrintInfo()
         {
-            while (Settings.Ins.AppRunning)
+            while (!Settings.Ins.AppExitToken.IsCancellationRequested)
             {
                 await Task.Delay(TimeSpan.FromMinutes(3));
-                LOGGER.Info($"channel总数:{outerChannelMap.Count},有效channel数量:{curActiveChannelCount}");
+                LOGGER.Info($"channel总数:{outerChannelMap.Count},有效channel数量:{CurActiveChannelCount}");
             }
         }
 
-        //检测udp超时
+       
         async Task CheckTimeOut()
         {
             var removeList = new List<long>();
-            while (Settings.Ins.AppRunning)
+            while (!Settings.Ins.AppExitToken.IsCancellationRequested)
             {
                 removeList.Clear();
                 int activeChannelCount = 0;
                 var timeNow = DateTime.UtcNow;
-                //这里暂时只检测udp
                 foreach (var kv in outerChannelMap)
                 {
-                    if (kv.Value is UdpChannel udpChannel)
+                    var netId = kv.Key;
+                    var chann = kv.Value;
+                    if (chann is UdpChannel udpChannel)
                     {
+                        //这里只检测udp,tcp关闭的时候会自动移除
                         if (udpChannel.IsClose() || udpChannel.GetLastMessageTimeSecond(timeNow) > 12)
                         {
                             udpChannel.Close();
-                            removeList.Add(kv.Key);
+                            removeList.Add(netId);
                         }
                         else
                         {
                             activeChannelCount++;
                         }
                     }
-                    else if (!kv.Value.IsClose())
+                    else if (!chann.IsClose())
                     {
                         activeChannelCount++;
                     }
                 }
 
-                curActiveChannelCount = activeChannelCount;
+                CurActiveChannelCount = activeChannelCount;
 
                 foreach (var k in removeList)
                 {
                     //LOGGER.Info($"超时移除:{k}");
-                    outerChannelMap.Remove(k, out _);
+                    outerChannelMap.TryRemove(k, out _);
                 }
                 await Task.Delay(1500);
             }
+        }
+
+        private bool CheckLoad(EndPoint endPoint)
+        {
+            if (CurActiveChannelCount < Settings.InsAs<GateSettings>().MaxClientCount)
+            {
+                return true;
+            }
+            var newGate = GatewayDiscoveryClient.Instance.GetIdleGateway();
+            if (newGate != null && !string.IsNullOrEmpty(newGate.PublicIp))
+            {
+                var data = MessagePack.MessagePackSerializer.Serialize(new Dictionary<string, string>
+                    {
+                        { "ip",newGate.PublicIp},
+                        { "port",newGate.OuterPort.ToString()}
+                    });
+                outerUdpServer.SendTo(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, 0, 0, data), endPoint);
+            }
+            else
+            {
+                outerUdpServer.SendTo(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, 0, 0), endPoint);
+            }
+            return false;
         }
 
         /// <summary>
@@ -305,6 +359,13 @@ namespace Geek.Server.Gateway
                 outerUdpServer.SendTo(new TempNetPackage(NetPackageFlag.NO_INNER_SERVER, netId, package.innerServerId), endPoint);
                 return;
             }
+            else if (server.InnerEndPoint == null)
+            {
+                LOGGER.Warn($"服务器InnerEndPoint为空:{package.innerServerId}");
+                package.flag = NetPackageFlag.NO_INNER_SERVER;
+                channel.Write(package);
+                return;
+            }
 
             switch (package.flag)
             {
@@ -313,6 +374,11 @@ namespace Geek.Server.Gateway
 #if DEBUG
                         LOGGER.Info($"收到udp连接请求 netid:{package.ToString()}");
 #endif
+                        if (!CheckLoad(endPoint))
+                        {
+                            break;
+                        }
+
                         if (netId == 0)
                         {
                             netId = IdGenerator.GetActorID(ActorType.Gate);

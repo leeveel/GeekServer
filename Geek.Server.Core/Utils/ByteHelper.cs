@@ -1,5 +1,7 @@
 ﻿using Geek.Server.Core.Net.Kcp;
+using System.Buffers;
 using System.Buffers.Binary;
+using System.IO.Pipelines;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -191,6 +193,16 @@ namespace Geek.Server.Core.Utils
                 throw new InvalidOperationException("Buffer backed by array was expected");
             }
             return result;
+        }
+
+        public static void WritePipe(this PipeWriter writer, TempNetPackage package, CancellationToken token = default)
+        {
+            Span<byte> target = stackalloc byte[package.Length + 4];
+            int offset = 0;
+            target.Write(package.Length, ref offset);
+            target.Write(package, ref offset);
+            writer.Write(target);
+            _ = writer.FlushAsync(token);
         }
         #endregion
     }

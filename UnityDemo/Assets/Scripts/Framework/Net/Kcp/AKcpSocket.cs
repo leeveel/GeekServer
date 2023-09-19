@@ -93,6 +93,8 @@ public class ConnectResult
     public bool isSuccess;
     public bool allowReconnect;
     public bool resetNetId;
+    public string newGateIp;
+    public int newGatePort;
 
     public ConnectResult()
     {

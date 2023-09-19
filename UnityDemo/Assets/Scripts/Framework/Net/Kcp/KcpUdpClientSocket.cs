@@ -2,8 +2,9 @@
 using System;
 using System.Threading.Tasks;
 using System.Buffers.Binary;
-using Base;
 using UnityEngine;
+using System.Collections.Generic;
+using MessagePack;
 
 public class KcpUdpClientSocket : AKcpSocket
 {
@@ -21,7 +22,7 @@ public class KcpUdpClientSocket : AKcpSocket
         try
         {
             socket = new UdpClient(ip, port);
-            //socket.ExclusiveAddressUse = true;
+            socket.EnableBroadcast = false;
         }
         catch (Exception e)
         {
@@ -36,6 +37,7 @@ public class KcpUdpClientSocket : AKcpSocket
         data.Write(ServerId, 9);
         //Debug.Log($"开始udp连接....{NetId}");  
         socket.Send(data, data.Length);
+        ConnectResult result = new ConnectResult();
         try
         {
             var task = socket.ReceiveAsync();
@@ -47,25 +49,37 @@ public class KcpUdpClientSocket : AKcpSocket
                     var flag = buffer[0];
                     NetId = buffer.ReadLong(1);
                     var serId = buffer.ReadInt(9);
+                    try
+                    {
+                        var dic = MessagePackSerializer.Deserialize<Dictionary<string, string>>(new ReadOnlyMemory<byte>(buffer, 13, buffer.Length));
+                        result.newGateIp = dic["ip"];
+                        result.newGatePort = int.Parse(dic["port"]);
+                    }
+                    catch { }
                     Debug.Log($"收到连接包:{flag}");
                     if (flag == NetPackageFlag.ACK)
                     {
                         Debug.Log($"连接成功..");
-                        return new(true, true, false);
+                        result.isSuccess = true;
+                        return result;
                     }
                     if (flag == NetPackageFlag.NO_GATE_CONNECT)
                     {
                         Close();
-                        return new(false, true, false);
+                        result.allowReconnect = true;
+                        return result;
                     }
                     if (flag == NetPackageFlag.NO_INNER_SERVER) //不能发现服务器
                     {
                         Close();
-                        return new(false, false, true);
+                        result.resetNetId = true;
+                        return result;
                     }
                     if (flag == NetPackageFlag.CLOSE) //服务器已关闭连接
                     {
-                        return new(false, true, true);
+                        result.allowReconnect = true;
+                        result.resetNetId = true;
+                        return result;
                     }
                 }
             }
@@ -78,14 +92,17 @@ public class KcpUdpClientSocket : AKcpSocket
         catch (Exception e)
         {
             Debug.LogError(e.Message);
-            return new(false, true, false);
+            Close();
+            result.allowReconnect = true;
+            return result;
         }
         finally
         {
             isConnecting = false;
         }
         Close();
-        return new(false, true, false);
+        result.allowReconnect = true;
+        return result;
     }
 
     public override void Close()
@@ -93,7 +110,6 @@ public class KcpUdpClientSocket : AKcpSocket
         lock (this)
         {
             base.Close();
-            cancelSrc.Cancel();
             socket?.Close();
             socket = null;
         }
@@ -113,7 +129,7 @@ public class KcpUdpClientSocket : AKcpSocket
     readonly byte[] sendBuffer = new byte[2000];
     public override void Send(TempNetPackage package)
     {
-        if (socket == null)
+        if (IsClose())
             return;
         var target = new Span<byte>(sendBuffer);
         target[0] = package.flag;
@@ -122,7 +138,7 @@ public class KcpUdpClientSocket : AKcpSocket
         target.Write(package.innerServerId, ref offset);
         if (!package.body.IsEmpty)
         {
-            package.body.CopyTo(target.Slice(TempNetPackage.headLen));
+            package.body.CopyTo(target[TempNetPackage.headLen..]);
         }
         socket.Send(sendBuffer, package.Length);
     }
@@ -157,7 +173,9 @@ public class KcpUdpClientSocket : AKcpSocket
                     if (package.body.Length > 0)
                     {
                         var id = BinaryPrimitives.ReadInt32BigEndian(package.body);
+#if UNITY_EDITOR
                         Debug.Log($"收到心跳回复包...{id}");
+#endif
                         EndWaitHeartId(id);
                     }
                     break;
@@ -175,7 +193,7 @@ public class KcpUdpClientSocket : AKcpSocket
             try
             {
                 var result = await socket.ReceiveAsync();
-                // Debuger.Log($"收到udp数据：{result.Buffer.Length}");
+                // Debug.Log($"收到udp数据：{result.Buffer.Length}");
                 var buffer = result.Buffer;
                 if (buffer.Length >= TempNetPackage.headLen)
                 {

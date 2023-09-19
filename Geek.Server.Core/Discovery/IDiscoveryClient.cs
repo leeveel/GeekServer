@@ -1,4 +1,6 @@
-﻿namespace Core.Discovery
+﻿using Geek.Server.Core.Discovery;
+
+namespace Core.Discovery
 {
     public interface IDiscoveryClient
     {

@@ -8,7 +8,7 @@ namespace Geek.Server.Core.Discovery
     public abstract class BaseDiscoveryClient : IDiscoveryClient
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public IDiscoveryHub ServerAgent { private set; get; }
+        protected IDiscoveryHub ServerAgent { private set; get; }
         protected string connUrl;
         protected ReConnecter reConn;
         protected Func<ServerState> selfNodeStateGetter;
@@ -20,12 +20,19 @@ namespace Geek.Server.Core.Discovery
             connUrl = url;
             this.selfNodeGetter = selfNodeGetter;
             this.selfNodeStateGetter = selfNodeStateGetter;
-            reConn = new ReConnecter(ConnectImpl, $"中心服:{connUrl}");
+            reConn = new ReConnecter(ConnectImpl, $"DiscoveryUrl:{connUrl}");
+        }
+
+        public virtual void OnRegister()
+        {
+
         }
 
         async Task<bool> Register()
         {
             var ret = await ServerAgent.Register(selfNodeGetter());
+            if (ret)
+                OnRegister();
             _ = StartSyncStateAsync();
             //ServerChanged(await ServerAgent.GetAllNodes());
             return ret;
@@ -51,11 +58,11 @@ namespace Geek.Server.Core.Discovery
                     if (ServerAgent != null)
                         await ServerAgent.SyncState(selfNodeStateGetter());
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     //LOGGER.Error($"rpc.同步状态到中心服异常:{ex.Message}");
                 }
-                await Task.Delay(1000_0);
+                await Task.Delay(2000_0);
             };
         }
 
@@ -94,7 +101,7 @@ namespace Geek.Server.Core.Discovery
             }
             catch (Exception e)
             {
-                LOGGER.Error($"rpc连接异常:{e.Message}");
+                LOGGER.Error($"{GetType().Name}:{e.Message}");
                 try
                 {
                     if (ServerAgent != null)
