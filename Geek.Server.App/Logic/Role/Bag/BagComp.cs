@@ -7,6 +7,7 @@ namespace Geek.Server.App.Logic.Role.Bag
 
     public class BagState : CacheState
     {
+        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
         public Dictionary<int, long> ItemMap = new Dictionary<int, long>();
     }
 

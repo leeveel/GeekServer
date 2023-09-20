@@ -1,9 +1,0 @@
-﻿{
-  "IsDebug": true,
-  "ServerId": 1001,
-  "LocalIp": "127.0.0.1",
-  "MongoUrl": "mongodb://127.0.0.1:27017/?authSource=admin",
-  "DBRootPath": "../../database/game/",
-  "BackupDBPath": "../../database/backup/",
-  "LocalDBPrefix": "gamedb_"
-}

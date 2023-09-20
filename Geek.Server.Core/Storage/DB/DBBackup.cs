@@ -1,9 +1,7 @@
-using System.IO.Compression;
-using System.Runtime.InteropServices;
 using NLog;
-using RocksDbSharp;
+using System.IO.Compression;
 
-namespace Geek.Server.Core.Storage.DB
+namespace Core.Storage.DB
 {
     public class BackupInfo
     {
@@ -15,143 +13,96 @@ namespace Geek.Server.Core.Storage.DB
     public static class DBBackup
     {
         static readonly Logger Log = LogManager.GetCurrentClassLogger();
-        public static String Backup(EmbeddedDB db, string path, uint backupsKeepNum = 12)
-        {
-            string err = null;
-            using (var pathSafe = new RocksSafePath(path))
-            {
-                var optionPtr = Native.Instance.rocksdb_backup_engine_options_create(pathSafe.Handle);
-                var bePtr = Native.Instance.rocksdb_backup_engine_open_opts(optionPtr, Env.CreateDefaultEnv().Handle);
-                Native.Instance.rocksdb_backup_engine_create_new_backup_flush(bePtr, db.InnerDB.Handle, true, out IntPtr errPtr);
 
-                if (errPtr != IntPtr.Zero)
+        public static async Task BackupToZip(EmbeddedDB db, string zipBasePath)
+        {
+            try
+            {
+                await db.Flush();
+                //db.InnerDB.Rebuild();
+            }
+            catch
+            {
+
+            }
+            zipBasePath += "_backup";
+            var start1 = DateTime.Now;
+            if (!Directory.Exists(zipBasePath))
+                Directory.CreateDirectory(zipBasePath);
+
+            var dbName = Path.GetFileName(db.DbPath);
+            var zipDirInfo = new DirectoryInfo(zipBasePath);
+            var fileArr = zipDirInfo.GetFiles("*.zip");
+            int fileLen = fileArr.Length;
+            foreach (var f in fileArr)
+            {
+                var fName = Path.GetFileNameWithoutExtension(f.Name);
+                var strArr = fName.Split('@');
+                if (strArr.Length == 2 && strArr[0] == dbName)
                 {
-                    err = Marshal.PtrToStringAnsi(errPtr);
-                    Native.Instance.rocksdb_free(errPtr);
+                    var arr2 = strArr[1].SplitToIntArray('-');
+                    if (arr2.Length == 5)
+                    {
+                        //备份文件保留7天
+                        var btime = new DateTime(arr2[0], arr2[1], arr2[2], arr2[3], arr2[4], 0);
+                        if ((start1 - btime).TotalMinutes < 10)
+                        {
+                            Log.Error($"上次备份数据时间太近了,忽略");
+                            return;
+                        }
+                        if ((start1 - btime).TotalDays < 7)
+                            continue;
+                    }
                 }
 
-                Native.Instance.rocksdb_backup_engine_purge_old_backups(bePtr, backupsKeepNum, out var errPtr1);
-                Native.Instance.rocksdb_free(errPtr1);
+                //尽量由运维删除，实在太多了再删除
+                if (fileLen < 100)
+                    continue;
 
-                Native.Instance.rocksdb_backup_engine_options_destroy(optionPtr);
-                Native.Instance.rocksdb_backup_engine_close(bePtr);
-            }
-            return err;
-        }
-
-        public static string BackupToZip(EmbeddedDB db, string zipBasePath)
-        {
-            if (!Directory.Exists(zipBasePath))
-            {
-                Directory.CreateDirectory(zipBasePath);
-            }
-            var zipDirInfo = new DirectoryInfo(zipBasePath);
-            foreach (var f in zipDirInfo.GetFiles("*.zip"))
-            {
                 try
                 {
+                    Log.Info($"删除过期的备份数据 {f.FullName}");
+                    fileLen--;
                     f.Delete();
                 }
                 catch (Exception e)
                 {
-                    Log.Info($"尝试删除老的zip备份文件失败{e.Message}");
+                    Log.Error($"尝试删除老的zip备份文件失败 {f.FullName} {e.Message}");
                 }
             }
 
             var tempPath = db.DbPath + "_zip_backup_temp";
             if (Directory.Exists(tempPath))
-            {
                 Directory.Delete(tempPath, true);
-            }
             Directory.CreateDirectory(tempPath);
 
-            var err = Backup(db, tempPath, 1);
-            if (err != null)
+            var start2 = DateTime.Now;
+            var tempFilePath = Path.Combine(tempPath, "data.db");
+
+            await db.Backup(tempFilePath);
+
+            if (!File.Exists(tempFilePath))
             {
-                Log.Error($"备份数据zip出错，{err}");
-                return err;
+                Log.Error($"备份数据zip出错");
+                return;
             }
-            //var fileName = Path.GetFileName(db.dbPath) + System.DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".zip";
-            var fileName = Path.GetFileName(db.DbPath) + "_backup.zip";
+
+            var start3 = DateTime.Now;
+            var fileName = dbName + $"@{DateTime.Now:yyyy-MM-dd-HH-mm}.zip";
             var targetPath = $"{zipBasePath}/{fileName}";
             try
             {
-                ZipFile.CreateFromDirectory(tempPath, targetPath, CompressionLevel.SmallestSize, false);
+                ZipFile.CreateFromDirectory(tempPath, targetPath, CompressionLevel.Fastest, false);
             }
             catch (Exception e)
             {
-                err = e.Message;
-                Log.Error($"备份数据zip出错，{err}");
+                Log.Error($"备份数据zip出错，{e}");
             }
             finally
             {
                 Directory.Delete(tempPath, true);
             }
-            return err;
-        }
-
-
-        public static List<BackupInfo> GetBackupInfos(string path)
-        {
-            var result = new List<BackupInfo>();
-            using (var pathSafe = new RocksSafePath(path))
-            {
-                var optionPtr = Native.Instance.rocksdb_backup_engine_options_create(pathSafe.Handle);
-                var bePtr = Native.Instance.rocksdb_backup_engine_open_opts(optionPtr, Env.CreateDefaultEnv().Handle);
-
-                var infosPtr = Native.Instance.rocksdb_backup_engine_get_backup_info(bePtr);
-                var count = Native.Instance.rocksdb_backup_engine_info_count(infosPtr);
-                for (int i = 0; i < count; i++)
-                {
-                    var info = new BackupInfo();
-                    result.Add(info);
-                    info.backupId = Native.Instance.rocksdb_backup_engine_info_backup_id(infosPtr, i);
-                    info.size = Native.Instance.rocksdb_backup_engine_info_size(infosPtr, i);
-                    info.fileNumber = Native.Instance.rocksdb_backup_engine_info_number_files(infosPtr, i);
-                    var timestamp = Native.Instance.rocksdb_backup_engine_info_timestamp(infosPtr, i);
-                    System.DateTime startTime = TimeZoneInfo.ConvertTime(new DateTime(1970, 1, 1), TimeZoneInfo.Local); // 当地时区
-                    info.time = startTime.AddSeconds(timestamp);
-                }
-                Native.Instance.rocksdb_backup_engine_info_destroy(infosPtr);
-                Native.Instance.rocksdb_backup_engine_options_destroy(optionPtr);
-                Native.Instance.rocksdb_backup_engine_close(bePtr);
-            }
-            return result;
-        }
-
-        public static string Restore(string backupPath, string targetPath, uint backupId = 0)
-        {
-            string err = null;
-            using (var pathSafe = new RocksSafePath(backupPath))
-            {
-                var optionPtr = Native.Instance.rocksdb_backup_engine_options_create(pathSafe.Handle);
-                var bePtr = Native.Instance.rocksdb_backup_engine_open_opts(optionPtr, Env.CreateDefaultEnv().Handle);
-                var restorOptionPtr = Native.Instance.rocksdb_restore_options_create();
-
-                if (backupId == 0)
-                {
-                    Native.Instance.rocksdb_backup_engine_restore_db_from_latest_backup(bePtr, targetPath, targetPath, restorOptionPtr, out var errPtr);
-                    if (errPtr != IntPtr.Zero)
-                    {
-                        err = Marshal.PtrToStringAnsi(errPtr);
-                        Native.Instance.rocksdb_free(errPtr);
-                    }
-                }
-                else
-                {
-                    Native.Instance.rocksdb_backup_engine_restore_db_from_backup(bePtr, targetPath, targetPath, restorOptionPtr, backupId, out var errPtr);
-                    if (errPtr != IntPtr.Zero)
-                    {
-                        err = Marshal.PtrToStringAnsi(errPtr);
-                        Native.Instance.rocksdb_free(errPtr);
-                    }
-                }
-
-                Native.Instance.rocksdb_restore_options_destroy(restorOptionPtr);
-                Native.Instance.rocksdb_backup_engine_options_destroy(optionPtr);
-                Native.Instance.rocksdb_backup_engine_close(bePtr);
-            }
-            return err;
+            Log.Warn($"localdb 备份时间 {(DateTime.Now - start1).TotalSeconds} {(DateTime.Now - start2).TotalSeconds} {(DateTime.Now - start3).TotalSeconds}秒  {fileName}");
         }
 
         public static void RestoreByZip(string zipPath, string targetPath)
@@ -166,7 +117,12 @@ namespace Geek.Server.Core.Storage.DB
             try
             {
                 ZipFile.ExtractToDirectory(zipPath, tempPath, false);
-                Restore(tempPath, targetPath);
+                File.Copy(Path.Combine(tempPath, "data.db"), targetPath, true);
+                var logFile = Path.Combine(tempPath, "data-log.db");
+                if (File.Exists(logFile))
+                {
+                    File.Copy(logFile, targetPath.Replace(".db", "-log.db"), true);
+                }
             }
             catch (Exception e)
             {
@@ -174,8 +130,49 @@ namespace Geek.Server.Core.Storage.DB
             }
             finally
             {
-                //Directory.Delete(tempPath, true);
+                Directory.Delete(tempPath, true);
             }
+        }
+
+
+        public static bool CheckRestore(string dbPath, string dbName)
+        {
+            var restorePath = Path.Combine(dbPath, dbName + "@restore.zip");
+            if (File.Exists(restorePath))
+            {
+                try
+                {
+                    var dbFileName = dbName + ".db";
+                    Log.Info("发现需要还原的数据，准备回档, 开始备份老db");
+                    var time = DateTime.Now;
+                    var oldDbPath = Path.Combine(dbPath, dbFileName);
+                    var oldDbLogPath = oldDbPath.Replace(".db", "-log.db");
+                    var backupPath = oldDbPath + "@restore_backup";
+                    var backupLogPath = oldDbLogPath + "@restore_backup";
+                    if (File.Exists(backupPath))
+                        File.Delete(backupPath);
+                    if (File.Exists(oldDbPath))
+                        File.Move(oldDbPath, backupPath);
+
+                    if (File.Exists(backupLogPath))
+                        File.Delete(backupLogPath);
+                    if (File.Exists(oldDbLogPath))
+                        File.Move(oldDbLogPath, backupLogPath);
+                    Log.Info("开始回档");
+                    RestoreByZip(restorePath, Path.Combine(dbPath, dbFileName));
+                    File.Delete(restorePath);
+                    Log.Info($"回档完成 {(DateTime.Now - time).TotalSeconds}秒");
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Log.Info("回档失败");
+                    Log.Error(e.ToString());
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

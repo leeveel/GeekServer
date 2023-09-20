@@ -1,157 +1,120 @@
-using System.Collections.Concurrent;
-using System.Runtime.InteropServices;
-using RocksDbSharp;
+using LiteDB;
+using LiteDB.Async;
+using PolymorphicMessagePack;
 
-namespace Geek.Server.Core.Storage.DB
+namespace Core.Storage.DB
 {
     /// <summary>
     /// 内嵌数据库-基于RocksDB
     /// </summary>
     public class EmbeddedDB
     {
+        public class TableNameIndex
+        {
+            [BsonId]
+            public string Name { get; set; }
+            [BsonIgnore]
+            ushort index;
+            public ushort Index
+            {
+                get => index;
+                set
+                {
+                    index = value;
+                    InnerName = "t" + value.ToString();
+                }
+            }
+            [BsonIgnore]
+            public string InnerName { get; private set; }
+        }
+
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public RocksDb InnerDB { get; private set; }
-        protected FlushOptions flushOption;
-        public ColumnFamilyOptions cfOption;
+        public LiteDatabaseAsync InnerDB { get; private set; }
+        protected ILiteCollection<TableNameIndex> nameCollection;
+        readonly Dictionary<string, TableNameIndex> nameCollectMemoryCache = new();
+        readonly Dictionary<ushort, TableNameIndex> nameIndexCollectMemoryCache = new();
         public string DbPath { get; private set; } = "";
         public string SecondPath { get; private set; } = "";
         public bool ReadOnly { get; private set; } = false;
-        protected ConcurrentDictionary<string, ColumnFamilyHandle> columnFamilie = new ConcurrentDictionary<string, ColumnFamilyHandle>();
 
-        public EmbeddedDB(string path, bool readOnly = false, string readonlyPath = null, int maxOpenFileNum = 100)
+        public EmbeddedDB(string path, bool readOnly = false)
         {
             this.ReadOnly = readOnly;
             var dir = Path.GetDirectoryName(path);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
             DbPath = path;
-            var option = new DbOptions();
-            var bbtOpt = new BlockBasedTableOptions();
-            option.SetKeepLogFileNum(3);  //日志文件保留个数 LOG.old...数量
-            option.SetMaxTotalWalSize(1024 * 1024 * 70); //日志文件最大size  70m
-            bbtOpt.SetNoBlockCache(true); //没有block缓存 
-            //bbtOpt.SetCacheIndexAndFilterBlocks(false);//不缓存索引
-            option.SetBlockBasedTableFactory(bbtOpt);
-            option.SetMaxOpenFiles(maxOpenFileNum);
-            RocksDb.TryListColumnFamilies(option, DbPath, out var cfList);
+            InnerDB = new LiteDatabaseAsync($"filename={path}.db");
+            InnerDB.UnderlyingDatabase.Mapper.idToTypeGetter = PolymorphicTypeMapper.TryGet;
+            InnerDB.UnderlyingDatabase.Mapper.typeToIdGetter = PolymorphicTypeMapper.TryGet;
 
-            cfOption = new ColumnFamilyOptions();
-            //cfOption.SetDbWriteBufferSize(readOnly ? 1024ul : 1024 * 512); //每个列族memtable大小
-
-            var cfs = new ColumnFamilies();
-            foreach (var cf in cfList)
+            nameCollection = InnerDB.UnderlyingDatabase.GetCollection<TableNameIndex>("table_names");
+            var all = nameCollection.FindAll().ToList();
+            foreach (var n in all)
             {
-                cfs.Add(cf, cfOption);
-                columnFamilie[cf] = null;
-            }
-
-            if (readOnly)
-            {
-                if (string.IsNullOrEmpty(readonlyPath))
-                    SecondPath = DbPath + "_$$$";
-                else
-                    SecondPath = readonlyPath;
-                InnerDB = RocksDb.OpenAsSecondary(option, DbPath, SecondPath, cfs);
-            }
-            else
-            {
-                flushOption = new FlushOptions();
-                option.SetCreateIfMissing(true).SetCreateMissingColumnFamilies(true);
-                InnerDB = RocksDb.Open(option, DbPath, cfs);
+                nameCollectMemoryCache.Add(n.Name, n);
+                nameIndexCollectMemoryCache.Add(n.Index, n);
             }
         }
 
-        ColumnFamilyHandle GetOrCreateColumnFamilyHandle(string name)
+        public string GetTableIndexName(string name, bool addIfNotExsit = false)
         {
-            lock (columnFamilie)
+            lock (nameCollection)
             {
-                if (columnFamilie.TryGetValue(name, out var handle))
+                if (nameCollectMemoryCache.TryGetValue(name, out var value))
                 {
-                    if (handle != null)
-                        return handle;
-                    InnerDB.TryGetColumnFamily(name, out handle);
-                    columnFamilie[name] = handle;
-                    return handle;
+                    return value.InnerName;
                 }
-                else if (!ReadOnly)
+                if (addIfNotExsit)
                 {
-                    handle = InnerDB.CreateColumnFamily(cfOption, name);
-                    columnFamilie[name] = handle;
-                    return handle;
-                }
-            }
-            return null;
-        }
-
-        public void TryCatchUpWithPrimary()
-        {
-            if (ReadOnly)
-            {
-                InnerDB.TryCatchUpWithPrimary();
-            }
-        }
-
-        public Table<T> GetTable<T>() where T : class
-        {
-            var name = typeof(T).FullName;
-            var handle = GetOrCreateColumnFamilyHandle(name);
-            if (handle == null)
-                return null;
-            return new Table<T>(this, name, handle);
-        }
-
-        public Table<T> GetTable<T>(string tableName) where T : class
-        {
-            var handle = GetOrCreateColumnFamilyHandle(tableName);
-            if (handle == null)
-                return null;
-            return new Table<T>(this, tableName, handle);
-        }
-
-        public Table<byte[]> GetRawTable(string fullName)
-        {
-            var handle = GetOrCreateColumnFamilyHandle(fullName);
-            if (handle == null)
-                return null;
-            return new Table<byte[]>(this, fullName, handle, true);
-        }
-
-        public Transaction NewTransaction()
-        {
-            return new Transaction(this);
-        }
-
-        public void WriteBatch(WriteBatch batch)
-        {
-            InnerDB.Write(batch);
-        }
-
-        public void Flush(bool wait)
-        {
-            if (!ReadOnly)
-            {
-                flushOption.SetWaitForFlush(wait);
-                foreach (var c in columnFamilie)
-                {
-                    if (c.Value != null)
+                    ushort index = (ushort)nameCollectMemoryCache.Count;
+                    while (nameIndexCollectMemoryCache.ContainsKey(index))
                     {
-                        Native.Instance.rocksdb_flush_cf(InnerDB.Handle, flushOption.Handle, c.Value.Handle, out var err);
-                        if (err != IntPtr.Zero)
-                        {
-                            var errStr = Marshal.PtrToStringAnsi(err);
-                            Native.Instance.rocksdb_free(err);
-                            LOGGER.Fatal($"rocksdb flush 错误:{errStr}");
-                        }
+                        index = (ushort)Math.Max(1, (index + 1) % ushort.MaxValue);
                     }
+                    var tnIndex = new TableNameIndex { Name = name, Index = index };
+                    nameCollectMemoryCache.Add(name, tnIndex);
+                    nameIndexCollectMemoryCache.Add(index, tnIndex);
+                    nameCollection.Insert(tnIndex);
+                    return tnIndex.InnerName;
                 }
+                return default;
             }
+        }
+
+        public Table<T> GetTable<T>(string tableName = null) where T : class
+        {
+            var tName = typeof(T).FullName;
+            if (tableName == null && tName == typeof(BsonDocument).FullName)
+            {
+                LOGGER.Error("当类型为BsonDocument时，必须指定table名");
+                return null;
+            }
+            var name = (tableName ?? tName).Replace(".", "_");
+            return new Table<T>(this, GetTableIndexName(name, true), name);
+        }
+
+        public async Task Flush()
+        {
+            try
+            {
+                await InnerDB.CheckpointAsync();
+            }
+            catch (Exception e)
+            {
+                LOGGER.Error($"EmbeddedDB flush错误:{e}");
+            }
+        }
+
+        public async Task Backup(string targetPath)
+        {
+            await InnerDB.Backup(targetPath);
         }
 
         public void Close()
         {
-            Flush(true);
-            Native.Instance.rocksdb_cancel_all_background_work(InnerDB.Handle, true);
-            InnerDB.Dispose();
+            InnerDB?.Dispose();
+            InnerDB = null;
         }
     }
 }

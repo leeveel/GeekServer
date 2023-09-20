@@ -1,5 +1,8 @@
 ﻿
+using Core.Storage.DB;
+using Core.Storage;
 using Geek.Server.Core.Actors;
+using Geek.Server.Core.Comps;
 using Geek.Server.Core.Storage;
 using Geek.Server.Core.Utils;
 
@@ -32,10 +35,10 @@ namespace Geek.Server.Core.Timer
                 if (!working)
                     break;
                 var startTime = DateTime.Now;
-                await GameDB.TimerSave();
+                await StateComp.SaveAll();
                 var cost = (DateTime.Now - startTime).TotalMilliseconds;
 
-                GameDB.Flush(false);
+                await GameDB.Flush();
                 Log.Info($"定时回存完成 耗时: {cost:f4}ms");
 
                 await ActorMgr.CheckIdle();
@@ -75,7 +78,10 @@ namespace Geek.Server.Core.Timer
         {
             working = false;
             await LoopTask;
-            await GameDB.SaveAll();
+            await StateComp.SaveAll();
+            await Task.Delay(TimeSpan.FromSeconds(1));
+            await GameDB.Flush();
+            await Task.Delay(TimeSpan.FromSeconds(1));
             GameDB.Close();
             Log.Info($"停止全局定时完成");
         }

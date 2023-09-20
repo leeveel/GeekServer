@@ -72,24 +72,14 @@ namespace Geek.Server.Core.Storage
         }
 
         public async Task SaveState<TState>(TState state) where TState : CacheState
-        {
-            var (isChanged, data) = state.IsChanged();
-            if (isChanged)
+        { 
+            var filter = Builders<TState>.Filter.Eq(CacheState.UniqueId, state.Id);
+            var stateName = typeof(TState).FullName;
+            var col = CurDB.GetCollection<TState>(stateName);
+            var result = await col.ReplaceOneAsync(filter, state, REPLACE_OPTIONS);
+            if (result.IsAcknowledged)
             {
-                var mongoState = new MongoState()
-                {
-                    Data = data,
-                    Id = state.Id.ToString(),
-                    Timestamp = TimeUtils.CurrentTimeMillisUTC()
-                };
-                var filter = Builders<MongoState>.Filter.Eq(CacheState.UniqueId, mongoState.Id);
-                var stateName = typeof(TState).FullName;
-                var col = CurDB.GetCollection<MongoState>(stateName);
-                var result = await col.ReplaceOneAsync(filter, mongoState, REPLACE_OPTIONS);
-                if (result.IsAcknowledged)
-                {
-                    state.AfterSaveToDB();
-                }
+                state.AfterSaveToDB();
             }
         }
 
@@ -99,9 +89,10 @@ namespace Geek.Server.Core.Storage
             Client.Cluster.Dispose();
         }
 
-        public void Flush(bool wait)
-        {
 
+        public Task Flush()
+        {
+            return Task.CompletedTask;
         }
     }
 }

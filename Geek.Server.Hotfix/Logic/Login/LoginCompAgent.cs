@@ -85,8 +85,7 @@ namespace Server.Logic.Logic.Login
                 info.SdkType = sdkType;
                 info.UserName = userName;
                 State.PlayerMap[playerId] = info;
-            }
-            info.IsChanged = true;
+            } 
             info.RoleMap[Settings.ServerId] = roleId;
         }
 

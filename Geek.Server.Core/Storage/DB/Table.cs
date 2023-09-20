@@ -1,234 +1,79 @@
-using System.Collections;
-using System.Text;
-using Geek.Server.Core.Serialize;
+using LiteDB.Async;
 using NLog;
-using RocksDbSharp;
+using BsonDocument = LiteDB.BsonDocument;
+using BsonValue = LiteDB.BsonValue;
 
-namespace Geek.Server.Core.Storage.DB
+namespace Core.Storage.DB
 {
-    public class Table<T> : IEnumerable<T>
+    public class Table<T>
     {
-        protected static readonly Logger Log = LogManager.GetCurrentClassLogger();
+        protected static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         protected EmbeddedDB db;
-        ColumnFamilyHandle cfHandle;
-        string tableName;
-        bool isRawTable;
+        //这里不直接使用T类型，litedb底层针对async task依然存在多线程问题，改用异步接口底层单线程，为了减轻线程压力，这里序列化，反序列化放到外部来
+        protected ILiteCollectionAsync<BsonDocument> collection;
+        readonly string realName;
+        private BsonDocument InnerSerialize(T value) => db.InnerDB.UnderlyingDatabase.Mapper.ToDocument(value);
+        private T InnerDeserialize(BsonDocument value) => db.InnerDB.UnderlyingDatabase.Mapper.Deserialize<T>(value);
 
-        internal Table(EmbeddedDB db, string name, ColumnFamilyHandle cfHandle, bool isRawTable = false)
+        internal Table(EmbeddedDB db, string name, string realName)
         {
             this.db = db;
-            this.cfHandle = cfHandle;
-            this.isRawTable = isRawTable;
-            tableName = name;
+            this.realName = realName;
+            collection = db.InnerDB.GetCollection<BsonDocument>(name);
         }
 
-        public void Set<IDType>(IDType id, T value, Transaction trans = null)
+        public Task<bool> Set<IDType>(IDType id, T value)
         {
-            var data = Serializer.Serialize<T>(value);
-            SetRaw(id, data);
+            return collection.UpsertAsync(new BsonValue(id), InnerSerialize(value));
         }
 
-        public void SetRaw<IDType>(IDType id, byte[] data, Transaction trans = null)
+
+        public Task<int> SetBatch(List<T> values)
         {
-            var mainId = GetDBKey(id);
-            if (trans != null)
-            {
-                trans.Set(mainId, data, cfHandle);
-            }
-            else
-            {
-                db.InnerDB.Put(Encoding.UTF8.GetBytes(mainId), data, cfHandle);
-            }
+            var list = new List<BsonDocument>(values.Count);
+            values.ForEach(x => list.Add(InnerSerialize(x)));
+            return collection.UpsertAsync(list);
         }
 
-        public void SetBatch<IDType>(List<IDType> ids, List<T> values, Transaction trans = null)
+        public Task<bool> Delete<IDType>(IDType id)
         {
-            var valueList = new List<byte[]>(values.Count);
-            foreach (var value in values)
-            {
-                var mainId = GetDBKey(value);
-                if (string.IsNullOrEmpty(mainId))
-                {
-                    throw new NotFindKeyException($"no KeyAttribute find in {tableName}");
-                }
-                valueList.Add(Serializer.Serialize<T>(value));
-            }
-            SetRawBatch(ids, valueList, trans);
+            return collection.DeleteAsync(new BsonValue(id));
         }
 
-        public void SetRawBatch<IDType>(List<IDType> ids, List<byte[]> values, Transaction trans = null)
+        public async Task<T> Get<IDType>(IDType id)
         {
-            var batch = trans == null ? new WriteBatch() : null;
-            var count = values.Count;
-            var keyList = new List<string>(count);
-            foreach (var value in ids)
+            try
             {
-                var mainId = GetDBKey(value);
-                keyList.Add(mainId);
+                var ret = await collection.FindByIdAsync(new BsonValue(id));
+                return InnerDeserialize(ret);
             }
-
-            for (int i = 0; i < count; i++)
+            catch (Exception e)
             {
-                var mainId = keyList[i];
-                var data = values[i];
-                if (batch != null)
-                {
-                    var id = Encoding.UTF8.GetBytes(mainId);
-                    batch.Put(id, data, cfHandle);
-                }
-                else
-                {
-                    trans.Set(mainId, data, cfHandle);
-                }
+                LOGGER.Error($"Get {realName} [{id}] error:{e}");
             }
-
-            if (trans == null)
-            {
-                db.InnerDB.Write(batch);
-                batch.Dispose();
-            }
+            return default;
         }
 
-        public void Delete<IDType>(IDType id, Transaction trans = null)
+        public async Task<bool> Exist<IDType>(IDType id)
         {
-            var mainId = GetDBKey(id);
-
-            if (trans != null)
-            {
-                trans.Delete(mainId, cfHandle);
-            }
-            else
-            {
-                db.InnerDB.Remove(Encoding.UTF8.GetBytes(mainId), cfHandle);
-            }
+            var ret = await collection.FindByIdAsync(new BsonValue(id));
+            return ret != null;
         }
 
-        public void DeleteBatch<IDType>(List<IDType> ids, Transaction trans = null)
+        public async Task<List<T>> GetAll()
         {
-            var batch = trans == null ? new WriteBatch() : null;
-            foreach (var id in ids)
+            var result = new List<T>();
+            var ret = await collection.FindAllAsync();
+            foreach (var item in ret)
             {
-                var mainId = GetDBKey(id);
-                if (batch != null)
-                {
-                    batch.Delete(Encoding.UTF8.GetBytes(mainId), cfHandle);
-                }
-                else
-                {
-                    trans.Delete(mainId, cfHandle);
-                }
+                result.Add(InnerDeserialize(item));
             }
-            if (trans == null)
-            {
-                db.InnerDB.Write(batch);
-                batch.Dispose();
-            }
+            return result;
         }
 
-        public T Get<IDType>(IDType id)
+        public async Task<bool> Any()
         {
-            var data = db.InnerDB.Get(Encoding.UTF8.GetBytes(GetDBKey(id)), cfHandle);
-            if (data == null)
-            {
-                return default;
-            }
-            if (isRawTable)
-            {
-                return (T)(object)data;
-            }
-            return Serializer.Deserialize<T>(data);
-        }
-
-        public List<T> GetAll()
-        {
-            return this.ToList();
-        }
-
-        protected string GetDBKey<IDType>(IDType id)
-        {
-            return id.ToString();
-        }
-
-        public IEnumerator<T> GetEnumerator()
-        {
-            return new Enumerator(this);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public class Enumerator : IEnumerator<T>
-        {
-            //private Snapshot snapshot;
-            private Iterator dbIterator;
-            private T currValue = default(T);
-            private Table<T> table;
-
-            internal Enumerator(Table<T> table)
-            {
-                this.table = table;
-                var option = new ReadOptions();
-                dbIterator = table.db.InnerDB.NewIterator(table.cfHandle, option);
-                dbIterator.SeekToFirst();
-            }
-
-            private bool isDisposed = false;
-            public void Dispose()
-            {
-                Dispose(disposing: true);
-                GC.SuppressFinalize(this);
-            }
-
-            void Dispose(bool disposing)
-            {
-                if (!isDisposed)
-                {
-                    currValue = default(T);
-                    if (dbIterator != null)
-                    {
-                        dbIterator.Dispose();
-                        dbIterator = null;
-                    }
-                }
-                isDisposed = true;
-            }
-
-            ~Enumerator()
-            {
-                Dispose(disposing: false);
-            }
-
-            public bool MoveNext()
-            {
-                if (dbIterator.Valid())
-                {
-                    if (table.isRawTable)
-                        currValue = (T)(object)dbIterator.Value();
-                    else
-                        currValue = Serializer.Deserialize<T>(dbIterator.Value());
-                    dbIterator.Next();
-                    return true;
-                }
-                return false;
-            }
-
-
-            public T Current => currValue;
-
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return currValue;
-                }
-            }
-
-            void IEnumerator.Reset()
-            {
-                dbIterator.SeekToFirst();
-            }
+            return await collection.CountAsync() > 0;
         }
     }
 }

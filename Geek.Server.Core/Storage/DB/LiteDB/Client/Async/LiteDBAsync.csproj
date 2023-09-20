@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <PackageId>LiteDB.Async</PackageId>
+    <Version>0.1.7</Version>
+    <Authors>Mark Lockett</Authors>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Title>LiteDB-Async</Title>
+    <Copyright>Copyright (c) 2020 - 2023 Licensed by Apache 2.0</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/mlockett42/litedb-async</RepositoryUrl>
+    <ProjectUrl>https://github.com/mlockett42/litedb-async</ProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <Description>LiteDB.Async - A lightweight async wrapper for LiteDB</Description>
+    <Summary>LiteDB.Async - A lightweight async wrapper for LiteDB</Summary>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>LiteDBAsyncStrongNameKey.snk</AssemblyOriginatorKeyFile>
+		<AssemblyName>LiteDB.Async</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LiteDB" Version="5.0.17" />
+  </ItemGroup>
+
+</Project>

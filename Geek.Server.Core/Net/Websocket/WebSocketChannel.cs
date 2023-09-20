@@ -167,7 +167,7 @@ namespace Geek.Server.Core.Net.Websocket
                     if (result.IsCompleted)
                         break;
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     // LOGGER.Error(e.Message);
                     break;

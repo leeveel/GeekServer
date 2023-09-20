@@ -1,4 +1,5 @@
-﻿using Geek.Server.Core.Actors;
+﻿using Core.Storage;
+using Geek.Server.Core.Actors;
 using Geek.Server.Core.Comps;
 
 namespace Geek.Server.Core.Storage
@@ -6,7 +7,7 @@ namespace Geek.Server.Core.Storage
     public enum DBModel
     {
         /// <summary>
-        /// 内嵌做主存,mongodb备份
+        /// 本地数据库
         /// </summary>
         Embeded,
         /// <summary>
@@ -19,7 +20,7 @@ namespace Geek.Server.Core.Storage
     {
         public void Open(string url, string dbName);
         public void Close();
-        public void Flush(bool wait);
+        public Task Flush();
         public Task<TState> LoadState<TState>(long id, Func<TState> defaultGetter = null) where TState : CacheState, new();
         public Task SaveState<TState>(TState state) where TState : CacheState;
     }
@@ -35,7 +36,7 @@ namespace Geek.Server.Core.Storage
         {
             if (Settings.DBModel == (int)DBModel.Embeded)
             {
-                dbImpler = new RocksDBConnection();
+                dbImpler = new EmbeddedDBConnection();
             }
             else if (Settings.DBModel == (int)DBModel.Mongodb)
             {
@@ -47,9 +48,9 @@ namespace Geek.Server.Core.Storage
             }
         }
 
-        public static void Flush(bool wait)
+        public static async Task Flush()
         {
-            dbImpler.Flush(wait);
+            await dbImpler.Flush();
         }
 
         public static T As<T>() where T : IGameDB
@@ -79,36 +80,9 @@ namespace Geek.Server.Core.Storage
             return dbImpler.LoadState(id, defaultGetter);
         }
 
-        public static Task SaveState<TState>(TState state) where TState : CacheState
+        public static async Task SaveState<TState>(TState state) where TState : CacheState
         {
-            return dbImpler.SaveState(state);
+            await dbImpler.SaveState(state);
         }
-
-
-        public static async Task SaveAll()
-        {
-            if (Settings.DBModel == (int)DBModel.Embeded)
-            {
-                await ActorMgr.SaveAll();
-            }
-            else if (Settings.DBModel == (int)DBModel.Mongodb)
-            {
-                await StateComp.SaveAll();
-            }
-        }
-
-        public static async Task TimerSave()
-        {
-            if (Settings.DBModel == (int)DBModel.Embeded)
-            {
-                await ActorMgr.TimerSave();
-            }
-            else if (Settings.DBModel == (int)DBModel.Mongodb)
-            {
-                await StateComp.TimerSave();
-            }
-        }
-
-
     }
 }

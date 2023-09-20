@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Collections.Generic;
 
 namespace Geek.Server.Core.Storage
 {
@@ -61,16 +62,16 @@ namespace Geek.Server.Core.Storage
             }
         }
 
-        internal static async Task SaveToFile(List<ReplaceOneModel<MongoState>> list, string stateName)
+        internal static async Task SaveToFile(List<long> ids, List<ReplaceOneModel<MongoDB.Bson.BsonDocument>> docs, string stateName)
         {
             var folder = Environment.CurrentDirectory + $"/../State/{DateTime.Now:yyyy-MM-dd-HH-mm}/{stateName}/";
             folder.CreateAsDirectory();
-            foreach (var one in list)
+            for(int i=0;i<ids.Count;i++)
             {
-                var state = one.Replacement;
-                Newtonsoft.Json.JsonConvert.SerializeObject(state);
-                var str = Newtonsoft.Json.JsonConvert.SerializeObject(state);
-                var path = folder + state.Id + ".json";
+                var id = ids[i];
+                var doc = docs[i];
+                var str = doc.ToString();
+                var path = folder + id + ".json";
                 await File.WriteAllTextAsync(path, str);
             }
         }

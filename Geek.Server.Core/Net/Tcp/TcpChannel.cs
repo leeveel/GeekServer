@@ -49,7 +49,7 @@ namespace Geek.Server.Core.Net.Tcp
                         if (result.IsCompleted)
                             break;
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         // LOGGER.Error(e.Message);
                         break;

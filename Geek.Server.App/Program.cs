@@ -7,8 +7,8 @@ using System.Text;
 namespace Geek.Server.App
 {
     class Program
-    {
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+    { 
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger(); 
 
         private static volatile bool ExitCalled = false;
         private static volatile Task GameLoopTask = null;

@@ -15,8 +15,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Generate", "Gee
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.CodeGenerator", "Geek.Server.CodeGenerator\Geek.Server.CodeGenerator.csproj", "{3C43CD22-AF8C-432D-A601-EB657D625A86}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.RemoteBackup", "Geek.Server.RemoteBackup\Geek.Server.RemoteBackup.csproj", "{D78F3E4F-104A-429D-B595-6A149A40241A}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Geek.Server.Proto", "Geek.Server.Proto\Geek.Server.Proto.csproj", "{F92D52B5-642D-4596-A8BE-5A56D2BCE593}"
 EndProject
 Global
@@ -49,10 +47,6 @@ Global
 		{3C43CD22-AF8C-432D-A601-EB657D625A86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C43CD22-AF8C-432D-A601-EB657D625A86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C43CD22-AF8C-432D-A601-EB657D625A86}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D78F3E4F-104A-429D-B595-6A149A40241A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D78F3E4F-104A-429D-B595-6A149A40241A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D78F3E4F-104A-429D-B595-6A149A40241A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D78F3E4F-104A-429D-B595-6A149A40241A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F92D52B5-642D-4596-A8BE-5A56D2BCE593}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F92D52B5-642D-4596-A8BE-5A56D2BCE593}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F92D52B5-642D-4596-A8BE-5A56D2BCE593}.Release|Any CPU.ActiveCfg = Release|Any CPU
