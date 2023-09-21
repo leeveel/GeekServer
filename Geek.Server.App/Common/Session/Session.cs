@@ -1,5 +1,5 @@
 ﻿
-using Geek.Server.Core.Net.BaseHandler;
+using Geek.Server.Core.Net;
 
 namespace Geek.Server.App.Common.Session
 {
@@ -18,7 +18,7 @@ namespace Geek.Server.App.Common.Session
         /// <summary>
         /// 连接上下文
         /// </summary>
-        public INetChannel Channel { get; set; }
+        public NetChannel Channel { get; set; }
 
         /// <summary>
         /// 连接标示，避免自己顶自己的号,客户端每次启动游戏生成一次/或者每个设备一个

@@ -1,11 +1,8 @@
-﻿
-using Geek.Server.Core.Net.BaseHandler;
-
-namespace Geek.Server.Core.Net.Tcp.Handler
+﻿namespace Geek.Server.Core.Net.Tcp.Handler
 {
     public abstract class BaseMessageHandler
     {
-        public INetChannel Channel { get; set; }
+        public NetChannel Channel { get; set; }
 
         public Message Msg { get; set; }
 

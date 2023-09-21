@@ -3,7 +3,7 @@ using Geek.Server.App.Common.Session;
 using Geek.Server.App.Logic.Login;
 using Geek.Server.Core.Actors;
 using Geek.Server.Core.Hotfix.Agent;
-using Geek.Server.Core.Net.BaseHandler;
+using Geek.Server.Core.Net;
 using Geek.Server.Core.Utils;
 using Server.Logic.Common.Handler;
 using Server.Logic.Logic.Role.Base;
@@ -15,7 +15,7 @@ namespace Server.Logic.Logic.Login
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 
-        public async Task OnLogin(INetChannel channel, ReqLogin reqLogin)
+        public async Task OnLogin(NetChannel channel, ReqLogin reqLogin)
         {
             if (string.IsNullOrEmpty(reqLogin.UserName))
             {

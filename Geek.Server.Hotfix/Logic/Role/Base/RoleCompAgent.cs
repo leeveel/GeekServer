@@ -92,12 +92,8 @@ namespace Server.Logic.Logic.Role.Base
 
         public void NotifyClient(Message msg, int uniId = 0, StateCode code = StateCode.Success)
         {
-            var channel = SessionManager.GetChannel(ActorId);
-            if (channel != null && !channel.IsClose())
-            {
-                channel.Write(msg, uniId, code);
-            }
+            var session = SessionManager.Get(ActorId);
+            session?.Channel?.Write(msg, uniId, code);
         }
-
     }
 }

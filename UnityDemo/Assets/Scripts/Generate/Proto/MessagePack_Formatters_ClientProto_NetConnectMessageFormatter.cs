@@ -14,16 +14,14 @@
 #pragma warning disable SA1403 // File may only contain a single namespace
 #pragma warning disable SA1649 // File name should match first type name
 
-namespace MessagePack.Formatters.Geek.Server.Proto
+namespace MessagePack.Formatters.ClientProto
 {
-    public sealed class PlaceFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::Geek.Server.Proto.Place>
+    public sealed class NetConnectMessageFormatter : global::MessagePack.Formatters.IMessagePackFormatter<global::ClientProto.NetConnectMessage>
     {
-        // X
-        private static global::System.ReadOnlySpan<byte> GetSpan_X() => new byte[1 + 1] { 161, 88 };
-        // Y
-        private static global::System.ReadOnlySpan<byte> GetSpan_Y() => new byte[1 + 1] { 161, 89 };
+        // UniId
+        private static global::System.ReadOnlySpan<byte> GetSpan_UniId() => new byte[1 + 5] { 165, 85, 110, 105, 73, 100 };
 
-        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::Geek.Server.Proto.Place value, global::MessagePack.MessagePackSerializerOptions options)
+        public void Serialize(ref global::MessagePack.MessagePackWriter writer, global::ClientProto.NetConnectMessage value, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (value is null)
             {
@@ -31,14 +29,12 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                 return;
             }
 
-            writer.WriteMapHeader(2);
-            writer.WriteRaw(GetSpan_X());
-            writer.Write(value.X);
-            writer.WriteRaw(GetSpan_Y());
-            writer.Write(value.Y);
+            writer.WriteMapHeader(1);
+            writer.WriteRaw(GetSpan_UniId());
+            writer.Write(value.UniId);
         }
 
-        public global::Geek.Server.Proto.Place Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
+        public global::ClientProto.NetConnectMessage Deserialize(ref global::MessagePack.MessagePackReader reader, global::MessagePack.MessagePackSerializerOptions options)
         {
             if (reader.TryReadNil())
             {
@@ -47,7 +43,7 @@ namespace MessagePack.Formatters.Geek.Server.Proto
 
             options.Security.DepthStep(ref reader);
             var length = reader.ReadMapHeader();
-            var ____result = new global::Geek.Server.Proto.Place();
+            var ____result = new global::ClientProto.NetConnectMessage();
 
             for (int i = 0; i < length; i++)
             {
@@ -58,17 +54,11 @@ namespace MessagePack.Formatters.Geek.Server.Proto
                     FAIL:
                       reader.Skip();
                       continue;
-                    case 1:
-                        switch (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey))
-                        {
-                            default: goto FAIL;
-                            case 88UL:
-                                ____result.X = reader.ReadDouble();
-                                continue;
-                            case 89UL:
-                                ____result.Y = reader.ReadDouble();
-                                continue;
-                        }
+                    case 5:
+                        if (global::MessagePack.Internal.AutomataKeyGen.GetKey(ref stringKey) != 430728375893UL) { goto FAIL; }
+
+                        ____result.UniId = reader.ReadInt32();
+                        continue;
 
                 }
             }

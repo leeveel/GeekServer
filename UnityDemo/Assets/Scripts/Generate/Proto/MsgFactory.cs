@@ -18,6 +18,8 @@ namespace Geek.Server.Proto
 			    { 1686846581, typeof(Geek.Server.Proto.ReqUseItem) },
 			    { -1395845865, typeof(Geek.Server.Proto.ReqSellItem) },
 			    { 901279609, typeof(Geek.Server.Proto.ResItemChange) },
+			    { 667869091, typeof(ClientProto.NetConnectMessage) },
+			    { 1245418514, typeof(ClientProto.NetDisConnectMessage) },
 			    { 299119425, typeof(Geek.Server.Proto.TestStruct) },
 			    { 1250601847, typeof(Geek.Server.Proto.A) },
 			    { -899515946, typeof(Geek.Server.Proto.B) },
@@ -28,8 +30,6 @@ namespace Geek.Server.Proto
 			    { 1575482382, typeof(Geek.Server.Proto.HearBeat) },
 			    { 1179199001, typeof(Geek.Server.Proto.ResErrorCode) },
 			    { 537499886, typeof(Geek.Server.Proto.ResPrompt) },
-			    { -1343898071, typeof(Geek.Server.Proto.Place) },
-			    { 696796597, typeof(Geek.Server.Proto.MoveMessage) },
             };
         }
 

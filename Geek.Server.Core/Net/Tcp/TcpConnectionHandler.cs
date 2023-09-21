@@ -1,5 +1,4 @@
 ﻿using Geek.Server.Core.Hotfix;
-using Geek.Server.Core.Net.BaseHandler;
 using MessagePack;
 using Microsoft.AspNetCore.Connections;
 
@@ -13,23 +12,19 @@ namespace Geek.Server.Core.Net.Tcp
 
         public override async Task OnConnectedAsync(ConnectionContext connection)
         {
-            OnConnection(connection);
-            INetChannel channel = null;
-            channel = new TcpChannel(connection, new DefaultMessageProtocol(), (msg) => _ = Dispatcher(channel, msg), () => OnDisconnection(channel));
+            LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链成功");
+            NetChannel channel = null;
+            channel = new TcpChannel(connection, (msg) => _ = Dispatcher(channel, msg));
             await channel.StartAsync();
-        }
-
-        protected virtual void OnConnection(ConnectionContext connection)
-        {
-            LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链接成功");
-        }
-
-        protected virtual void OnDisconnection(INetChannel channel)
-        {
             LOGGER.Debug($"{channel.RemoteAddress} 断开链接");
+            OnDisconnection(channel);
+        } 
+
+        protected virtual void OnDisconnection(NetChannel channel)
+        {
         }
 
-        protected async Task Dispatcher(INetChannel channel, Message msg)
+        protected async Task Dispatcher(NetChannel channel, Message msg)
         {
             if (msg == null)
                 return;

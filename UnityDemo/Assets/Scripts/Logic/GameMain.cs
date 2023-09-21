@@ -1,4 +1,5 @@
 ﻿using Base.Net;
+using ClientProto;
 using Geek.Client;
 using Geek.Client.Config;
 using Geek.Server;
@@ -27,19 +28,26 @@ namespace Logic
         async void Start()
         {
             Txt = GameObject.Find("Text").GetComponent<Text>();
-            //GameDataManager.ReloadAll();
-            GameClient.Singleton.Init(MsgFactory.GetType);
+
+            Application.logMessageReceived += (con, stackTrace, type) =>
+            {
+                GameMain.Singleton.AppendLog(con);
+            };
+
+            //GameDataManager.ReloadAll(); 
             DemoService.Singleton.RegisterEventListener();
-            await ConnectServer();
+            if (!await ConnectServer())
+            {
+                return;
+            }
             await Login();
             await ReqBagInfo();
             await ReqComposePet();
         }
 
-        private async Task ConnectServer()
+        private async Task<bool> ConnectServer()
         {
-            GameClient.Singleton.Connect(serverIp, serverPort);
-            await MsgWaiter.StartWait(GameClient.ConnectEvt);
+            return await GameClient.Singleton.Connect(serverIp, serverPort);
         }
 
         private Task Login()
@@ -76,7 +84,7 @@ namespace Logic
         private void OnApplicationQuit()
         {
             Debug.Log("OnApplicationQuit");
-            GameClient.Singleton.Close(false);
+            GameClient.Singleton.Close();
             MsgWaiter.DisposeAll();
         }
 

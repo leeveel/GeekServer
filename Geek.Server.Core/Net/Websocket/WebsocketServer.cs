@@ -46,11 +46,9 @@ namespace Geek.Server.Core.Net.Tcp
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
-                    using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
-                    {
-                        var clientAddress = $"{context.Connection?.RemoteIpAddress}:{context.Connection?.RemotePort}";
-                        await hander.OnConnectedAsync(webSocket, clientAddress);
-                    }
+                    using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                    var clientAddress = $"{context.Connection?.RemoteIpAddress}:{context.Connection?.RemotePort}";
+                    await hander.OnConnectedAsync(webSocket, clientAddress);
                 }
                 else
                 {

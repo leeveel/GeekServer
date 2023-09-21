@@ -4,5 +4,5 @@
   "useWebSocket": false,
   "webSocketServerUrl": "ws://127.0.0.1:6666/ws",
   "serverPort": 8899,
-  "clientCount": 1000
+  "clientCount": 2000
 }

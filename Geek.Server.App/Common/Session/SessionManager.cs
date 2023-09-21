@@ -4,6 +4,7 @@ using Geek.Server.Core.Actors;
 using Geek.Server.Core.Events;
 using Geek.Server.Core.Net.BaseHandler;
 using Geek.Server.Proto;
+using NLog;
 
 namespace Geek.Server.App.Common.Session
 {
@@ -20,7 +21,7 @@ namespace Geek.Server.App.Common.Session
         }
 
         public static void Remove(long id)
-        {
+        { 
             if (sessionMap.TryRemove(id, out var _) && ActorMgr.HasActor(id))
             {
                 EventDispatcher.Dispatch(id, (int)EventID.SessionRemove);
@@ -40,10 +41,10 @@ namespace Geek.Server.App.Common.Session
             return Task.CompletedTask;
         }
 
-        public static INetChannel GetChannel(long id)
+        public static Session Get(long id)
         {
             sessionMap.TryGetValue(id, out Session session);
-            return session?.Channel;
+            return session;
         }
 
         public static void Add(Session session)
@@ -61,7 +62,7 @@ namespace Geek.Server.App.Common.Session
                 }
                 // 新连接 or 顶号
                 oldSession.Channel.RemoveData(SESSIONID);
-                oldSession.Channel.Close(false);
+                oldSession.Channel.Close();
             }
             session.Channel.SetData(SESSIONID, session.Id);
             sessionMap[session.Id] = session;

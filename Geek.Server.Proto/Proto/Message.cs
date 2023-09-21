@@ -1,5 +1,6 @@
 ﻿using MessagePack;
 
+//外部message定义，不要修改此类 
 [MessagePackObject(true)]
 public class Message
 {

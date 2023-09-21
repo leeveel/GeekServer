@@ -1,56 +1,30 @@
 ﻿
-using Base;
-using Bedrock.Framework;
-using Bedrock.Framework.Protocols;
+using ClientProto;
 using Geek.Client;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO.Pipelines;
-using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using System.Threading.Tasks;
 using Debug = UnityEngine.Debug;
 
 namespace Base.Net
 {
-    public enum NetCode
-    {
-        Unknown = 0,
-        Success,
-        Fail,
-        Closed,
-    }
-
     public class GameClient
     {
-        private const float DISPATCH_MAX_TIME = 0.06f;  //每一帧最大的派发事件时间，超过这个时间则停止派发，等到下一帧再派发
-        public const int ConnectEvt = 101; //连接成功
-        public const int DisconnectEvt = 102; //连接断开
+        private const float DISPATCH_MAX_TIME = 0.06f;  //每一帧最大的派发事件时间，超过这个时间则停止派发，等到下一帧再派发 
         public static GameClient Singleton = new GameClient();
         private NetChannel channel { get; set; }
-        ConcurrentQueue<NetMessage> msgQueue = new ConcurrentQueue<NetMessage>();
+        ConcurrentQueue<Message> msgQueue = new ConcurrentQueue<Message>();
         public int Port { private set; get; }
         public string Host { private set; get; }
-        IProtocal<Message> protocol;
-
-        public void Init(Func<int, Type> getMsgTypeFunc)
-        {
-            protocol = new ClientProtocol(getMsgTypeFunc);
-        }
-
-        public void Init(IProtocal<Message> protocol)
-        {
-            this.protocol = protocol;
-        }
 
         public void Send(Message msg)
         {
             channel?.Write(msg);
         }
 
-        public async void Connect(string host, int port, int timeOut = 5000)
+        public async Task<bool> Connect(string host, int port, int timeOut = 5000)
         {
             Host = host;
             Port = port;
@@ -60,62 +34,60 @@ namespace Base.Net
                 var ipType = AddressFamily.InterNetwork;
                 (ipType, host) = NetUtils.GetIPv6Address(host, port);
 
-                var context = await new SocketConnection(ipType, host, port).StartAsync(timeOut);
-
-                if (context != null)
+                var socket = new TcpClient(ipType);
+                try
                 {
-                    Debug.Log($"Connected to {context.LocalEndPoint}");
-                    OnConnected(NetCode.Success);
-                    channel = new NetChannel(context, protocol, OnRevice, OnDisConnected);
-                    _ = channel.StartReadMsgAsync();
+                    await socket.ConnectAsync(host, port);
                 }
-                else
+                catch (Exception e)
                 {
-                    OnConnected(NetCode.Fail);
+                    Debug.LogError(e);
+                    return false;
                 }
 
+                if (!socket.Connected)
+                {
+                    return false;
+                }
+
+                Debug.Log($"connected success....");
+                OnConnected();
+                channel = new NetChannel(socket, OnRevice, OnDisConnected);
+                _ = channel.StartAsync();
+                return true;
             }
             catch (Exception e)
             {
                 Debug.LogError(e.ToString());
-                OnConnected(NetCode.Fail);
+                return false;
             }
         }
 
-
-        private void OnConnected(NetCode code)
+        private void OnConnected()
         {
-            var rMsg = new NetMessage();
-            rMsg.MsgId = ConnectEvt;
-            rMsg.Msg = code;
-            msgQueue.Enqueue(rMsg);
         }
 
         public void OnDisConnected()
         {
-            var rMsg = new NetMessage();
-            rMsg.MsgId = DisconnectEvt;
-            rMsg.Msg = NetCode.Closed;
-            msgQueue.Enqueue(rMsg);
+            msgQueue.Enqueue(new NetDisConnectMessage());
         }
 
         public void OnRevice(Message msg)
         {
-            msgQueue.Enqueue(new NetMessage(msg));
+            msgQueue.Enqueue(msg);
         }
 
-        public void Close(bool triggerCloseEvt)
+        public void Close()
         {
-            channel?.Abort(triggerCloseEvt);
+            channel?.Close();
             channel = null;
             ClearAllMsg();
         }
 
         public void ClearAllMsg()
         {
-            msgQueue = new ConcurrentQueue<NetMessage>();
+            msgQueue = new ConcurrentQueue<Message>();
         }
-
 
         public void Update(EventDispatcher evt, float maxTime = DISPATCH_MAX_TIME)
         {
@@ -132,15 +104,14 @@ namespace Base.Net
                 if (msg == null)
                     return;
 
-#if UNITY_EDITOR
-                var innerMsg = ((NetMessage)msg).Msg;
-                var msgName = innerMsg != null ? innerMsg.GetType().FullName : "";
+#if UNITY_EDITOR 
+                var msgName = msg != null ? msg.GetType().FullName : "";
                 Debug.Log($"开始处理网络事件 {msg.MsgId}  {msgName}");
 #endif
 
                 try
                 {
-                    evt.dispatchEvent(msg.MsgId, msg.Msg);
+                    evt.dispatchEvent(msg.MsgId, msg);
                 }
                 catch (Exception e)
                 {

@@ -1,5 +1,4 @@
 ﻿using Geek.Server.Core.Hotfix;
-using Geek.Server.Core.Net.BaseHandler;
 using Geek.Server.Core.Net.Tcp;
 using System.Net.WebSockets;
 
@@ -8,20 +7,21 @@ namespace Geek.Server.Core.Net.Websocket
     public class WebSocketConnectionHandler
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
-        public virtual Task OnConnectedAsync(WebSocket socket, string clientAddress)
+        public virtual async Task OnConnectedAsync(WebSocket socket, string clientAddress)
         {
             LOGGER.Info($"new websocket {clientAddress} connect...");
             WebSocketChannel channel = null;
-            channel = new WebSocketChannel(socket, clientAddress, new DefaultMessageProtocol(), (msg) => _ = Dispatcher(channel, msg), () => OnDisconnection(channel));
-            return channel.StartAsync();
+            channel = new WebSocketChannel(socket, clientAddress , (msg) => _ = Dispatcher(channel, msg));
+            await channel.StartAsync();
+            OnDisconnection(channel);
         }
 
-        protected virtual void OnDisconnection(INetChannel channel)
+        public virtual void OnDisconnection(NetChannel channel)
         {
             LOGGER.Debug($"{channel.RemoteAddress} 断开链接");
         }
 
-        protected async Task Dispatcher(INetChannel channel, Message msg)
+        protected async Task Dispatcher(NetChannel channel, Message msg)
         {
             if (msg == null)
                 return;

@@ -1,10 +1,9 @@
-
-using Bedrock.Framework;
-using Newtonsoft.Json;
-using System.Net.Sockets;
-using Geek.Server.Core.Net.BaseHandler;
+using Geek.Server.Core.Net;
 using Geek.Server.Core.Net.Tcp;
 using Geek.Server.Core.Net.Websocket;
+using Microsoft.AspNetCore.DataProtection;
+using Newtonsoft.Json;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 
 namespace Geek.Server.TestPressure.Logic
@@ -25,7 +24,7 @@ namespace Geek.Server.TestPressure.Logic
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         long id;
-        INetChannel netChannel;
+        NetChannel netChannel;
         MsgWaiter msgWaiter = new();
         int msgUniId = 200;
 
@@ -44,7 +43,7 @@ namespace Geek.Server.TestPressure.Logic
                 if (ws.State == WebSocketState.Open)
                 {
                     Log.Info($"Connected to {TestSettings.Ins.webSocketServerUrl}");
-                    netChannel = new WebSocketChannel(ws, TestSettings.Ins.webSocketServerUrl, new ClientLengthPrefixedProtocol(), OnRevice, OnDisConnected);
+                    netChannel = new WebSocketChannel(ws, TestSettings.Ins.webSocketServerUrl, OnRevice);
                     _ = netChannel.StartAsync();
                 }
                 else
@@ -55,18 +54,19 @@ namespace Geek.Server.TestPressure.Logic
             }
             else
             {
-                var context = await new SocketConnection(AddressFamily.InterNetwork, TestSettings.Ins.serverIp, TestSettings.Ins.serverPort).StartAsync(5000);
-                if (context != null)
+                var socket = new TcpClient(AddressFamily.InterNetwork);
+                try
                 {
-                    Log.Info($"Connected to {context.LocalEndPoint}");
-                    netChannel = new TcpChannel(context, new ClientLengthPrefixedProtocol(), OnRevice, OnDisConnected);
-                    _ = netChannel.StartAsync();
+                    await socket.ConnectAsync(TestSettings.Ins.serverIp, TestSettings.Ins.serverPort);
                 }
-                else
+                catch (Exception e)
                 {
-                    Log.Error($"连接服务器失败...");
+                    Log.Error(e);
                     return;
                 }
+
+                netChannel = new ClientTcpChannel(socket, OnRevice);
+                _ = netChannel.StartAsync();
             }
 
 
@@ -115,10 +115,6 @@ namespace Geek.Server.TestPressure.Logic
             return await msgWaiter.StartWait(msg.UniId);
         }
 
-        public void OnDisConnected()
-        {
-
-        }
 
 
         public void OnRevice(Message msg)
