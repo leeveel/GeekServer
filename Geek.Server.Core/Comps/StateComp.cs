@@ -7,6 +7,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using NLog;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Geek.Server.Core.Comps
 {
@@ -89,29 +90,44 @@ namespace Geek.Server.Core.Comps
         {
             var idList = new List<long>();
             var writeList = new List<LiteDBDocument>();
-            var tasks = new List<Task>();
 
             var db = GameDB.As<EmbeddedDBConnection>().CurDataBase;
-            foreach (var state in stateDic.Values)
+            if (shutdown)
             {
-                var actor = ActorMgr.GetActor(state.Id);
-                if (actor != null)
+                foreach (var state in stateDic.Values)
                 {
-                    tasks.Add(actor.SendAsync(() =>
+                    if (state.IsChanged())
                     {
-                        if (!force && !state.IsChanged())
-                            return;
                         var bsonDoc = db.InnerDB.UnderlyingDatabase.Mapper.ToDocument(state);
-                        lock (writeList)
-                        {
-                            writeList.Add(bsonDoc);
-                            idList.Add(state.Id);
-                        }
-                    }));
+                        writeList.Add(bsonDoc);
+                        idList.Add(state.Id);
+                    }
                 }
             }
+            else
+            {
+                var tasks = new List<Task>();
+                foreach (var state in stateDic.Values)
+                {
+                    var actor = ActorMgr.GetActor(state.Id);
+                    if (actor != null)
+                    {
+                        tasks.Add(actor.SendAsync(() =>
+                        {
+                            if (!force && !state.IsChanged())
+                                return;
+                            var bsonDoc = db.InnerDB.UnderlyingDatabase.Mapper.ToDocument(state);
+                            lock (writeList)
+                            {
+                                writeList.Add(bsonDoc);
+                                idList.Add(state.Id);
+                            }
+                        }));
+                    }
+                }
+                await Task.WhenAll(tasks);
+            }
 
-            await Task.WhenAll(tasks);
 
             if (!writeList.IsNullOrEmpty())
             {
@@ -148,16 +164,12 @@ namespace Geek.Server.Core.Comps
         {
             var idList = new List<long>();
             var writeList = new List<ReplaceOneModel<MongoDBDocument>>();
-            var tasks = new List<Task>();
-            foreach (var state in stateDic.Values)
+            if (shutdown)
             {
-                var actor = ActorMgr.GetActor(state.Id);
-                if (actor != null)
+                foreach (var state in stateDic.Values)
                 {
-                    tasks.Add(actor.SendAsync(() =>
+                    if (state.IsChanged())
                     {
-                        if (!force && !state.IsChanged())
-                            return;
                         var bsonDoc = state.ToBsonDocument();
                         lock (writeList)
                         {
@@ -165,11 +177,36 @@ namespace Geek.Server.Core.Comps
                             writeList.Add(new ReplaceOneModel<MongoDBDocument>(filter, bsonDoc) { IsUpsert = true });
                             idList.Add(state.Id);
                         }
-                    }));
+                    }
                 }
             }
+            else
+            {
+                var tasks = new List<Task>();
 
-            await Task.WhenAll(tasks); 
+                foreach (var state in stateDic.Values)
+                {
+                    var actor = ActorMgr.GetActor(state.Id);
+                    if (actor != null)
+                    {
+                        tasks.Add(actor.SendAsync(() =>
+                        {
+                            if (!force && !state.IsChanged())
+                                return;
+                            var bsonDoc = state.ToBsonDocument();
+                            lock (writeList)
+                            {
+                                var filter = Builders<MongoDBDocument>.Filter.Eq("_id", state.Id);
+                                writeList.Add(new ReplaceOneModel<MongoDBDocument>(filter, bsonDoc) { IsUpsert = true });
+                                idList.Add(state.Id);
+                            }
+                        }));
+                    }
+                }
+
+                await Task.WhenAll(tasks);
+            }
+
 
             if (!writeList.IsNullOrEmpty())
             {
