@@ -25,21 +25,22 @@ namespace Geek.Server.Core.Net.Tcp
 
         public static Task Start(string url, WebSocketConnectionHandler hander)
         {
-            var builder = WebApplication.CreateBuilder(); 
+            var builder = WebApplication.CreateBuilder();
+
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
 
             builder.WebHost.UseUrls(url).UseNLog();
             app = builder.Build();
 
-            var opt = new WebSocketOptions()
+            app.UseWebSockets(new WebSocketOptions()
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
-                AllowedOrigins = {
-                "http://localhost",
-                "https://localhost"
-                }
-            };
+            });
 
-            app.UseWebSockets(); 
+            app.UseForwardedHeaders();
 
             app.Map("/ws", async context =>
             {
