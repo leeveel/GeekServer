@@ -67,6 +67,7 @@ namespace Geek.Client
 
         public static void EndWait(int uniId, bool result = true)
         {
+            UnityEngine.Debug.Log("结束等待消息:" + uniId);
             if (!result) UnityEngine.Debug.LogError("await失败：" + uniId);
             if (waitDic.ContainsKey(uniId))
             {

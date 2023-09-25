@@ -40,10 +40,8 @@ namespace Geek.Server.Core.Net.Tcp
                     var buffer = result.Buffer;
                     if (buffer.Length > 0)
                     {
-                        SequencePosition examined = buffer.Start;
-                        SequencePosition consumed = examined;
-                        TryParseMessage(buffer, ref consumed, ref examined);
-                        Reader.AdvanceTo(consumed, examined);
+                        while (TryParseMessage(ref buffer)) { }
+                        Reader.AdvanceTo(buffer.Start, buffer.End);
                     }
                     else if (result.IsCanceled || result.IsCompleted)
                     {
@@ -61,15 +59,14 @@ namespace Geek.Server.Core.Net.Tcp
             }
         }
 
-        protected virtual void TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined)
+        protected virtual bool TryParseMessage(ref ReadOnlySequence<byte> input)
         {
             var bufEnd = input.End;
             var reader = new SequenceReader<byte>(input);
 
             if (!reader.TryReadBigEndian(out int msgLen))
-            {
-                consumed = bufEnd; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据
-                return;
+            { 
+                return false;
             }
 
             if (!CheckMsgLen(msgLen))
@@ -79,8 +76,7 @@ namespace Geek.Server.Core.Net.Tcp
 
             if (reader.Remaining < msgLen - 4)
             {
-                consumed = bufEnd;
-                return;
+                return false;
             }
 
             var payload = input.Slice(reader.Position, msgLen - 4);
@@ -98,10 +94,7 @@ namespace Geek.Server.Core.Net.Tcp
                 throw new Exception("消息order错乱");
             }
 
-            reader.TryReadBigEndian(out int msgId);
-
-            consumed = payload.End;
-            examined = consumed;
+            reader.TryReadBigEndian(out int msgId); 
 
             var msgType = HotfixMgr.GetMsgType(msgId);
             if (msgType == null)
@@ -117,6 +110,8 @@ namespace Geek.Server.Core.Net.Tcp
                 }
                 onMessage(message);
             }
+            input = input.Slice(input.GetPosition(msgLen));
+            return true;
         }
 
         public bool CheckMagicNumber(int order, int msgLen)
@@ -174,6 +169,7 @@ namespace Geek.Server.Core.Net.Tcp
 
         public override void Write(Message msg)
         {
+            LOGGER.Info("写消息："+msg.UniId);
             if (IsClose())
                 return;
             var bytes = Serializer.Serialize(msg);

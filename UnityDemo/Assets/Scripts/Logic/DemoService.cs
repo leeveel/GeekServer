@@ -48,6 +48,7 @@ namespace Logic
         {
             msg.UniId = UniId++;
             GameClient.Singleton.Send(msg);
+            UnityEngine.Debug.Log("开始等待消息:" + msg.UniId);
             return MsgWaiter.StartWait(msg.UniId);
         }
 

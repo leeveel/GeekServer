@@ -46,10 +46,8 @@ public class NetChannel
                 var buffer = result.Buffer;
                 if (buffer.Length > 0)
                 {
-                    SequencePosition examined = buffer.Start;
-                    SequencePosition consumed = examined;
-                    TryParseMessage(buffer, ref consumed, ref examined);
-                    recvPipe.Reader.AdvanceTo(consumed, examined);
+                    while (TryParseMessage(ref buffer)) ;
+                    recvPipe.Reader.AdvanceTo(buffer.Start, buffer.End);
                 }
                 else if (result.IsCanceled || result.IsCompleted)
                 {
@@ -94,23 +92,18 @@ public class NetChannel
         }
     }
 
-    protected virtual void TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined)
+    protected virtual bool TryParseMessage(ref ReadOnlySequence<byte> input)
     {
         var reader = new SequenceReader<byte>(input);
 
         if (!reader.TryReadBigEndian(out int length) || reader.Remaining < length - 4)
         {
-            consumed = input.End; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据
-            return;
+            return false;
         }
 
         var payload = input.Slice(reader.Position, length - 4);
         if (payload.Length < 4)
             throw new Exception("消息长度不够");
-
-        consumed = payload.End;
-        examined = consumed;
-
         //消息id
         reader.TryReadBigEndian(out int msgId);
 
@@ -121,7 +114,8 @@ public class NetChannel
             throw new Exception($"解析消息错误，注册消息id和消息无法对应.real:{message.MsgId}, register:{msgId}");
         }
         onMessage(message);
-        return;
+        input = input.Slice(input.GetPosition(length));
+        return true;
     }
 
     private const int Magic = 0x1234;
@@ -130,6 +124,8 @@ public class NetChannel
     {
         if (IsClose())
             return;
+
+        Debug.Log("发送消息:" + MessagePackSerializer.SerializeToJson(msg));
         var bytes = MessagePackSerializer.Serialize(msg);
         int len = 4 + 8 + 4 + 4 + bytes.Length;
         var buffer = ArrayPool<byte>.Shared.Rent(len);
