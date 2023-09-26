@@ -16,6 +16,9 @@ namespace Geek.Server.Gateway.Outer
         protected PipeReader Reader { get; set; }
         protected PipeWriter Writer { get; set; }
 
+        private readonly SemaphoreSlim sendSemaphore = new(0);
+        private readonly MemoryStream sendStream = new();
+
         protected string remoteAddress;
         protected ReceiveFunc onRecvPack;
         protected CancellationTokenSource cancelSrc;
@@ -33,6 +36,7 @@ namespace Geek.Server.Gateway.Outer
 
         public async Task StartAsync()
         {
+            _ = TrySendAsync();
             while (!cancelSrc.IsCancellationRequested)
             {
                 try
@@ -41,11 +45,15 @@ namespace Geek.Server.Gateway.Outer
                     var buffer = result.Buffer;
                     if (buffer.Length > 0)
                     {
-                        //LOGGER.Info($"读取tcp,len:{buffer.Length}");
-                        SequencePosition examined = buffer.Start;
-                        SequencePosition consumed = examined;
-                        TryParseMessage(buffer, ref consumed, ref examined);
-                        Reader.AdvanceTo(consumed, examined);
+                        int count = 0;
+                        while (TryParseMessage(ref buffer))
+                        {
+                            if (++count > 100)
+                            {
+                                await Task.Delay(5);
+                            }
+                        }
+                        Reader.AdvanceTo(buffer.Start, buffer.End);
                     }
                     else if (result.IsCanceled || result.IsCompleted)
                     {
@@ -60,14 +68,42 @@ namespace Geek.Server.Gateway.Outer
             Close();
         }
 
-        void TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined)
+        async Task TrySendAsync()
+        {
+            //pipewriter线程不安全，这里统一发送写刷新数据
+            try
+            {
+                var token = cancelSrc.Token;
+                while (!token.IsCancellationRequested)
+                {
+                    await sendSemaphore.WaitAsync();
+                    lock (sendStream)
+                    {
+                        var len = sendStream.Length;
+                        if (len > 0)
+                        {
+                            Writer.Write(sendStream.GetBuffer().AsSpan<byte>()[..(int)len]);
+                            sendStream.SetLength(0);
+                            sendStream.Position = 0;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    await Writer.FlushAsync(token);
+                }
+            }
+            catch { };
+        }
+
+        bool TryParseMessage(ref ReadOnlySequence<byte> input)
         {
             var reader = new SequenceReader<byte>(input);
 
             if (!reader.TryReadBigEndian(out int msgLen))
             {
-                examined = input.End; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据
-                return;
+                return false;
             }
 
             if (msgLen < 13)//(消息长度已经被读取)
@@ -81,27 +117,19 @@ namespace Geek.Server.Gateway.Outer
 
             if (reader.Remaining < msgLen)
             {
-                examined = input.End;
-                return;
+                return false;
             }
 
             reader.TryRead(out byte flag);
             reader.TryReadBigEndian(out long netId);
             reader.TryReadBigEndian(out int serverId);
-            var dataLen = msgLen - 13;
-            if (dataLen > 0)
-            {
-                var payload = input.Slice(reader.Position, dataLen);
-                Span<byte> data = stackalloc byte[dataLen];
-                payload.CopyTo(data);
-                consumed = examined = payload.End;
-                onRecvPack(this, new TempNetPackage(flag, netId, serverId, data));
-            }
-            else
-            {
-                consumed = examined = reader.Position;
-                onRecvPack(this, new TempNetPackage(flag, netId, serverId));
-            }
+            var dataLen = msgLen - 13; 
+            var payload = input.Slice(reader.Position, dataLen);
+            Span<byte> data = stackalloc byte[dataLen];
+            payload.CopyTo(data);
+            onRecvPack(this, new TempNetPackage(flag, netId, serverId, data));
+            input = input.Slice(msgLen + 4);
+            return true;
         }
 
         public override bool IsClose()
@@ -119,6 +147,7 @@ namespace Geek.Server.Gateway.Outer
                         return;
                     cancelSrc.Cancel();
                     Context?.Abort();
+                    sendStream.Close();
                 }
                 catch
                 {
@@ -136,13 +165,11 @@ namespace Geek.Server.Gateway.Outer
 
         public override void Write(TempNetPackage package)
         {
-            //LOGGER.Info($"tcp channel write:{package.ToString()}");
-            Span<byte> target = stackalloc byte[package.Length + 4];
-            int offset = 0;
-            target.Write(package.Length, ref offset);
-            target.Write(package, ref offset);
-            Writer.Write(target);
-            Writer.FlushAsync(cancelSrc.Token);
+            lock (sendStream)
+            {
+                sendStream.Write(package);
+            }
+            sendSemaphore.Release();
         }
     }
 }

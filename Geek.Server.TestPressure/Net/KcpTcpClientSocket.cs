@@ -113,7 +113,8 @@ namespace Geek.Server.TestPressure.Net
                     try
                     {
                         var result = await dataPipe.Reader.ReadAsync(cancelToken);
-                        if (TryParseNetPack(result.Buffer, (pack) =>
+                        var buf = result.Buffer;
+                        if (TryParseNetPack(ref buf, (pack) =>
                         {
                             NetId = pack.netId;
                             if (pack.flag == NetPackageFlag.ACK)
@@ -134,7 +135,14 @@ namespace Geek.Server.TestPressure.Net
                                 retResult.resetNetId = true;
                             }
                         }))
+                        {
+                            dataPipe.Reader.AdvanceTo(buf.Start, buf.End);
                             break;
+                        }
+                        else
+                        {
+                            dataPipe.Reader.AdvanceTo(buf.Start, buf.End);
+                        }
                     }
                     catch
                     {
@@ -182,15 +190,21 @@ namespace Geek.Server.TestPressure.Net
         async Task ReadPackAsync(ReceiveFunc onPack)
         {
             var readCancelToken = cancelSrc.Token;
+            var reader = dataPipe.Reader;
             while (!cancelSrc.IsCancellationRequested)
             {
                 try
                 {
-                    var result = await dataPipe.Reader.ReadAsync(readCancelToken);
-                    //Debug.Log($"read tcp len:{result.Buffer.Length}");
-                    if (result.Buffer.Length > 0)
+                    var result = await reader.ReadAsync(readCancelToken);
+                    //LOGGER.Info($"read tcp len:{result.Buffer.Length}");
+                    var buf = result.Buffer;
+                    if (buf.Length > 0)
                     {
-                        TryParseNetPack(result.Buffer, onPack);
+                        while (TryParseNetPack(ref buf, onPack))
+                        {
+
+                        }
+                        reader.AdvanceTo(buf.Start, buf.End);
                     }
                 }
                 catch
@@ -200,17 +214,13 @@ namespace Geek.Server.TestPressure.Net
             }
         }
 
-        bool TryParseNetPack(in ReadOnlySequence<byte> input, ReceiveFunc onPack)
+        bool TryParseNetPack(ref ReadOnlySequence<byte> input, ReceiveFunc onPack)
         {
-            SequencePosition examined = input.Start;
-            SequencePosition consumed = examined;
             var netReader = dataPipe.Reader;
             var reader = new SequenceReader<byte>(input);
 
             if (!reader.TryReadBigEndian(out int msgLen))
             {
-                examined = input.End; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据 
-                netReader.AdvanceTo(consumed, examined);
                 return false;
             }
 
@@ -225,8 +235,6 @@ namespace Geek.Server.TestPressure.Net
 
             if (reader.Remaining < msgLen)
             {
-                examined = input.End;
-                netReader.AdvanceTo(consumed, examined);
                 return false;
             }
 
@@ -234,20 +242,12 @@ namespace Geek.Server.TestPressure.Net
             reader.TryReadBigEndian(out long netId);
             reader.TryReadBigEndian(out int serverId);
             var dataLen = msgLen - TempNetPackage.headLen;
-            if (dataLen > 0)
-            {
-                var payload = input.Slice(reader.Position, dataLen);
-                Span<byte> data = stackalloc byte[dataLen];
-                payload.CopyTo(data);
-                consumed = examined = payload.End;
-                onPack(new TempNetPackage(flag, netId, serverId, data));
-            }
-            else
-            {
-                consumed = examined = reader.Position;
-                onPack(new TempNetPackage(flag, netId, serverId));
-            }
-            netReader.AdvanceTo(consumed, examined);
+
+            var payload = input.Slice(reader.Position, dataLen);
+            Span<byte> data = stackalloc byte[dataLen];
+            payload.CopyTo(data);
+            onPack(new TempNetPackage(flag, netId, serverId, data));
+            input = input.Slice(msgLen + 4);
             return true;
         }
 

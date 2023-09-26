@@ -48,14 +48,13 @@ namespace Geek.Server.Core.Net.Kcp
         }
 
 
-        bool TryParseMessage(in ReadOnlySequence<byte> input, ref SequencePosition consumed, ref SequencePosition examined, out Message message)
+        bool TryParseMessage(ref ReadOnlySequence<byte> input, out Message message)
         {
             message = default;
             var reader = new SequenceReader<byte>(input);
 
             if (!reader.TryReadBigEndian(out int msgLen))
             {
-                examined = input.End; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据
                 return false;
             }
 
@@ -68,20 +67,15 @@ namespace Geek.Server.Core.Net.Kcp
                 throw new Exception("从客户端接收的包大小超过限制：" + msgLen + "字节，最大值：" + MAX_RECV_SIZE / 1024 + "字节");
             }
 
-            //验证token...
-
             if (reader.Remaining < msgLen - 4)
             {
-                examined = input.End;
                 return false;
             }
 
-            reader.TryReadBigEndian(out int msgId);  //4  
-
+            reader.TryReadBigEndian(out int msgId);  //4   
             var payload = input.Slice(reader.Position, msgLen - 8);
             message = MessagePackSerializer.Deserialize<Message>(payload);
-
-            consumed = examined = payload.End;
+            input = input.Slice(msgLen);
             return true;
         }
 
@@ -99,18 +93,18 @@ namespace Geek.Server.Core.Net.Kcp
 
                     if (buffer.Length > 0)
                     {
-                        SequencePosition examined = buffer.Start;
-                        SequencePosition consumed = examined;
-                        TryParseMessage(buffer, ref consumed, ref examined, out var msg);
-                        reader.AdvanceTo(consumed, examined);
-                        if (msg != null)
+                        while (TryParseMessage(ref buffer, out var msg))
                         {
+                            if (msg != null)
+                            {
 #if DEBUG
-                            LOGGER.Info($"收到消息:{msg.GetType().Name}:{MessagePackSerializer.SerializeToJson(msg)}");
+                                LOGGER.Info($"收到消息:{msg.GetType().Name}:{MessagePackSerializer.SerializeToJson(msg)}");
 #endif
-                            if (onMessageAct != null)
-                                await onMessageAct(this, msg);
+                                if (onMessageAct != null)
+                                    await onMessageAct(this, msg);
+                            }
                         }
+                        reader.AdvanceTo(buffer.Start, buffer.End);
                     }
                     else if (result.IsCanceled || result.IsCompleted)
                     {

@@ -75,7 +75,8 @@ public class KcpTcpClientSocket : AKcpSocket
                 try
                 {
                     var result = await dataPipe.Reader.ReadAsync(cancelToken);
-                    if (TryParseNetPack(result.Buffer, (pack) =>
+                    var buf = result.Buffer;
+                    if (TryParseNetPack(ref buf, (pack) =>
                     {
                         NetId = pack.netId;
                         try
@@ -103,7 +104,14 @@ public class KcpTcpClientSocket : AKcpSocket
                             retResult.resetNetId = true;
                         }
                     }))
+                    {
+                        dataPipe.Reader.AdvanceTo(buf.Start, buf.End);
                         break;
+                    }
+                    else
+                    {
+                        dataPipe.Reader.AdvanceTo(buf.Start, buf.End);
+                    }
                 }
                 catch
                 {
@@ -155,11 +163,12 @@ public class KcpTcpClientSocket : AKcpSocket
             try
             {
                 var result = await dataPipe.Reader.ReadAsync(readCancelToken);
-                //Debug.Log($"read tcp len:{result.Buffer.Length}");
-                if (result.Buffer.Length > 0)
+                var buf = result.Buffer;
+                while (!cancelSrc.IsCancellationRequested && TryParseNetPack(ref buf, onPack))
                 {
-                    TryParseNetPack(result.Buffer, onPack);
+
                 }
+                dataPipe.Reader.AdvanceTo(buf.Start, buf.End);
             }
             catch
             {
@@ -169,17 +178,13 @@ public class KcpTcpClientSocket : AKcpSocket
         Debug.Log($"ReadPackAsync exit.....");
     }
 
-    bool TryParseNetPack(in ReadOnlySequence<byte> input, ReceiveFunc onPack)
+    bool TryParseNetPack(ref ReadOnlySequence<byte> input, ReceiveFunc onPack)
     {
-        SequencePosition examined = input.Start;
-        SequencePosition consumed = examined;
         var netReader = dataPipe.Reader;
         var reader = new MessagePack.SequenceReader<byte>(input);
 
         if (!reader.TryReadBigEndian(out int msgLen))
         {
-            examined = input.End; //告诉read task，到这里为止还不满足一个消息的长度，继续等待更多数据 
-            netReader.AdvanceTo(consumed, examined);
             return false;
         }
 
@@ -194,8 +199,6 @@ public class KcpTcpClientSocket : AKcpSocket
 
         if (reader.Remaining < msgLen)
         {
-            examined = input.End;
-            netReader.AdvanceTo(consumed, examined);
             return false;
         }
 
@@ -203,20 +206,13 @@ public class KcpTcpClientSocket : AKcpSocket
         reader.TryReadBigEndian(out long netId);
         reader.TryReadBigEndian(out int serverId);
         var dataLen = msgLen - TempNetPackage.headLen;
-        if (dataLen > 0)
-        {
-            var payload = input.Slice(reader.Position, dataLen);
-            Span<byte> data = stackalloc byte[dataLen];
-            payload.CopyTo(data);
-            consumed = examined = payload.End;
-            onPack(new TempNetPackage(flag, netId, serverId, data));
-        }
-        else
-        {
-            consumed = examined = reader.Position;
-            onPack(new TempNetPackage(flag, netId, serverId));
-        }
-        netReader.AdvanceTo(consumed, examined);
+
+        var payload = input.Slice(reader.Position, dataLen);
+        Span<byte> data = stackalloc byte[dataLen];
+        payload.CopyTo(data);
+        onPack(new TempNetPackage(flag, netId, serverId, data));
+
+        input = input.Slice(input.GetPosition(msgLen + 4));
         return true;
     }
 

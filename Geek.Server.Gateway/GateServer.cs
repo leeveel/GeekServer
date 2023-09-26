@@ -27,7 +27,7 @@ namespace Geek.Server.Gateway
                  
                 try
                 {
-                    if (!CheckLoad(connection))
+                    if (!await CheckLoad(connection))
                     {
                         await Task.Delay(2000);
                         return;
@@ -56,7 +56,7 @@ namespace Geek.Server.Gateway
                 }
             }
 
-            private bool CheckLoad(ConnectionContext context)
+            private async Task<bool> CheckLoad(ConnectionContext context)
             {
                 if (Instance.CurActiveChannelCount < Settings.InsAs<GateSettings>().MaxClientCount)
                 {
@@ -78,6 +78,7 @@ namespace Geek.Server.Gateway
                 {
                     writer.WritePipe(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, 0, 0));
                 }
+                await writer.FlushAsync();
                 return false;
             }
 

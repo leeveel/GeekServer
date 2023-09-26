@@ -202,7 +202,17 @@ namespace Geek.Server.Core.Utils
             target.Write(package.Length, ref offset);
             target.Write(package, ref offset);
             writer.Write(target);
-            _ = writer.FlushAsync(token);
+            //_ = writer.FlushAsync(token); 
+        }
+
+        public static void Write(this MemoryStream stream, TempNetPackage package)
+        {
+            Span<byte> target = stackalloc byte[package.Length + 4];
+            int offset = 0;
+            target.Write(package.Length, ref offset);
+            target.Write(package, ref offset);
+            stream.Write(target);
+            //_ = writer.FlushAsync(token); 
         }
         #endregion
     }
