@@ -1,6 +1,11 @@
 ﻿using Geek.Server.Core.Serialize;
+using MessagePack;
+using PolymorphicMessagePack;
 using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.IO;
 using System.Net.WebSockets;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Geek.Server.Core.Net.Websocket
 {
@@ -53,6 +58,7 @@ namespace Geek.Server.Core.Net.Websocket
 
         async Task DoSend()
         {
+            var array = new object[2];
             while (!IsClose())
             {
                 await newSendMsgSemaphore.WaitAsync();
@@ -61,8 +67,40 @@ namespace Geek.Server.Core.Net.Websocket
                 {
                     continue;
                 }
-                await webSocket.SendAsync(Serializer.Serialize(message), WebSocketMessageType.Binary, true, closeSrc.Token);
+                array[0] = message.MsgId;
+                array[1] = message;
+                //这里为了应对前端是js等不方便处理多态的情况 
+                var data = MessagePackSerializer.Serialize(array, MessagePackSerializerOptions.Standard);
+#if DEBUG
+                LOGGER.Info("发送消息:" + MessagePackSerializer.ConvertToJson(data));
+#endif
+                await webSocket.SendAsync(data, WebSocketMessageType.Binary, true, closeSrc.Token);
             }
+        }
+
+        Message DeserializeMsg(MemoryStream stream)
+        {
+            var data = stream.GetBuffer();
+            var reader = new MessagePackReader(new ReadOnlyMemory<byte>(data, 0, (int)stream.Length));
+            Type type = null;
+            if (reader.NextMessagePackType == MessagePackType.Array)
+            {
+                var count = reader.ReadArrayHeader();
+                if (count != 2)
+                    throw new MessagePackSerializationException("Invalid polymorphic array count");
+                if (reader.NextMessagePackType == MessagePackType.Integer)
+                {
+                    var typeId = reader.ReadInt32();
+                    if (!PolymorphicTypeMapper.TryGet(typeId, out type))
+                        throw new MessagePackSerializationException($"Cannot find Type Id: {typeId} registered in {nameof(PolymorphicTypeMapper)}");
+                }
+            }
+            else
+            {
+                throw new MessagePackSerializationException("不是正确的序列化格式...");
+            }
+
+            return MessagePackSerializer.Deserialize(type, ref reader, MessagePackSerializerOptions.Standard) as Message;
         }
 
         async Task DoRevice()
@@ -87,7 +125,12 @@ namespace Geek.Server.Core.Net.Websocket
                     break;
 
                 stream.Seek(0, SeekOrigin.Begin);
-                var message = Serializer.Deserialize<Message>(stream);
+                //这里默认用多态类型的反序列方式，里面做了兼容处理 
+                var message = DeserializeMsg(stream);// Serializer.Deserialize<Message>(stream);
+
+#if DEBUG
+                LOGGER.Info("收到消息:" +message.GetType().Name+"  " + MessagePackSerializer.SerializeToJson(message));
+#endif
                 onMessage(message);
             }
             stream.Close();

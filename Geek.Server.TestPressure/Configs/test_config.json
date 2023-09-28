@@ -1,8 +1,8 @@
 {
   "serverId": 1001, //[1000,9999]
   "serverIp": "127.0.0.1",
-  "useWebSocket": false,
-  "webSocketServerUrl": "ws://127.0.0.1:6666/ws",
+  "useWebSocket": true,
+  "webSocketServerUrl": "ws://127.0.0.1:443/ws",
   "serverPort": 8899,
-  "clientCount": 2000
+  "clientCount": 3000
 }

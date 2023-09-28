@@ -2,6 +2,7 @@
   "ProjectPath": "../../Geek.Server.Proto",
   "ServerOutPath": "../../Geek.Server.Generate/Proto",
   "ClientOutPath": "../../UnityDemo/Assets/Scripts/Generate/Proto",
+  "TSOutPath": "../../CocosCreatorDemo/assets/scripts/proto/gen",
   "BaseMessageName": "Message",
   "NoExportList": ["Message"],
   "GeneratedFirst": false

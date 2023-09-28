@@ -1,0 +1,10 @@
+
+export {{typename}} {{name}} {{supercode}} {
+  {{~ if ismsg~}} 
+    MsgID(){return {{sid}} }; 
+    UniId: number= 0;
+  {{~ end ~}}
+  {{~ for field in fields ~}} 
+    {{field.propcode}}
+  {{~ end ~}}
+}

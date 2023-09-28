@@ -1,0 +1,11 @@
+
+export {{typename}} {{name}} {{supercode}} {
+  {{~ if ismsg~}} 
+    MsgID = {{sid}}; 
+    UniId: number= 0;
+  {{~ end ~}}
+  {{~ for field in fields ~}} 
+    // @ts-ignore
+    {{field.propcode}}
+  {{~ end ~}}
+}
