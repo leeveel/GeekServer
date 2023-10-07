@@ -60,7 +60,7 @@
     "_globals": {
       "__id__": 17
     },
-    "_id": "5db89821-2d67-4ff8-a722-d7e5cac91db5"
+    "_id": "0cdeaabf-c26f-4490-aa60-8d3e935f6fcf"
   },
   {
     "__type__": "cc.Node",
@@ -366,7 +366,7 @@
     "_priority": 1073741824,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 431.5657620041754,
+    "_orthoHeight": 458.93089960886573,
     "_near": 1,
     "_far": 2000,
     "_color": {
@@ -462,7 +462,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 1220,
-      "height": 600
+      "height": 90.39999999999999
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -497,7 +497,7 @@
     "_id": "06aT6/Zr5JJ4MhIALSEe4g"
   },
   {
-    "__type__": "59e3bavO+BPh4OERLdV0Xo0",
+    "__type__": "c2440wjn2ZBmI/oXDCyh5HF",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -506,7 +506,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "_id": "e0pqTxEapOOL7dq/Or2uuM"
+    "_id": "33KfSeTmlGeoCsqMVOoSRL"
   },
   {
     "__type__": "cc.UITransform",
