@@ -7,7 +7,7 @@ using Geek.Server.Proto;
 using NLog;
 using NLog.Config;
 using NLog.LayoutRenderers;
-using PolymorphicMessagePack; 
+using PolymorphicMessagePack;
 
 namespace Geek.Server.App.Common
 {
@@ -57,7 +57,7 @@ namespace Geek.Server.App.Common
             {
                 Settings.Load<AppSetting>("Configs/app_config.json", ServerType.Game);
                 Console.WriteLine("init NLog config...");
-                LayoutRenderer.Register<NLogConfigurationLayoutRender>("logConfiguration");
+                LogManager.Setup().SetupExtensions(s => s.RegisterConditionMethod("logState", (e) => Settings.IsDebug ? "debug" : "release"));
                 LogManager.Configuration = new XmlLoggingConfiguration("Configs/app_log.config");
                 LogManager.AutoShutdown = false;
 

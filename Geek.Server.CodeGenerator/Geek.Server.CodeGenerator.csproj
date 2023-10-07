@@ -1,41 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
 
-	<PropertyGroup>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-	</PropertyGroup>
+  <PropertyGroup>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<OutputPath>..\bin\app_debug</OutputPath>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\bin\app_debug</OutputPath>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<OutputPath>..\bin\app</OutputPath>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <OutputPath>..\bin\app</OutputPath>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<None Remove="Template\State.liquid" />
-	</ItemGroup>
-
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.3">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Remove="Template\State.liquid" />
+  </ItemGroup>
 
 
-	<ItemGroup>
-		<PackageReference Include="Scriban" Version="5.4.4" GeneratePathProperty="true" PrivateAssets="all" />
-	</ItemGroup>
-	<ItemGroup>
-		<EmbeddedResource Include="$(PKGScriban)\lib\netstandard2.0\Scriban.dll" Visible="false" />
-		<EmbeddedResource Include="$(ProjectPath)\..\Template\Agent.liquid" Visible="true" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.7.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Scriban" Version="5.9.0" GeneratePathProperty="true" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="$(PKGScriban)\lib\netstandard2.0\Scriban.dll" Visible="false" />
+    <EmbeddedResource Include="$(ProjectPath)\..\Template\Agent.liquid" Visible="true" />
+  </ItemGroup>
 
 </Project>
