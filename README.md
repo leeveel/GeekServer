@@ -47,7 +47,7 @@ Actor 模型本身是存在死锁的情况，且不容易被发现。GeekServer 
 
 ### 11.高效的通信协议(基于 MessagePack)
 
-[Geek.MsgPackTool](https://github.com/leeveel/Geek.MsgPackTool) (注意:**需要安装.Net5.0**，MessagePack 的 MPC 工具对 5.0 有依赖)[MessagePack]对多态支持不够友好，GeekServer 提供了工具来生成多态注册信息，序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E5%85%B3%E4%BA%8E%E5%8D%8F%E8%AE%AE.md)
+[Geek.MsgPackTool](https://github.com/leeveel/Geek.MsgPackTool) [MessagePack]对多态支持不够友好，GeekServer 提供了工具来生成多态注册信息，序列化和反序列化效率极高，同时序列化之后的数据极小，数据传输效率很高。[了解更多](https://github.com/leeveel/GeekServer/blob/main/Docs/%E5%85%B3%E4%BA%8E%E5%8D%8F%E8%AE%AE.md)
 
 ### 12.一键导表工具(GeekConfig)
 
@@ -59,8 +59,8 @@ Actor 模型本身是存在死锁的情况，且不容易被发现。GeekServer 
 
 # 运行
 
-1. 安装[.NetCore6.0 或更新的 SDK](https://dotnet.microsoft.com/download/dotnet/6.0)，**协议工具需要安装.Net5.0**(MessagePack 代码生成工具依赖了此版本)
-2. 安装[mongodb4.x](https://www.mongodb.com/try/download/community)
+1. 安装[.Net 7.x](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+2. 安装[mongodb](https://www.mongodb.com/try/download/community)
 3. 打开 git clone 本项目https://github.com/leeveel/GeekServer.git
 4. 运行 Tools/ExcelGen/ExcelToCode.exe 点击[服务器-ALL]导出配置表
 5. 用 VisualStudio2022 打开 GeekServer.sln 启动 GeekServer.App
