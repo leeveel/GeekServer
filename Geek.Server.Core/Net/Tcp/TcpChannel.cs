@@ -168,8 +168,7 @@ namespace Geek.Server.Core.Net.Tcp
         }
 
         public override void Write(Message msg)
-        {
-            LOGGER.Info("写消息："+msg.UniId);
+        { 
             if (IsClose())
                 return;
             var bytes = Serializer.Serialize(msg);
