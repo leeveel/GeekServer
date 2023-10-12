@@ -57,6 +57,7 @@ namespace Geek.Server.TestPressure.Logic
                 var socket = new TcpClient(AddressFamily.InterNetwork);
                 try
                 {
+                    socket.NoDelay = true;
                     await socket.ConnectAsync(TestSettings.Ins.serverIp, TestSettings.Ins.serverPort);
                 }
                 catch (Exception e)
@@ -101,25 +102,21 @@ namespace Geek.Server.TestPressure.Logic
         {
             return SendMsgAndWaitBack(new ReqComposePet() { FragmentId = 1000 });
         }
-
-        void SendMsg(Message msg)
-        {
-            msg.UniId = msgUniId++;
-            Log.Info($"{id} 发送消息:{JsonConvert.SerializeObject(msg)}");
-            netChannel.Write(msg);
-        }
-
+         
         async Task<bool> SendMsgAndWaitBack(Message msg)
         {
-            SendMsg(msg);
-            return await msgWaiter.StartWait(msg.UniId);
+            msg.UniId = (int)id*10000 +  msgUniId++;
+            Log.Info($"{id} 发送消息:{JsonConvert.SerializeObject(msg)}");
+            var awaiter = msgWaiter.StartWait(msg.UniId,  msg.GetType().Name); 
+            netChannel.Write(msg);
+            return await awaiter;
         }
 
 
 
         public void OnRevice(Message msg)
         {
-            //Log.Error($"收到消息:{msg.MsgId} {MsgFactory.GetType(msg.MsgId)}");
+            Log.Info($"收到消息:{msg.MsgId} {MsgFactory.GetType(msg.MsgId)}"); 
 
             if (msg.MsgId == ResErrorCode.MsgID)
             {
@@ -143,7 +140,7 @@ namespace Geek.Server.TestPressure.Logic
             else
             {
 
-                Log.Info($"{id} 收到消息:{JsonConvert.SerializeObject(msg)}");
+                //Log.Info($"{id} 收到消息:{JsonConvert.SerializeObject(msg)}");
             }
         }
     }

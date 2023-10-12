@@ -9,18 +9,22 @@ namespace Geek.Server.Core.Net.Tcp
 {
     public class TcpChannel : NetChannel
     {
-        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger(); 
+        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         public ConnectionContext Context { get; protected set; }
         protected PipeReader Reader { get; set; }
         protected PipeWriter Writer { get; set; }
 
-        protected Action<Message> onMessage;
+
+        private readonly SemaphoreSlim sendSemaphore = new(0);
+        private readonly MemoryStream sendStream = new();
+
+        protected Func<Message, Task> onMessage;
 
         protected long lastReviceTime = 0;
         protected int lastOrder = 0;
         const int MAX_RECV_SIZE = 1024 * 1024 * 5; /// 从客户端接收的包大小最大值（单位：字节 5M）
 
-        public TcpChannel(ConnectionContext context, Action<Message> onMessage = null)
+        public TcpChannel(ConnectionContext context, Func<Message, Task> onMessage = null)
         {
             this.onMessage = onMessage;
             Context = context;
@@ -33,6 +37,8 @@ namespace Geek.Server.Core.Net.Tcp
         {
             try
             {
+                _ = TrySendAsync();
+
                 var cancelToken = closeSrc.Token;
                 while (!cancelToken.IsCancellationRequested)
                 {
@@ -40,7 +46,10 @@ namespace Geek.Server.Core.Net.Tcp
                     var buffer = result.Buffer;
                     if (buffer.Length > 0)
                     {
-                        while (TryParseMessage(ref buffer)) { }
+                        while (TryParseMessage(ref buffer, out var msg))
+                        {
+                            await onMessage(msg);
+                        }
                         Reader.AdvanceTo(buffer.Start, buffer.End);
                     }
                     else if (result.IsCanceled || result.IsCompleted)
@@ -59,13 +68,43 @@ namespace Geek.Server.Core.Net.Tcp
             }
         }
 
-        protected virtual bool TryParseMessage(ref ReadOnlySequence<byte> input)
+        async Task TrySendAsync()
         {
+            //pipewriter线程不安全，这里统一发送写刷新数据
+            try
+            {
+                var token = closeSrc.Token;
+                while (!token.IsCancellationRequested)
+                {
+                    await sendSemaphore.WaitAsync();
+                    lock (sendStream)
+                    {
+                        var len = sendStream.Length;
+                        if (len > 0)
+                        {
+                            Writer.Write(sendStream.GetBuffer().AsSpan<byte>()[..(int)len]);
+                            sendStream.SetLength(0);
+                            sendStream.Position = 0;
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    await Writer.FlushAsync(token);
+                }
+            }
+            catch { };
+        }
+
+        protected virtual bool TryParseMessage(ref ReadOnlySequence<byte> input, out Message msg)
+        {
+            msg = default;
             var bufEnd = input.End;
             var reader = new SequenceReader<byte>(input);
 
             if (!reader.TryReadBigEndian(out int msgLen))
-            { 
+            {
                 return false;
             }
 
@@ -94,7 +133,7 @@ namespace Geek.Server.Core.Net.Tcp
                 throw new Exception("消息order错乱");
             }
 
-            reader.TryReadBigEndian(out int msgId); 
+            reader.TryReadBigEndian(out int msgId);
 
             var msgType = HotfixMgr.GetMsgType(msgId);
             if (msgType == null)
@@ -108,7 +147,7 @@ namespace Geek.Server.Core.Net.Tcp
                 {
                     throw new Exception($"解析消息错误，注册消息id和消息无法对应.real:{message.MsgId}, register:{msgId}");
                 }
-                onMessage(message);
+                msg = message;
             }
             input = input.Slice(input.GetPosition(msgLen));
             return true;
@@ -168,18 +207,23 @@ namespace Geek.Server.Core.Net.Tcp
         }
 
         public override void Write(Message msg)
-        { 
+        {
             if (IsClose())
                 return;
             var bytes = Serializer.Serialize(msg);
             int len = 8 + bytes.Length;
-            var span = Writer.GetSpan(len);
+            Span<byte> span = stackalloc byte[len];
             int offset = 0;
             span.WriteInt(len, ref offset);
             span.WriteInt(msg.MsgId, ref offset);
             span.WriteBytesWithoutLength(bytes, ref offset);
-            Writer.Advance(len);
-            _ = Writer.FlushAsync(closeSrc.Token);
-        } 
+
+            lock (sendStream)
+            {
+                sendStream.Write(span);
+            }
+
+            sendSemaphore.Release();
+        }
     }
 }

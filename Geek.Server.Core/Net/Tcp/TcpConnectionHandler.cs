@@ -14,7 +14,7 @@ namespace Geek.Server.Core.Net.Tcp
         {
             LOGGER.Debug($"{connection.RemoteEndPoint?.ToString()} 链成功");
             NetChannel channel = null;
-            channel = new TcpChannel(connection, (msg) => _ = Dispatcher(channel, msg));
+            channel = new TcpChannel(connection, async (msg) => await Dispatcher(channel, msg));
             await channel.StartAsync();
             LOGGER.Debug($"{channel.RemoteAddress} 断开链接");
             OnDisconnection(channel);
@@ -29,7 +29,7 @@ namespace Geek.Server.Core.Net.Tcp
             if (msg == null)
                 return;
 
-            //LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
+           // LOGGER.Debug($"-------------收到消息{msg.MsgId} {msg.GetType()}");
             var handler = HotfixMgr.GetTcpHandler(msg.MsgId);
             if (handler == null)
             {

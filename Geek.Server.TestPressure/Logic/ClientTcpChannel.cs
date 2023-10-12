@@ -20,8 +20,8 @@ namespace Geek.Server.TestPressure.Logic
             this.onMessage = onMessage;
             recvPipe = new Pipe();
         }
-
         public override async Task StartAsync()
+
         {
             try
             {
@@ -72,8 +72,9 @@ namespace Geek.Server.TestPressure.Logic
                 else
                 {
                     break;
-                } 
+                }
             }
+            LOGGER.Error($"退出socket接收");
         }
 
         protected virtual bool TryParseMessage(ref ReadOnlySequence<byte> input)
@@ -133,7 +134,10 @@ namespace Geek.Server.TestPressure.Logic
             target.WriteInt(magic, ref offset);
             target.WriteInt(msg.MsgId, ref offset);
             target.WriteBytesWithoutLength(bytes, ref offset);
-            socket.GetStream().Write(target); 
+            lock(socket)
+            { 
+                socket.GetStream().Write(target);
+            }
         }
     }
 }
