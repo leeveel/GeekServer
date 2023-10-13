@@ -8,13 +8,14 @@ namespace Geek.Server.TestPressure.Logic
     {
         public class Awaiter : INotifyCompletion
         {
-            private static readonly Action _callbackCompleted = () => { };
-            private Action _callback;
+            private Action _callback = () => { };
             private bool result = false;
             private Timer timer;
-            public bool IsCompleted => ReferenceEquals(_callback, _callbackCompleted);
+            public bool IsCompleted => cmp;
             public bool GetResult() => result;
             public Awaiter GetAwaiter() => this;
+
+            volatile bool cmp;
 
             public Awaiter(float timeoutSeconds)
             {
@@ -23,21 +24,24 @@ namespace Geek.Server.TestPressure.Logic
 
             public void OnCompleted(Action continuation)
             {
-                if (ReferenceEquals(_callback, _callbackCompleted) || ReferenceEquals(Interlocked.CompareExchange(ref _callback, continuation, null), _callbackCompleted))
+                if (IsCompleted)
                 {
                     continuation();
+                }
+                else
+                {
+                    _callback += continuation;
                 }
             }
 
             public void Complete(bool result)
             {
-                this.result = result;
-                var continuation = Interlocked.Exchange(ref _callback, _callbackCompleted);
-
-                if (continuation != null)
+                if (!cmp)
                 {
-                    continuation();
+                    cmp = true;
+                    this.result = result;
                     timer.Dispose();
+                    _callback();
                 }
             }
 
