@@ -44,9 +44,9 @@ public static class SpanExtension
             return;
         }
 
-        if (offset + value.Length + IntSize > buffer.Length)
+        if (offset + value.Length > buffer.Length)
         {
-            throw new ArgumentException($"xbuffer write out of index {offset + value.Length + IntSize}, {buffer.Length}");
+            throw new ArgumentException($"xbuffer write out of index {offset + value.Length}, {buffer.Length}");
         }
 
         fixed (byte* ptr = buffer, valPtr = value)
