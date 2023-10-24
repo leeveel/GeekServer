@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
+using System;
 using System.Diagnostics;
 
 namespace Geek.Server.CodeGenerator.Agent
@@ -12,7 +13,7 @@ namespace Geek.Server.CodeGenerator.Agent
     {
         public void Initialize(GeneratorInitializationContext context)
         {
-            //  Debugger.Launch();
+            //Debugger.Launch();
             ResLoader.LoadDll();
             context.RegisterForSyntaxNotifications(() => new AgentFilter());
         }
@@ -90,6 +91,11 @@ namespace Geek.Server.CodeGenerator.Agent
                                 else if (attStr.Contains("[Discard]"))
                                 {
                                     mth.Discard = true;
+                                    if(mth.Isasync)
+                                    {
+                                        mth.Modify = mth.Modify.Replace("async ", "");
+                                        mth.Isasync = false;
+                                    } 
                                 }
                                 else if (attStr.Contains("TimeOut"))
                                 {
