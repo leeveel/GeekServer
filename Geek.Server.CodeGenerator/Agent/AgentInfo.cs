@@ -40,6 +40,8 @@ namespace Geek.Server.CodeGenerator.Agent
 
         public bool IsVirtual { get; set; }
 
+        public bool Isasync { get; set; }
+
         public List<string> Params { get; private set; } = new List<string>();
 
         public List<string> AttributeList { get; private set; } = new List<string>();

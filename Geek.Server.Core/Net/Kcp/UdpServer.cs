@@ -51,19 +51,28 @@ namespace Geek.Server.Core.Net.Kcp
                 EndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
                 while (socket != null)
                 {
-                    int len = socket.ReceiveFrom(cache, ref ipEndPoint);
-                    //LOGGER.Debug($"收到udp数据...{ipEndPoint} {len}");
-                    if (onRecv != null)
+                    try
                     {
-                        var package = new TempNetPackage(cache.AsSpan(0, len));
-                        if (package.isOk)
+                        int len = socket.ReceiveFrom(cache, ref ipEndPoint);
+                        //LOGGER.Debug($"收到udp数据...{ipEndPoint} {len}");
+                        if (onRecv != null)
                         {
-                            onRecv(package, ipEndPoint);
+                            var package = new TempNetPackage(cache.AsSpan(0, len));
+                            if (package.isOk)
+                            {
+                                onRecv(package, ipEndPoint);
+                            }
+                            else
+                            {
+                                LOGGER.Error($"错误的udp package...{ipEndPoint}");
+                            }
                         }
-                        else
-                        {
-                            LOGGER.Error($"错误的udp package...{ipEndPoint}");
-                        }
+                    }
+                    catch (Exception e)
+                    {
+#if DEBUG
+                        LOGGER.Error(e);
+#endif
                     }
                 }
             }, CancellationToken.None, TaskCreationOptions.LongRunning);

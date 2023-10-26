@@ -16,18 +16,17 @@ namespace Geek.Server.Gateway
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger(); 
 
         internal class GateTcpConnectHander : ConnectionHandler
-        {
-            readonly ConcurrentDictionary<long, BaseNetChannel> outerChannelMap = Instance.outerChannelMap;
+        { 
             readonly UdpServer innerUdpServer = Instance.innerUdpServer;
 
-            public override async Task OnConnectedAsync(ConnectionContext connection)
+            public override async Task OnConnectedAsync(ConnectionContext context)
             {
-                string remoteAdd = connection.RemoteEndPoint.ToString();
+                string remoteAdd = context.RemoteEndPoint.ToString();
                 LOGGER.Info($"tcp连接:{remoteAdd}");
                  
                 try
                 {
-                    if (!await CheckLoad(connection))
+                    if (!await CheckLoad(context))
                     {
                         await Task.Delay(2000);
                         return;
@@ -41,7 +40,7 @@ namespace Geek.Server.Gateway
                 TcpChannel channel = null;
                 try
                 {
-                    channel = new TcpChannel(connection, onRecv)
+                    channel = new TcpChannel(context, onRecv)
                     {
                         RemoteAddress = remoteAdd
                     };
@@ -50,9 +49,7 @@ namespace Geek.Server.Gateway
                 catch { }
                 finally
                 {
-                    LOGGER.Info($"tcp连接关闭:{remoteAdd}");
-                    if (channel != null && channel.NetId != 0)
-                        outerChannelMap.TryRemove(channel.NetId, out _);
+                    Instance.TryRemoveChannel(channel);
                 }
             }
 
@@ -124,23 +121,12 @@ namespace Geek.Server.Gateway
                             {
                                 netId = IdGenerator.GetActorID(ActorType.Gate);
                             }
-                            else
-                            {
-                                if (outerChannelMap.TryGetValue(netId, out var cacheChannel))
-                                {
-                                    if (cacheChannel != channel)
-                                    {
-                                        cacheChannel?.Close();
-                                        outerChannelMap.TryRemove(netId, out _); 
-                                    }
-                                }
-                            }
-
-                            //TODO 如果当前网关连接数量已经够多，则给客户端一个推荐网关 
                             channel.NetId = netId;
-                            outerChannelMap[netId] = channel;
                             channel.TargetServerId = package.innerServerId;
                             channel.UpdateRecvMessageTime(TimeSpan.FromSeconds(5).Ticks);
+
+                            Instance.AddChannel(channel);
+
                             //通知内部服务器   
                             package.netId = netId;
                             package.body = Encoding.UTF8.GetBytes(channel.RemoteAddress);
@@ -198,14 +184,15 @@ namespace Geek.Server.Gateway
             }
         }
 
-       
+
         async Task CheckTimeOut()
         {
-            var removeList = new List<long>();
+            var removeList = new List<BaseNetChannel>();
             while (!Settings.Ins.AppExitToken.IsCancellationRequested)
             {
                 removeList.Clear();
                 int activeChannelCount = 0;
+                string activeConnectInfos = "\n";
                 var timeNow = DateTime.UtcNow;
                 foreach (var kv in outerChannelMap)
                 {
@@ -217,25 +204,37 @@ namespace Geek.Server.Gateway
                         if (udpChannel.IsClose() || udpChannel.GetLastMessageTimeSecond(timeNow) > 12)
                         {
                             udpChannel.Close();
-                            removeList.Add(netId);
+                            removeList.Add(udpChannel);
                         }
                         else
                         {
                             activeChannelCount++;
+#if DEBUG
+                            activeConnectInfos += $"udp:{chann.RemoteAddress} \n";
+#endif
                         }
                     }
                     else if (!chann.IsClose())
                     {
                         activeChannelCount++;
+#if DEBUG
+                        activeConnectInfos += $"tcp:{chann.RemoteAddress} \n";
+#endif
                     }
                 }
 
-                CurActiveChannelCount = activeChannelCount;
+                CurActiveChannelCount = activeChannelCount; 
 
+                int removeCount = 0;
                 foreach (var k in removeList)
                 {
-                    //LOGGER.Info($"超时移除:{k}");
-                    outerChannelMap.TryRemove(k, out _);
+                    TryRemoveChannel(k);
+                    removeCount++;
+                    if (removeCount > 10)
+                    {
+                        await Task.Delay(10);
+                        removeCount = 0;
+                    }
                 }
                 await Task.Delay(1500);
             }
@@ -264,6 +263,46 @@ namespace Geek.Server.Gateway
             return false;
         }
 
+
+        public void TryRemoveChannel(BaseNetChannel channel)
+        {
+            if (channel == null || channel.NetId == 0)
+                return;
+            var id = channel.NetId;
+            lock (outerChannelMap)
+            {
+                if (outerChannelMap.TryGetValue(id, out var cacheChannel))
+                {
+                    if (cacheChannel == channel)
+                    {
+#if DEBUG
+                        LOGGER.Warn($"移除channel:{channel.RemoteAddress} {channel.GetType().Name}");
+#endif
+                        outerChannelMap.TryRemove(id, out _);
+                        channel?.Close();
+                    }
+                }
+            }
+        }
+
+        public void AddChannel(BaseNetChannel channel)
+        {
+            if (channel == null || channel.NetId == 0)
+                return;
+            lock (outerChannelMap)
+            {
+                var id = channel.NetId;
+                if (outerChannelMap.TryGetValue(id, out var cacheChannel))
+                {
+                    cacheChannel?.Close();
+                }
+#if DEBUG
+                LOGGER.Warn($"添加channel:{channel.RemoteAddress} {channel.GetType().Name}");
+#endif
+                outerChannelMap[channel.NetId] = channel;
+            }
+        }
+
         /// <summary>
         /// 接收内部服务器消息
         /// </summary>
@@ -287,14 +326,8 @@ namespace Geek.Server.Gateway
             }
 
             outerChannelMap.TryGetValue(netId, out var clientChannel);
-            if (clientChannel == null)
+            if (clientChannel == null || clientChannel.IsClose())
             {
-                innerUdpServer.SendTo(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, netId, serverId), endPoint);
-                return;
-            }
-            else if (clientChannel.IsClose())
-            {
-                outerChannelMap.TryRemove(netId, out _);
                 innerUdpServer.SendTo(new TempNetPackage(NetPackageFlag.NO_GATE_CONNECT, netId, serverId), endPoint);
                 return;
             }
@@ -351,19 +384,18 @@ namespace Geek.Server.Gateway
             BaseNetChannel channel = null;
             if (netId != 0)
             {
-                outerChannelMap.TryGetValue(netId, out channel);
-                if (package.flag == NetPackageFlag.MSG || package.flag == NetPackageFlag.HEART)
-                    if (channel == null || channel is not UdpChannel || channel.IsClose() || channel.TargetServerId != package.innerServerId)
+                if (outerChannelMap.TryGetValue(netId, out channel))
+                {
+                    if (channel.TargetServerId != package.innerServerId)
                     {
-#if DEBUG
-                        LOGGER.Warn($"当前接收到来自netid:{netId}的udp消息，但channel不是udpchannel或者已经关闭，或者innerServerId不匹配...");
-#endif
+                        LOGGER.Warn($"当前包存在的channel serverid不匹配{channel.TargetServerId} ：{package.innerServerId}");
                         package.flag = NetPackageFlag.NO_GATE_CONNECT;
                         package.body = Span<byte>.Empty;
                         outerUdpServer.SendTo(package, endPoint);
-                        outerChannelMap.Remove(netId, out _);
+                        channel.Close();
                         return;
                     }
+                }
             }
 
             //内网服务器信息
@@ -400,25 +432,12 @@ namespace Geek.Server.Gateway
                         }
                         else
                         {
-                            package.flag = NetPackageFlag.SYN_OLD_NET_ID;
-                            if (outerChannelMap.TryGetValue(netId, out channel))
-                            {
-                                if (channel is not UdpChannel || channel.TargetServerId != package.innerServerId)
-                                {
-                                    channel?.Close();
-                                    outerChannelMap.TryRemove(netId, out _);
-                                    channel = null;
-                                }
-                            }
+                            package.flag = NetPackageFlag.SYN_OLD_NET_ID; 
                         }
-
-                        //TODO 如果当前网关连接数量已经够多，则给客户端一个推荐网关
-                        if (channel == null)
-                        {
-                            channel = new UdpChannel(netId, package.innerServerId, outerUdpServer, endPoint);
-                            outerChannelMap.TryAdd(channel.NetId, channel);
-                        }
+                         
+                        channel = new UdpChannel(netId, package.innerServerId, outerUdpServer, endPoint);
                         (channel as UdpChannel).UpdateRemoteAddress(endPoint);
+                        AddChannel(channel);
                         //通知内部服务器   
                         package.netId = netId;
                         package.body = Encoding.UTF8.GetBytes(endPoint?.ToString() ?? "");
@@ -427,21 +446,26 @@ namespace Geek.Server.Gateway
                     }
 
                 case NetPackageFlag.HEART:
-                    //LOGGER.Info($"kcpservice recv GATE_HEART: {netId}");
-                    channel.UpdateRecvMessageTime();
-                    channel.Write(package);
-                    innerUdpServer.SendTo(package, server.InnerEndPoint);
+                    if (channel != null && channel is UdpChannel)
+                    {
+                        channel.UpdateRecvMessageTime();
+                        channel.Write(package);
+                        innerUdpServer.SendTo(package, server.InnerEndPoint);
+                    }
                     break;
 
                 case NetPackageFlag.MSG:
-                    channel.UpdateRecvMessageTime();
-                    innerUdpServer.SendTo(package, server.InnerEndPoint);
+                    if (channel != null && channel is UdpChannel)
+                    {
+                        channel.UpdateRecvMessageTime();
+                        innerUdpServer.SendTo(package, server.InnerEndPoint);
+                    }
                     break;
 
-                case NetPackageFlag.CLOSE: 
-                    if (channel is UdpChannel)
+                case NetPackageFlag.CLOSE:
+                    if (channel != null && channel is UdpChannel)
                     {
-                        channel.Close();
+                        TryRemoveChannel(channel);
                         innerUdpServer.SendTo(package, server.InnerEndPoint);
                         LOGGER.Info($"kcpservice recv fin: {netId}");
                     }

@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
+using System;
 using System.Diagnostics;
 
 namespace Geek.Server.CodeGenerator.Agent
@@ -62,12 +63,14 @@ namespace Geek.Server.CodeGenerator.Agent
                                 }
                                 else
                                 {
-                                    mth.Modify = m.Text + " ";
+                                    mth.Modify += m.Text + " ";
                                 }
                                 if (m.Text.Equals("public"))
                                     mth.IsPublic = true;
                                 if (m.Text.Equals("static"))
                                     mth.IsStatic = true;
+                                if (m.Text.Equals("async"))
+                                    mth.Isasync = true;
                             }
 
                             if (mth.IsStatic)
@@ -88,6 +91,11 @@ namespace Geek.Server.CodeGenerator.Agent
                                 else if (attStr.Contains("[Discard]"))
                                 {
                                     mth.Discard = true;
+                                    if(mth.Isasync)
+                                    {
+                                        mth.Modify = mth.Modify.Replace("async ", "");
+                                        mth.Isasync = false;
+                                    } 
                                 }
                                 else if (attStr.Contains("TimeOut"))
                                 {
@@ -131,7 +139,7 @@ namespace Geek.Server.CodeGenerator.Agent
                                 mth.ParamDeclare = method.ParameterList.ToString();  //(int a, List<int> list)
                                 //mth.Returntype = method.ReturnType.ToString();   //Task<T>
                                 if (mth.Discard && !mth.Returntype.Equals("Task") && !mth.Returntype.Equals("ValueTask"))
-                                    context.LogError($"{fullName}.{method.Identifier.Text}只有返回值为Task/ValueTask类型才能添加【Discard】注解");
+                                    context.LogError($"{fullName}.{method.Identifier.Text}只有返回值为Task类型才能添加【Discard】注解");
                                 mth.Constraint = method.ConstraintClauses.ToString(); //where T : class, new() where K : BagState
                                 mth.Typeparams = method.TypeParameterList?.ToString(); //"<T, K>"	
                                 foreach (var p in method.ParameterList.Parameters)
