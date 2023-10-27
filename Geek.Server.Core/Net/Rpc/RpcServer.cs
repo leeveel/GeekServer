@@ -1,15 +1,10 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
-using NLog.Web;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NLog.Extensions.Logging;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Geek.Server.Core.Net.Rpc
@@ -17,6 +12,25 @@ namespace Geek.Server.Core.Net.Rpc
     public class RpcServer
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
+        private class LoggerProvider : ILoggerProvider
+        {
+            readonly NLogLoggerFactory loggerFactory;
+            public LoggerProvider()
+            {
+                loggerFactory = new NLog.Extensions.Logging.NLogLoggerFactory();
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public ILogger CreateLogger(string categoryName)
+            {
+                return loggerFactory.CreateLogger(categoryName);
+            }
+        }
+
         public static IHost host { get; set; }
         public static Task Start(int rpcPort)
         {
@@ -35,8 +49,9 @@ namespace Geek.Server.Core.Net.Rpc
                 })
                 .ConfigureLogging(logging =>
                 {
-                    logging.SetMinimumLevel(LogLevel.Error);
-                }).UseNLog();
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(LogLevel.Warning).AddProvider(new LoggerProvider());
+                });
             host = builder.Build();
             return host.StartAsync();
         }
