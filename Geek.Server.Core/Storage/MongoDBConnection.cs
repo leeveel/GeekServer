@@ -49,11 +49,10 @@ namespace Geek.Server.Core.Storage
             var col = CurDB.GetCollection<TState>(stateName);
 
             using var cursor = await col.FindAsync(filter);
-            var state = await cursor.FirstOrDefaultAsync(); 
-            var isNew = state == null; 
+            var state = await cursor.FirstOrDefaultAsync();
+            state?.AfterLoadFromDB();
             state ??= defaultGetter?.Invoke();
             state ??= new TState { Id = id };
-            state.AfterLoadFromDB(isNew);
             return state;
         }
 

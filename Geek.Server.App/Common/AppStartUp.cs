@@ -63,7 +63,12 @@ namespace Geek.Server.App.Common
 
                 PolymorphicTypeMapper.Register(typeof(AppStartUp).Assembly); //app
                 PolymorphicRegister.Load();
-                PolymorphicResolver.Instance.Init();
+                PolymorphicResolver.Instance.Init(); 
+
+                //mongodb bson
+                BsonClassMapHelper.SetConvention();
+                BsonClassMapHelper.RegisterAllClass(typeof(ReqLogin).Assembly);
+                BsonClassMapHelper.RegisterAllClass(typeof(Program).Assembly);
 
                 return true;
             }
