@@ -53,10 +53,6 @@ Actor 模型本身是存在死锁的情况，且不容易被发现。GeekServer 
 
 [GeekConfig](https://github.com/leeveel/GeekConfig)是一个一键导表工具，将策划配置表，转化为二进制数据，并提供了方便快捷的 API 供游戏调用
 
-### 13.本地数据库
-
-采用 litedb 作为本地数据库，工程里的 litedb 版本做了部分修改，同时 litedb 本身针对 async task 的使用场景，可能存在多线程问题，这里使用https://github.com/mlockett42/litedb-async.git的异步接口 (底层单线程循环)
-
 # 运行
 
 1. 安装[.Net 7.x](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
