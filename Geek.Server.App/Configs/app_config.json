@@ -7,11 +7,8 @@
   "HttpCode": "inner_httpcode",
   "HttpPort": 20000,
   "GrpcPort": 30000,
-  "WebSocketUrl": "http://*:443",
-  "LocalDBPrefix": "gamedb_",
-  "LocalDBPath": "../../database/game/",
-  "SDKType": 0,
-  "DBModel": 1, //0:内嵌 1:mongodb
+  "WebSocketUrl": "http://*:443", 
+  "SDKType": 0, 
   "MongoUrl": "mongodb://127.0.0.1:27017/?authSource=admin",
   "MongoDBName": "geek_server"
 }

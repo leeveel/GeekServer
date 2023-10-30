@@ -1,13 +1,10 @@
-﻿using Core.Storage;
-using Geek.Server.Core.Actors;
+﻿using Geek.Server.Core.Actors;
 using Geek.Server.Core.Storage;
 using Geek.Server.Core.Utils;
-using LiteDB;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using NLog;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 
 namespace Geek.Server.Core.Comps
 {
@@ -85,80 +82,7 @@ namespace Geek.Server.Core.Comps
         }
 
 
-        const int ONCE_SAVE_COUNT = 300;
-        static async Task LocalDBSaveStates(bool shutdown, bool force = false)
-        {
-            var idList = new List<long>();
-            var writeList = new List<LiteDBDocument>();
-
-            var db = GameDB.As<EmbeddedDBConnection>().CurDataBase;
-            if (shutdown)
-            {
-                foreach (var state in stateDic.Values)
-                {
-                    if (state.IsChanged())
-                    {
-                        var bsonDoc = db.InnerDB.UnderlyingDatabase.Mapper.ToDocument(state);
-                        writeList.Add(bsonDoc);
-                        idList.Add(state.Id);
-                    }
-                }
-            }
-            else
-            {
-                var tasks = new List<Task>();
-                foreach (var state in stateDic.Values)
-                {
-                    var actor = ActorMgr.GetActor(state.Id);
-                    if (actor != null)
-                    {
-                        tasks.Add(actor.SendAsync(() =>
-                        {
-                            if (!force && !state.IsChanged())
-                                return;
-                            var bsonDoc = db.InnerDB.UnderlyingDatabase.Mapper.ToDocument(state);
-                            lock (writeList)
-                            {
-                                writeList.Add(bsonDoc);
-                                idList.Add(state.Id);
-                            }
-                        }));
-                    }
-                }
-                await Task.WhenAll(tasks);
-            }
-
-
-            if (!writeList.IsNullOrEmpty())
-            {
-                var stateName = typeof(TState).FullName;
-                StateComp.statisticsTool.Count(stateName, writeList.Count);
-                Log.Debug($"状态回存 {stateName} count:{writeList.Count}");
-                var table = db.GetTable<LiteDBDocument>(stateName);
-                for (int idx = 0; idx < writeList.Count; idx += ONCE_SAVE_COUNT)
-                {
-                    var docs = writeList.GetRange(idx, Math.Min(ONCE_SAVE_COUNT, writeList.Count - idx));
-                    var ids = idList.GetRange(idx, docs.Count);
-
-                    try
-                    {
-                        var count = await table.SetBatch(docs);
-                        foreach (var id in ids)
-                        {
-                            stateDic.TryGetValue(id, out var state);
-                            if (state == null)
-                                continue;
-                            state.AfterSaveToDB();
-                        }
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Log.Error($"保存数据异常，类型:{typeof(TState).FullName}，{ex}");
-                    }
-                }
-            }
-        }
+        const int ONCE_SAVE_COUNT = 300; 
 
         static async Task MongoDBSaveStates(bool shutdown, bool force = false)
         {
@@ -254,15 +178,7 @@ namespace Geek.Server.Core.Comps
 
         public static async Task SaveStates(bool shutdown, bool force = false)
         {
-
-            if (Settings.DBModel == (int)DBModel.Mongodb)
-            {
-                await MongoDBSaveStates(shutdown, force);
-            }
-            if (Settings.DBModel == (int)DBModel.Embeded)
-            {
-                await LocalDBSaveStates(shutdown, force);
-            }
+            await MongoDBSaveStates(shutdown, force);
         }
     }
 }
