@@ -1,10 +1,26 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Linq;
+using System.Reflection;
 
 public abstract class Singleton<T> where T : Singleton<T>
 {
     private const string ErrorMessage = "单例构造函数不能为public";
     private static T instance = null;
-    public static T Instance => instance ?? (instance = Create());
+    private static readonly object lockObject = new Object();
+    public static T Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                lock (lockObject)
+                {
+                    instance ??= Create();
+                }
+            }
+            return instance;
+        }
+    }
 
     protected Singleton()
     {
