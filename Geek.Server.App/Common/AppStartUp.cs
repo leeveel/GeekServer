@@ -2,11 +2,9 @@
 using Geek.Server.Core.Comps;
 using Geek.Server.Core.Hotfix;
 using Geek.Server.Core.Storage;
-using Geek.Server.Core.Utils;
 using Geek.Server.Proto;
 using NLog;
 using NLog.Config;
-using NLog.LayoutRenderers;
 using PolymorphicMessagePack;
 
 namespace Geek.Server.App.Common
@@ -34,11 +32,8 @@ namespace Geek.Server.App.Common
                 Console.WriteLine("***进入游戏主循环***");
                 Settings.LauchTime = DateTime.Now;
                 Settings.AppRunning = true;
-                TimeSpan delay = TimeSpan.FromSeconds(1);
-                while (Settings.AppRunning)
-                {
-                    await Task.Delay(delay);
-                }
+
+                await Settings.AppExitToken;
             }
             catch (Exception e)
             {

@@ -46,9 +46,6 @@ namespace Geek.Server.App
 
         private static void HandleExit()
         {
-            if (ExitCalled)
-                return;
-            ExitCalled = true;
             Log.Info($"监听到退出程序消息");
             ShutDownTask = Task.Run(() =>
             {

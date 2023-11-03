@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace Geek.Server.Core.Utils
 {
@@ -6,31 +7,63 @@ namespace Geek.Server.Core.Utils
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         static Action callBack;
+        private static PosixSignalRegistration exitSignalReg;
         public static void Init(Action existCallBack)
         {
-            callBack = existCallBack;
-            //退出监听
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => { callBack?.Invoke(); };
+            callBack = () =>
+            {
+                Action act = null;
+                lock (callBack)
+                {
+                    if (existCallBack != null)
+                    {
+                        act = existCallBack;
+                    }
+                    existCallBack = null;
+                }
+                act?.Invoke();
+            };
+
+            exitSignalReg = PosixSignalRegistration.Create(PosixSignal.SIGTERM, c =>
+            {
+                LOGGER.Info("PosixSignalRegistration SIGTERM....");
+                callBack();
+            });
+
+            //退出监听 
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => { callBack(); };
             //Fetal异常监听
-            AppDomain.CurrentDomain.UnhandledException += (s, e) => { HandleFetalException(e.ExceptionObject); };
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => { handleFetalException("AppDomain.CurrentDomain.UnhandledException", e.ExceptionObject); };
+
+            TaskScheduler.UnobservedTaskException += (s, e) => { handleFetalException("TaskScheduler.UnobservedTaskException", e.Exception); };
+
             //ctrl+c
-            Console.CancelKeyPress += (s, e) => { callBack?.Invoke(); };
+            Console.CancelKeyPress += (s, e) => { callBack(); };
         }
 
-        private static void HandleFetalException(object e)
-        {
-            //这里可以发送短信或者钉钉消息通知到运维
-            LOGGER.Error("get unhandled exception");
-            if (e is IEnumerable arr)
+        static void handleFetalException(string tag, object e)
+        { 
+            LOGGER.Error($"[{tag}]get unhandled exception");
+            if (e == null)
+            {
+                callBack();
+                return;
+            }
+            if (e is Array arr)
             {
                 foreach (var ex in arr)
-                    LOGGER.Error($"Unhandled Exception:{ex}");
+                    LOGGER.Error("Unhandled Exception:" + ex.ToString());
+            }
+            else if (e is IList list)
+            {
+                foreach (var ex in list)
+                    LOGGER.Error("Unhandled Exception:" + ex.ToString());
             }
             else
             {
-                LOGGER.Error($"Unhandled Exception:{e}");
-            }
-            callBack?.Invoke();
+                LOGGER.Error("Unhandled Exception:" + e.ToString());
+            } 
+            callBack();
         }
     }
 }
