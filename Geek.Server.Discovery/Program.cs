@@ -14,8 +14,7 @@ namespace Geek.Server.Discovery
     internal class Program
     {
         private static readonly Logger Log = LogManager.GetCurrentClassLogger();
-
-        private static volatile bool ExitCalled = false;
+         
         private static volatile Task GameLoopTask = null;
         private static volatile Task ShutDownTask = null;
 
@@ -47,10 +46,7 @@ namespace Geek.Server.Discovery
         }
 
         private static void HandleExit()
-        {
-            if (ExitCalled)
-                return;
-            ExitCalled = true;
+        { 
             Log.Info($"监听到退出程序消息");
             ShutDownTask = Task.Run(() =>
             {

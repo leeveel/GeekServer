@@ -1,8 +1,9 @@
 {
-  "isDebug": true,
+  "isDebug": true, 
+  "ServerName": "GateServer",
   "ServerId": 9101, //[9101,9200]
   "InnerIp": "127.0.0.1",
-  "InnerUdpPort": 7919,
+  "InnerPort": 7919,
   "OuterPort": 7899,
   "HttpPort": 9103,
   "MaxClientCount": 20000,

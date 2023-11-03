@@ -1,4 +1,6 @@
-﻿using Core.Discovery;
+﻿using System.Collections.Concurrent;
+using System.Net;
+using Core.Discovery;
 using Geek.Server.Core.Net;
 using Grpc.Net.Client;
 using MagicOnion.Client;
@@ -9,30 +11,27 @@ namespace Geek.Server.Core.Discovery
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         protected IDiscoveryHub ServerAgent { private set; get; }
-        protected string connUrl;
         protected ReConnecter reConn;
         protected Func<ServerState> selfNodeStateGetter;
         protected Func<ServerInfo> selfNodeGetter;
-        CancellationTokenSource cancelStateSyncSrc;
+        protected CancellationTokenSource cancelStateSyncSrc;
+        protected CancellationTokenSource closeTokenSrc;
 
-        public BaseDiscoveryClient(string url, Func<ServerInfo> selfNodeGetter, Func<ServerState> selfNodeStateGetter = null)
+        protected ConcurrentDictionary<long, ServerInfo> allServerMap = new();
+        protected ConcurrentDictionary<long, ServerInfo> gatewayServerMap = new();
+
+        public BaseDiscoveryClient(Func<ServerInfo> selfNodeGetter, Func<ServerState> selfNodeStateGetter = null)
         {
-            connUrl = url;
             this.selfNodeGetter = selfNodeGetter;
             this.selfNodeStateGetter = selfNodeStateGetter;
-            reConn = new ReConnecter(ConnectImpl, $"DiscoveryUrl:{connUrl}");
+            closeTokenSrc = new CancellationTokenSource();
+            reConn = new ReConnecter(ConnectImpl, $"DiscoveryUrl:{Settings.Ins.DiscoveryServerUrl}");
         }
 
-        public virtual void OnRegister()
-        {
-
-        }
 
         async Task<bool> Register()
         {
             var ret = await ServerAgent.Register(selfNodeGetter());
-            if (ret)
-                OnRegister();
             _ = StartSyncStateAsync();
             //ServerChanged(await ServerAgent.GetAllNodes());
             return ret;
@@ -43,13 +42,9 @@ namespace Geek.Server.Core.Discovery
             if (selfNodeStateGetter == null)
                 return;
 
-            if (cancelStateSyncSrc != null)
-            {
-                cancelStateSyncSrc.Cancel();
-                cancelStateSyncSrc = null;
-            }
-
+            cancelStateSyncSrc?.Cancel();
             cancelStateSyncSrc = new CancellationTokenSource();
+            var token = cancelStateSyncSrc.Token;
 
             while (!cancelStateSyncSrc.IsCancellationRequested)
             {
@@ -62,31 +57,36 @@ namespace Geek.Server.Core.Discovery
                 {
                     //LOGGER.Error($"rpc.同步状态到中心服异常:{ex.Message}");
                 }
-                await Task.Delay(2000_0);
+                try
+                {
+                    await Task.Delay(2000_0, token);
+                }
+                catch
+                {
+                    break;
+                }
             };
         }
 
         public Task Start()
         {
+            LOGGER.Info($"开始{GetType().FullName}...");
             return reConn.Connect();
         }
 
         public async Task Stop()
         {
-            if (cancelStateSyncSrc != null)
-            {
-                cancelStateSyncSrc.Cancel();
-                cancelStateSyncSrc = null;
-            }
-            if (ServerAgent != null)
-                await ServerAgent.DisposeAsync();
+            cancelStateSyncSrc?.Cancel();
+            closeTokenSrc?.Cancel();
+            await ServerAgent?.DisposeAsync();
+            ServerAgent = null;
         }
 
         private async Task<bool> ConnectImpl()
         {
             try
             {
-                var channel = GrpcChannel.ForAddress(connUrl);
+                var channel = GrpcChannel.ForAddress(Settings.Ins.DiscoveryServerUrl);
                 ServerAgent = await StreamingHubClient.ConnectAsync<IDiscoveryHub, IDiscoveryClient>(channel, this);
                 if (selfNodeGetter != null)
                 {
@@ -133,8 +133,78 @@ namespace Geek.Server.Core.Discovery
             }
         }
 
-        public abstract void ServerChanged(List<ServerInfo> nodes);
+        public virtual void ServerChanged(List<ServerInfo> nodes)
+        {
+            var allMap = new ConcurrentDictionary<long, ServerInfo>();
+            var gatewayMap = new ConcurrentDictionary<long, ServerInfo>();
+            LOGGER.Debug("ServerChanged:" + nodes.Count);
+            foreach (var node in nodes)
+            {
+                try
+                {
+#if DEBUG
+                    LOGGER.Debug(MessagePack.MessagePackSerializer.SerializeToJson(node));
+#endif
 
-        public abstract void HaveMessage(string eid, byte[] msg);
+                    if (string.IsNullOrEmpty(node.LocalIp))
+                    {
+                        node.InnerEndPoint = null;
+                        LOGGER.Error($"server [{node.Type}] [{node.ServerId}] localIp is empty...");
+                    }
+                    else
+                    {
+                        node.InnerEndPoint = new IPEndPoint(IPAddress.Parse(node.LocalIp), node.InnerPort);
+                    }
+
+                    if (node.Type == ServerType.Gate)
+                    {
+                        gatewayMap[node.ServerId] = node;
+                    }
+                    allMap[node.ServerId] = node; 
+                }
+                catch (Exception e)
+                {
+                    LOGGER.Error(e);
+                }
+            }
+
+            foreach (var kv in allServerMap)
+            {
+                if (!allMap.ContainsKey(kv.Key))
+                    LOGGER.Warn($"server change remove server {kv.Value}");
+            }
+
+            allServerMap = allMap;
+            gatewayServerMap = gatewayMap;
+        }
+
+        public ServerInfo GetServer(int serverId, ServerType type)
+        {
+            if (allServerMap.TryGetValue(serverId, out var server))
+            {
+                if (server.Type == type)
+                    return server;
+            }
+            return null;
+        }
+
+        public ServerInfo GetServer(int serverId)
+        {
+            if (allServerMap.TryGetValue(serverId, out var server))
+            {
+                return server;
+            }
+            return null;
+        }
+
+        public EndPoint GetServerInnerEndPoint(int serverId)
+        {
+            if (allServerMap.TryGetValue(serverId, out var server))
+            {
+                return server.InnerEndPoint;
+            }
+            LOGGER.Error("GetServerInnerEndPoint error:"+serverId);
+            return null;
+        }
     }
 }

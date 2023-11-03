@@ -170,7 +170,7 @@ namespace Geek.Server.TestPressure.Net
                         onRecvUdpData(buffer);
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     Close();
                     onGateClose?.Invoke();

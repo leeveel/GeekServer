@@ -1,10 +1,7 @@
-﻿using Geek.Server.Core.Actors;
-using Geek.Server.Core.Utils;
-using NLog;
-using System.Buffers;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Text;
+using NLog;
 
 namespace Geek.Server.Core.Net.Kcp
 {
@@ -13,16 +10,18 @@ namespace Geek.Server.Core.Net.Kcp
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
         private readonly ConcurrentDictionary<long, KcpChannel> channels = new();
-        private Func<KcpChannel, Message, Task> onMessageAct;
-        private Action<KcpChannel> onChannelRemove;
-        private UdpServer udpServer;
+        private readonly SemaphoreSlim newChannArrived = new(initialCount: 0, maxCount: int.MaxValue);
+        private readonly Func<KcpChannel,Message, Task> onMessageAct;
+        private readonly Action<KcpChannel> onChannelRemove;
+        private readonly UdpServer udpServer;
+        CancellationTokenSource closeSrc = new CancellationTokenSource();
 
-        public KcpServer(int port, Func<KcpChannel, Message, Task> onMessageAct, Action<KcpChannel> onChannelRemove)
+        public KcpServer(int port, Func<KcpChannel, Message, Task> onMessageAct, Action<KcpChannel> onChannelRemove, Func<int, EndPoint> getPointById = null)
         {
             LOGGER.Info($"开始kcp server...{port}");
             this.onMessageAct = onMessageAct;
             this.onChannelRemove = onChannelRemove;
-            udpServer = new UdpServer(port, OnRecv);
+            udpServer = new UdpServer(port, OnRecv, Settings.Ins.ServerId, getPointById);
         }
 
         public void Start()
@@ -33,45 +32,68 @@ namespace Geek.Server.Core.Net.Kcp
 
         public void Stop()
         {
-            foreach (long channelId in channels.Keys.ToArray())
-            {
-                channels.TryRemove(channelId, out var channel);
-                if (channel != null)
-                    channel.Close();
-            }
+            closeSrc?.Cancel();
             udpServer.Close();
+            channels.Clear();
+            //foreach (long channelId in channels.Keys.ToArray())
+            //{
+            //    channels.TryRemove(channelId, out var channel);
+            //    channel?.Close();
+            //}
         }
 
         async Task UpdateChannel()
         {
             List<KcpChannel> channelList = new();
             var paraOpt = new ParallelOptions { MaxDegreeOfParallelism = 3 };
+            var token = closeSrc.Token;
             while (true)
             {
-                var time = DateTime.UtcNow;
-                channelList.Clear();
-                foreach (var kv in channels)
+                try
                 {
-                    channelList.Add(kv.Value);
+                    if (channels.IsEmpty)
+                    {
+                        await newChannArrived.WaitAsync(token);
+                    }
+
+                    if (token.IsCancellationRequested)
+                        return;
+
+                    var time = DateTime.UtcNow;
+                    channelList.Clear();
+                    foreach (var kv in channels)
+                    {
+                        channelList.Add(kv.Value);
+                    }
+                    Parallel.ForEach(channelList, paraOpt, (channel) =>
+                    {
+                        if (token.IsCancellationRequested)
+                            return;
+                        try
+                        {
+                            channel.Update(time);
+                        }
+                        catch (Exception e)
+                        {
+                            LOGGER.Error("kcp channel update error:" + e.Message);
+                        }
+                        if (channel.IsClose())
+                        {
+                            LOGGER.Info($"移除channel:{channel.RemoteAddress}");
+                            channels.Remove(channel.NetId, out _);
+                            onChannelRemove?.Invoke(channel);
+                        }
+                    });
+                    await Task.Delay(10, token);
                 }
-                Parallel.ForEach(channelList, paraOpt, (channel) =>
+                catch (OperationCanceledException)
                 {
-                    try
-                    {
-                        channel.Update(time);
-                    }
-                    catch (Exception e)
-                    {
-                        LOGGER.Error("kcp channel update error:" + e.Message);
-                    }
-                    if (channel.IsClose())
-                    {
-                        LOGGER.Info($"移除channel...{channel.NetId}");
-                        channels.Remove(channel.NetId, out _);
-                        onChannelRemove?.Invoke(channel);
-                    }
-                });
-                await Task.Delay(10);
+                    break;
+                }
+                catch (Exception e)
+                {
+                    LOGGER.Error(e);
+                }
             }
         }
 
@@ -83,7 +105,7 @@ namespace Geek.Server.Core.Net.Kcp
             var curServerId = Settings.Ins.ServerId;
 
             //检查内网服务器id
-            if (innerServerNetId == 0 || innerServerNetId != curServerId)
+            if (innerServerNetId == 0 || innerServerNetId != Settings.Ins.ServerId)
             {
                 LOGGER.Warn($"kcp消息错误,不正确的内网服id:{innerServerNetId}");
                 return;
@@ -105,7 +127,6 @@ namespace Geek.Server.Core.Net.Kcp
                 switch (package.flag)
                 {
                     case NetPackageFlag.SYN:
-                        //LOGGER.Info($"kcp server 收到连接请求包:{package.ToString()}");
                         if (channel == null || channel.IsClose())
                         {
                             channel = new KcpChannel(true, netId, curServerId, ipEndPoint, (chann, data) =>
@@ -115,6 +136,7 @@ namespace Geek.Server.Core.Net.Kcp
                                 udpServer.SendTo(tmpPackage, (chann as KcpChannel).routerEndPoint);
                             }, onMessageAct);
                             channels[channel.NetId] = channel;
+                            newChannArrived.Release();
                             channel.RemoteAddress = Encoding.UTF8.GetString(package.body);
                         }
                         //更新最新路由地址
@@ -123,6 +145,7 @@ namespace Geek.Server.Core.Net.Kcp
                         channel.UpdateRecvMessageTime(TimeSpan.FromSeconds(5).Ticks);
 
                         udpServer.SendTo(new TempNetPackage(NetPackageFlag.ACK, netId, curServerId), ipEndPoint);
+                        LOGGER.Info($"kcp server 收到请求 建立连接:{package.ToString()}");
                         break;
 
                     case NetPackageFlag.SYN_OLD_NET_ID:

@@ -1,4 +1,5 @@
 ﻿using Geek.Server.Core.Net.Rpc;
+using Geek.Server.Discovery.Logic;
 using NLog;
 using NLog.Config;
 using PolymorphicMessagePack;
@@ -12,15 +13,21 @@ namespace Geek.Server.Discovery
         {
             try
             {
-                var flag = Start();
-                if (!flag) return; //启动服务器失败
+                LogManager.Configuration = new XmlLoggingConfiguration("Configs/NLog.config");
+                LogManager.AutoShutdown = false;
+                Settings.Load<BaseSetting>("Configs/discovery_config.json", ServerType.Discovery);
 
                 PolymorphicResolver.Instance.Init();
 
-                Log.Info("开始启动...");
+                Log.Info("开始启动..."); 
+
+                NamingService.Instance.AddSelf();
+
                 await RpcServer.Start(Settings.Ins.RpcPort);
 
                 Settings.Ins.AppRunning = true;
+
+                Log.Info("启动完成...");
                 await Settings.Ins.AppExitToken;
             }
             catch (Exception e)
@@ -32,22 +39,6 @@ namespace Geek.Server.Discovery
             Console.WriteLine($"退出服务器开始");
             await RpcServer.Stop();
             Console.WriteLine($"退出服务器成功");
-        }
-
-        private static bool Start()
-        {
-            try
-            {
-                LogManager.Configuration = new XmlLoggingConfiguration("Configs/NLog.config");
-                LogManager.AutoShutdown = false;
-                Settings.Load<BaseSetting>("Configs/discovery_config.json", ServerType.Discovery);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Log.Error($"启动服务器失败,异常:{e}");
-                return false;
-            }
         }
     }
 }

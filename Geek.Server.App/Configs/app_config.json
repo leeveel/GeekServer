@@ -1,7 +1,7 @@
 ﻿{
   "IsDebug": true,
   "ServerId": 1001, //[1000,9000]
-  "ServerName": "geek_server",
+  "ServerName": "gameServer",
   "LocalIp": "127.0.0.1",
   "InnerPort": 10000,
   "HttpPort": 20000,

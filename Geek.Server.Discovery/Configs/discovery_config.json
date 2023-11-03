@@ -1,6 +1,7 @@
 ﻿{
   "IsDebug": true,
   "ServerId": 9001, //[9001,9100]
-  "ServerName": "Geek Server",
+  "ServerName": "DiscoveryServer",
+  "LocalIp":"127.0.0.1",
   "RpcPort": 9001
 }

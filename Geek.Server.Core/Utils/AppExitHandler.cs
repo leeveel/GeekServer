@@ -1,43 +1,71 @@
 ﻿using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace Geek.Server.Core.Utils
 {
-    public static class AppExitHandler
+    public class AppExitHandler
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         static Action callBack;
-        public static void Init(Action exitCallBack)
+        private static PosixSignalRegistration exitSignalReg;
+        public static void Init(Action existCallBack)
         {
-            callBack = exitCallBack;
-            OnExit(exitCallBack);
+            callBack = () =>
+            {
+                Action act = null;
+                lock (callBack)
+                {
+                    if (existCallBack != null)
+                    {
+                        act = existCallBack;
+                    }
+                    existCallBack = null;
+                }
+                act?.Invoke();
+            };
+
+            //退出监听 
+            exitSignalReg = PosixSignalRegistration.Create(PosixSignal.SIGTERM, c =>
+            {
+                LOGGER.Info("PosixSignalRegistration SIGTERM....");
+                callBack();
+            });
+
+            AppDomain.CurrentDomain.ProcessExit += (s, e) => { callBack(); };
             //Fetal异常监听
-            AppDomain.CurrentDomain.UnhandledException += (s, e) => { HandleFetalException(e.ExceptionObject); };
-        }
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => { handleFetalException("AppDomain.CurrentDomain.UnhandledException", e.ExceptionObject); };
 
-        public static void OnExit(Action exitCallBack)
-        {
-            //退出监听
-            AppDomain.CurrentDomain.ProcessExit += (s, e) => { exitCallBack?.Invoke(); };
+            TaskScheduler.UnobservedTaskException += (s, e) => { handleFetalException("TaskScheduler.UnobservedTaskException", e.Exception); };
+
             //ctrl+c
-            Console.CancelKeyPress += (s, e) => { exitCallBack?.Invoke(); };
+            Console.CancelKeyPress += (s, e) => { callBack(); };
         }
 
-        private static void HandleFetalException(object e)
+        static void handleFetalException(string tag, object e)
         {
-            //发送钉钉消息通知到运维
-            ExceptionMonitor.Report(ExceptionType.UnhandledException, $"服务器异常退出 e:{e}").Wait(TimeSpan.FromSeconds(10));
-
-            LOGGER.Error("get unhandled exception");
-            if (e is IEnumerable arr)
+            //这里可以发送短信或者钉钉消息通知到运维
+            LOGGER.Error($"[{tag}]get unhandled exception");
+            if (e == null)
+            {
+                callBack();
+                return;
+            }
+            if (e is Array arr)
             {
                 foreach (var ex in arr)
-                    LOGGER.Error($"Unhandled Exception:{ex}");
+                    LOGGER.Error("Unhandled Exception:" + ex.ToString());
+            }
+            else if (e is IList list)
+            {
+                foreach (var ex in list)
+                    LOGGER.Error("Unhandled Exception:" + ex.ToString());
             }
             else
             {
-                LOGGER.Error($"Unhandled Exception:{e}");
+                LOGGER.Error("Unhandled Exception:" + e.ToString());
             }
-            callBack?.Invoke();
+            ExceptionMonitor.Report(ExceptionType.UnhandledException, $"{e}").Wait(TimeSpan.FromSeconds(10));
+            //callBack();
         }
     }
 }

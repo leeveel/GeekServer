@@ -42,6 +42,7 @@ public static class Settings
 
 public class BaseSetting
 {
+    static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
     public virtual bool IsLocal(int serverId)
     {
         return serverId == ServerId;
@@ -58,14 +59,23 @@ public class BaseSetting
         get => _appRunning;
         set
         {
-            _appRunning = value;
-            if (value)
+            lock (AppExitSource)
             {
-                LauchTime = DateTime.Now;
-            }
-            if (!value && !AppExitSource.IsCancellationRequested)
-            {
-                AppExitSource.Cancel();
+                if (AppExitSource.IsCancellationRequested)
+                {
+                    if (value)
+                    {
+                        LOGGER.Error("AppRunning已经被设置为退出，不能再次开启...");
+                    }
+                    _appRunning = false;
+                    return;
+                }
+                _appRunning = value;
+                if (!value && !AppExitSource.IsCancellationRequested)
+                {
+                    LOGGER.Info("Set AppRunning false...");
+                    AppExitSource.Cancel();
+                }
             }
         }
     }

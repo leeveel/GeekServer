@@ -42,7 +42,7 @@ namespace Geek.Server.Gateway
                 {
                     channel = new TcpChannel(context, onRecv)
                     {
-                        RemoteAddress = remoteAdd
+                        RemoteAddress = "tcp->" + remoteAdd
                     };
                     await channel.StartAsync();
                 }
@@ -158,18 +158,17 @@ namespace Geek.Server.Gateway
         UdpServer innerUdpServer;
 
         readonly ConcurrentDictionary<long, BaseNetChannel> outerChannelMap = new();
-        public int CurActiveChannelCount { get; private set; } = 0; 
-        GateServer() { }
+        public int CurActiveChannelCount { get; private set; } = 0;  
 
         public void Start()
         {
             _ = GatewayDiscoveryClient.Instance.Start();
             var setting = Settings.Ins as GateSettings;
-            innerUdpServer = new UdpServer(setting.InnerPort, OnUdpRecvInner);
+            innerUdpServer = new UdpServer(setting.InnerPort, OnUdpRecvInner, setting.ServerId, GatewayDiscoveryClient.Instance.GetServerInnerEndPoint);
             outerUdpServer = new UdpServer(setting.OuterPort, OnUdpRecvOuter);
             outerTcpServer = new();
-            _ = innerUdpServer.Start();
-            _ = outerUdpServer.Start();
+            _ = innerUdpServer.Start(Environment.ProcessorCount / 2);
+            _ = outerUdpServer.Start(Environment.ProcessorCount);
             _ = outerTcpServer.Start(setting.OuterPort);
             _ = CheckTimeOut();
             _ = PrintInfo();
@@ -440,7 +439,7 @@ namespace Geek.Server.Gateway
                         AddChannel(channel);
                         //通知内部服务器   
                         package.netId = netId;
-                        package.body = Encoding.UTF8.GetBytes(endPoint?.ToString() ?? "");
+                        package.body = Encoding.UTF8.GetBytes(channel.RemoteAddress);
                         innerUdpServer.SendTo(package, server.InnerEndPoint);
                         break;
                     }

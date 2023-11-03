@@ -1,5 +1,7 @@
 ﻿using Geek.Server.Core.Discovery;
 using MagicOnion;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Core.Discovery
 {
@@ -9,7 +11,5 @@ namespace Core.Discovery
         public Task<List<ServerInfo>> GetAllNodes();
         public Task<List<ServerInfo>> GetNodesByType(ServerType type);
         public Task SyncState(ServerState state);
-        public Task Subscribe(string eventId);
-        public Task Unsubscribe(string eventId);
     }
 }

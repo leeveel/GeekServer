@@ -10,7 +10,7 @@ namespace Geek.Server.Core.Net
         private readonly int retryTimes;
         private int retryed = 0;
         private readonly int retryDelay = 5000;
-        const int MAX_DELAY = 60_000;
+        const int MAX_DELAY = 20_000;
 
         private readonly string connInfo;
 
@@ -70,8 +70,10 @@ namespace Geek.Server.Core.Net
             {
                 if (Settings.Ins.AppExitToken.IsCancellationRequested)
                 {
+                    LOGGER.Warn($"AppExit,[{connInfo}]不再进行重连...");
                     return;
                 }
+
                 if (retryTimes < 0 || retryed < retryTimes)
                 {
                     //每失败三次通知一次
@@ -79,7 +81,7 @@ namespace Geek.Server.Core.Net
                         NotifyDingTalk();
                     int delay = GetNextDelayTime();
                     retryed++;
-                    LOGGER.Error($"rpc连接断开,{delay}ms后尝试重连");
+                    LOGGER.Error($"[{connInfo}]连接断开,{delay}ms后尝试重连");
                     cancel = new CancellationTokenSource();
                     await Task.Delay(delay, cancel.Token);
                     if (!cancel.IsCancellationRequested)

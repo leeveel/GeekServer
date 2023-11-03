@@ -1,14 +1,15 @@
 ﻿using MessagePack;
-using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using PolymorphicMessagePack;
 using System.Net;
 
-namespace Geek.Server.Core.Discovery
+namespace Core.Discovery
 {
     [MessagePackObject(true)]
     [PolymorphicIgnore]
     public class ServerInfo
     {
+        public string ServerName { get; set; } 
         public int ServerId { get; set; }
         public ServerType Type { get; set; }
         public string PublicIp { get; set; }
@@ -17,10 +18,23 @@ namespace Geek.Server.Core.Discovery
         public int OuterPort { get; set; }
         public int HttpPort { get; set; }
         public int RpcPort { get; set; }
+
+        [JsonIgnore]
         public ServerState State { get; set; } = new ServerState();
-        [IgnoreMember]
-        [BsonIgnore]
+
+        [JsonIgnore]
+        [MessagePack.IgnoreMember]
         public EndPoint InnerEndPoint { get; set; }
+
+        public bool IsSame(ServerInfo info)
+        {
+            return ToString() == info.ToString();
+        }
+
+        public override string ToString()
+        {
+            return JsonConvert.SerializeObject(this);
+        }
     }
 
     [MessagePackObject(true)]

@@ -1,8 +1,11 @@
+using System.Buffers.Binary;
+using System.Collections.Concurrent;
+using System.Net;
 using Core.Discovery;
-using Geek.Server.Core.Discovery;
+using Geek.Server.Core.Net.Kcp;
+using Geek.Server.Core.Utils;
 using MagicOnion.Server.Hubs;
 using NLog;
-using System.Collections.Concurrent;
 
 namespace Geek.Server.Discovery.Logic
 {
@@ -12,98 +15,78 @@ namespace Geek.Server.Discovery.Logic
 
         const string globalGroupName = "global";
 
-        private IGroup group;
+        private IGroup group; 
 
-        private ConcurrentDictionary<string, bool> SubscribeEvts = new();
+        static ConcurrentDictionary<int, DiscoveryHub> gatewayHubDic = new(); 
 
-        public long CurServerId { private set; get; }
+        CancellationTokenSource closeSrc = new();
+
+        ServerInfo info;
+        public long CurServerId => (long)(info?.ServerId);
 
         protected override async ValueTask OnConnecting()
         {
-            LOGGER.Debug($"rpc客户端连接:{Context.CallContext.Peer}");
+            LOGGER.Info($"rpc客户端连接: {Context.CallContext.Peer}");
             group = await Group.AddAsync(globalGroupName);
         }
 
         protected override async ValueTask OnDisconnected()
         {
-            LOGGER.Debug($"rpc客户端断开连接:{Context.CallContext.Peer}");
-            ServiceManager.NamingService.Remove(CurServerId);
+            closeSrc.Cancel();
+
             if (group != null)
                 await group.RemoveAsync(Context);
-            await UnsubscribeAll();
-            await NodesChanged();
-        }
 
-        public IDiscoveryClient GetRpcClientAgent()
-        {
-            return BroadcastToSelf(group);
+            if (info == null)
+                return;
+
+            LOGGER.Debug($"rpc客户端断开连接:[{info}] {Context.CallContext.Peer}");  
+
+            NamingService.Instance.Remove(info); 
+            await NodesChanged();
         }
 
         private async Task NodesChanged()
         {
             await Task.Delay(10);
-            var list = ServiceManager.NamingService.GetAllNodes();
+            var list = NamingService.Instance.GetAllNodes();
             Broadcast(group).ServerChanged(list);
         }
 
         /// <summary>
-        /// 所有服启动之后都要到中心服来注册
+        /// 所有服启动之后都要到中心服注册
         /// </summary>
-        /// <param name="node"></param>
         /// <returns></returns>
-        public async Task<bool> Register(ServerInfo node)
+        public async Task<bool> Register(ServerInfo info)
         {
-            CurServerId = node.ServerId;
-            ServiceManager.NamingService.Add(node);
+            this.info = info;
+            NamingService.Instance.Add(info);
             await NodesChanged();
+            //如果是网关节点，开始心跳检测用于判断是否压力过大
+            if (info.Type == ServerType.Gate)
+            {
+                gatewayHubDic[info.ServerId] = this; 
+                _ = ExceptionMonitor.Report(ExceptionType.Notify, $"网关服[{info}]上线...");
+            }
             return true;
         }
 
-
         public Task<List<ServerInfo>> GetAllNodes()
         {
-            var nodes = ServiceManager.NamingService.GetAllNodes();
+            var nodes = NamingService.Instance.GetAllNodes();
             return Task.FromResult(nodes);
         }
 
         public Task<List<ServerInfo>> GetNodesByType(ServerType type)
         {
-            var nodes = ServiceManager.NamingService.GetNodesByType(type);
+            var nodes = NamingService.Instance.GetNodesByType(type);
             return Task.FromResult(nodes);
-        }
-
-        public Task Subscribe(string eventId)
-        {
-            SubscribeEvts[eventId] = true;
-            ServiceManager.SubscribeService.Subscribe(eventId, this);
-            return Task.CompletedTask;
-        }
-        public Task Unsubscribe(string eventId)
-        {
-            SubscribeEvts.TryRemove(eventId, out _);
-            ServiceManager.SubscribeService.Unsubscribe(eventId, this);
-            return Task.CompletedTask;
-        }
-
-        public Task UnsubscribeAll()
-        {
-            foreach (var v in SubscribeEvts)
-            {
-                ServiceManager.SubscribeService.Unsubscribe(v.Key, this);
-            }
-            SubscribeEvts.Clear();
-            return Task.CompletedTask;
-        }
-
-        public void PostMessageToClient(string eid, byte[] msg)
-        {
-            GetRpcClientAgent().HaveMessage(eid, msg);
         }
 
         //节点主动同步状态
         public Task SyncState(ServerState state)
         {
-            ServiceManager.NamingService.SetNodeState(CurServerId, state);
+            NamingService.Instance.SetNodeState(CurServerId, state);
             return Task.CompletedTask;
         }
     }

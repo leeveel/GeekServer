@@ -7,7 +7,7 @@ namespace Geek.Server.Gateway.Outer
     internal class UdpChannel : BaseNetChannel
     {
         static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
-        public override string RemoteAddress => remoteEndPoint.ToString();
+        public override string RemoteAddress => "udp->"+ remoteEndPoint.ToString();
         public IPEndPoint remoteEndPoint;
         UdpServer udpServer;
         bool isClose;

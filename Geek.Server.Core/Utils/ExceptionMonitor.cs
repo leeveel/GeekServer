@@ -10,6 +10,8 @@ namespace Geek.Server.Core.Utils
         StartFailed = 1,
         UnhandledException,
         ActorTimeout,
+        Notify,
+        GateError,
         NetworkTimeout
     }
 
@@ -45,7 +47,7 @@ namespace Geek.Server.Core.Utils
 
             if (string.IsNullOrEmpty(monitorUrl) || string.IsNullOrEmpty(secret))
             {
-                LOGGER.Error($"Dintalk.monitorUrl{monitorUrl} or MonitorKey{secret} 不合法");
+                //LOGGER.Error($"Dintalk.monitorUrl{monitorUrl} or MonitorKey{secret} 不合法");
                 return;
             }
 

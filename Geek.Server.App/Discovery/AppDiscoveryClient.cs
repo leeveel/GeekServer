@@ -1,33 +1,30 @@
-﻿using Geek.Server.Core.Discovery;
+﻿using Core.Discovery;
+using Geek.Server.Core.Discovery;
 
 namespace Geek.Server.App.Discovery
 {
     public class AppDiscoveryClient : BaseDiscoveryClient
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+        public static AppDiscoveryClient Instance;
 
-        public AppDiscoveryClient(string url)
-            : base(url, () =>
+        public AppDiscoveryClient()
+            : base(() =>
             {
+                LOGGER.Info("local ip:" + Settings.Ins.LocalIp);
                 return new ServerInfo
                 {
                     ServerId = Settings.Ins.ServerId,
                     LocalIp = Settings.Ins.LocalIp,
+                    ServerName = Settings.Ins.ServerName, 
                     InnerPort = Settings.Ins.InnerPort,
                     OuterPort = Settings.Ins.OuterPort,
                     HttpPort = Settings.Ins.HttpPort,
                     Type = ServerType.Game
                 };
             })
-        { }
-
-        public override void ServerChanged(List<ServerInfo> nodes)
         {
-            //LOGGER.Debug("ServerChanged:" + node.ServerId);
-        }
-
-        public override void HaveMessage(string eid, byte[] msg)
-        {
+            AppDiscoveryClient.Instance = this;
         }
     }
 }

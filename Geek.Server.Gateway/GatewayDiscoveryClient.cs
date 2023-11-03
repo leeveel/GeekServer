@@ -1,8 +1,6 @@
 ﻿using Core.Discovery;
 using Geek.Server.Core.Discovery;
 using Geek.Server.Gateway.Common;
-using System.Collections.Concurrent;
-using System.Net;
 
 namespace Geek.Server.Gateway
 {
@@ -20,18 +18,13 @@ namespace Geek.Server.Gateway
             }
         }
 
-        readonly ConcurrentDictionary<long, ServerInfo> allServerMap = new();
-        readonly ConcurrentDictionary<long, ServerInfo> gatewayServerMap = new();
-
-        private readonly string whenGateStateChangeEvtId = SubscribeEvent.NetNodeStateChange(ServerType.Gate);
-
         public GatewayDiscoveryClient() :
-            base(Settings.Ins.DiscoveryServerUrl,
+            base(
                 () => new ServerInfo
                 {
-                    ServerId = Settings.Ins.ServerId,
-                    PublicIp = Settings.InsAs<GateSettings>().PublicIp,
+                    ServerId = Settings.Ins.ServerId, 
                     LocalIp = Settings.Ins.LocalIp,
+                    ServerName = Settings.Ins.ServerName, 
                     InnerPort = Settings.Ins.InnerPort,
                     OuterPort = Settings.Ins.OuterPort,
                     HttpPort = Settings.Ins.HttpPort,
@@ -43,86 +36,40 @@ namespace Geek.Server.Gateway
                     CurrentLoad = GateServer.Instance.CurActiveChannelCount
                 })
         {
+            UpdateAllGateway();
         }
 
-        public override void OnRegister()
+        public async void UpdateAllGateway()
         {
-            ServerAgent?.Subscribe(whenGateStateChangeEvtId);
-        }
-
-        public override void HaveMessage(string eid, byte[] msg)
-        {
-            if (whenGateStateChangeEvtId == eid)
-            {
-                var info = MessagePack.MessagePackSerializer.Deserialize<ServerInfo>(msg);
-                if (info != null)
-                {
-                    var oldInfo = GetServer(info.ServerId);
-                    if (oldInfo != null)
-                    {
-                        oldInfo.State = info.State;
-#if DEBUG
-                        LOGGER.Debug($"更新server[{info.ServerId}][{info.Type}]状态,{info.State?.ToString()}");
-#endif
-                    }
-                }
-            }
-        }
-
-        public override void ServerChanged(List<ServerInfo> nodes)
-        {
-            allServerMap.Clear();
-            gatewayServerMap.Clear();
-            LOGGER.Debug("ServerChanged:" + nodes.Count);
-            foreach (var node in nodes)
+            await Task.Delay(TimeSpan.FromSeconds(3));
+            var token = closeTokenSrc.Token;
+            //定时同步其他网关信息
+            while (!token.IsCancellationRequested)
             {
                 try
                 {
+                    if (ServerAgent != null)
+                    {
+                        var list = await ServerAgent.GetNodesByType(ServerType.Gate);
+                        foreach (var info in list)
+                        {
+                            var oldInfo = GetServer(info.ServerId);
+                            if (oldInfo != null)
+                            {
+                                oldInfo.State = info.State;
 #if DEBUG
-                    LOGGER.Debug(MessagePack.MessagePackSerializer.SerializeToJson(node));
+                                LOGGER.Debug($"更新server[{info.ServerId}][{info.Type}]状态,{info.State?.ToString()}");
 #endif
-                    if (node.Type == ServerType.Game)
-                    {
-                        if (string.IsNullOrEmpty(node.LocalIp))
-                        {
-                            node.InnerEndPoint = null;
-                            LOGGER.Error($"Logic server [{node.ServerId}] localIp is empty...");
-                        }
-                        else
-                        {
-                            node.InnerEndPoint = new IPEndPoint(IPAddress.Parse(node.LocalIp), node.InnerPort);
+                            }
                         }
                     }
-                    else if (node.Type == ServerType.Gate)
-                    {
-                        gatewayServerMap[node.ServerId] = node;
-                    }
-                    allServerMap[node.ServerId] = node;
+                    await Task.Delay(TimeSpan.FromSeconds(15), token);
                 }
-                catch (Exception e)
+                catch
                 {
-                    LOGGER.Error(e);
+
                 }
             }
-        }
-
-        public ServerInfo GetServer(int serverId, ServerType type)
-        {
-            if (allServerMap.TryGetValue(serverId, out var server))
-            {
-                if (server.Type == type)
-                    return server;
-            }
-            return null;
-        }
-
-        public ServerInfo GetServer(int serverId)
-        {
-            if (allServerMap.TryGetValue(serverId, out var server))
-            {
-                return server;
-            }
-            return null;
         }
 
         public ServerInfo GetIdleGateway()

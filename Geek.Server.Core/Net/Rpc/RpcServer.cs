@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -18,7 +19,7 @@ namespace Geek.Server.Core.Net.Rpc
             readonly NLogLoggerFactory loggerFactory;
             public LoggerProvider()
             {
-                loggerFactory = new NLog.Extensions.Logging.NLogLoggerFactory();
+                loggerFactory = new NLogLoggerFactory();
             }
 
             public void Dispose()

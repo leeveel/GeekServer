@@ -1,12 +1,7 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-
-public abstract class Singleton<T> where T : Singleton<T>
+﻿public abstract class Singleton<T> where T : Singleton<T>, new()
 {
-    private const string ErrorMessage = "单例构造函数不能为public";
     private static T instance = null;
-    private static readonly object lockObject = new Object();
+    private static readonly object lockObject = new();
     public static T Instance
     {
         get
@@ -15,30 +10,10 @@ public abstract class Singleton<T> where T : Singleton<T>
             {
                 lock (lockObject)
                 {
-                    instance ??= Create();
+                    instance ??= new();
                 }
             }
             return instance;
-        }
-    }
-
-    protected Singleton()
-    {
-        var pconstr = typeof(T).GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-        if (pconstr.Any())
-            throw new Exception(typeof(T) + ErrorMessage);
-    }
-
-    private static T Create()
-    {
-        try
-        {
-            var constructors = typeof(T).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
-            return (T)constructors.Single().Invoke(null);
-        }
-        catch
-        {
-            throw new Exception(typeof(T) + ErrorMessage);
         }
     }
 }

@@ -35,14 +35,18 @@ namespace Geek.Server.App.Common
 
                 Settings.InsAs<AppSetting>().ServerReady = true;
 
-                _ = new AppDiscoveryClient(Settings.Ins.DiscoveryServerUrl).Start();
+                _ = new AppDiscoveryClient().Start();
 
-                new KcpServer(Settings.Ins.InnerPort, KcpHander.OnMessage, KcpHander.OnChannelRemove).Start();
+                var kcpServer = new KcpServer(Settings.Ins.InnerPort, KcpHander.OnMessage, KcpHander.OnChannelRemove, AppDiscoveryClient.Instance.GetServerInnerEndPoint);
+                kcpServer.Start();
 
                 Log.Info("进入游戏主循环...");
                 Console.WriteLine("***进入游戏主循环***");
                 Settings.Ins.AppRunning = true;
+
                 await Settings.Ins.AppExitToken;
+
+                kcpServer.Stop();
             }
             catch (Exception e)
             {

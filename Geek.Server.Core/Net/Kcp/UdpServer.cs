@@ -1,22 +1,33 @@
-﻿using Geek.Server.Core.Utils;
-using NLog;
-using System;
+﻿using System.Buffers;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Geek.Server.Core.Utils;
+using NLog;
 
 namespace Geek.Server.Core.Net.Kcp
 {
+    //docker 内部发送 需要用localIP 否则172.17.0.1可能丢包
     public class UdpServer
     {
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         public Socket socket;
         public delegate void ReceiveFunc(TempNetPackage package, EndPoint point);
         ReceiveFunc onRecv;
-        public UdpServer(int port, ReceiveFunc onRecv)
+        int innerId = 0;
+        bool isInnerServer => innerId != 0;
+
+        Func<int, EndPoint> getEndPointById;
+        public UdpServer(int port, ReceiveFunc onRecv, int innerId = 0, Func<int, EndPoint> getEndPointById = null)
         {
+            this.getEndPointById = getEndPointById;
+            this.innerId = innerId;
             this.onRecv = onRecv;
-            socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp)
+            {
+                DualMode = true,
+                EnableBroadcast = false
+            };
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 socket.SendBufferSize = 1024 * 1024 * 40;
@@ -39,53 +50,76 @@ namespace Geek.Server.Core.Net.Kcp
             }
         }
 
-        public Task Start()
+        public Task Start(int parallel = 1)
         {
-            return Task.Factory.StartNew((o) =>
+            parallel = Math.Max(parallel, 1);
+
+            List<Task> tasks = new List<Task>();
+            for (int i = 0; i < parallel; i++)
             {
-                if (socket == null)
+                tasks.Add(Task.Factory.StartNew((o) =>
                 {
-                    return;
-                }
-                byte[] cache = new byte[4096];
-                EndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
-                while (socket != null)
-                {
-                    try
+                    byte[] cache = new byte[2048];
+                    EndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                    while (socket != null)
                     {
-                        int len = socket.ReceiveFrom(cache, ref ipEndPoint);
-                        //LOGGER.Debug($"收到udp数据...{ipEndPoint} {len}");
-                        if (onRecv != null)
+                        try
                         {
-                            var package = new TempNetPackage(cache.AsSpan(0, len));
-                            if (package.isOk)
+                            int len = socket.ReceiveFrom(cache, ref ipEndPoint);
+                            if (isInnerServer)
                             {
-                                onRecv(package, ipEndPoint);
+                                ipEndPoint = getEndPointById?.Invoke(cache.ReadInt(0)) ?? ipEndPoint;
                             }
-                            else
+                            LOGGER.Info($"收到udp数据...{ipEndPoint} {len}");
+                            if (onRecv != null)
                             {
-                                LOGGER.Error($"错误的udp package...{ipEndPoint}");
+                                var offset = isInnerServer ? 4 : 0;
+                                var package = new TempNetPackage(cache.AsSpan(offset, len - offset));
+                                if (package.isOk)
+                                {
+                                    //if (package.flag != NetPackageFlag.HEART)
+                                    //{
+                                    //    LOGGER.Info($"收到包...{package.ToString()}");
+                                    //}
+                                    onRecv(package, ipEndPoint);
+                                }
+                                else
+                                {
+                                    LOGGER.Error($"错误的udp package...{ipEndPoint}");
+                                }
                             }
                         }
-                    }
-                    catch (Exception e)
-                    {
+                        catch (Exception e)
+                        {
 #if DEBUG
-                        LOGGER.Error(e);
+                            LOGGER.Warn(e);
 #endif
+                        }
                     }
-                }
-            }, CancellationToken.None, TaskCreationOptions.LongRunning);
+                    LOGGER.Warn($"退出udp接收线程...{i}");
+                }, TaskCreationOptions.LongRunning));
+            }
+            return Task.WhenAll(tasks);
         }
 
         public void SendTo(TempNetPackage package, EndPoint point)
         {
-            Span<byte> target = stackalloc byte[package.Length];
+            var len = package.Length + (innerId == 0 ? 0 : 4);
+            Span<byte> target = stackalloc byte[len];
             int offset = 0;
+            if (isInnerServer)
+            {
+                target.Write(innerId, ref offset);
+            }
             target.Write(package, ref offset);
             try
             {
                 socket?.SendTo(target, point);
+
+                if (package.flag != NetPackageFlag.HEART)
+                {
+                    LOGGER.Info($"发送包...{package.ToString()} {point}");
+                }
             }
             catch
             {
@@ -97,7 +131,16 @@ namespace Geek.Server.Core.Net.Kcp
         {
             try
             {
-                socket?.SendTo(span, point);
+                if (isInnerServer)
+                {
+                    int offset = 0;
+                    Span<byte> target = stackalloc byte[span.Length + 4];
+                    target.Write(innerId, ref offset);
+                    span.CopyTo(target[offset..]);
+                    socket?.SendTo(target, point);
+                }
+                else
+                    socket?.SendTo(span, point);
             }
             catch
             {
@@ -107,7 +150,7 @@ namespace Geek.Server.Core.Net.Kcp
 
         public void Close()
         {
-            socket.Close();
+            socket?.Close();
             socket = null;
         }
     }

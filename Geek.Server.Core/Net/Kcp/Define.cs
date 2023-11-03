@@ -1,10 +1,4 @@
-﻿using Amazon.Runtime.Internal.Transform;
-using Geek.Server.Core.Utils;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Geek.Server.Core.Utils;
 
 namespace Geek.Server.Core.Net.Kcp
 {
@@ -76,10 +70,7 @@ namespace Geek.Server.Core.Net.Kcp
             body = data[headLen..];
         }
 
-        public int Length
-        {
-            get => headLen + body.Length;
-        }
+        public readonly int Length => headLen + body.Length;
 
         public override string ToString()
         {

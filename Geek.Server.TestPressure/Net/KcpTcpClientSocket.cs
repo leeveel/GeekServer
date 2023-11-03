@@ -88,7 +88,7 @@ namespace Geek.Server.TestPressure.Net
                     await task;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Close();
                 return new(false, true, false);

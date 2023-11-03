@@ -1,65 +1,70 @@
 ﻿
 using Core.Discovery;
-using Geek.Server.Core.Discovery;
 using System.Collections.Concurrent;
 
 namespace Geek.Server.Discovery.Logic
 {
-    public class NamingService
+    public class NamingService : Singleton<NamingService>
     {
-        static readonly NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
+        static NLog.Logger Log = NLog.LogManager.GetCurrentClassLogger();
         //服务器节点的id 为自身的serverid
-        internal readonly ConcurrentDictionary<long, ServerInfo> nodeMap = new();
+        ConcurrentDictionary<long, ServerInfo> serverMap = new();
 
         public int NodeCount()
         {
-            return nodeMap.Count;
+            return serverMap.Count;
         }
 
-        public ServerInfo Remove(long id)
+        public void Remove(ServerInfo info)
         {
-            nodeMap.TryRemove(id, out var node);
-            return node;
-        }
-
-        public void Remove(ServerInfo node)
-        {
-            nodeMap.TryRemove(node.ServerId, out var _);
+            if (info == null)
+                return;
+            serverMap.TryRemove(new KeyValuePair<long, ServerInfo>(info.ServerId, info));
         }
 
         public ServerInfo Get(long id)
         {
-            nodeMap.TryGetValue(id, out var v);
+            serverMap.TryGetValue(id, out var v);
             return v;
-        }
-        public List<long> GetKeys()
-        {
-            var list = new List<long>();
-            list.AddRange(nodeMap.Keys.ToArray());
-            return list;
         }
 
         public List<ServerInfo> GetAllNodes()
         {
-            return nodeMap.Values.ToList();
+            return serverMap.Values.ToList();
         }
 
         public int GetNodeCount()
         {
-            return nodeMap.Count;
+            return serverMap.Count;
         }
 
-        public ServerInfo Add(ServerInfo node)
+        public void AddSelf()
         {
-            Log.Debug($"新的网络节点:{node.ServerId} {node.Type}");
-            var old = nodeMap.GetOrAdd(node.ServerId, node);
-            return old != node ? old : null;
+            serverMap[Settings.Ins.ServerId] = new ServerInfo
+            {
+                Type = ServerType.Discovery,
+                ServerName = Settings.Ins.ServerName, 
+                ServerId = Settings.Ins.ServerId,
+                LocalIp = Settings.Ins.LocalIp,
+                InnerPort = Settings.Ins.RpcPort
+            };
+        }
+
+        public void Add(ServerInfo node)
+        {
+            if (node.Type == ServerType.Discovery)
+            {
+                Log.Error($"不能添加discovery节点...{node?.ToString()}");
+                return;
+            }
+            serverMap[node.ServerId] = node;
+            Log.Info($"新的网络节点:[{node}]   总数：{GetNodeCount()}");
         }
 
         public List<ServerInfo> GetNodesByType(ServerType type)
         {
             var list = new List<ServerInfo>();
-            foreach (var node in nodeMap)
+            foreach (var node in serverMap)
             {
                 if (node.Value.Type == type)
                 {
@@ -72,10 +77,9 @@ namespace Geek.Server.Discovery.Logic
         public void SetNodeState(long nodeId, ServerState state)
         {
             //Log.Debug($"设置节点{nodeId}状态");
-            if (nodeMap.TryGetValue(nodeId, out var node))
+            if (serverMap.TryGetValue(nodeId, out var node))
             {
                 node.State = state;
-                ServiceManager.SubscribeService.Publish(SubscribeEvent.NetNodeStateChange(node.Type), MessagePack.MessagePackSerializer.Serialize(node));
             }
         }
     }
