@@ -13,17 +13,17 @@ namespace Geek.Server.Gateway
 {
     public class GateServer : Singleton<GateServer>
     {
-        static readonly Logger LOGGER = LogManager.GetCurrentClassLogger(); 
+        static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
         internal class GateTcpConnectHander : ConnectionHandler
-        { 
+        {
             readonly UdpServer innerUdpServer = Instance.innerUdpServer;
 
             public override async Task OnConnectedAsync(ConnectionContext context)
             {
                 string remoteAdd = context.RemoteEndPoint.ToString();
                 LOGGER.Info($"tcp连接:{remoteAdd}");
-                 
+
                 try
                 {
                     if (!await CheckLoad(context))
@@ -45,6 +45,7 @@ namespace Geek.Server.Gateway
                         RemoteAddress = "tcp->" + remoteAdd
                     };
                     await channel.StartAsync();
+                    channel.Close();
                 }
                 catch { }
                 finally
@@ -146,7 +147,7 @@ namespace Geek.Server.Gateway
                         innerUdpServer.SendTo(package, server.InnerEndPoint);
                         break;
 
-                    case NetPackageFlag.CLOSE: 
+                    case NetPackageFlag.CLOSE:
                         channel.Close();
                         break;
                 }
@@ -158,7 +159,7 @@ namespace Geek.Server.Gateway
         UdpServer innerUdpServer;
 
         readonly ConcurrentDictionary<long, BaseNetChannel> outerChannelMap = new();
-        public int CurActiveChannelCount { get; private set; } = 0;  
+        public int CurActiveChannelCount { get; private set; } = 0;
 
         public void Start()
         {
@@ -222,7 +223,7 @@ namespace Geek.Server.Gateway
                     }
                 }
 
-                CurActiveChannelCount = activeChannelCount; 
+                CurActiveChannelCount = activeChannelCount;
 
                 int removeCount = 0;
                 foreach (var k in removeList)
@@ -296,7 +297,7 @@ namespace Geek.Server.Gateway
                     cacheChannel?.Close();
                 }
 #if DEBUG
-                LOGGER.Warn($"添加channel:{channel.RemoteAddress} {channel.GetType().Name}");
+                //LOGGER.Warn($"添加channel:{channel.RemoteAddress} {channel.GetType().Name}");
 #endif
                 outerChannelMap[channel.NetId] = channel;
             }
@@ -334,12 +335,12 @@ namespace Geek.Server.Gateway
             switch (package.flag)
             {
                 case NetPackageFlag.ACK:
-                    { 
+                    {
                         clientChannel.Write(package);
                         break;
                     }
 
-                case NetPackageFlag.MSG: 
+                case NetPackageFlag.MSG:
                     clientChannel.Write(package);
                     break;
 
@@ -413,12 +414,20 @@ namespace Geek.Server.Gateway
                 return;
             }
 
+            //如果channel已经关闭，提示客户端重连网关
+            if (package.flag != NetPackageFlag.SYN && (channel == null || channel.IsClose()))
+            {
+                package.flag = NetPackageFlag.NO_GATE_CONNECT;
+                outerUdpServer.SendTo(package, endPoint);
+                return;
+            }
+
             switch (package.flag)
             {
                 case NetPackageFlag.SYN:
                     {
 #if DEBUG
-                        LOGGER.Info($"收到udp连接请求 netid:{package.ToString()}");
+                        //LOGGER.Info($"收到udp连接请求 netid:{package.ToString()}");
 #endif
                         if (!CheckLoad(endPoint))
                         {
@@ -431,9 +440,9 @@ namespace Geek.Server.Gateway
                         }
                         else
                         {
-                            package.flag = NetPackageFlag.SYN_OLD_NET_ID; 
+                            package.flag = NetPackageFlag.SYN_OLD_NET_ID;
                         }
-                         
+
                         channel = new UdpChannel(netId, package.innerServerId, outerUdpServer, endPoint);
                         (channel as UdpChannel).UpdateRemoteAddress(endPoint);
                         AddChannel(channel);

@@ -4,7 +4,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Scriban;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Geek.Server.CodeGenerator.Agent
 {
@@ -22,9 +24,13 @@ namespace Geek.Server.CodeGenerator.Agent
         {
             if (context.SyntaxReceiver is AgentFilter receiver)
             {
+                receiver.ClearPartialList();
                 //生成模板
                 var str = ResLoader.LoadTemplate("Agent.liquid");
                 Template agentTemplate = Template.Parse(str);
+
+                Dictionary<string, int> partialClassCount = new Dictionary<string, int>();
+
                 foreach (var agent in receiver.AgentList)
                 {
                     string fullName = agent.GetFullName();
@@ -33,6 +39,22 @@ namespace Geek.Server.CodeGenerator.Agent
                     info.Name = info.Super + "Wrapper";
                     //info.Space = Tools.GetNameSpace(fullName);
                     info.Space = "Wrapper.Agent";
+
+                    string outFileName = null;
+
+                    var isPartialClass = agent.Modifiers.ToList().FindIndex(s => s.Text == "partial") >= 0;
+                    if (isPartialClass)
+                    {
+                        info.Partial = "partial";
+                        partialClassCount.TryGetValue(info.Name, out var count);
+                        partialClassCount[info.Name] = count + 1;
+                        outFileName = $"{info.Name}{count}.g.cs";
+                    }
+                    else
+                    {
+                        outFileName = $"{info.Name}.g.cs";
+                    }
+
                     //处理Using
                     CompilationUnitSyntax root = agent.SyntaxTree.GetCompilationUnitRoot();
                     foreach (UsingDirectiveSyntax element in root.Usings)
@@ -91,11 +113,11 @@ namespace Geek.Server.CodeGenerator.Agent
                                 else if (attStr.Contains("[Discard]"))
                                 {
                                     mth.Discard = true;
-                                    if(mth.Isasync)
+                                    if (mth.Isasync)
                                     {
                                         mth.Modify = mth.Modify.Replace("async ", "");
                                         mth.Isasync = false;
-                                    } 
+                                    }
                                 }
                                 else if (attStr.Contains("TimeOut"))
                                 {
@@ -150,7 +172,7 @@ namespace Geek.Server.CodeGenerator.Agent
                         }
                     }
                     var source = agentTemplate.Render(info);
-                    context.AddSource($"{info.Name}.g.cs", source);
+                    context.AddSource(outFileName, source);
                 }
             }
         }

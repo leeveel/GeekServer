@@ -10,7 +10,7 @@ namespace Geek.Server.CodeGenerator.Utils
             if (string.IsNullOrEmpty(fullName))
                 return fullName;
             int i = fullName.LastIndexOf('.');
-            if (i < 0)
+            if(i < 0)
                 return fullName;
             return fullName.Substring(0, i);
         }

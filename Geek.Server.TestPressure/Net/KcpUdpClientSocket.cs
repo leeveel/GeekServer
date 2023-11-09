@@ -20,26 +20,29 @@ namespace Geek.Server.TestPressure.Net
             isConnecting = true;
             try
             {
-                socket = new UdpClient(ip, port);
+                socket = new UdpClient(0,AddressFamily.InterNetwork);
+                socket.Connect(ip, port);
                 //socket.ExclusiveAddressUse = true;
+
+                NetId = netId;
+                //serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+                var data = new byte[TempNetPackage.headLen];
+                data.Write(NetPackageFlag.SYN, 0);
+                data.Write(NetId, 1);
+                data.Write(ServerId, 9);
+                //Debug.Log($"开始udp连接....{NetId}");  
+                socket.Send(data, data.Length);
             }
             catch (Exception e)
             {
                 LOGGER.Error(e);
                 return new(false, true, false);
             }
-            NetId = netId;
-            //serverEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
-            var data = new byte[TempNetPackage.headLen];
-            data.Write(NetPackageFlag.SYN, 0);
-            data.Write(NetId, 1);
-            data.Write(ServerId, 9);
-            //Debug.Log($"开始udp连接....{NetId}");  
-            socket.Send(data, data.Length);
+       
             try
             {
                 var task = socket.ReceiveAsync();
-                if (task == await Task.WhenAny(task, Task.Delay(400)))
+                if (task == await Task.WhenAny(task, Task.Delay(5000)))
                 {
                     var buffer = task.Result.Buffer;
                     if (buffer.Length >= TempNetPackage.headLen)

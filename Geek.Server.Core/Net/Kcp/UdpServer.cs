@@ -70,7 +70,7 @@ namespace Geek.Server.Core.Net.Kcp
                             {
                                 ipEndPoint = getEndPointById?.Invoke(cache.ReadInt(0)) ?? ipEndPoint;
                             }
-                            LOGGER.Info($"收到udp数据...{ipEndPoint} {len}");
+                            //LOGGER.Info($"收到udp数据...{ipEndPoint} {len}");
                             if (onRecv != null)
                             {
                                 var offset = isInnerServer ? 4 : 0;
@@ -116,10 +116,10 @@ namespace Geek.Server.Core.Net.Kcp
             {
                 socket?.SendTo(target, point);
 
-                if (package.flag != NetPackageFlag.HEART)
-                {
-                    LOGGER.Info($"发送包...{package.ToString()} {point}");
-                }
+                //if (package.flag != NetPackageFlag.HEART)
+                //{
+                //    LOGGER.Info($"发送包...{package.ToString()} {point}");
+                //}
             }
             catch
             {

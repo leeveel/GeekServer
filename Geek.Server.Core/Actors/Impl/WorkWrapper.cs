@@ -151,6 +151,50 @@
         }
     }
 
+
+    public class ActionValueAsyncWrapper : WorkWrapper
+    {
+        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+
+        public Func<ValueTask> Work { private set; get; }
+        public TaskCompletionSource<bool> Tcs { private set; get; }
+
+        public ActionValueAsyncWrapper(Func<ValueTask> work)
+        {
+            Work = work;
+            Tcs = new TaskCompletionSource<bool>();
+        }
+
+        public override async Task DoTask()
+        {
+            try
+            {
+                SetContext();
+                await Work();
+            }
+            catch (Exception e)
+            {
+                LOGGER.Error(e.ToString());
+            }
+            finally
+            {
+                ResetContext();
+                Tcs.TrySetResult(true);
+            }
+        }
+
+        public override string GetTrace()
+        {
+            return Work.Target + "|" + Work.Method.Name;
+        }
+
+        public override void ForceSetResult()
+        {
+            ResetContext();
+            Tcs.TrySetResult(false);
+        }
+    }
+
     public class FuncAsyncWrapper<T> : WorkWrapper
     {
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
@@ -159,6 +203,49 @@
         public TaskCompletionSource<T> Tcs { private set; get; }
 
         public FuncAsyncWrapper(Func<Task<T>> work)
+        {
+            Work = work;
+            Tcs = new TaskCompletionSource<T>();
+        }
+
+        public override async Task DoTask()
+        {
+            T ret = default;
+            try
+            {
+                SetContext();
+                ret = await Work();
+            }
+            catch (Exception e)
+            {
+                LOGGER.Error(e.ToString());
+            }
+            finally
+            {
+                ResetContext();
+                Tcs.TrySetResult(ret);
+            }
+        }
+
+        public override string GetTrace()
+        {
+            return Work.Target + "|" + Work.Method.Name;
+        }
+
+        public override void ForceSetResult()
+        {
+            ResetContext();
+            Tcs.TrySetResult(default);
+        }
+    }
+    public class FuncValueAsyncWrapper<T> : WorkWrapper
+    {
+        static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
+
+        public Func<ValueTask<T>> Work { private set; get; }
+        public TaskCompletionSource<T> Tcs { private set; get; }
+
+        public FuncValueAsyncWrapper(Func<ValueTask<T>> work)
         {
             Work = work;
             Tcs = new TaskCompletionSource<T>();
