@@ -91,6 +91,7 @@ namespace Geek.Server.CodeGenerator.Agent
     public class AgentInfo
     {
         public string Space { get; set; }
+        public string Partial { get; set; } = "";
         public string Name { get; set; }
         public string Super { get; set; }
         public List<MthInfo> Methods { get; set; } = new List<MthInfo>();

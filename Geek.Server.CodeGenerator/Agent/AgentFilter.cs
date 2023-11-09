@@ -9,6 +9,8 @@ namespace Geek.Server.CodeGenerator.Agent
     {
 
         public List<ClassDeclarationSyntax> AgentList { get; private set; } = new List<ClassDeclarationSyntax>();
+        private HashSet<string> AgentNameList = new HashSet<string>();
+        private List<ClassDeclarationSyntax> PartialList = new List<ClassDeclarationSyntax>();
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
@@ -17,8 +19,28 @@ namespace Geek.Server.CodeGenerator.Agent
                 if (IsCompAgent(syntax))
                 {
                     AgentList.Add(syntax);
+                    AgentNameList.Add(syntax.Identifier.Text);
+                }
+                else
+                {
+                    if (syntax.Modifiers.ToList().FindIndex(s => s.Text == "partial") >= 0)
+                    {
+                        PartialList.Add(syntax);
+                    }
                 }
             }
+        }
+
+        public void ClearPartialList()
+        {
+            foreach (var p in PartialList)
+            {
+                if (AgentNameList.Contains(p.Identifier.Text))
+                {
+                    AgentList.Add(p);
+                }
+            }
+            PartialList.Clear();
         }
 
         public bool IsCompAgent(ClassDeclarationSyntax source)
