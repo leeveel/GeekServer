@@ -9,10 +9,8 @@ using System.Text;
 namespace Geek.Server.App
 {
     class Program
-    { 
-        private static readonly Logger Log = LogManager.GetCurrentClassLogger(); 
-
-        private static volatile bool ExitCalled = false;
+    {
+        private static readonly Logger Log = LogManager.GetCurrentClassLogger();
         private static volatile Task GameLoopTask = null;
         private static volatile Task ShutDownTask = null;
 
@@ -53,7 +51,7 @@ namespace Geek.Server.App
                 GameLoopTask?.Wait();
                 LogManager.Shutdown();
                 Console.WriteLine($"退出程序");
-                Process.GetCurrentProcess().Kill();
+                Process.GetCurrentProcess().Kill(true);
             });
             ShutDownTask.Wait();
         }

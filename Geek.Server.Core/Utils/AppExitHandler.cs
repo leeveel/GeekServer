@@ -63,7 +63,7 @@ namespace Geek.Server.Core.Utils
             {
                 LOGGER.Error("Unhandled Exception:" + e.ToString());
             } 
-            callBack();
+            //callBack();
         }
     }
 }
