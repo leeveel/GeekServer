@@ -15,7 +15,7 @@ namespace Geek.Server.Core.Net.Websocket
         WebSocket webSocket;
         readonly Action<Message> onMessage;
         protected readonly ConcurrentQueue<Message> sendQueue = new();
-        protected readonly SemaphoreSlim newSendMsgSemaphore = new(0);
+        protected readonly SemaphoreSlim newSendMsgSemaphore = new(0); 
 
         public WebSocketChannel(WebSocket webSocket, string remoteAddress, Action<Message> onMessage = null)
         {
@@ -58,23 +58,31 @@ namespace Geek.Server.Core.Net.Websocket
 
         async Task DoSend()
         {
-            var array = new object[2];
-            while (!IsClose())
+            try
             {
-                await newSendMsgSemaphore.WaitAsync();
-
-                if (!sendQueue.TryDequeue(out var message))
+                var array = new object[2];
+                var closeToken = closeSrc.Token;
+                while (!closeToken.IsCancellationRequested)
                 {
-                    continue;
-                }
-                array[0] = message.MsgId;
-                array[1] = message;
-                //这里为了应对前端是js等不方便处理多态的情况 
-                var data = MessagePackSerializer.Serialize(array, MessagePackSerializerOptions.Standard);
+                    await newSendMsgSemaphore.WaitAsync(closeToken);
+
+                    if (!sendQueue.TryDequeue(out var message))
+                    {
+                        continue;
+                    }
+                    array[0] = message.MsgId;
+                    array[1] = message;
+                    //这里为了应对前端是js等不方便处理多态的情况 
+                    var data = MessagePackSerializer.Serialize(array, MessagePackSerializerOptions.Standard);
 #if DEBUG
-                LOGGER.Info("发送消息:" + MessagePackSerializer.ConvertToJson(data));
+                    LOGGER.Info("发送消息:" + MessagePackSerializer.ConvertToJson(data));
 #endif
-                await webSocket.SendAsync(data, WebSocketMessageType.Binary, true, closeSrc.Token);
+                    await webSocket.SendAsync(data, WebSocketMessageType.Binary, true, closeToken);
+                }
+            }
+            catch
+            {
+
             }
         }
 
@@ -108,7 +116,8 @@ namespace Geek.Server.Core.Net.Websocket
             var stream = new MemoryStream();
             var buffer = new ArraySegment<byte>(new byte[2048]);
 
-            while (!IsClose())
+            var closeToken = closeSrc.Token;
+            while (!closeToken.IsCancellationRequested)
             {
                 int len = 0;
                 WebSocketReceiveResult result;
@@ -116,7 +125,7 @@ namespace Geek.Server.Core.Net.Websocket
                 stream.Seek(0, SeekOrigin.Begin);
                 do
                 {
-                    result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
+                    result = await webSocket.ReceiveAsync(buffer, closeToken);
                     len += result.Count;
                     stream.Write(buffer.Array, buffer.Offset, result.Count);
                 } while (!result.EndOfMessage);
