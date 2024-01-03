@@ -17,6 +17,8 @@ namespace Geek.Server.Core.Timer
 
         public static void Unschedule(long id)
         {
+            if (scheduler.IsShutdown)
+                return;
             if (id <= 0)
                 return;
             scheduler.DeleteJob(JobKey.Create(id + ""));
@@ -24,6 +26,8 @@ namespace Geek.Server.Core.Timer
 
         public static void Unschedule(IEnumerable<long> set)
         {
+            if (scheduler.IsShutdown)
+                return;
             foreach (var id in set)
             {
                 if (id > 0)

@@ -24,10 +24,10 @@
     <PackageReference Include="MessagePack" Version="2.5.129" />
     <PackageReference Include="Microsoft.AspNetCore.Connections.Abstractions" Version="7.0.11" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.21.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.23.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NLog" Version="5.2.4" />
-    <PackageReference Include="Quartz" Version="3.7.0" />
+    <PackageReference Include="Quartz" Version="3.8.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
 
     <PackageReference Include="Grpc.AspNetCore.Server" Version="2.57.0" />
