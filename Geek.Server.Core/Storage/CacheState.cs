@@ -1,11 +1,13 @@
 ﻿using Geek.Server.Core.Serialize;
 using MessagePack;
+using MongoDB.Bson.Serialization.Attributes;
 using NLog;
 
 namespace Geek.Server.Core.Storage
 {
 
     [MessagePackObject(true)]
+    [BsonIgnoreExtraElements(true,Inherited =true)]
     public abstract class CacheState
     {
         public const string UniqueId = nameof(Id);
