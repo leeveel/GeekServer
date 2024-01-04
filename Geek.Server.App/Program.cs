@@ -32,13 +32,8 @@ namespace Geek.Server.App
                 {
                     error = $"服务器运行时异常 e:{e}";
                     Console.WriteLine(error);
-                }
-                else
-                {
-                    error = $"启动服务器失败 e:{e}";
-                    Console.WriteLine(error);
-                }
-                File.WriteAllText("server_error.txt", $"{error}", Encoding.UTF8);
+                    File.WriteAllText("server_error.txt", $"{e}", Encoding.UTF8);
+                } 
             }
         }
 
@@ -50,6 +45,7 @@ namespace Geek.Server.App
                 Settings.AppRunning = false;
                 GameLoopTask?.Wait();
                 LogManager.Shutdown();
+                AppExitHandler.Kill();
                 Console.WriteLine($"退出程序");
                 Process.GetCurrentProcess().Kill(true);
             });

@@ -95,6 +95,8 @@ namespace Geek.Server.Core.Storage
                     {
                         var bsonClassMap = new BsonClassMap(t);
                         bsonClassMap.AutoMap();
+                        bsonClassMap.SetIgnoreExtraElements(true);
+                        bsonClassMap.SetIgnoreExtraElementsIsInherited(true);
                         BsonClassMap.RegisterClassMap(bsonClassMap);
                     }
                 }

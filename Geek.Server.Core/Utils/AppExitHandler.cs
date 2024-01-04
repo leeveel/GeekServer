@@ -8,6 +8,7 @@ namespace Geek.Server.Core.Utils
         static readonly NLog.Logger LOGGER = NLog.LogManager.GetCurrentClassLogger();
         static Action callBack;
         private static PosixSignalRegistration exitSignalReg;
+        static bool isKill = false;
         public static void Init(Action existCallBack)
         {
             callBack = () =>
@@ -41,8 +42,15 @@ namespace Geek.Server.Core.Utils
             Console.CancelKeyPress += (s, e) => { callBack(); };
         }
 
+        public static void Kill()
+        {
+            isKill = true;
+        }
+
         static void handleFetalException(string tag, object e)
-        { 
+        {
+            if (isKill)
+                return;
             LOGGER.Error($"[{tag}]get unhandled exception");
             if (e == null)
             {
