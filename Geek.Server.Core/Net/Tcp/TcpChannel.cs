@@ -2,6 +2,7 @@
 using Geek.Server.Core.Serialize;
 using MessagePack;
 using Microsoft.AspNetCore.Connections;
+using SharpCompress.Writers;
 using System.Buffers;
 using System.IO.Pipelines;
 
@@ -35,66 +36,89 @@ namespace Geek.Server.Core.Net.Tcp
 
         public override async Task StartAsync()
         {
+            Task reading = ReadAsync();
+            Task writing = SendAsync();
+            await Task.WhenAll(reading, writing);
+            Close();
+        }
+
+        async Task ReadAsync()
+        {
             try
             {
-                _ = TrySendAsync();
-
-                var cancelToken = closeSrc.Token;
-                while (!cancelToken.IsCancellationRequested)
+                var token = Context.ConnectionClosed;
+                while (!token.IsCancellationRequested)
                 {
-                    var result = await Reader.ReadAsync(cancelToken);
+
+                    var result = await Reader.ReadAsync(token);
                     var buffer = result.Buffer;
-                    if (buffer.Length > 0)
+                    try
                     {
+                        if (result.IsCanceled)
+                            break;
+
+                        int count = 0;
                         while (TryParseMessage(ref buffer, out var msg))
                         {
-                            await onMessage(msg);
+                            await onMessage?.Invoke(msg);
+                            if (++count > 20)
+                            {
+                                await Task.Yield();
+                                count = 0;
+                            }
+                        };
+                        if (result.IsCompleted)
+                        {
+                            break;
                         }
+                    }
+                    catch (Exception e)
+                    {
+                        LOGGER.Error(e);
+                        break;
+                    }
+                    finally
+                    {
                         Reader.AdvanceTo(buffer.Start, buffer.End);
                     }
-                    else if (result.IsCanceled || result.IsCompleted)
+                }
+            }
+            catch
+            {
+            }
+            finally
+            {
+                await Reader.CompleteAsync();
+            }
+        }
+
+        async Task SendAsync()
+        {
+            var token = Context.ConnectionClosed;
+            try
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        await sendSemaphore.WaitAsync(token);
+                        var flush = await Writer.FlushAsync(token);
+                        if (flush.IsCompleted || flush.IsCanceled)
+                            break;
+                    }
+                    catch
                     {
                         break;
                     }
                 }
             }
-            catch (OperationCanceledException)
+            catch
             {
-
             }
-            catch (Exception e)
+            finally
             {
-                LOGGER.Error(e.Message);
+                await Writer.CompleteAsync();
             }
-        }
-
-        async Task TrySendAsync()
-        {
-            //pipewriter线程不安全，这里统一发送写刷新数据
-            try
-            {
-                var token = closeSrc.Token;
-                while (!token.IsCancellationRequested)
-                {
-                    await sendSemaphore.WaitAsync();
-                    lock (sendStream)
-                    {
-                        var len = sendStream.Length;
-                        if (len > 0)
-                        {
-                            Writer.Write(sendStream.GetBuffer().AsSpan<byte>()[..(int)len]);
-                            sendStream.SetLength(0);
-                            sendStream.Position = 0;
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-                    await Writer.FlushAsync(token);
-                }
-            }
-            catch { };
         }
 
         protected virtual bool TryParseMessage(ref ReadOnlySequence<byte> input, out Message msg)
@@ -218,12 +242,51 @@ namespace Geek.Server.Core.Net.Tcp
             span.WriteInt(msg.MsgId, ref offset);
             span.WriteBytesWithoutLength(bytes, ref offset);
 
-            lock (sendStream)
+            lock (Writer)
             {
-                sendStream.Write(span);
+                Writer.Write(span);
             }
 
-            sendSemaphore.Release();
+            if (sendSemaphore.CurrentCount == 0)
+                sendSemaphore.Release();
+        }
+
+        public override void Close()
+        {
+            if (IsClose())
+                return;
+
+            lock (this)
+            {
+                if (Context == null)
+                    return;
+                try
+                {
+                    sendSemaphore.Release(short.MaxValue);
+                    sendSemaphore?.Dispose();
+                }
+                catch
+                {
+
+                }
+
+                try
+                {
+                    Context.Abort();
+                }
+                catch { }
+                try
+                {
+                    Context.DisposeAsync();
+                }
+                catch { }
+                Context = null;
+            }
+        }
+
+        public override bool IsClose()
+        {
+            return Context == null || Context.ConnectionClosed.IsCancellationRequested;
         }
     }
 }
