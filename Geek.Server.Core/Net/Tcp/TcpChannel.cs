@@ -17,7 +17,6 @@ namespace Geek.Server.Core.Net.Tcp
 
 
         private readonly SemaphoreSlim sendSemaphore = new(0);
-        private readonly MemoryStream sendStream = new();
 
         protected Func<Message, Task> onMessage;
 
