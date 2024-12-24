@@ -3,7 +3,7 @@ using MessagePack;
 using System.Diagnostics;
 using System;
 
-namespace d
+namespace FormatterExtension
 {
     public class LocalDateTimeFormatter : IMessagePackFormatter<DateTime>
     {
